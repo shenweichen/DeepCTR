@@ -119,10 +119,8 @@ class DeepFM(TFBaseModel):
         l2_reg_V_loss = 1 * self._l2_reg_V * tf.nn.l2_loss(self.embeddings)
         # tf.contrib.layers.l2_regularizer()
 
-        self.sample_loss = tf.nn.sigmoid_cross_entropy_with_logits(
-            labels=self.placeholders['Y'], logits=self.logit)
-        self.log_loss = tf.reduce_sum(self.sample_loss)  # total_loss
-        self.mean_log_loss = tf.reduce_mean(self.sample_loss)
+        self.log_loss = tf.reduce_sum(tf.nn.sigmoid_cross_entropy_with_logits(
+            labels=self.placeholders['Y'], logits=self.logit))  # total_loss
 
         self.loss = self.log_loss  # + l2_reg_w_loss
         if self.params['use_cross']:

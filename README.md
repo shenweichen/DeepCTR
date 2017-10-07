@@ -18,17 +18,16 @@
 同时设计了若干抽象方法
 - _get_data_loss
 - _get_input_target
-- _get_out_put_target
+- _get_output_target
 - _get_data_loss
 - _get_optimizer
 - _build_graph
 
 要求子类在`__init__`方法的最后调用`self._build_graph()`构建计算图。
 ## DeepFM
-参考论文
->DeepFM: A Factorization-Machine based Neural Network for CTR Prediction [link](https://arxiv.org/abs/1703.04247)
+>DeepFM: A Factorization-Machine based Neural Network for CTR Prediction [arxiv](https://arxiv.org/abs/1703.04247)
 ## DeepCrossNetwork
-> Deep & Cross Network for Ad Click Predictions [link](https://arxiv.org/abs/1708.05123)
+> Deep & Cross Network for Ad Click Predictions [arxiv](https://arxiv.org/abs/1708.05123)
 
 实现和论文的区别
 - embedding_size  

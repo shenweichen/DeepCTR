@@ -43,7 +43,7 @@ class DeepCrossNetwork(TFBaseModel):
         return self.optimizer
 
     def _get_output_target(self, ):
-        return self.pred_prob
+        return tf.sigmoid(self.logit)
 
     def _build_graph(self,):
 
@@ -144,16 +144,12 @@ class DeepCrossNetwork(TFBaseModel):
                                                            weights_regularizer=None)
             self.logit = tf.reshape(self.logit, (-1,))
 
-            self.pred_prob = tf.sigmoid(self.logit)
 
-    def _create_loss(self, ):
+    def _create_loss(self, ): 
 
-        self.sample_loss = tf.nn.sigmoid_cross_entropy_with_logits(
-            labels=self.Y, logits=self.logit)
-
-        self.log_loss = tf.reduce_sum(self.sample_loss)  # total_loss
-        self.mean_log_loss = tf.reduce_mean(self.sample_loss)  # mean_loss
-
+        self.log_loss = tf.reduce_sum(tf.nn.sigmoid_cross_entropy_with_logits(
+            labels=self.Y, logits=self.logit))  # total_loss
+       
         self.loss = self.log_loss  # + l2_reg_w_loss
 
     def _create_optimizer(self):
