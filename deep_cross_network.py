@@ -1,10 +1,6 @@
-import tensorflow as tf
-from .base import TFBaseModel
-
-
 class DeepCrossNetwork(TFBaseModel):
     def __init__(self, field_dim, feature_dim,embedding_size=4,
-                 lr=0.1, cross_layer_num=1, hidden_size=[], deep_l2_reg=0.1,
+                 lr=0.1, cross_layer_num=1, hidden_size=[], use_batchnorm=True,deep_l2_reg=0.0,
                  init_std=0.01, seed=1024, keep_prob=0.5,
                  checkpoint_path=None, opt="adam", ):
         super(DeepCrossNetwork, self).__init__(
@@ -27,6 +23,7 @@ class DeepCrossNetwork(TFBaseModel):
         #self.feature_count = feature_count
 
         self.opt = opt
+        self.use_batchnorm = use_batchnorm
 
         self._build_graph()
 
@@ -98,6 +95,7 @@ class DeepCrossNetwork(TFBaseModel):
 
         def inverted_dropout(fc, keep_prob):
             return tf.divide(tf.nn.dropout(fc, keep_prob), keep_prob)
+        
 
         with tf.name_scope("cross_network"):
             #embeds = []
@@ -120,13 +118,23 @@ class DeepCrossNetwork(TFBaseModel):
             if len(self.hidden_size) > 0:
                 fc_input = tf.reshape(
                     embeds, (-1, self.field_dim * self.embedding_size))
+
                 for l in range(len(self.hidden_size)):
-                    fc = tf.contrib.layers.fully_connected(fc_input, self.hidden_size[l],
-                                                           activation_fn=tf.nn.relu,
-                                                           weights_initializer=tf.truncated_normal_initializer(
-                                                               stddev=self.init_std),
-                                                           weights_regularizer=tf.contrib.layers.l2_regularizer(
-                                                               self.deep_l2_reg))
+                    if self.use_batchnorm:
+                        weight = tf.get_variable(name='deep_weight'+str(l),
+                                              shape=[fc_input.get_shape().as_list()[1],self.hidden_size[l]],
+                                            initializer=tf.random_normal_initializer(stddev=self.init_std,seed=self.seed))
+                        #bias = tf.Variable(0.0,name='bias'+str(l))
+                        H = tf.matmul(fc_input,weight)#,bias
+                        H_hat = tf.layers.batch_normalization(H,training=self.train_flag)
+                        fc = tf.nn.relu(H_hat)
+                    else:
+                        fc = tf.contrib.layers.fully_connected(fc_input, self.hidden_size[l],
+                                                               activation_fn=tf.nn.relu,
+                                                               weights_initializer=tf.truncated_normal_initializer(
+                                                                   stddev=self.init_std),
+                                                               weights_regularizer=tf.contrib.layers.l2_regularizer(
+                                                                   self.deep_l2_reg))
                     if l < len(self.hidden_size) - 1:
                         fc = tf.cond(self.train_flag, lambda: inverted_dropout(
                             fc, self.keep_prob), lambda: fc)
@@ -149,7 +157,12 @@ class DeepCrossNetwork(TFBaseModel):
 
         self.log_loss = tf.reduce_sum(tf.nn.sigmoid_cross_entropy_with_logits(
             labels=self.Y, logits=self.logit))  # total_loss
-       
+        # TODO: tf.summary.FileWriter
+        #tf.summary.scalar('loss',self.log_loss)
+        #self.merged = tf.summary.merge_all()
+        #self.train_writer = tf.summary.FileWriter('../check/DCN/train',self.graph)
+        #test_writer = tf.summary.FileWriter('../check/DCN/test')
+        #https://www.tensorflow.org/get_started/summaries_and_tensorboard
         self.loss = self.log_loss  # + l2_reg_w_loss
 
     def _create_optimizer(self):
@@ -162,9 +175,7 @@ class DeepCrossNetwork(TFBaseModel):
             opt = tf.train.MomentumOptimizer(self.lr, 0.9)
         else:
             opt = tf.train.GradientDescentOptimizer(self.lr)
-        self.optimizer = opt.minimize(self.loss)
-
-
-if __name__ == '__main__':
-    model = DeepCrossNetwork(2, 4, 4)
-    print('Deep Cross Network test pass')
+            
+        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
+        with tf.control_dependencies(update_ops):
+            self.optimizer = opt.minimize(self.loss)

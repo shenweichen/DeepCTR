@@ -24,8 +24,14 @@
 - _build_graph
 
 要求子类在`__init__`方法的最后调用`self._build_graph()`构建计算图。
+
+## 计划
+- 添加`tf.summary.FileWriter`
+
 ## DeepFM
 >DeepFM: A Factorization-Machine based Neural Network for CTR Prediction [arxiv](https://arxiv.org/abs/1703.04247)
+- 正则化项和损失函数还需要修改
+
 ## DeepCrossNetwork
 > Deep & Cross Network for Ad Click Predictions [arxiv](https://arxiv.org/abs/1708.05123)
 
@@ -33,7 +39,7 @@
 - embedding_size  
 论文里提出每个field根据cardinality的不同来设置。这里用的是所有field具有相同embedding_size的实现，所以feature的编码是global的。
 - Batch normalization  
-论文在Deep Network部分采用了BN
+论文在Deep Network部分采用了BN,采用BN貌似没有dropout效果好。
 - gradient clip  
 论文采用了梯度截断，范数设置为100
 - 其他
