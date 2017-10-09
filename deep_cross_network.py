@@ -1,15 +1,17 @@
+import tensorflow as tf
+from .base import TFBaseModel
+
 class DeepCrossNetwork(TFBaseModel):
     def __init__(self, field_dim, feature_dim,embedding_size=4,
-                 lr=0.1, cross_layer_num=1, hidden_size=[], use_batchnorm=True,deep_l2_reg=0.0,
+                 cross_layer_num=1, hidden_size=[], use_batchnorm=True,deep_l2_reg=0.0,
                  init_std=0.01, seed=1024, keep_prob=0.5,
-                 checkpoint_path=None, opt="adam", ):
+                 checkpoint_path=None,  ):
         super(DeepCrossNetwork, self).__init__(
             seed=seed, checkpoint_path=checkpoint_path)
 
         self.field_dim = field_dim
         self.feature_dim = feature_dim
         self.embedding_size = embedding_size
-        self.lr = lr
 
         self.deep_l2_reg = deep_l2_reg
         self.init_std = init_std
@@ -21,24 +23,18 @@ class DeepCrossNetwork(TFBaseModel):
 
         #self.feature_list = feature_list
         #self.feature_count = feature_count
-
-        self.opt = opt
         self.use_batchnorm = use_batchnorm
 
         self._build_graph()
 
-    def _get_data_loss(self):
-        return self.log_loss
+    def _get_optimizer_loss(self):
+        return self.loss
 
     def _get_input_data(self, ):
         return self.X
 
     def _get_input_target(self, ):
         return self.Y
-
-    def _get_optimizer(self):
-        return self.optimizer
-
     def _get_output_target(self, ):
         return tf.sigmoid(self.logit)
 
@@ -51,11 +47,7 @@ class DeepCrossNetwork(TFBaseModel):
             self._create_variable()
             self._forward_pass()
             self._create_loss()
-            self._create_optimizer()
 
-            # init
-            init = tf.global_variables_initializer()
-            self.sess.run(init)
 
     def _create_placeholders(self, ):
 
@@ -164,18 +156,7 @@ class DeepCrossNetwork(TFBaseModel):
         #test_writer = tf.summary.FileWriter('../check/DCN/test')
         #https://www.tensorflow.org/get_started/summaries_and_tensorboard
         self.loss = self.log_loss  # + l2_reg_w_loss
-
-    def _create_optimizer(self):
-        if self.opt == "adam":
-            opt = tf.train.AdamOptimizer(self.lr)
-        elif self.opt == "ftrl":
-            opt = tf.train.FtrlOptimizer(
-                self.lr, l2_regularization_strength=0.5, l1_regularization_strength=0.5)
-        elif self.opt == "momentum":
-            opt = tf.train.MomentumOptimizer(self.lr, 0.9)
-        else:
-            opt = tf.train.GradientDescentOptimizer(self.lr)
-            
-        update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
-        with tf.control_dependencies(update_ops):
-            self.optimizer = opt.minimize(self.loss)
+if __name__ == '__main__':
+    model = DeepCrossNetwork(2, 3)
+    model.compile('adam',)
+    print('DeepCrossNetwork test pass')

@@ -6,10 +6,13 @@ import numpy as np
 from sklearn.utils import shuffle as sklearn_shuffle
 from sklearn.model_selection import train_test_split
 
+from .utils import sigmoid_cross_entropy_with_probs 
+
 
 class TFBaseModel(metaclass=ABCMeta):
-    def __init__(self, seed=1024, checkpoint_path=None):
+    def __init__(self, seed=1024, checkpoint_path=None,):
         self.seed = seed
+
         if checkpoint_path and checkpoint_path.count('/') < 2:
             raise ValueError('checkpoint_path must be dir/model_name format')
         self.checkpoint_path = checkpoint_path
@@ -21,10 +24,10 @@ class TFBaseModel(metaclass=ABCMeta):
             self.saver = tf.train.Saver()
         self.sess = tf.Session(graph=self.graph)
         
+
     @abstractmethod
     def _get_input_data(self, ):
         raise NotImplementedError
-
     @abstractmethod
     def _get_input_target(self, ):
         raise NotImplementedError
@@ -32,28 +35,92 @@ class TFBaseModel(metaclass=ABCMeta):
     @abstractmethod
     def _get_output_target(self, ):
         raise NotImplementedError
-    @abstractmethod
-    def _get_data_loss(self, ):
-        raise NotImplementedError
-    @abstractmethod
-    def _get_optimizer(self):
-        raise NotImplementedError
-
+    @ abstractmethod
+    def _get_optimizer_loss(self,):
+        """
+        return the loss tensor that the optimizer wants to minimize
+        :return:
+        """
     @abstractmethod
     def _build_graph(self):
         """
+        该方法必须在子类的初始化方法末尾被调用
         子类的方法在默认图中构建计算图
         with self.graph.as_default():  # , tf.device('/cpu:0'):
             tf.set_random_seed(self.seed)
             #构建计算图
             #...
             #...
-            #最后初始化
-            init = tf.global_variables_initializer()# init
-            self.sess.run(init)# sess defined in scope
         """
         raise NotImplementedError
 
+    def compile(self, optimizer='sgd', loss='logloss', metrics=None, loss_weights=None, sample_weight_mode=None):
+        """
+        compile the model with optimizer and loss function
+        :param optimizer:str or predefined optimizer in tensorflow
+        ['sgd','adam','adagrad','rmsprop','moment','ftrl']
+        :param loss: str 
+        :param metrics: str ['logloss','mse','mean_squared_error','logloss_with_logits']
+        :param loss_weights:
+        :param sample_weight_mode:
+        :return:
+        """
+        with self.graph.as_default():# , tf.device('/cpu:0'):
+            #根据指定的优化器和损失函数初始化
+            self.metric_list = self._create_metrics(metrics)
+            update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)#for the use of BN
+            with tf.control_dependencies(update_ops):#for the use of BN
+                self.optimizer = self._create_optimizer(optimizer).minimize(self.loss, global_step=self.global_step)
+            #执行初始化操作
+            init = tf.global_variables_initializer()  # init
+            self.sess.run(init)  # sess defined in scope
+
+    def _create_metrics(self,metric):
+        if metric is None:#若不指定，则以训练时的损失函数作为度量
+            return [self._get_optimizer_loss()]
+
+        if metric not in ['logloss','mse','mean_squared_error','logloss_with_logits']:
+            raise ValueError('invalid param metrics')
+        # TODO:添加更多度量函数和函数作为参数
+        metrics_list = []
+
+        if metric == 'logloss':
+            metrics_list.append(tf.reduce_sum(sigmoid_cross_entropy_with_probs(
+            labels=self._get_input_target(), probs=self._get_output_target())))
+        elif metric=='mse' or metric == 'mean_squared_error':
+            metrics_list.append(tf.reduce_sum(tf.squared_difference(self._get_input_target(),self._get_output_target())))
+        elif metric=='logloss_with_logits':
+            metrics_list.append(tf.reduce_sum(tf.nn.sigmoid_cross_entropy_with_logits(labels=self._get_input_target(), logits=self.logit)))
+        return metrics_list
+
+    def _create_optimizer(self,optimizer='sgd'):
+        """
+
+        :param optimizer: str of optimizer or predefined optimizer in tensorflow
+        :return: optimizer object
+        """
+
+        optimizer_dict = {'sgd':tf.train.GradientDescentOptimizer(0.01),
+                          'adam':tf.train.AdamOptimizer(0.001),
+                          'adagrad':tf.train.AdagradOptimizer(0.01),
+                          #'adagradda':tf.train.AdagradDAOptimizer(),
+                          'rmsprop':tf.train.RMSPropOptimizer(0.001),
+                          'moment':tf.train.MomentumOptimizer(0.01,0.9),
+                          'ftrl':tf.train.FtrlOptimizer(0.01)
+                          #tf.train.ProximalAdagradOptimizer#padagrad
+                           #tf.train.ProximalGradientDescentOptimizer#pgd
+        }
+        if isinstance(optimizer,str):
+            if optimizer in optimizer_dict.keys():
+                return optimizer_dict[optimizer]
+            else:
+                raise ValueError('invalid optimizer name')
+        elif isinstance(optimizer,tf.train.Optimizer):
+            return  optimizer
+        else:
+            raise ValueError('invalid parm for optimizer')
+
+   
 
     def save_model(self, save_path):
         self.saver.save(self.sess, save_path + '.ckpt', self.global_step)
@@ -73,8 +140,7 @@ class TFBaseModel(metaclass=ABCMeta):
     def train_on_batch(self, x, y ):  # fit a batch
         feed_dict_ = {self._get_input_data(): x,
                       self._get_input_target(): y, self.train_flag: True}
-        loss, _ = self.sess.run((self._get_data_loss(), self._get_optimizer()), feed_dict=feed_dict_)
-        return loss
+        self.sess.run((self._get_optimizer_loss(), self.optimizer), feed_dict=feed_dict_)
 
     def fit(self,x, y, batch_size=1024, epochs=50, validation_split = 0.0, validation_data=None,
             val_size=2 ** 18, shuffle=True,initial_epoch=0,min_display=50,max_iter=-1):
@@ -106,7 +172,7 @@ class TFBaseModel(metaclass=ABCMeta):
                 batch_x = x[j * batch_size:(j + 1) * batch_size]
                 batch_y = y[j * batch_size:(j + 1) * batch_size]
                 
-                l = self.train_on_batch(batch_x, batch_y )
+                self.train_on_batch(batch_x, batch_y )
                 if j % min_display == 0:
                     tr_loss = self.evaluate(x, y, val_size)
                     self.tr_loss_list.append(tr_loss)
@@ -140,7 +206,7 @@ class TFBaseModel(metaclass=ABCMeta):
         """
         feed_dict_ = {self._get_input_data(): x,
                       self._get_input_target(): y, self.train_flag: False}
-        loss = self.sess.run([self._get_data_loss()], feed_dict=feed_dict_)
+        loss = self.sess.run(self.metric_list, feed_dict=feed_dict_)
         return loss[0]
 
     def evaluate(self, x,y, val_size=2 ** 18):

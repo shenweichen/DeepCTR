@@ -5,36 +5,28 @@ from .base import TFBaseModel
 
 class DeepFM(TFBaseModel):
     def __init__(self, field_dim, feature_dim, embedding_size=4,
-                 lr=0.1, opt='ftrl', use_cross=True, hidden_size=[], l2_reg_w=1.0, l2_reg_V=1.0,
+                  use_cross=True, hidden_size=[], l2_reg_w=1.0, l2_reg_V=1.0,
                  init_std=0.01, seed=1024, hidden_unit=100, keep_prob=0.5,
                  checkpoint_path=None, ):
 
         super(DeepFM, self).__init__(
-            seed=seed, checkpoint_path=checkpoint_path)
+            seed=seed, checkpoint_path=checkpoint_path,opt=opt)
         self.params = locals()
         self._build_graph()
 
     def _get_output_target(self, ):
         return tf.sigmoid(self.logit)
 
-    def _get_data_loss(self, ):
-        return self.log_loss
-
-    def _get_optimizer(self):
-        return self.optimizer
+    def _get_optimizer_loss(self,):
+        return self.loss
 
     def _build_graph(self, ):
         with self.graph.as_default():  # , tf.device('/cpu:0'):
             tf.set_random_seed(self.seed)
             self._create_placeholders()
-
             self._create_variable()
             self._forward_pass()
             self._create_loss()
-            self.optimizer = self._create_optimizer()
-            init = tf.global_variables_initializer()  # init
-
-            self.sess.run(init)  # sess defined in scope
 
     def _get_input_data(self, ):
         return self.placeholders['X']
@@ -127,20 +119,7 @@ class DeepFM(TFBaseModel):
             # self.loss += l2_reg_V_loss
             pass
 
-    def _create_optimizer(self):
-        if self.params['opt'] == "adam":
-            opt = tf.train.AdamOptimizer(self.params['lr'])
-        elif self.params['opt'] == "ftrl":
-            opt = tf.train.FtrlOptimizer(self.params['lr'], l2_regularization_strength=0.5,
-                                         l1_regularization_strength=0.5)
-        elif self.params['opt'] == "momentum":
-            opt = tf.train.MomentumOptimizer(self.params['lr'], 0.9)
-        else:
-            opt = tf.train.GradientDescentOptimizer(self.params['lr'])
-
-        return opt.minimize(self.loss, global_step=self.global_step)
-
-
 if __name__ == '__main__':
     model = DeepFM(2, 3)
+    model.compile('ftrl',)
     print('DeepFM test pass')
