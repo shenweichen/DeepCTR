@@ -6,7 +6,7 @@ import numpy as np
 from sklearn.utils import shuffle as sklearn_shuffle
 from sklearn.model_selection import train_test_split
 
-from .utils import sigmoid_cross_entropy_with_probs 
+from .utils import sigmoid_cross_entropy_with_probs,new_variable_initializer
 
 
 class TFBaseModel(metaclass=ABCMeta):
@@ -17,13 +17,19 @@ class TFBaseModel(metaclass=ABCMeta):
             raise ValueError('checkpoint_path must be dir/model_name format')
         self.checkpoint_path = checkpoint_path
         self.train_flag = True
-        
         self.graph = tf.Graph()
+        self.sess = tf.Session(graph=self.graph,config=tf.ConfigProto(
+          allow_soft_placement=True, log_device_placement=False))
+
         with self.graph.as_default():
+            tf.set_random_seed(self.seed)#设置随机种子
             self.global_step = tf.Variable(0, dtype=tf.int32, trainable=False, name='global_step')
-            self.saver = tf.train.Saver()
-        self.sess = tf.Session(graph=self.graph)
+
+
         
+        
+    def get_variable(self,variable,feed_dict=None):
+        return self.sess.run([variable],feed_dict)
 
     @abstractmethod
     def _get_input_data(self, ):
@@ -35,7 +41,7 @@ class TFBaseModel(metaclass=ABCMeta):
     @abstractmethod
     def _get_output_target(self, ):
         raise NotImplementedError
-    @ abstractmethod
+    @abstractmethod
     def _get_optimizer_loss(self,):
         """
         return the loss tensor that the optimizer wants to minimize
@@ -46,15 +52,14 @@ class TFBaseModel(metaclass=ABCMeta):
         """
         该方法必须在子类的初始化方法末尾被调用
         子类的方法在默认图中构建计算图
-        with self.graph.as_default():  # , tf.device('/cpu:0'):
-            tf.set_random_seed(self.seed)
+        with self.graph.as_default():  # with tf.device("/gpu:0")::
             #构建计算图
             #...
             #...
         """
         raise NotImplementedError
 
-    def compile(self, optimizer='sgd', loss='logloss', metrics=None, loss_weights=None, sample_weight_mode=None):
+    def compile(self, optimizer='sgd', loss='logloss', metrics=None, loss_weights=None, sample_weight_mode=None,only_init_new=False,):
         """
         compile the model with optimizer and loss function
         :param optimizer:str or predefined optimizer in tensorflow
@@ -65,15 +70,25 @@ class TFBaseModel(metaclass=ABCMeta):
         :param sample_weight_mode:
         :return:
         """
+        # TODO: 添加loss
         with self.graph.as_default():# , tf.device('/cpu:0'):
             #根据指定的优化器和损失函数初始化
-            self.metric_list = self._create_metrics(metrics)
-            update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)#for the use of BN
+            self.metric_list = self._create_metrics(metrics)#创建度量列表
+            update_ops = self.graph.get_collection(tf.GraphKeys.UPDATE_OPS)#for the use of BN,tf.get_collection get default Graph            
             with tf.control_dependencies(update_ops):#for the use of BN
-                self.optimizer = self._create_optimizer(optimizer).minimize(self.loss, global_step=self.global_step)
-            #执行初始化操作
-            init = tf.global_variables_initializer()  # init
-            self.sess.run(init)  # sess defined in scope
+                self.op = self._create_optimizer(optimizer)
+                self.optimizer = self.op.minimize(self._get_optimizer_loss(), global_step=self.global_step)#创建优化器
+                       #执行初始化操作
+            self.saver = tf.train.Saver()#saver要定义在所有变量定义结束之后，且在计算图中
+            if only_init_new is False:
+                print("init all variables")
+                init_op = tf.global_variables_initializer() 
+            else:
+                print("init new variables")
+                init_op = new_variable_initializer(self.sess)#如果更换了优化器，需要重新初始化一些变量
+            self.sess.run(init_op)
+   
+
 
     def _create_metrics(self,metric):
         if metric is None:#若不指定，则以训练时的损失函数作为度量
@@ -127,20 +142,24 @@ class TFBaseModel(metaclass=ABCMeta):
 
     def load_model(self, meta_graph_path, ckpt_dir=None, ckpt_path=None):
         """
-        :ckpt_dir 最新的检查点
+        :meta_graph_path .meta文件路径
+        :ckpt_dir 最新的检查点所在目录
         :ckpt_path 指定检查点
         """
         if ckpt_dir is None and ckpt_path is None:
             raise ValueError('Must specify ckpt_dir or ckpt_path')
+   
         restore_saver = tf.train.import_meta_graph(meta_graph_path, )
         if ckpt_path is None:
             ckpt_path = tf.train.latest_checkpoint(ckpt_dir)
+            print(ckpt_path)
+     
         restore_saver.restore(self.sess, ckpt_path)
 
     def train_on_batch(self, x, y ):  # fit a batch
         feed_dict_ = {self._get_input_data(): x,
                       self._get_input_target(): y, self.train_flag: True}
-        self.sess.run((self._get_optimizer_loss(), self.optimizer), feed_dict=feed_dict_)
+        self.sess.run([self.optimizer], feed_dict=feed_dict_)
 
     def fit(self,x, y, batch_size=1024, epochs=50, validation_split = 0.0, validation_data=None,
             val_size=2 ** 18, shuffle=True,initial_epoch=0,min_display=50,max_iter=-1):

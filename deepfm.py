@@ -10,7 +10,7 @@ class DeepFM(TFBaseModel):
                  checkpoint_path=None, ):
 
         super(DeepFM, self).__init__(
-            seed=seed, checkpoint_path=checkpoint_path,opt=opt)
+            seed=seed, checkpoint_path=checkpoint_path,)
         self.params = locals()
         self._build_graph()
 
@@ -22,7 +22,7 @@ class DeepFM(TFBaseModel):
 
     def _build_graph(self, ):
         with self.graph.as_default():  # , tf.device('/cpu:0'):
-            tf.set_random_seed(self.seed)
+            
             self._create_placeholders()
             self._create_variable()
             self._forward_pass()
@@ -43,16 +43,16 @@ class DeepFM(TFBaseModel):
         self.train_flag = tf.placeholder(tf.bool, name='train_flag')
 
     def _create_variable(self, ):
-
-        self.b = tf.Variable(tf.constant(0.0), name='bias')
+        
+        self.b = tf.get_variable( name='bias',initializer=tf.constant(0.0),)
         # TODO:  self.init_std/ math.sqrt(float(dim))
-        self.embeddings = tf.Variable(
+        self.embeddings = tf.get_variable(name='cross_weight',initializer=
             tf.random_normal([self.params['feature_dim'], self.params['embedding_size']],
                              stddev=self.params['init_std'], seed=self.seed),
-            name='cross_weight')
-        self.single_embedding = tf.Variable(
-            tf.zeros((self.params['feature_dim'], 1), ), name='linear_weight')
-        # TODO normal
+            )
+        self.single_embedding = tf.get_variable(name='linear_weight',
+            initializer=tf.zeros((self.params['feature_dim'], 1), ), )
+        # TODO: normal
         self._l2_reg_w = tf.constant(
             self.params['l2_reg_w'], shape=(1,), name='l2_reg_w')
         self._l2_reg_V = tf.constant(

@@ -6,7 +6,8 @@
  - sklearn
 ## 设计说明
 `base`基类仿照`keras`模型实现以下公有方法，包括
-- compile 编译模型
+- compile  
+  编译模型,指定优化器和损失函数以及度量
 - save_model 保存模型
 - load_mdel 加载模型
 - train_on_batch 小批量训练
@@ -17,21 +18,21 @@
 - predict 全量预测
 私有方法包括
 - _create_optimizer
-- _create_metrics
+- _create_metrics  
 
 同时设计了若干抽象方法
 - _get_input_data
 - _get_input_target
 - _get_output_target
 - _get_optimizer_loss
-- _build_graph
-
-要求子类在`__init__`方法的最后调用`self._build_graph()`构建计算图。
+- _build_graph  
+要求子类在`__init__`方法末尾调用`self._build_graph()`构建计算图。
 
 ## 计划
 - 添加`tf.summary.FileWriter`
 - 添加自定义度量函数
 - 添加带权损失函数
+- 添加损失函数
 
 ## DeepFM
 >DeepFM: A Factorization-Machine based Neural Network for CTR Prediction [arxiv](https://arxiv.org/abs/1703.04247)

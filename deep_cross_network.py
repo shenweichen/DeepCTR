@@ -41,7 +41,6 @@ class DeepCrossNetwork(TFBaseModel):
     def _build_graph(self,):
 
         with self.graph.as_default():  # , tf.device('/cpu:0'):
-            tf.set_random_seed(self.seed)
             self._create_placeholders()
 
             self._create_variable()
