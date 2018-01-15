@@ -1,11 +1,14 @@
 import tensorflow as tf
+
 from .base import TFBaseModel
+from .utils import tf_weighted_sigmoid_ce_with_logits
+
 
 class DeepCrossNetwork(TFBaseModel):
     def __init__(self, field_dim, feature_dim,embedding_size=4,
                  cross_layer_num=1, hidden_size=[], use_batchnorm=True,deep_l2_reg=0.0,
                  init_std=0.01, seed=1024, keep_prob=0.5,
-                 checkpoint_path=None,  ):
+                 checkpoint_path=None):
         super(DeepCrossNetwork, self).__init__(
             seed=seed, checkpoint_path=checkpoint_path)
 
@@ -146,8 +149,8 @@ class DeepCrossNetwork(TFBaseModel):
 
     def _create_loss(self, ): 
 
-        self.log_loss = tf.reduce_sum(tf.nn.sigmoid_cross_entropy_with_logits(
-            labels=self.Y, logits=self.logit))  # total_loss
+        self.log_loss = tf.reduce_sum(tf_weighted_sigmoid_ce_with_logits(
+            labels=self.Y, logits=self.logit,sample_weight=self.sample_weight))  # total_loss
         # TODO: tf.summary.FileWriter
         #tf.summary.scalar('loss',self.log_loss)
         #self.merged = tf.summary.merge_all()

@@ -1,10 +1,10 @@
 # DeepCTR
-本仓库主要是进行论文的复现以及在基准数据集上的评测，提供适合比赛使用的数据接口。使用TensorFlow实现是为了计算图定义的灵活性，同时提供类似Keras的调用接口。欢迎指正交流！
+本仓库主要是进行论文的复现以及在基准数据集上的评测，提供简单易用的调用接口。使用TensorFlow实现是为了计算图定义的灵活性，同时提供类似Keras的调用接口。欢迎指正交流！
 ## 依赖环境
  - python3
- - tensorflow
- - numpy
- - sklearn
+ - tensorflow==1.4.0
+ - numpy==1.13.3
+ - scikit-learn==0.19.1
 ## 设计说明
 `base`基类仿照`keras`模型实现以下公有方法，包括
 - compile  
@@ -20,6 +20,7 @@
 私有方法包括
 - _create_optimizer
 - _create_metrics  
+- _compute_sample_weight
 
 同时设计了若干抽象方法
 - _get_input_data

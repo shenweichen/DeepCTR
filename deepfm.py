@@ -1,13 +1,16 @@
 from __future__ import print_function
+
 import tensorflow as tf
+
 from .base import TFBaseModel
+from .utils import tf_weighted_sigmoid_ce_with_logits
 
 
 class DeepFM(TFBaseModel):
     def __init__(self, field_dim, feature_dim, embedding_size=4,
-                  use_cross=True, hidden_size=[], l2_reg_w=1.0, l2_reg_V=1.0,
-                 init_std=0.01, seed=1024, hidden_unit=100, keep_prob=0.5,
-                 checkpoint_path=None, ):
+                 use_cross=True, hidden_size=[], l2_reg_w=1.0, l2_reg_V=1.0,
+                 init_std=0.01, seed=1024, keep_prob=0.5,
+                 checkpoint_path=None, continuous_dim=0,):
 
         super(DeepFM, self).__init__(
             seed=seed, checkpoint_path=checkpoint_path,)
@@ -22,14 +25,17 @@ class DeepFM(TFBaseModel):
 
     def _build_graph(self, ):
         with self.graph.as_default():  # , tf.device('/cpu:0'):
-            
+
             self._create_placeholders()
             self._create_variable()
             self._forward_pass()
             self._create_loss()
 
     def _get_input_data(self, ):
-        return self.placeholders['X']
+        if self.params['continuous_dim'] == 0:
+            return self.placeholders['X']
+        else:
+            return self.placeholders['X'], self.placeholders['continuous_bias']
 
     def _get_input_target(self, ):
         return self.placeholders['Y']
@@ -40,18 +46,21 @@ class DeepFM(TFBaseModel):
             tf.int32, shape=[None, self.params['field_dim']], name='input_X')
         self.placeholders['Y'] = tf.placeholder(
             tf.float32, shape=[None, ], name='input_Y')
+        # addd
+        self.placeholders['continuous_bias'] = tf.placeholder(
+            tf.float32, shape=[None, self.params['continuous_dim']], name='input_bias')
+        #-----
         self.train_flag = tf.placeholder(tf.bool, name='train_flag')
 
     def _create_variable(self, ):
-        
-        self.b = tf.get_variable( name='bias',initializer=tf.constant(0.0),)
+
+        self.b = tf.get_variable(name='bias', initializer=tf.constant(0.0),)
         # TODO:  self.init_std/ math.sqrt(float(dim))
-        self.embeddings = tf.get_variable(name='cross_weight',initializer=
-            tf.random_normal([self.params['feature_dim'], self.params['embedding_size']],
-                             stddev=self.params['init_std'], seed=self.seed),
-            )
+        self.embeddings = tf.get_variable(name='cross_weight', initializer=tf.random_normal([self.params['feature_dim'], self.params['embedding_size']],
+                                                                                            stddev=self.params['init_std'], seed=self.seed),
+                                          )
         self.single_embedding = tf.get_variable(name='linear_weight',
-            initializer=tf.zeros((self.params['feature_dim'], 1), ), )
+                                                initializer=tf.zeros((self.params['feature_dim'], 1), ), )
         # TODO: normal
         self._l2_reg_w = tf.constant(
             self.params['l2_reg_w'], shape=(1,), name='l2_reg_w')
@@ -79,7 +88,9 @@ class DeepFM(TFBaseModel):
             if len(self.params['hidden_size']) > 0:
                 fc_input = tf.reshape(
                     embeds, (-1, self.params['field_dim'] * self.params['embedding_size']))
-
+                if self.params['continuous_dim'] > 0:
+                    fc_input = tf.concat(
+                        [fc_input, self.placeholders['continuous_bias']], axis=1)
                 for l in range(len(self.params['hidden_size'])):
                     fc = tf.contrib.layers.fully_connected(fc_input, self.params['hidden_size'][l],
                                                            activation_fn=tf.nn.relu,
@@ -92,7 +103,7 @@ class DeepFM(TFBaseModel):
 
                     fc_input = fc
 
-                nn_logit = tf.contrib.layers.fully_connected(fc, 1, activation_fn=None,
+                nn_logit = tf.contrib.layers.fully_connected(fc_input, 1, activation_fn=None,
                                                              weights_initializer=tf.truncated_normal_initializer(
                                                                  stddev=self.params['init_std']),
                                                              )
@@ -111,13 +122,16 @@ class DeepFM(TFBaseModel):
         l2_reg_V_loss = 1 * self._l2_reg_V * tf.nn.l2_loss(self.embeddings)
         # tf.contrib.layers.l2_regularizer()
 
-        self.log_loss = tf.reduce_sum(tf.nn.sigmoid_cross_entropy_with_logits(
-            labels=self.placeholders['Y'], logits=self.logit))  # total_loss
+        # self.log_loss = tf.reduce_sum(tf.multiply(tf.nn.sigmoid_cross_entropy_with_logits(
+        #    labels=self.placeholders['Y'], logits=self.logit),self.sample_weight))  # weighted total_loss
+        self.log_loss = tf.reduce_sum(tf_weighted_sigmoid_ce_with_logits(
+            self.placeholders['Y'], self.logit, self.sample_weight))
 
         self.loss = self.log_loss  # + l2_reg_w_loss
         if self.params['use_cross']:
             # self.loss += l2_reg_V_loss
             pass
+
 
 if __name__ == '__main__':
     model = DeepFM(2, 3)
