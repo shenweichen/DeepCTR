@@ -1,54 +1,87 @@
 # DeepCTR
-本仓库主要是进行论文的复现以及在基准数据集上的评测，提供简单易用的调用接口。使用TensorFlow实现是为了计算图定义的灵活性，同时提供类似Keras的调用接口。欢迎指正交流！
-## 依赖环境
- - python3
- - tensorflow==1.4.0
- - numpy==1.13.3
- - scikit-learn==0.19.1
-## 设计说明
-`base`基类仿照`keras`模型实现以下公有方法，包括
-- compile  
-  编译模型,指定优化器和损失函数以及度量
-- save_model 保存模型
-- load_mdel 加载模型
-- train_on_batch 小批量训练
-- fit 全量训练
-- test_on_batch 小批量评估
-- evaluate 模型评估
-- predict_on_batch 小批量预测
-- predict 全量预测
-私有方法包括
-- _create_optimizer
-- _create_metrics  
-- _compute_sample_weight
+This project  implements serval models of the papers on CTR prediction with easy-to-use call interfaces.  
 
-同时设计了若干抽象方法
-- _get_input_data
-- _get_input_target
-- _get_output_target
-- _get_optimizer_loss
-- _build_graph  
-要求子类在`__init__`方法末尾调用`self._build_graph()`构建计算图。
+The goal is to make it possible for everyone to use complex models with `model.fit()`and`model.predict()`.  
 
-## 计划
-- 添加`tf.summary.FileWriter`
-- 添加自定义度量函数
-- 添加带权损失函数
-- 添加损失函数
+ Most of the models have been finished in keras. The tensorflow version will be added soon~
+ Please feel free to contact me if you have any questions!!
+## Support Model List
 
-## DeepFM
->DeepFM: A Factorization-Machine based Neural Network for CTR Prediction [arxiv](https://arxiv.org/abs/1703.04247)
-- 正则化项和损失函数还需要修改
+  |Model|Paper|Available Framework|
+  |:--:|--|--|
+  |AFM|[IJCAI 2017][Attentional Factorization Machines: Learning the Weight of Feature Interactions via Attention Networks](http://www.ijcai.org/proceedings/2017/435)|`keras`|
+  |DCN|[ADKDD 2017][Deep & Cross Network for Ad Click Predictions](https://dl.acm.org/citation.cfm?id=3124754)|`keras`,`tensorflow`|
+  |DeepFM|[IJCAI 2017][DeepFM: A Factorization-Machine based Neural Network for CTR Prediction](http://www.ijcai.org/proceedings/2017/0239.pdf)|`keras`,`tensorflow`|
+  |MLR|[arxiv 2017][Learning Piece-wise Linear Models from Large Scale Data for Ad Click Prediction](https://arxiv.org/abs/1704.05194)|`keras`,|
+  |NFM|[SIGIR 2017][Neural Factorization Machines for Sparse Predictive Analytics](https://dl.acm.org/citation.cfm?id=3080777)|`keras`|
 
-## DeepCrossNetwork
-> Deep & Cross Network for Ad Click Predictions [arxiv](https://arxiv.org/abs/1708.05123)
+## Keras Model
+  ### Requirements
+  - python3
+  - tensorflow==1.4.0
+  - keras==2.1.2
+  ### Quick Start
+  Source code [`keras_demo.py`](./keras_demo.py)  
+  
+  ![](docs/data_view.png)
+  ```Python
+data = pd.read_pickle("./demo/small_data.pkl")
+sparse_features = [ "movie_id","user_id","gender","age","occupation","zip"]
+target = ['rating']
+#1.Label Encoding for sparse features,and Normalization for dense fetures
+for feat in sparse_features:
+    lbe = LabelEncoder()
+    data[feat] = lbe.fit_transform(data[feat])
+#2.count #unique features for each sparse field
+sparse_feature_dim = {feat:data[feat].nunique() for feat in sparse_features}
+#3.generate input data for model
+model_input = [data[feat].values for feat in sparse_feature_dim] 
+#4.Define Model,compile and train
+model = NFM({"sparse":sparse_feature_dim,"dense":[]},final_activation='linear').model
+  
+model.compile("adam","mse",metrics=['mse'],)
+history = model.fit(model_input,data[target],
+          batch_size=256,epochs=5,verbose=2,validation_split=0.2,)
+  ```
+## TensorFlow Model
+  ### Requirements
+  - python3
+  - tensorflow==1.4.0
+  - numpy==1.13.3
+  - scikit-learn==0.19.1
+  ### Design Notes
+  The `base` base class mimics the `keras` model to implement the following public methods, including:
+  - compile  
+  - save_model 
+  - load_mdel 
+  - train_on_batch 
+  - fit 
+  - test_on_batch 
+  - evaluate 
+  - predict_on_batch 
+  - predict   
 
-实现和论文的区别
-- embedding_size  
-论文里提出每个field根据cardinality的不同来设置。这里用的是所有field具有相同embedding_size的实现，所以feature的编码是global的。
-- Batch normalization  
-论文在Deep Network部分采用了BN,采用BN貌似没有dropout效果好。
-- gradient clip  
-论文采用了梯度截断，范数设置为100
-- 其他
-论文采用512batch size，并提出使用早停来防止过拟合，L2和dropout正则效果一般。
+private methods:
+  - _create_optimizer
+  - _create_metrics  
+  - _compute_sample_weight
+
+At the same time, several abstract methods are designed:
+  - _get_input_data
+  - _get_input_target
+  - _get_output_target
+  - _get_optimizer_loss
+  - _build_graph 
+
+The subclass is required to call `self._build_graph()` at the end of the `__init__` method to build the calculation graph. 
+
+
+  ### TODO
+  - Add `tf.summary.FileWriter`
+  - Add  custom metric function
+  - Add weighted loss function
+  - Encapsulate  models with `tf.estimator`
+ ### Quick Start
+  Source code [`tf_demo.py`](./tf_demo.py)  
+## Experiment Result
+see [docs/README.md](docs/README.md)

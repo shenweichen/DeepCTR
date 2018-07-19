@@ -1,19 +1,23 @@
 import tensorflow as tf
-
 from .base import TFBaseModel
 from .utils import tf_weighted_sigmoid_ce_with_logits
 
 
 class DeepCrossNetwork(TFBaseModel):
-    def __init__(self, field_dim, feature_dim,embedding_size=4,
-                 cross_layer_num=1, hidden_size=[], use_batchnorm=True,deep_l2_reg=0.0,
-                 init_std=0.01, seed=1024, keep_prob=0.5,
+    def __init__(self, feature_dim_dict,embedding_size=4,
+                 cross_layer_num=1, hidden_size=[], use_batchnorm=True,deep_l2_reg=0.00002,
+                 init_std=0.001, seed=1024, keep_prob=0.5,
                  checkpoint_path=None):
         super(DeepCrossNetwork, self).__init__(
             seed=seed, checkpoint_path=checkpoint_path)
-
-        self.field_dim = field_dim
-        self.feature_dim = feature_dim
+        if not isinstance(feature_dim_dict,
+                          dict) or "sparse" not in feature_dim_dict or "dense" not in feature_dim_dict:
+            raise ValueError(
+                "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
+        if len(feature_dim_dict["dense"]) >0:
+            raise ValueError("Now tf DCN doesn't support dense input")
+        self.field_dim = len(feature_dim_dict["sparse"])
+        self.feature_dim = feature_dim_dict
         self.embedding_size = embedding_size
 
         self.deep_l2_reg = deep_l2_reg
@@ -23,15 +27,15 @@ class DeepCrossNetwork(TFBaseModel):
         self.keep_prob = keep_prob
         self.cross_layer_num = cross_layer_num
         self.hidden_size = hidden_size
-
-        #self.feature_list = feature_list
-        #self.feature_count = feature_count
         self.use_batchnorm = use_batchnorm
-
+        #self.params = locals()
         self._build_graph()
 
-    def _get_optimizer_loss(self):
-        return self.loss
+    def _get_optimizer_loss(self,loss):
+        if loss == "logloss":
+            return self.log_loss
+        if loss == "mse":
+            return self.mse_loss
 
     def _get_input_data(self, ):
         return self.X
@@ -56,6 +60,7 @@ class DeepCrossNetwork(TFBaseModel):
         self.X = tf.placeholder(
             tf.int32, shape=[None, self.field_dim], name='input_X')
         self.Y = tf.placeholder(tf.float32, shape=[None, ], name='input_Y')
+
         self.train_flag = tf.placeholder(tf.bool, name='train_flag')
 
     def _create_variable(self, ):
@@ -64,15 +69,15 @@ class DeepCrossNetwork(TFBaseModel):
         # TODO:  self.init_std/ math.sqrt(float(dim))
         self.embedding_list = []
         self.total_size = self.field_dim * self.embedding_size
-        # for feat in self.feature_list:
-        #    cardinality = self.feature_count[feat]
-        #    embedding_size = int(6 * np.power(cardinality, 0.25))
-        #    self.total_size += embedding_size
-        #    self.embedding_list.append(
-        #        tf.Variable(tf.random_normal([cardinality, embedding_size], stddev=self.init_std, seed=self.seed),
-        #                    name='embed' + feat))
-        self.embeddings = tf.Variable(tf.random_normal(
-            [self.feature_dim, self.embedding_size], stddev=self.init_std, seed=self.seed), name='cross_embed_weight')
+
+        self.sparse_embeddings = [tf.get_variable(name='embed_cate' + str(i) + '-' + feat,
+                                                  initializer=tf.random_normal(
+                                                      [self.feature_dim["sparse"][feat],
+                                                       min(self.embedding_size,6*pow(self.feature_dim["sparse"][feat], 0.25))],
+                                                      stddev=self.init_std)) for i, feat in
+                                  enumerate(self.feature_dim["sparse"])]
+
+
 
         self.cross_layer_weight = [
             tf.Variable(tf.random_normal([self.total_size, 1], stddev=self.init_std, seed=self.seed)) for i in
@@ -97,9 +102,12 @@ class DeepCrossNetwork(TFBaseModel):
             #    temp = tf.nn.embedding_lookup(self.embedding_list[i], self.X[:, i], )
             #    embeds.append(temp)
             #embeds = tf.concat(embeds, axis=1)
-            embeds = tf.nn.embedding_lookup(
-                self.embeddings, self.X, partition_strategy='div')
+            #embeds = tf.nn.embedding_lookup(
+            #    self.embeddings, self.X, partition_strategy='div')
+            embed_list = [tf.nn.embedding_lookup(self.sparse_embeddings[i], self.X[:,i]) for i in
+                          range(self.field_dim)]
 
+            embeds = tf.concat(embed_list,axis=-1)
             self._x_0 = tf.reshape(embeds, (-1, self.total_size, 1))
             x_l = self._x_0
             for l in range(self.cross_layer_num):
@@ -151,14 +159,16 @@ class DeepCrossNetwork(TFBaseModel):
 
         self.log_loss = tf.reduce_sum(tf_weighted_sigmoid_ce_with_logits(
             labels=self.Y, logits=self.logit,sample_weight=self.sample_weight))  # total_loss
+        self.mse_loss = tf.squared_difference(
+                self.Y, self.logit)
         # TODO: tf.summary.FileWriter
         #tf.summary.scalar('loss',self.log_loss)
         #self.merged = tf.summary.merge_all()
         #self.train_writer = tf.summary.FileWriter('../check/DCN/train',self.graph)
         #test_writer = tf.summary.FileWriter('../check/DCN/test')
         #https://www.tensorflow.org/get_started/summaries_and_tensorboard
-        self.loss = self.log_loss  # + l2_reg_w_loss
+
 if __name__ == '__main__':
-    model = DeepCrossNetwork(2, 3)
+    model = DeepCrossNetwork( {"sparse":{"field1":4,"field2":3},"dense":[]})
     model.compile('adam',)
     print('DeepCrossNetwork test pass')

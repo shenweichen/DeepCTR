@@ -5,8 +5,8 @@ import numpy as np
 import tensorflow as tf
 
 from .utils import (get_sample_num, new_variable_initializer,
-                    sigmoid_cross_entropy_with_probs, sklearn_shuffle,
-                    sklearn_split)
+                            sigmoid_cross_entropy_with_probs, sklearn_shuffle,
+                            sklearn_split)
 
 
 class TFBaseModel(metaclass=ABCMeta):
@@ -53,7 +53,7 @@ class TFBaseModel(metaclass=ABCMeta):
         return sample_weight
 
     @abstractmethod
-    def _get_optimizer_loss(self,):
+    def _get_optimizer_loss(self,loss):
         """
         return the loss tensor that the optimizer wants to minimize
         :return:
@@ -85,13 +85,13 @@ class TFBaseModel(metaclass=ABCMeta):
         # TODO: 添加loss
         with self.graph.as_default():  # , tf.device('/cpu:0'):
             # 根据指定的优化器和损失函数初始化
-            self.metric_list = self._create_metrics(metrics)  # 创建度量列表
+            self.metric_list = self._create_metrics(metrics,loss)  # 创建度量列表
             # for the use of BN,tf.get_collection get default Graph
             update_ops = self.graph.get_collection(tf.GraphKeys.UPDATE_OPS)
             with tf.control_dependencies(update_ops):  # for the use of BN
                 self.op = self._create_optimizer(optimizer)
                 self.optimizer = self.op.minimize(
-                    self._get_optimizer_loss(), global_step=self.global_step)  # 创建优化器
+                    self._get_optimizer_loss(loss), global_step=self.global_step)  # 创建优化器
                 # 执行初始化操作
             self.saver = tf.train.Saver()  # saver要定义在所有变量定义结束之后，且在计算图中
             if only_init_new is False:
@@ -103,12 +103,12 @@ class TFBaseModel(metaclass=ABCMeta):
                     self.sess)  # 如果更换了优化器，需要重新初始化一些变量
             self.sess.run(init_op)
 
-    def _create_metrics(self, metric):
+    def _create_metrics(self,metric,loss):
         """
         返回每个样本上的评分
         """
         if metric is None:  # 若不指定，则以训练时的损失函数作为度量
-            return [self._get_optimizer_loss()]
+            return [self._get_optimizer_loss(loss)]
 
         if metric not in ['logloss', 'mse', 'mean_squared_error', 'logloss_with_logits']:
             raise ValueError('invalid param metrics')
@@ -192,7 +192,7 @@ class TFBaseModel(metaclass=ABCMeta):
         self.sess.run([self.optimizer], feed_dict=feed_dict_)
 
     def fit(self, x, y, batch_size=1024, epochs=50, validation_split=0.0, validation_data=None,
-            val_size=2 ** 18, shuffle=True, initial_epoch=0, min_display=50, max_iter=-1, class_weight=None, sample_weight=None):
+            val_size=2 ** 18, shuffle=True, initial_epoch=0, min_display=50, max_iter=-1, class_weight=None, sample_weight=None,verbose=0):
 
         self.class_weight = class_weight
         if class_weight is not None and not isinstance(class_weight, dict):
