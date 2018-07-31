@@ -31,10 +31,17 @@ class FMLayer(Layer):
         :param concated_embeds_value: None * field_size * embedding_size
         :return: None*1
         """
+
         temp_a = Lambda(lambda x: K.sum(x, axis=1, keepdims=True), )(concated_embeds_value)
+
+        temp_a = Lambda(lambda x: K.square(x))(temp_a)
+
         temp_b = multiply([concated_embeds_value, concated_embeds_value])
+
         temp_b = Lambda(lambda x: K.sum(x, axis=1, keepdims=True))(temp_b)
+
         cross_term = subtract([temp_a, temp_b])
+
         cross_term = Lambda(lambda x: 0.5 * K.sum(x, axis=2, keepdims=False))(cross_term)
 
         return cross_term

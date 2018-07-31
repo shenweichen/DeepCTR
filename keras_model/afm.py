@@ -56,6 +56,7 @@ class FMLayer(Layer):
         :return: None*1
         """
         temp_a = Lambda(lambda x: K.sum(x, axis=1, keepdims=True), )(concated_embeds_value)
+        temp_a = Lambda(lambda x: K.square(x))(temp_a)
         temp_b = multiply([concated_embeds_value, concated_embeds_value])
         temp_b = Lambda(lambda x: K.sum(x, axis=1, keepdims=True))(temp_b)
         cross_term = subtract([temp_a, temp_b])
