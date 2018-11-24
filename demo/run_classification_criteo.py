@@ -2,7 +2,6 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 from deepctr.models import DeepFM
 
-
 if __name__ == "__main__":
     data = pd.read_csv('./criteo_sample.txt')
 

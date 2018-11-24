@@ -9,7 +9,7 @@ Welcome to DeepCTR's documentation!
 DeepCTR is a **Easy-to-use** , **Modular** and **Extendible** package of deep-learning based based CTR models ,including serval DNN-based CTR models and lots of core components layer of the models which can be used to build your own custom model.
 The goal is to make it possible for everyone to use complex deep learning-based models with ``model.fit()`` and ``model.predict()`` .
 
-Through ``pip install deepctr`` get the package and `Get Started! <../html/Quick-Start.html>`_
+Through ``pip install deepctr`` get the package and `Get Started! <./Quick-Start.html>`_
 
 You can find source code at https://github.com/shenweichen/DeepCTR
 

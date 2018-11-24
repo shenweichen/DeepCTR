@@ -13,7 +13,7 @@ class SequencePoolingLayer(Layer):
 
         - seq_value is a 3D tensor with shape: ``(batch_size, T, embedding_size``
 
-        - seq_len is a 2D tensor with shape : ``(batch_size, 1)``，indicate valid length of each sequence.
+        - seq_len is a 2D tensor with shape : ``(batch_size, 1)``,indicate valid length of each sequence.
 
       Output shape
         - 3D tensor with shape: `(batch_size, 1, embedding_size)`.
@@ -40,11 +40,11 @@ class SequencePoolingLayer(Layer):
         uiseq_embed_list, user_behavior_length = seq_value_len_list
         embedding_size = uiseq_embed_list.shape[-1]
         mask = tf.sequence_mask(user_behavior_length,
-                                self.seq_len_max, dtype=tf.float32)  # [B, T,1]
-        # tf.transpose(mask, [0, 2, 1])
+                                self.seq_len_max, dtype=tf.float32)
+
         mask = K.permute_dimensions(mask, [0, 2, 1])
-        mask = tf.tile(mask, [1, 1, embedding_size])  # [B, T, H]
-        uiseq_embed_list *= mask  # [B, T, H]
+        mask = tf.tile(mask, [1, 1, embedding_size])
+        uiseq_embed_list *= mask
         hist = uiseq_embed_list
         if self.mode == "max":
             return K.max(hist, 1, keepdims=True)
@@ -127,14 +127,12 @@ class AttentionSequencePoolingLayer(Layer):
         outputs = K.permute_dimensions(attention_score, (0, 2, 1))
         key_masks = tf.sequence_mask(keys_length, hist_len)
 
-
         if self.weight_normalization:
             paddings = tf.ones_like(outputs) * (-2 ** 32 + 1)
         else:
             paddings = tf.zeros_like(outputs)
 
         outputs = tf.where(key_masks, outputs, paddings)
-
 
         if self.weight_normalization:
             outputs = K.softmax(outputs)
@@ -148,7 +146,7 @@ class AttentionSequencePoolingLayer(Layer):
 
     def get_config(self,):
 
-        config = {'hidden_size': self.hidden_size,'activation':self.activation,'weight_normalization':self.weight_normalization}
+        config = {'hidden_size': self.hidden_size, 'activation': self.activation,
+                  'weight_normalization': self.weight_normalization}
         base_config = super(AttentionSequencePoolingLayer, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
-

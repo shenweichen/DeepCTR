@@ -5,7 +5,7 @@ DeepCTR Models API
 
    FNN<deepctr.models.fnn>
    PNN<deepctr.models.pnn>
-   Wide&Deep<deepctr.models.wdl>
+   WDL<deepctr.models.wdl>
    DeepFM<deepctr.models.deepfm>
    MLR<deepctr.models.mlr>
    NFM<deepctr.models.nfm>

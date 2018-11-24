@@ -18,7 +18,6 @@ class FM(Layer):
         
       References
         - [Factorization Machines](https://www.csie.ntu.edu.tw/~b97053/paper/Rendle2010FM.pdf)
-
     """
     def __init__(self, **kwargs):
 
@@ -111,7 +110,7 @@ class AFMLayer(Layer):
         self.projection_p = self.add_weight(shape=(embedding_size, 1), initializer=glorot_normal(seed=self.seed), name="projection_p")
         super(AFMLayer, self).build(input_shape)  # Be sure to call this somewhere!
 
-    def call(self, inputs,**kwargs ):
+    def call(self, inputs,**kwargs):
 
         if K.ndim(inputs[0]) != 3:
             raise ValueError("Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
@@ -258,13 +257,10 @@ class MLP(Layer):
     """The Multi Layer Percetron
         
       Input shape
-        - nD tensor with shape: ``(batch_size, ..., input_dim)``.
-        The most common situation would be a 2D input with shape ``(batch_size, input_dim)``.
+        - nD tensor with shape: ``(batch_size, ..., input_dim)``. The most common situation would be a 2D input with shape ``(batch_size, input_dim)``.
 
       Output shape
-        - nD tensor with shape: ``(batch_size, ..., hidden_size[-1])``.
-        For instance, for a 2D input with shape `(batch_size, input_dim)`,
-        the output would have shape ``(batch_size, hidden_size[-1])``.
+        - nD tensor with shape: ``(batch_size, ..., hidden_size[-1])``. For instance, for a 2D input with shape `(batch_size, input_dim)`, the output would have shape ``(batch_size, hidden_size[-1])``.
 
       Arguments
         - **hidden_size**:list of positive integer, the layer number and units in each layer.
@@ -278,8 +274,8 @@ class MLP(Layer):
         - **use_bn**: bool. Whether use BatchNormalization before activation or not.
 
         - **seed**: A Python integer to use as random seed.
-
     """
+
     def __init__(self,  hidden_size, activation,l2_reg, keep_prob, use_bn,seed,**kwargs):
         self.hidden_size = hidden_size
         self.activation =activation
@@ -339,6 +335,7 @@ class BiInteractionPooling(Layer):
       References
         - [Neural Factorization Machines for Sparse Predictive Analytics](http://arxiv.org/abs/1708.05027)
     """
+
     def __init__(self, **kwargs):
 
         super(BiInteractionPooling, self).__init__(**kwargs)
@@ -505,8 +502,7 @@ class InnerProductLayer(Layer):
         - A list of N 3D tensor with shape: ``(batch_size,1,embedding_size)``.
 
       Output shape
-        - 2D tensor with shape: ``(batch_size, N*(N-1)/2 )`` if use reduce_sum. or
-        3D tensor with shape: ``(batch_size, N*(N-1)/2, embedding_size )`` if not use reduce_sum.
+        - 2D tensor with shape: ``(batch_size, N*(N-1)/2 )`` if use reduce_sum. or 3D tensor with shape: ``(batch_size, N*(N-1)/2, embedding_size )`` if not use reduce_sum.
 
       Arguments
         - **reduce_sum**: bool. Whether return inner product or element-wise product
@@ -514,6 +510,7 @@ class InnerProductLayer(Layer):
       References
             - [Product-based Neural Networks for User Response Prediction](https://arxiv.org/pdf/1611.00144.pdf)
     """
+
     def __init__(self,reduce_sum=True,**kwargs):
         self.reduce_sum = reduce_sum
         super(InnerProductLayer, self).__init__(**kwargs)
@@ -605,6 +602,7 @@ class LocalActivationUnit(Layer):
       References
         - [Deep Interest Network for Click-Through Rate Prediction](https://arxiv.org/pdf/1706.06978.pdf)
     """
+
     def __init__(self,hidden_size, activation,l2_reg, keep_prob, use_bn,seed,**kwargs):
         self.hidden_size = hidden_size
         self.activation = activation

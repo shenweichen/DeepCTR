@@ -23,7 +23,7 @@ This example shows how to use *DeepFM* to solve a simple binary classification t
 
     import pandas as pd
     from sklearn.preprocessing import LabelEncoder,MinMaxScaler
-    from deepctr import DeepFM
+    from deepctr.models import DeepFM
 
     
     data = pd.read_csv('./criteo_sample.txt')
@@ -80,7 +80,7 @@ This example shows how to use *DeepFM* to solve a simple binary regression task.
 
     import pandas as pd
     from sklearn.preprocessing import LabelEncoder,MinMaxScaler
-    from deepctr import DeepFM
+    from deepctr.models import DeepFM
 
     
     data = pd.read_csv("./movielens_sample.txt")
