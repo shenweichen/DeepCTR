@@ -9,4 +9,4 @@ if __name__ == "__main__":
 	features = [ "movie_id","user_id","gender","age","occupation","zip"]
 	target = ['rating']
 	data=pd.merge(pd.merge(ratings,movies,how='left',on='movie_id'),users,how='left',on='user_id')
-	data = data.sample(frac=0.01,random_state=1024).to_pickle("small_data.pkl")
+	data = data.sample(frac=0.01,random_state=1024).to_pickle("movielens_sample.pkl")
