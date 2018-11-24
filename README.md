@@ -6,7 +6,6 @@
 [![GitHub Issues](https://img.shields.io/github/issues/shenweichen/deepctr.svg
 )](https://github.com/shenweichen/deepctr/issues)
 [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](https://github.com/shenweichen/deepctr/blob/master/LICENSE)
-
 [![PyPI Version](https://img.shields.io/pypi/v/deepctr.svg)](https://pypi.org/project/deepctr)
 
 DeepCTR is a **Easy-to-use**,**Modular** and **Extendible** package of deep-learning based CTR models ,including serval DNN-based CTR models and lots of core components layer of the models which can be used to build your own custom model.The goal is to make it possible for everyone to use complex deep learning-based models with `model.fit()`and`model.predict()`. 

@@ -1,18 +1,6 @@
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
-from deepctr.models import DeepFM, AFM
-
-import tensorflow as tf
-import os
-import keras.backend.tensorflow_backend as KTF
-
-os.environ["CUDA_VISIBLE_DEVICES"] = "1"  # 指定显卡编号
-
-config = tf.ConfigProto()
-config.gpu_options.allow_growth = True  # 不全部占满显存, 按需分配
-sess = tf.Session(config=config)
-
-KTF.set_session(sess)
+from deepctr.models import DeepFM
 
 
 if __name__ == "__main__":
