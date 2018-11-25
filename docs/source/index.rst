@@ -6,12 +6,11 @@
 Welcome to DeepCTR's documentation!
 ===================================
 
-DeepCTR is a **Easy-to-use** , **Modular** and **Extendible** package of deep-learning based based CTR models ,including serval DNN-based CTR models and lots of core components layer of the models which can be used to build your own custom model.
-The goal is to make it possible for everyone to use complex deep learning-based models with ``model.fit()`` and ``model.predict()`` .
+DeepCTR is a **Easy-to-use**,**Modular** and **Extendible** package of deep-learning based CTR models along with lots of core components layer  which can be used to build your own custom model easily.You can use any complex model with `model.fit()`and`model.predict()` just like any other keras model.And the layers are compatible with tensorflow.
 
-Through ``pip install deepctr`` get the package and `Get Started! <./Quick-Start.html>`_
+Through  `pip install deepctr`  get the package and [**Get Started!**](https://deepctr-doc.readthedocs.io/en/latest/Quick-Start.html)
 
-You can find source code at https://github.com/shenweichen/DeepCTR
+You can read the source code at https://github.com/shenweichen/DeepCTR
 
 .. toctree::
    :maxdepth: 2
