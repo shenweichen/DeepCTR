@@ -3,7 +3,7 @@ Quick-Start
 
 Installation Guide
 ----------------------
-Install deepctr package is through ``pip``.You must make sure that you have already installed tensorflow on your local machine: ::
+Install deepctr package is through ``pip`` .You must make sure that you have already installed 1.4.0<=tensorflow<1.7.0 on your local machine: ::
 
     pip install deepctr
 
@@ -37,12 +37,12 @@ Step 1: Import model
 Step 2: Simple preprocessing
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Usually there are two simple way to encode the sparse feature for embedding
+Usually there are two simple way to encode the sparse categorical feature for embedding
 
 - Label Encoding: map the features to integer value from 0 ~ len(#unique) - 1
 - Hash Encoding: map the features to a fix range,like 0 ~ 9999
 
-And for dense features,they are usually  discretized to buckets,here we use normalization.
+And for dense numerical features,they are usually  discretized to buckets,here we use normalization.
 
 .. code-block:: python
 
@@ -58,8 +58,8 @@ Step 3: Generate feature config dict
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Here, for sparse features, we transform them into dense vectors by embedding techniques.
-For continuous value features, we add a dummy index like LIBFM.
-That is, all dense features under the same field share the same embedding vector.
+For dense numerical features, we add a dummy index like LIBFM.
+That is to say, all dense features under the same field share the same embedding vector.
 In some implementations, the dense feature is concatened to the input embedding vectors of the deep network, you can modify the code yourself.
 
 
