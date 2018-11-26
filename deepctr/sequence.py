@@ -1,5 +1,4 @@
 from tensorflow.python.keras.layers import Layer
-from tensorflow.python.keras import backend as K
 from .layers import LocalActivationUnit
 from .activations import Dice
 import tensorflow as tf
@@ -16,7 +15,7 @@ class SequencePoolingLayer(Layer):
         - seq_len is a 2D tensor with shape : ``(batch_size, 1)``,indicate valid length of each sequence.
 
       Output shape
-        - 3D tensor with shape: ``(batch_size, 1, embedding_size)``.
+        - 3D tensor with shape: `(batch_size, 1, embedding_size)`.
 
       Arguments
         - **seq_len_max**:Positive integer indicates that the max length of all the sequence feature,usually same as T.
@@ -42,14 +41,15 @@ class SequencePoolingLayer(Layer):
         mask = tf.sequence_mask(user_behavior_length,
                                 self.seq_len_max, dtype=tf.float32)
 
-        mask = K.permute_dimensions(mask, [0, 2, 1])
+        mask = tf.transpose(mask,(0,2,1))
+
         mask = tf.tile(mask, [1, 1, embedding_size])
         uiseq_embed_list *= mask
         hist = uiseq_embed_list
         if self.mode == "max":
-            return K.max(hist, 1, keepdims=True)
+            return tf.reduce_max(hist, 1, keep_dims=True)
 
-        hist = K.sum(hist, 1, keepdims=False)
+        hist = tf.reduce_sum(hist, 1, keep_dims=False)
         if self.mode == "mean":
 
             hist = tf.div(hist, user_behavior_length)
@@ -78,7 +78,7 @@ class AttentionSequencePoolingLayer(Layer):
         - keys_length is a 2D tensor with shape: ``(batch_size, 1)``
 
       Output shape
-        - 3D tensor with shape: ``(batch_size, 1, embedding_size)``.
+        -3D tensor with shape: ``(batch_size, 1, embedding_size)``.
 
       Arguments
         - **hidden_size**:list of positive integer, the attention net layer number and units in each layer.
@@ -124,7 +124,8 @@ class AttentionSequencePoolingLayer(Layer):
         attention_score = LocalActivationUnit(
             self.hidden_size, self.activation, 0, 1, False, 1024,)([queries, keys])
 
-        outputs = K.permute_dimensions(attention_score, (0, 2, 1))
+        outputs = tf.transpose(attention_score,(0,2,1))
+
         key_masks = tf.sequence_mask(keys_length, hist_len)
 
         if self.weight_normalization:
@@ -135,7 +136,7 @@ class AttentionSequencePoolingLayer(Layer):
         outputs = tf.where(key_masks, outputs, paddings)
 
         if self.weight_normalization:
-            outputs = K.softmax(outputs)
+            outputs = tf.nn.softmax(outputs)
 
         outputs = tf.matmul(outputs, keys)
 

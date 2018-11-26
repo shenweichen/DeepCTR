@@ -3,7 +3,7 @@ Quick-Start
 
 Installation Guide
 ----------------------
-Install deepctr package is through ``pip`` .You must make sure that you have already installed 1.4.0<=tensorflow<1.7.0 on your local machine: ::
+Install deepctr package is through ``pip`` .You must make sure that you have already installed ``1.4.0<=tensorflow<1.7.0`` on your local machine: ::
 
     pip install deepctr
 

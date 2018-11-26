@@ -3,7 +3,6 @@ from tensorflow.python.keras.regularizers import  l2
 from tensorflow.python.keras.initializers import  RandomNormal,Zeros,glorot_normal,glorot_uniform
 from tensorflow.python.keras import backend as K
 from tensorflow.python.keras.activations import  softmax
-from .activations import  Dice
 import tensorflow as tf
 
 
@@ -302,9 +301,10 @@ class MLP(Layer):
 
             if isinstance(self.activation,str):
                 fc = Activation(self.activation)(fc)
+            elif issubclass(self.activation,Layer):
+                fc = self.activation()(fc)
             else:
-                fc = self.activation(fc,name=self.name+"act"+str(l))
-
+                raise ValueError("Invalid activation of MLP,found %s.You should use a str or a Activation Layer Class."%(self.activation))
             fc = Dropout(1 - self.keep_prob)(fc)
 
             deep_input = fc
@@ -636,9 +636,9 @@ class LocalActivationUnit(Layer):
         keys_len = keys.get_shape()[1]
         queries = K.repeat_elements(query,keys_len,1)
 
-        att_input = K.concatenate([queries, keys, queries - keys, queries * keys], axis=-1)
+        att_input = tf.concat([queries, keys, queries - keys, queries * keys], axis=-1)
         att_input = BatchNormalization()(att_input)
-        att_out = MLP(self.hidden_size, self.activation, self.l2_reg, self.keep_prob, self.use_bn, seed=self.seed,name=self.name+"mlp")(att_input)
+        att_out = MLP(self.hidden_size, self.activation, self.l2_reg, self.keep_prob, self.use_bn, seed=self.seed)(att_input)
         attention_score = Dense(1, 'linear')(att_out)
 
         return attention_score

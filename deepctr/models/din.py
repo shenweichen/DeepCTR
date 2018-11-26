@@ -30,7 +30,7 @@ def get_input(feature_dim_dict, seq_feature_list, seq_max_len):
 
 
 def DIN(feature_dim_dict, seq_feature_list, embedding_size=4, hist_len_max=16,
-        use_din=True, use_bn=True, hidden_size=[200, 80], activation=Dice(), att_hidden_size=[80, 40], att_activation='sigmoid', att_weight_normalization=True,
+        use_din=True, use_bn=False, hidden_size=[200, 80], activation=Dice, att_hidden_size=[80, 40], att_activation='sigmoid', att_weight_normalization=True,
         l2_reg_deep=5e-5, l2_reg_embedding=0, final_activation='sigmoid', keep_prob=1, init_std=0.0001, seed=1024, ):
     """Instantiates the Deep Interest Network architecture.
 
@@ -39,7 +39,7 @@ def DIN(feature_dim_dict, seq_feature_list, embedding_size=4, hist_len_max=16,
     :param embedding_size: positive integer,sparse feature embedding_size.
     :param hist_len_max: positive int, to indicate the max length of seq input
     :param use_din: bool, whether use din pooling or not.If set to ``False``,use **sum pooling**
-    :param use_bn: bool. Whether use BatchNormalization before activation or not.in deep net
+    :param use_bn: bool. Whether use BatchNormalization before activation or not in deep net
     :param hidden_size: list,list of positive integer or empty list, the layer number and units in each layer of deep net
     :param activation: Activation function to use in deep net
     :param att_hidden_size: list,list of positive integer , the layer number and units in each layer of attention net
@@ -93,7 +93,7 @@ def DIN(feature_dim_dict, seq_feature_list, embedding_size=4, hist_len_max=16,
 
     deep_input_emb = Concatenate()([deep_input_emb, hist])
     output = MLP(hidden_size, activation, l2_reg_deep,
-                 keep_prob, use_bn, seed,)(deep_input_emb)
+                 keep_prob, use_bn, seed)(deep_input_emb)
     output = Dense(1, final_activation)(output)
     output = Reshape([1])(output)
     model_input_list = list(sparse_input.values(
