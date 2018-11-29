@@ -15,7 +15,7 @@ class SequencePoolingLayer(Layer):
         - seq_len is a 2D tensor with shape : ``(batch_size, 1)``,indicate valid length of each sequence.
 
       Output shape
-        - 3D tensor with shape: `(batch_size, 1, embedding_size)`.
+        - 3D tensor with shape: ``(batch_size, 1, embedding_size)``.
 
       Arguments
         - **seq_len_max**:Positive integer indicates that the max length of all the sequence feature,usually same as T.
@@ -78,7 +78,7 @@ class AttentionSequencePoolingLayer(Layer):
         - keys_length is a 2D tensor with shape: ``(batch_size, 1)``
 
       Output shape
-        -3D tensor with shape: ``(batch_size, 1, embedding_size)``.
+        - 3D tensor with shape: ``(batch_size, 1, embedding_size)``.
 
       Arguments
         - **hidden_size**:list of positive integer, the attention net layer number and units in each layer.

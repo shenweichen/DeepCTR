@@ -19,6 +19,7 @@ You can read the source code at https://github.com/shenweichen/DeepCTR
    Quick-Start
    Features
    Demo
+   FAQ
 
 .. toctree::
    :maxdepth: 3

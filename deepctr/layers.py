@@ -122,8 +122,8 @@ class AFMLayer(Layer):
             for j in range(i + 1, num_inputs):
                 row.append(i)
                 col.append(j)
-        p = concatenate([embeds_vec_list[idx] for idx in row],axis=1)# batch num_pairs k
-        q = concatenate([embeds_vec_list[idx] for idx in col],axis=1)  # Reshape([num_pairs, self.embedding_size])
+        p = tf.concat([embeds_vec_list[idx] for idx in row],axis=1)
+        q = tf.concat([embeds_vec_list[idx] for idx in col],axis=1)
         inner_product = p * q
 
         bi_interaction = inner_product
@@ -233,16 +233,13 @@ class CrossNet(Layer):
         if K.ndim(inputs) !=2 :
             raise ValueError("Unexpected inputs dimensions %d, expect to be 2 dimensions"% (K.ndim(inputs)))
 
-        x = inputs
-        dim = x.get_shape()[-1]
-        x_0 = K.reshape(x,[-1,dim, 1])
+        x_0 = tf.expand_dims(inputs,axis=2)
         x_l = x_0
         for i in range(self.layer_num):
-            dot_ = tf.matmul(x_0, tf.transpose(x_l, [0, 2, 1]))  # K.dot(x_0,K.transpose(x_l))
-            dot_ = K.dot(dot_, self.kernels[i])
-            #x_l = K.bias_add(dot_+ x_l,self.bias[i]) # K.bias_add(dot_, self.bias)
-            x_l = dot_ + x_l + self.bias[i]#K.reshape(self.bias[i],[1,dim,1])
-        x_l = K.reshape(x_l, [-1, dim])
+            xl_w = tf.tensordot(tf.transpose(x_l,[0,2,1]),self.kernels[i],axes=(-1,0))
+            dot_ = tf.matmul(x_0,xl_w)
+            x_l = dot_ + x_l + self.bias[i]
+        x_l = tf.squeeze(x_l,axis=2)
         return x_l
 
     def get_config(self,):
@@ -259,7 +256,7 @@ class MLP(Layer):
         - nD tensor with shape: ``(batch_size, ..., input_dim)``. The most common situation would be a 2D input with shape ``(batch_size, input_dim)``.
 
       Output shape
-        - nD tensor with shape: ``(batch_size, ..., hidden_size[-1])``. For instance, for a 2D input with shape `(batch_size, input_dim)`, the output would have shape ``(batch_size, hidden_size[-1])``.
+        - nD tensor with shape: ``(batch_size, ..., hidden_size[-1])``. For instance, for a 2D input with shape ``(batch_size, input_dim)``, the output would have shape ``(batch_size, hidden_size[-1])``.
 
       Arguments
         - **hidden_size**:list of positive integer, the layer number and units in each layer.
