@@ -29,9 +29,9 @@ def get_input(feature_dim_dict, seq_feature_list, seq_max_len):
     return sparse_input, user_behavior_input, user_behavior_length
 
 
-def DIN(feature_dim_dict, seq_feature_list, embedding_size=4, hist_len_max=16,
-        use_din=True, use_bn=False, hidden_size=[200, 80], activation=Dice, att_hidden_size=[80, 40], att_activation='sigmoid', att_weight_normalization=True,
-        l2_reg_deep=5e-5, l2_reg_embedding=0, final_activation='sigmoid', keep_prob=1, init_std=0.0001, seed=1024, ):
+def DIN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
+        use_din=True, use_bn=False, hidden_size=[200, 80], activation='relu', att_hidden_size=[80, 40], att_activation='sigmoid', att_weight_normalization=True,
+        l2_reg_deep=0, l2_reg_embedding=1e-5, final_activation='sigmoid', keep_prob=1, init_std=0.0001, seed=1024, ):
     """Instantiates the Deep Interest Network architecture.
 
     :param feature_dim_dict: dict,to indicate sparse field (**now only support sparse feature**)like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':[]}

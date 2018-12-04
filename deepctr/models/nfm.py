@@ -13,13 +13,12 @@ from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.regularizers import l2
 
 
-
 from ..layers import PredictionLayer, MLP, BiInteractionPooling
 from ..utils import get_input
 
 
 def NFM(feature_dim_dict, embedding_size=8,
-        hidden_size=[32, 32], l2_reg_embedding=1e-5, l2_reg_linear=1e-5, l2_reg_deep=0,
+        hidden_size=[128, 128], l2_reg_embedding=1e-5, l2_reg_linear=1e-5, l2_reg_deep=0,
         init_std=0.0001, seed=1024, keep_prob=1, activation='relu', final_activation='sigmoid',
         ):
     """Instantiates the Neural Factorization Machine architecture.

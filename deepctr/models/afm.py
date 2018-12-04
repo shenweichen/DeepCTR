@@ -10,18 +10,18 @@ Reference:
 
 """
 
-from tensorflow.python.keras.layers import  Dense, Embedding, Concatenate, Reshape, add
+from tensorflow.python.keras.layers import Dense, Embedding, Concatenate, Reshape, add
 from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.regularizers import l2
 
 from ..utils import get_input
-from ..layers import PredictionLayer,AFMLayer,FM
+from ..layers import PredictionLayer, AFMLayer, FM
 
 
-def AFM(feature_dim_dict, embedding_size=8,use_attention=True, attention_factor=4,
-                  l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_att=1e-5,keep_prob=1.0,init_std=0.0001,seed=1024,
-                   final_activation='sigmoid',):
+def AFM(feature_dim_dict, embedding_size=8, use_attention=True, attention_factor=8,
+        l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_att=1e-5, keep_prob=1.0, init_std=0.0001, seed=1024,
+        final_activation='sigmoid',):
     """Instantiates the Attentonal Factorization Machine architecture.
 
     :param feature_dim_dict: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
@@ -42,22 +42,24 @@ def AFM(feature_dim_dict, embedding_size=8,use_attention=True, attention_factor=
                       dict) or "sparse" not in feature_dim_dict or "dense" not in feature_dim_dict:
         raise ValueError(
             "feature_dim_dict must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}")
-    if not isinstance(feature_dim_dict["sparse"],dict):
-        raise ValueError("feature_dim_dict['sparse'] must be a dict,cur is",type(feature_dim_dict['sparse']))
-    if not isinstance(feature_dim_dict["dense"],list):
-        raise ValueError("feature_dim_dict['dense'] must be a list,cur is", type(feature_dim_dict['dense']))
+    if not isinstance(feature_dim_dict["sparse"], dict):
+        raise ValueError("feature_dim_dict['sparse'] must be a dict,cur is", type(
+            feature_dim_dict['sparse']))
+    if not isinstance(feature_dim_dict["dense"], list):
+        raise ValueError("feature_dim_dict['dense'] must be a list,cur is", type(
+            feature_dim_dict['dense']))
 
+    sparse_input, dense_input = get_input(feature_dim_dict, None)
+    sparse_embedding, linear_embedding, = get_embeddings(
+        feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding, l2_reg_linear)
 
-
-
-    sparse_input, dense_input = get_input(feature_dim_dict,None)
-    sparse_embedding, linear_embedding, = get_embeddings(feature_dim_dict,embedding_size,init_std,seed,l2_reg_embedding,l2_reg_linear)
-
-    embed_list = [sparse_embedding[i](sparse_input[i]) for i in range(len(sparse_input))]
-    linear_term = [linear_embedding[i](sparse_input[i]) for i in range(len(sparse_input))]
+    embed_list = [sparse_embedding[i](sparse_input[i])
+                  for i in range(len(sparse_input))]
+    linear_term = [linear_embedding[i](sparse_input[i])
+                   for i in range(len(sparse_input))]
     if len(linear_term) > 1:
         linear_term = add(linear_term)
-    elif len(linear_term) >0:
+    elif len(linear_term) > 0:
         linear_term = linear_term[0]
     else:
         linear_term = 0
@@ -66,37 +68,40 @@ def AFM(feature_dim_dict, embedding_size=8,use_attention=True, attention_factor=
         continuous_embedding_list = list(
             map(Dense(embedding_size, use_bias=False, kernel_regularizer=l2(l2_reg_embedding), ),
                 dense_input))
-        continuous_embedding_list = list(map(Reshape((1, embedding_size)), continuous_embedding_list))
+        continuous_embedding_list = list(
+            map(Reshape((1, embedding_size)), continuous_embedding_list))
         embed_list += continuous_embedding_list
 
-        dense_input_ = dense_input[0] if len(dense_input) == 1 else Concatenate()(dense_input)
-        linear_dense_logit = Dense(1,activation=None,use_bias=False,kernel_regularizer=l2(l2_reg_linear))(dense_input_)
-        linear_term = add([linear_dense_logit,linear_term])
+        dense_input_ = dense_input[0] if len(
+            dense_input) == 1 else Concatenate()(dense_input)
+        linear_dense_logit = Dense(
+            1, activation=None, use_bias=False, kernel_regularizer=l2(l2_reg_linear))(dense_input_)
+        linear_term = add([linear_dense_logit, linear_term])
 
     fm_input = Concatenate(axis=1)(embed_list)
     if use_attention:
-        fm_out = AFMLayer(attention_factor,l2_reg_att,keep_prob,seed)(embed_list)
+        fm_out = AFMLayer(attention_factor, l2_reg_att,
+                          keep_prob, seed)(embed_list)
     else:
         fm_out = FM()(fm_input)
 
-    final_logit = add([linear_term,fm_out])
+    final_logit = add([linear_term, fm_out])
     output = PredictionLayer(final_activation)(final_logit)
-    model = Model(inputs=sparse_input + dense_input , outputs=output)
+    model = Model(inputs=sparse_input + dense_input, outputs=output)
     return model
 
 
 def get_embeddings(feature_dim_dict, embedding_size, init_std, seed, l2_rev_V, l2_reg_w):
     sparse_embedding = [Embedding(feature_dim_dict["sparse"][feat], embedding_size,
-                                  embeddings_initializer=RandomNormal(mean=0.0, stddev=init_std, seed=seed),
+                                  embeddings_initializer=RandomNormal(
+                                      mean=0.0, stddev=init_std, seed=seed),
                                   embeddings_regularizer=l2(l2_rev_V),
                                   name='sparse_emb_' + str(i) + '-' + feat) for i, feat in
                         enumerate(feature_dim_dict["sparse"])]
     linear_embedding = [Embedding(feature_dim_dict["sparse"][feat], 1,
                                   embeddings_initializer=RandomNormal(mean=0.0, stddev=init_std,
-                                                                      seed=seed)
-                                  , embeddings_regularizer=l2(l2_reg_w),
+                                                                      seed=seed), embeddings_regularizer=l2(l2_reg_w),
                                   name='linear_emb_' + str(i) + '-' + feat) for
                         i, feat in enumerate(feature_dim_dict["sparse"])]
 
     return sparse_embedding, linear_embedding
-

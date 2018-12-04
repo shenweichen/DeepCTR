@@ -15,7 +15,7 @@ from ..layers import PredictionLayer, MLP
 from ..utils import get_input
 
 
-def WDL(deep_feature_dim_dict, wide_feature_dim_dict, embedding_size=4, hidden_size=[], l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_deep=0,
+def WDL(deep_feature_dim_dict, wide_feature_dim_dict, embedding_size=8, hidden_size=[128, 128], l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_deep=0,
         init_std=0.0001, seed=1024, keep_prob=1, activation='relu', final_activation='sigmoid',
         ):
     """Instantiates the Wide&Deep Learning architecture.
@@ -56,15 +56,16 @@ def WDL(deep_feature_dim_dict, wide_feature_dim_dict, embedding_size=4, hidden_s
     deep_logit = Dense(1, use_bias=False, activation=None)(deep_out)
     final_logit = deep_logit
     if len(wide_feature_dim_dict['dense']) + len(wide_feature_dim_dict['sparse']) > 0:
-        bias_embed_list = [wide_linear_embedding[i](
-            bias_sparse_input[i]) for i in range(len(bias_sparse_input))]
-        linear_term = add(bias_embed_list) if len(
-            bias_embed_list) > 1 else bias_embed_list[0]
+        if len(wide_feature_dim_dict['sparse']) > 0:
+            bias_embed_list = [wide_linear_embedding[i](
+                bias_sparse_input[i]) for i in range(len(bias_sparse_input))]
+            linear_term = add(bias_embed_list) if len(
+                bias_embed_list) > 1 else bias_embed_list[0]
+            final_logit = add([final_logit, linear_term])
         if len(wide_feature_dim_dict['dense']) > 0:
             wide_dense_term = Dense(1, use_bias=False, activation=None)(Concatenate()(
                 bias_dense_input) if len(bias_dense_input) > 1 else bias_dense_input[0])
-            linear_term = add([linear_term, wide_dense_term])
-        final_logit = add([final_logit, linear_term])
+            final_logit = add([final_logit, wide_dense_term])
 
     output = PredictionLayer(final_activation)(final_logit)
     model = Model(inputs=sparse_input + dense_input +

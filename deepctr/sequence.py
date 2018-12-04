@@ -41,7 +41,7 @@ class SequencePoolingLayer(Layer):
         mask = tf.sequence_mask(user_behavior_length,
                                 self.seq_len_max, dtype=tf.float32)
 
-        mask = tf.transpose(mask,(0,2,1))
+        mask = tf.transpose(mask, (0, 2, 1))
 
         mask = tf.tile(mask, [1, 1, embedding_size])
         uiseq_embed_list *= mask
@@ -91,7 +91,7 @@ class AttentionSequencePoolingLayer(Layer):
         - [Deep Interest Network for Click-Through Rate Prediction](https://arxiv.org/pdf/1706.06978.pdf)
     """
 
-    def __init__(self, hidden_size=(80, 40), activation=Dice(name='att_dice'), weight_normalization=True, **kwargs):
+    def __init__(self, hidden_size=(80, 40), activation='sigmoid', weight_normalization=True, **kwargs):
 
         self.hidden_size = hidden_size
         self.activation = activation
@@ -124,7 +124,7 @@ class AttentionSequencePoolingLayer(Layer):
         attention_score = LocalActivationUnit(
             self.hidden_size, self.activation, 0, 1, False, 1024,)([queries, keys])
 
-        outputs = tf.transpose(attention_score,(0,2,1))
+        outputs = tf.transpose(attention_score, (0, 2, 1))
 
         key_masks = tf.sequence_mask(keys_length, hist_len)
 

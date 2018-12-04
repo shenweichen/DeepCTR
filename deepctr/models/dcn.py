@@ -16,8 +16,8 @@ from ..layers import CrossNet, PredictionLayer, MLP
 
 
 def DCN(feature_dim_dict, embedding_size='auto',
-        cross_num=2, hidden_size=(32,), l2_reg_embedding=1e-5, l2_reg_cross=0, l2_reg_deep=0,
-        init_std=0.0001, seed=1024, keep_prob=1, use_bn=True, activation='relu', final_activation='sigmoid',
+        cross_num=2, hidden_size=[128, 128, ], l2_reg_embedding=1e-5, l2_reg_cross=1e-5, l2_reg_deep=0,
+        init_std=0.0001, seed=1024, keep_prob=1, use_bn=False, activation='relu', final_activation='sigmoid',
         ):
     """Instantiates the Deep&Cross Network architecture.
 
@@ -90,8 +90,8 @@ def get_embeddings(feature_dim_dict, embedding_size, init_std, seed, l2_rev_V):
                                       embeddings_regularizer=l2(l2_rev_V), name='sparse_emb_' + str(i) + '-'+feat) for i, feat in
                             enumerate(feature_dim_dict["sparse"])]
 
-        print("DCN total auto embed size", sum(
-            [int(pow(feature_dim_dict["sparse"][k], 0.25)) for k, v in feature_dim_dict["sparse"].items()]))
+        print("Using auto embedding size,the connected vector dimension is", sum(
+            [6*int(pow(feature_dim_dict["sparse"][k], 0.25)) for k, v in feature_dim_dict["sparse"].items()]))
     else:
         sparse_embedding = [Embedding(feature_dim_dict["sparse"][feat], embedding_size,
                                       embeddings_initializer=RandomNormal(

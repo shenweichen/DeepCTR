@@ -206,7 +206,7 @@ class CrossNet(Layer):
       References
         - [Deep & Cross Network for Ad Click Predictions](https://arxiv.org/abs/1708.05123)
     """
-    def __init__(self, layer_num=1,l2_reg=0,seed=1024, **kwargs):
+    def __init__(self, layer_num=2,l2_reg=0,seed=1024, **kwargs):
         self.layer_num = layer_num
         self.l2_reg = l2_reg
         self.seed = seed
@@ -287,7 +287,7 @@ class MLP(Layer):
 
     def call(self, inputs,**kwargs):
         deep_input = inputs
-        deep_input = Dropout(1 - self.keep_prob)(deep_input)
+        #deep_input = Dropout(1 - self.keep_prob)(deep_input)
 
         for l in range(len(self.hidden_size)):
             fc = Dense(self.hidden_size[l], activation=None, \

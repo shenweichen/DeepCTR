@@ -39,7 +39,7 @@ concatenates the embedding vectors and feeds them into a MLP(MultiLayer Perceptr
 
 .. image:: ../pics/FNN.png
    :align: center
-   :scale: 70 %
+   :scale: 50 %
 
 
 Zhang, Weinan, Tianming Du, and Jun Wang. `"Deep learning over multi-field categorical data." <https://arxiv.org/pdf/1601.02376.pdf>`_ European conference on information retrieval. Springer, Cham, 2016.
@@ -70,7 +70,7 @@ The logits of deep part and wide part are added to get the prediction probabilit
 
 .. image:: ../pics/WDL.png
    :align: center
-   :scale: 70 %
+   :scale: 50 %
 
 Cheng, Heng-Tze, et al. `"Wide & deep learning for recommender systems." <https://arxiv.org/pdf/1606.07792.pdf>`_ Proceedings of the 1st Workshop on Deep Learning for Recommender Systems. ACM, 2016.
 
@@ -118,7 +118,7 @@ And then fed it into a MLP.The output logit of MLP and the output logit of linea
 
 .. image:: ../pics/NFM.png
    :align: center
-   :scale: 70 %
+   :scale: 50 %
 
 He, Xiangnan, and Tat-Seng Chua. `"Neural Factorization Machines for Sparse Predictive Analytics.(2017)." <https://arxiv.org/pdf/1708.05027.pdf>`_ (2017).
 
@@ -142,7 +142,7 @@ DCN (Deep & Cross Network)
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 DCN use a Cross Net to learn both low and high order feature interaction explicitly,and use a MLP to learn feature interaction implicitly.
-The output of Cross Net and MLP are concatenated.The concatenated vector are fed into one fully connected layer to get the prediction probability. 
+The output of Cross Net and MLP are concatenated.The concatenated vector are feed into one fully connected layer to get the prediction probability. 
 
 **DCN api** `link <./deepctr.models.dcn.html>`_
 

@@ -17,7 +17,7 @@ from ..layers import PredictionLayer, MLP, InnerProductLayer, OutterProductLayer
 from ..utils import get_input
 
 
-def PNN(feature_dim_dict, embedding_size=4, hidden_size=[32], l2_reg_embedding=1e-5, l2_reg_deep=0,
+def PNN(feature_dim_dict, embedding_size=8, hidden_size=[128, 128], l2_reg_embedding=1e-5, l2_reg_deep=0,
         init_std=0.0001, seed=1024, keep_prob=1, activation='relu',
         final_activation='sigmoid', use_inner=True, use_outter=False, kernel_type='mat', ):
     """Instantiates the Product-based Neural Network architecture.
@@ -34,15 +34,15 @@ def PNN(feature_dim_dict, embedding_size=4, hidden_size=[32], l2_reg_embedding=1
     :param final_activation: str,output activation,usually ``'sigmoid'`` or ``'linear'``
     :param use_inner: bool,whether use inner-product or not.
     :param use_outter: bool,whether use outter-product or not.
-    :param kernel_type: str,kerneo_type used in outter-product,can be ``'mat'``,``'vec'``or``'num'``
+    :param kernel_type: str,kerneo_type used in outter-product,can be ``'mat'`` , ``'vec'`` or ``'num'``
     :return: A Keras model instance.
     """
     if not isinstance(feature_dim_dict,
                       dict) or "sparse" not in feature_dim_dict or "dense" not in feature_dim_dict:
         raise ValueError(
             "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
-    if kernel_type not in ['mat','vec','num']:
-        raise  ValueError("kernel_type must be mat,vec or num")
+    if kernel_type not in ['mat', 'vec', 'num']:
+        raise ValueError("kernel_type must be mat,vec or num")
     sparse_input, dense_input = get_input(feature_dim_dict, None)
     sparse_embedding = [Embedding(feature_dim_dict["sparse"][feat], embedding_size,
                                   embeddings_initializer=RandomNormal(
@@ -62,7 +62,6 @@ def PNN(feature_dim_dict, embedding_size=4, hidden_size=[32], l2_reg_embedding=1
         continuous_embedding_list = list(
             map(Reshape((1, embedding_size)), continuous_embedding_list))
         embed_list += continuous_embedding_list
-
 
     inner_product = InnerProductLayer()(embed_list)
     outter_product = OutterProductLayer(kernel_type)(embed_list)
