@@ -34,8 +34,7 @@ class Dice(Layer):
 
     def call(self, inputs, **kwargs):
 
-        inputs_normed = BatchNormalization(
-            axis=self.axis, epsilon=self.epsilon, center=False, scale=False)(inputs)
+        inputs_normed = tf.layers.batch_normalization(inputs,axis=self.axis, epsilon=self.epsilon, center=False, scale=False)
         x_p = tf.sigmoid(inputs_normed)
         return self.alphas * (1.0 - x_p) * inputs + x_p * inputs
     def get_config(self,):

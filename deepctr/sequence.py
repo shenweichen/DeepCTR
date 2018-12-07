@@ -23,7 +23,7 @@ class SequencePoolingLayer(Layer):
         - **mode**:str.Pooling operation to be used,can be sum,mean or max.
     """
 
-    def __init__(self, seq_len_max, mode='sum', **kwargs):
+    def __init__(self, seq_len_max, mode='mean', **kwargs):
 
         if mode not in ['sum', 'mean', 'max']:
             raise ValueError("mode must be sum or mean")
@@ -91,7 +91,7 @@ class AttentionSequencePoolingLayer(Layer):
         - [Deep Interest Network for Click-Through Rate Prediction](https://arxiv.org/pdf/1706.06978.pdf)
     """
 
-    def __init__(self, hidden_size=(80, 40), activation='sigmoid', weight_normalization=True, **kwargs):
+    def __init__(self, hidden_size=(80, 40), activation='sigmoid', weight_normalization=False, **kwargs):
 
         self.hidden_size = hidden_size
         self.activation = activation

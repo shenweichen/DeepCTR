@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="deepctr",
-    version="0.1.4",
+    version="0.1.5",
     author="Weichen Shen",
     author_email="wcshen1994@163.com",
     description="DeepCTR is a Easy-to-use,Modular and Extendible package of deep-learning based CTR models ,including serval DNN-based CTR models and lots of core components layer of the models which can be used to build your own custom model.",
