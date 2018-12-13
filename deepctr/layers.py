@@ -131,8 +131,8 @@ class AFMLayer(Layer):
         bi_interaction = inner_product
         attention_temp =  tf.nn.relu(tf.nn.bias_add(tf.tensordot(bi_interaction,self.attention_W,axes=(-1,0)),self.attention_b))
         #  Dense(self.attention_factor,'relu',kernel_regularizer=l2(self.l2_reg_w))(bi_interaction)
-        attention_weight =tf.nn.softmax(tf.tensordot(attention_temp,self.projection_h,axes=(-1,0)),dim=1)
-        attention_output = tf.reduce_sum(attention_weight*bi_interaction,axis=1)
+        self.normalized_att_score =tf.nn.softmax(tf.tensordot(attention_temp,self.projection_h,axes=(-1,0)),dim=1)
+        attention_output = tf.reduce_sum(self.normalized_att_score*bi_interaction,axis=1)
 
         attention_output = tf.nn.dropout(attention_output,self.keep_prob,seed=1024)
         # Dropout(1-self.keep_prob)(attention_output)
