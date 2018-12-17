@@ -69,8 +69,7 @@ def DCN(feature_dim_dict, embedding_size='auto',
                        use_bn, seed)(deep_input)
         final_logit = Dense(1, use_bias=False, activation=None)(deep_out)
     elif cross_num > 0:  # Only Cross
-        cross_out = CrossNet(cross_num, init_std=init_std,
-                             l2_reg=l2_reg_cross)(deep_input)
+        cross_out = CrossNet(cross_num, l2_reg=l2_reg_cross)(deep_input)
         final_logit = Dense(1, use_bias=False, activation=None)(cross_out)
     else:  # Error
         raise NotImplementedError

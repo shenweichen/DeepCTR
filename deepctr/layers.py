@@ -286,7 +286,7 @@ class MLP(Layer):
 
     def build(self, input_shape):
         input_size = input_shape[-1]
-        hidden_units = [int(input_size)] + self.hidden_size
+        hidden_units = [int(input_size)] + list(self.hidden_size)
         self.kernels = [self.add_weight(name='kernel' + str(i),
                                         shape=(hidden_units[i], hidden_units[i+1]),
                                         initializer=glorot_normal(seed=self.seed),

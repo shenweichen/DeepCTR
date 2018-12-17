@@ -10,7 +10,7 @@
 [![Documentation Status](https://readthedocs.org/projects/deepctr-doc/badge/?version=latest)](https://deepctr-doc.readthedocs.io/)
 [![Build Status](https://travis-ci.com/shenweichen/DeepCTR.svg?branch=master)](https://travis-ci.com/shenweichen/DeepCTR)
 [![Coverage Status](https://coveralls.io/repos/github/shenweichen/DeepCTR/badge.svg)](https://coveralls.io/github/shenweichen/DeepCTR)
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/c5e1deb657a94e40aa1db080cb0df91e)](https://www.codacy.com/app/wcshen1994/DeepCTR?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=shenweichen/DeepCTR&amp;utm_campaign=Badge_Grade)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/d4099734dc0e4bab91d332ead8c0bdd0)](https://www.codacy.com/app/wcshen1994/DeepCTR?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=shenweichen/DeepCTR&amp;utm_campaign=Badge_Grade)
 
 DeepCTR is a **Easy-to-use**,**Modular** and **Extendible** package of deep-learning based CTR models along with lots of core components layer  which can be used to build your own custom model easily.You can use any complex model with `model.fit()`and`model.predict()` just like any other keras model.And the layers are compatible with tensorflow.Through  `pip install deepctr`  get the package and [**Get Started!**](https://deepctr-doc.readthedocs.io/en/latest/Quick-Start.html)
 
