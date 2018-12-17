@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from deepctr.models import DIN
 from deepctr.activations import Dice
 from deepctr.utils import custom_objects
@@ -29,6 +30,23 @@ def get_xy_fd():
     return x, y, feature_dim_dict, behavior_feature_list
 
 
+@pytest.mark.xfail(reason="There is a bug when save model use Dice")
+# @pytest.mark.skip(reason="misunderstood the API")
+def test_DIN_model_io():
+    name = "DIN_att"
+    x, y, feature_dim_dict, behavior_feature_list = get_xy_fd()
+
+    model = DIN(feature_dim_dict, behavior_feature_list, hist_len_max=4, embedding_size=8,
+                use_din=True, hidden_size=[4, 4, 4], keep_prob=0.6,)
+
+    model.compile('adam', 'binary_crossentropy',
+                  metrics=['binary_crossentropy'])
+   #model.fit(x, y, verbose=1, validation_split=0.5)
+    save_model(model,  name + '.h5')
+    model = load_model(name + '.h5', custom_objects)
+    print(name + " test save load model pass!")
+
+
 def test_DIN_att():
 
     name = "DIN_att"
@@ -45,12 +63,12 @@ def test_DIN_att():
     model.load_weights(name + '_weights.h5')
     print(name+" test save load weight pass!")
 
-    try:
-        save_model(model,  name + '.h5')
-        model = load_model(name + '.h5', custom_objects)
-        print(name + " test save load model pass!")
-    except:
-        print("【Error】There is a bug when save model use Dice or Prelu---------------------------------------------------")
+    # try:
+    #     save_model(model,  name + '.h5')
+    #     model = load_model(name + '.h5', custom_objects)
+    #     print(name + " test save load model pass!")
+    # except:
+    #     print("【Error】There is a bug when save model use Dice---------------------------------------------------")
 
     print(name + " test pass!")
 
@@ -71,12 +89,9 @@ def test_DIN_sum():
     model.load_weights(name + '_weights.h5')
     print(name+" test save load weight pass!")
 
-    try:
-        save_model(model,  name + '.h5')
-        model = load_model(name + '.h5', custom_objects)
-        print(name + " test save load model pass!")
-    except:
-        print("There is a bug when save model use Dice or Prelu")
+    save_model(model,  name + '.h5')
+    model = load_model(name + '.h5', custom_objects)
+    print(name + " test save load model pass!")
 
     print(name + " test pass!")
 

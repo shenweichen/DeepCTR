@@ -1,11 +1,18 @@
 import numpy as np
-from deepctr.models import MLR
-from deepctr.utils import custom_objects
+import pytest
 from tensorflow.python.keras.models import save_model, load_model
+from deepctr.models import AFM
+from deepctr.utils import custom_objects
 
 
-def test_MLR():
-    name = "MLR"
+@pytest.mark.parametrize(
+    'use_attention',
+    [(use_attention,)
+     for use_attention in [True, False]
+     ]
+)
+def test_AFM(use_attention):
+    name = "AFM"
 
     sample_size = 64
     feature_dim_dict = {'sparse': {'sparse_1': 2, 'sparse_2': 5,
@@ -17,7 +24,7 @@ def test_MLR():
     y = np.random.randint(0, 2, sample_size)
     x = sparse_input + dense_input
 
-    model = MLR(feature_dim_dict)
+    model = AFM(feature_dim_dict, use_attention=use_attention, keep_prob=0.5,)
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
     model.fit(x, y, batch_size=100, epochs=1, validation_split=0.5)
@@ -25,7 +32,7 @@ def test_MLR():
     model.save_weights(name + '_weights.h5')
     model.load_weights(name + '_weights.h5')
     print(name+" test save load weight pass!")
-    save_model(model, name + '.h5')
+    save_model(model,  name + '.h5')
     model = load_model(name + '.h5', custom_objects)
     print(name + " test save load model pass!")
 
@@ -33,4 +40,4 @@ def test_MLR():
 
 
 if __name__ == "__main__":
-    test_MLR()
+    test_AFM(use_attention=True)
