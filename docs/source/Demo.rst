@@ -16,7 +16,7 @@ In this demo,we simply normailize the integer feature between 0 and 1,you
 can try other transformation technique like log normalization or discretization.
 
 This example shows how to use *DeepFM* to solve a simple binary classification task. You can get the demo data 
-`criteo_sample.txt <https://github.com/shenweichen/DeepCTR/tree/master/demo
+`criteo_sample.txt <https://github.com/shenweichen/DeepCTR/tree/master/examples
 /criteo_sample.txt>`_ and run the following codes.
 
 .. code-block:: python
@@ -73,7 +73,7 @@ Here is a small fraction of data include  only sparse field.
    :scale: 70 %
 
 This example shows how to use *DeepFM* to solve a simple binary regression task. You can get the demo data 
-`movielens_sample.txt <https://github.com/shenweichen/DeepCTR/tree/master/demo
+`movielens_sample.txt <https://github.com/shenweichen/DeepCTR/tree/master/examples
 /movielens_sample.txt>`_ and run the following codes.
 
 .. code-block:: python
