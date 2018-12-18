@@ -175,9 +175,10 @@ class PredictionLayer(Layer):
 
         if isinstance(self.activation,str):
             output = Activation(self.activation)(x)
+        elif issubclass(self.activation,Layer):
+            output = self.activation()(x)
         else:
-            output = self.activation(x)
-
+            raise ValueError("Invalid activation of MLP,found %s.You should use a str or a Activation Layer Class." % (self.activation))
         output = tf.reshape(output,(-1,1))
 
         return output

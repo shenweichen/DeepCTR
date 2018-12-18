@@ -82,42 +82,59 @@ def MLR(region_feature_dim_dict,base_feature_dim_dict={"sparse":{},"dense":[]},r
 
     if region_dense_feature_num > 0 and region_sparse_feature_num==0:
         region_logits = Concatenate()(region_dense_logits_)
-        base_logits = base_dense_logits
     elif region_dense_feature_num == 0 and region_sparse_feature_num >0:
         region_sparse_logits = [
             add([region_embeddings[j][i](region_sparse_input[i]) for i in range(region_sparse_feature_num)])
-            for j in range(region_num)]
-        base_sparse_logits = [add(
-            [base_embeddings[j][i](base_sparse_input_[i]) for i in range(base_sparse_feature_num)])
-            for j in range(region_num)]
+             if region_sparse_feature_num > 1 else region_embeddings[j][0](region_sparse_input[0])
+            for j in range(region_num) ]
         region_logits = Concatenate()(region_sparse_logits)
-        base_logits = base_sparse_logits
+
     else:
         region_sparse_logits = [
             add([region_embeddings[j][i](region_sparse_input[i]) for i in range(region_sparse_feature_num)])
             for j in range(region_num)]
-        base_sparse_logits = [add(
-            [base_embeddings[j][i](base_sparse_input_[i]) for i in range(base_sparse_feature_num)])
-            for j in range(region_num)]
         region_logits =Concatenate()([add([region_sparse_logits[i],region_dense_logits_[i]]) for i in range(region_num)])
-        base_logits = [add([base_sparse_logits[i],base_dense_logits[i]]) for i in range(region_num)]
+       
+    if base_dense_feature_num > 0 and base_sparse_feature_num == 0:
+        base_logits = base_dense_logits
+    elif base_dense_feature_num == 0 and base_sparse_feature_num > 0:
+        base_sparse_logits = [add(
+            [base_embeddings[j][i](base_sparse_input_[i]) for i in range(base_sparse_feature_num)]) if base_sparse_feature_num > 1 else base_embeddings[j][0](base_sparse_input_[0]) 
+            for j in range(region_num)]
+        base_logits = base_sparse_logits
+    else:
+        base_sparse_logits = [add(
+            [base_embeddings[j][i](base_sparse_input_[i]) for i in range(base_sparse_feature_num)])  if base_sparse_feature_num > 1 else base_embeddings[j][0](base_sparse_input_[0]) 
+            for j in range(region_num)]
+        base_logits = [add([base_sparse_logits[i], base_dense_logits[i]]) for i in range(region_num)]
+
     region_weights = Activation("softmax")(region_logits)#Dense(self.region_num, activation='softmax')(final_logit)
     learner_score =  Concatenate()(
         [Activation(final_activation, name='learner' + str(i))(base_logits[i]) for i in range(region_num)])
     final_logit = dot([region_weights,learner_score], axes=-1)
 
-    if bias_dense_feature_num + bias_sparse_feature_num >0:
+    if bias_dense_feature_num + bias_sparse_feature_num > 0:
+
         if bias_dense_feature_num > 1:
-            bias_dense_logits =Dense(1, )(Concatenate()(bias_dense_input))
+            bias_dense_logits = Dense(1,)(Concatenate()(bias_dense_input))
+        elif bias_dense_feature_num == 1:
+            bias_dense_logits = Dense(1,)(bias_dense_input[0])
         else:
-            bias_dense_logits = Dense(1, )(bias_dense_input[0])
-        bias_cate_logits = add([bias_embedding[i](bias_sparse_input[i]) for i, feat in enumerate(bias_feature_dim_dict['sparse'])])
-        if bias_dense_feature_num > 0 and bias_sparse_feature_num == 0:
+            pass
+
+        if bias_sparse_feature_num > 1:
+            bias_cate_logits = add([bias_embedding[i](bias_sparse_input[i]) for i, feat in enumerate(bias_feature_dim_dict['sparse'])])
+        elif bias_sparse_feature_num == 1:
+            bias_cate_logits = bias_embedding[0](bias_sparse_input[0])
+        else:
+            pass
+    
+        if bias_dense_feature_num >0 and bias_sparse_feature_num > 0:
+            bias_logits = add([bias_dense_logits, bias_cate_logits])
+        elif bias_dense_feature_num > 0:
             bias_logits = bias_dense_logits
-        elif bias_dense_feature_num == 0 and bias_sparse_feature_num > 0:
-            bias_logits = bias_cate_logits
         else:
-            bias_logits = add([bias_dense_logits,bias_cate_logits])
+            bias_logits = bias_cate_logits
 
         bias_prob = Activation('sigmoid')(bias_logits)
         final_logit = dot([final_logit,bias_prob],axes=-1)

@@ -6,17 +6,24 @@ from deepctr.utils import custom_objects
 
 
 @pytest.mark.parametrize(
-    'use_attention',
-    [(use_attention,)
-     for use_attention in [True, False]
+    'use_attention,sparse_feature_num',
+    [(True, 1), (False, 3)
      ]
 )
-def test_AFM(use_attention):
+def test_AFM(use_attention, sparse_feature_num):
     name = "AFM"
 
     sample_size = 64
-    feature_dim_dict = {'sparse': {'sparse_1': 2, 'sparse_2': 5,
-                                   'sparse_3': 10}, 'dense': ['dense_1', 'dense_2', 'dense_3']}
+    feature_dim_dict = {"sparse": {}, 'dense': []}
+    for name, num in zip(["sparse", "dense"], [sparse_feature_num, sparse_feature_num]):
+        if name == "sparse":
+            for i in range(num):
+                feature_dim_dict[name][name + '_' +
+                                       str(i)] = np.random.randint(1, 10)
+        else:
+            for i in range(num):
+                feature_dim_dict[name].append(name + '_' + str(i))
+
     sparse_input = [np.random.randint(0, dim, sample_size)
                     for dim in feature_dim_dict['sparse'].values()]
     dense_input = [np.random.random(sample_size)
@@ -40,4 +47,4 @@ def test_AFM(use_attention):
 
 
 if __name__ == "__main__":
-    test_AFM(use_attention=True)
+    test_AFM(use_attention=True, sparse_feature_num=2)

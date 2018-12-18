@@ -9,9 +9,19 @@ EMBEDDING_SIZE = 8
 SEQ_LENGTH = 10
 
 
-def test_AttentionSequencePoolingLayer():
+@pytest.mark.parametrize(
+
+    'weight_normalization',
+
+    [weight_normalization
+        for
+     weight_normalization in [True, False, ]
+     ]
+
+)
+def test_AttentionSequencePoolingLayer(weight_normalization):
     with CustomObjectScope({'AttentionSequencePoolingLayer': sequence.AttentionSequencePoolingLayer}):
-        layer_test(sequence.AttentionSequencePoolingLayer, kwargs={},
+        layer_test(sequence.AttentionSequencePoolingLayer, kwargs={'weight_normalization': weight_normalization},
                    input_shape=[(BATCH_SIZE, 1, EMBEDDING_SIZE), (BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE), (BATCH_SIZE, 1)])
 
 

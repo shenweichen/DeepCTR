@@ -52,7 +52,7 @@ def test_LocalActivationUnit(hidden_size, activation):
 
 @pytest.mark.parametrize(
     'reduce_sum',
-    [(reduce_sum,)
+    [reduce_sum
      for reduce_sum in [True, False]
      ]
 )
@@ -94,14 +94,15 @@ def test_MLP(hidden_size, use_bn):
 
 
 @pytest.mark.parametrize(
-    'use_bias',
-    [(use_bias,)
+    'activation,use_bias',
+    [(activation, use_bias)
+     for activation in ['sigmoid', PReLU]
      for use_bias in [True, False]
      ]
 )
-def test_PredictionLayer(use_bias):
+def test_PredictionLayer(activation, use_bias):
     with CustomObjectScope({'PredictionLayer': layers.PredictionLayer}):
-        layer_test(layers.PredictionLayer, kwargs={'use_bias': use_bias
+        layer_test(layers.PredictionLayer, kwargs={'activation': activation, 'use_bias': use_bias
                                                    }, input_shape=(BATCH_SIZE, 1))
 
 
