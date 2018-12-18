@@ -11,7 +11,7 @@ from deepctr.utils import custom_objects
      ]
 )
 def test_AFM(use_attention, sparse_feature_num):
-    name = "AFM"
+    model_name = "AFM"
 
     sample_size = 64
     feature_dim_dict = {"sparse": {}, 'dense': []}
@@ -35,15 +35,15 @@ def test_AFM(use_attention, sparse_feature_num):
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
     model.fit(x, y, batch_size=100, epochs=1, validation_split=0.5)
-    print(name+" test train valid pass!")
-    model.save_weights(name + '_weights.h5')
-    model.load_weights(name + '_weights.h5')
-    print(name+" test save load weight pass!")
-    save_model(model,  name + '.h5')
-    model = load_model(name + '.h5', custom_objects)
-    print(name + " test save load model pass!")
+    print(model_name+" test train valid pass!")
+    model.save_weights(model_name + '_weights.h5')
+    model.load_weights(model_name + '_weights.h5')
+    print(model_name+" test save load weight pass!")
+    save_model(model,  model_name + '.h5')
+    model = load_model(model_name + '.h5', custom_objects)
+    print(model_name + " test save load model pass!")
 
-    print(name + " test pass!")
+    print(model_name + " test pass!")
 
 
 if __name__ == "__main__":

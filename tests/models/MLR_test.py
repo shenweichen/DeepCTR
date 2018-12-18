@@ -16,7 +16,7 @@ from tensorflow.python.keras.models import save_model, load_model
 
 )
 def test_MLRs(region_sparse, region_dense, base_sparse, base_dense, bias_sparse, bias_dense):
-    name = "MLRs"
+    model_name = "MLRs"
     region_fd = {"sparse": {}, 'dense': []}
     for name, num in zip(["sparse", "dense"], [region_sparse, region_dense]):
         if name == "sparse":
@@ -46,11 +46,11 @@ def test_MLRs(region_sparse, region_dense, base_sparse, base_dense, bias_sparse,
     model = MLR(region_fd, base_fd, bias_feature_dim_dict=bias_fd)
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
-    print(name + " test pass!")
+    print(model_name + " test pass!")
 
 
 def test_MLR():
-    name = "MLR"
+    model_name = "MLR"
 
     sample_size = 64
     feature_dim_dict = {'sparse': {'sparse_1': 2, 'sparse_2': 5,
@@ -66,15 +66,15 @@ def test_MLR():
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
     model.fit(x, y, batch_size=100, epochs=1, validation_split=0.5)
-    print(name+" test train valid pass!")
-    model.save_weights(name + '_weights.h5')
-    model.load_weights(name + '_weights.h5')
-    print(name+" test save load weight pass!")
-    save_model(model, name + '.h5')
-    model = load_model(name + '.h5', custom_objects)
-    print(name + " test save load model pass!")
+    print(model_name+" test train valid pass!")
+    model.save_weights(model_name + '_weights.h5')
+    model.load_weights(model_name + '_weights.h5')
+    print(model_name+" test save load weight pass!")
+    save_model(model, model_name + '.h5')
+    model = load_model(model_name + '.h5', custom_objects)
+    print(model_name + " test save load model pass!")
 
-    print(name + " test pass!")
+    print(model_name + " test pass!")
 
 
 if __name__ == "__main__":

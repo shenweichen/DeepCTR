@@ -49,7 +49,8 @@ def DCN(feature_dim_dict, embedding_size='auto',
     embed_list = [sparse_embedding[i](sparse_input[i])
                   for i in range(len(sparse_input))]
 
-    deep_input = Flatten()(Concatenate()(embed_list))
+    deep_input = Flatten()(Concatenate()(embed_list)
+                           if len(embed_list) > 1 else embed_list[0])
     if len(dense_input) > 0:
         if len(dense_input) == 1:
             continuous_list = dense_input[0]

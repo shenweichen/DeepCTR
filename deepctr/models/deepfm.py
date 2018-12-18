@@ -61,8 +61,6 @@ def DeepFM(feature_dim_dict, embedding_size=8,
         linear_term = add(linear_term)
     elif len(linear_term) > 0:
         linear_term = linear_term[0]
-    else:
-        linear_term = 0
 
     if len(dense_input) > 0:
         continuous_embedding_list = list(

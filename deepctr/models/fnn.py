@@ -58,8 +58,7 @@ def FNN(feature_dim_dict, embedding_size=8,
         linear_term = add(linear_term)
     elif len(linear_term) > 0:
         linear_term = linear_term[0]
-    else:
-        linear_term = 0
+
     #linear_term = add([linear_embedding[i](sparse_input[i]) for i in range(len(feature_dim_dict["sparse"]))])
     if len(dense_input) > 0:
         continuous_embedding_list = list(
