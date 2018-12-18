@@ -25,7 +25,7 @@ def test_NFM():
     print(model_name+" test train valid pass!")
     model.save_weights(model_name + '_weights.h5')
     model.load_weights(model_name + '_weights.h5')
-    print(name+" test save load weight pass!")
+    print(model_name+" test save load weight pass!")
     save_model(model,  model_name + '.h5')
     model = load_model(model_name + '.h5', custom_objects)
     print(model_name + " test save load model pass!")
