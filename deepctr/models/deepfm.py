@@ -19,7 +19,7 @@ from ..layers import PredictionLayer, MLP, FM
 
 
 def DeepFM(feature_dim_dict, embedding_size=8,
-           use_fm=True, hidden_size=[128, 128], l2_reg_linear=0.00001, l2_reg_embedding=0.00001, l2_reg_deep=0,
+           use_fm=True, hidden_size=(128, 128), l2_reg_linear=0.00001, l2_reg_embedding=0.00001, l2_reg_deep=0,
            init_std=0.0001, seed=1024, keep_prob=1, activation='relu', final_activation='sigmoid', use_bn=False):
     """Instantiates the DeepFM Network architecture.
 

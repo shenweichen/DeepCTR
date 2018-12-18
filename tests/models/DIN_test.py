@@ -3,8 +3,6 @@ import pytest
 from deepctr.models import DIN
 from deepctr.activations import Dice
 from deepctr.utils import custom_objects
-
-from tensorflow.python.keras.layers import PReLU
 from tensorflow.python.keras.models import load_model, save_model
 
 
@@ -34,9 +32,9 @@ def get_xy_fd():
 # @pytest.mark.skip(reason="misunderstood the API")
 def test_DIN_model_io():
     name = "DIN_att"
-    x, y, feature_dim_dict, behavior_feature_list = get_xy_fd()
+    x, _, feature_dim_dict, behavior_feature_list = get_xy_fd()
 
-    model = DIN(feature_dim_dict, behavior_feature_list, hist_len_max=4, embedding_size=8,
+    model = DIN(feature_dim_dict, behavior_feature_list, hist_len_max=4, embedding_size=8, att_activation=Dice,
                 use_din=True, hidden_size=[4, 4, 4], keep_prob=0.6,)
 
     model.compile('adam', 'binary_crossentropy',

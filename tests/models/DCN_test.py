@@ -44,11 +44,10 @@ def test_DCN(embedding_size, cross_num, hidden_size):
 
 
 def test_DCN_invalid(embedding_size=8, cross_num=0, hidden_size=()):
-    name = "DCN_invalid"
     feature_dim_dict = {'sparse': {'sparse_1': 2, 'sparse_2': 5,
                                    'sparse_3': 10}, 'dense': ['dense_1', 'dense_2', 'dense_3']}
     with pytest.raises(ValueError):
-        model = DCN(feature_dim_dict, embedding_size=embedding_size, cross_num=cross_num,
+        _ = DCN(feature_dim_dict, embedding_size=embedding_size, cross_num=cross_num,
                     hidden_size=hidden_size, keep_prob=0.5, )
 
 

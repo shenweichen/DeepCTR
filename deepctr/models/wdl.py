@@ -15,7 +15,7 @@ from ..layers import PredictionLayer, MLP
 from ..utils import get_input
 
 
-def WDL(deep_feature_dim_dict, wide_feature_dim_dict, embedding_size=8, hidden_size=[128, 128], l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_deep=0,
+def WDL(deep_feature_dim_dict, wide_feature_dim_dict, embedding_size=8, hidden_size=(128, 128), l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_deep=0,
         init_std=0.0001, seed=1024, keep_prob=1, activation='relu', final_activation='sigmoid',
         ):
     """Instantiates the Wide&Deep Learning architecture.

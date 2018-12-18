@@ -16,7 +16,7 @@ from ..layers import CrossNet, PredictionLayer, MLP
 
 
 def DCN(feature_dim_dict, embedding_size='auto',
-        cross_num=2, hidden_size=[128, 128, ], l2_reg_embedding=1e-5, l2_reg_cross=1e-5, l2_reg_deep=0,
+        cross_num=2, hidden_size=(128, 128, ), l2_reg_embedding=1e-5, l2_reg_cross=1e-5, l2_reg_deep=0,
         init_std=0.0001, seed=1024, keep_prob=1, use_bn=False, activation='relu', final_activation='sigmoid',
         ):
     """Instantiates the Deep&Cross Network architecture.

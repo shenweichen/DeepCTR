@@ -1,6 +1,6 @@
 from tensorflow.python.keras.layers import Layer,Activation,BatchNormalization
 from tensorflow.python.keras.regularizers import  l2
-from tensorflow.python.keras.initializers import  RandomNormal,Zeros,glorot_normal,glorot_uniform
+from tensorflow.python.keras.initializers import Zeros,glorot_normal,glorot_uniform
 from tensorflow.python.keras import backend as K
 
 import tensorflow as tf
@@ -61,7 +61,7 @@ class AFMLayer(Layer):
 
         - **l2_reg_w** : float between 0 and 1. L2 regularizer strength applied to attention network.
 
-        - **keep_prob** : float between 0 and 1. Fraction of the attention net output units to keep. 
+        - **keep_prob** : float between 0 and 1. Fraction of the attention net output units to keep.
 
         - **seed** : A Python integer to use as random seed.
 
@@ -268,7 +268,7 @@ class MLP(Layer):
 
         - **l2_reg**: float between 0 and 1. L2 regularizer strength applied to the kernel weights matrix.
 
-        - **keep_prob**: float between 0 and 1. Fraction of the units to keep. 
+        - **keep_prob**: float between 0 and 1. Fraction of the units to keep.
 
         - **use_bn**: bool. Whether use BatchNormalization before activation or not.
 
@@ -381,7 +381,7 @@ class OutterProductLayer(Layer):
 
       Output shape
             - 2D tensor with shape:``(batch_size,N*(N-1)/2 )``.
-    
+
       Arguments
             - **kernel_type**: str. The kernel weight matrix type to use,can be mat,vec or num
 
@@ -557,7 +557,7 @@ class InnerProductLayer(Layer):
         row = []
         col = []
         num_inputs = len(embed_list)
-        num_pairs = int(num_inputs * (num_inputs - 1) / 2)
+        #num_pairs = int(num_inputs * (num_inputs - 1) / 2)
 
 
         for i in range(num_inputs - 1):
@@ -604,7 +604,7 @@ class LocalActivationUnit(Layer):
 
         - **l2_reg**: float between 0 and 1. L2 regularizer strength applied to the kernel weights matrix of attention net.
 
-        - **keep_prob**: float between 0 and 1. Fraction of the units to keep of attention net. 
+        - **keep_prob**: float between 0 and 1. Fraction of the units to keep of attention net.
 
         - **use_bn**: bool. Whether use BatchNormalization before activation or not in attention net.
 
