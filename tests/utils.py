@@ -90,7 +90,6 @@ def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,
             input_dtype = K.floatx()
 
         input_data_shape = list(input_shape)
-        print(input_data_shape)
 
         for i, e in enumerate(input_data_shape):
 
@@ -109,6 +108,7 @@ def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,
             input_data = (10 * np.random.random(input_data_shape))
 
             input_data = input_data.astype(input_dtype)
+
 
     else:
 

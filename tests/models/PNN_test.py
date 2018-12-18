@@ -1,8 +1,10 @@
 import numpy as np
 import pytest
+
 from deepctr.models import PNN
 from deepctr.utils import custom_objects
 from tensorflow.python.keras.models import save_model, load_model
+
 
 
 @pytest.mark.parametrize(
@@ -12,7 +14,6 @@ from tensorflow.python.keras.models import save_model, load_model
 )
 def test_PNN(use_inner, use_outter):
     model_name = "PNN"
-
     sample_size = 64
     feature_dim_dict = {'sparse': {'sparse_1': 2, 'sparse_2': 5,
                                    'sparse_3': 10}, 'dense': ['dense_1', 'dense_2', 'dense_3']}

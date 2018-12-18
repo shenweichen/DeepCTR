@@ -5,6 +5,7 @@ from tensorflow.python.keras.models import save_model, load_model
 
 
 def test_NFM():
+
     model_name = "NFM"
 
     sample_size = 64
@@ -22,6 +23,7 @@ def test_NFM():
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
     model.fit(x, y, batch_size=100, epochs=1, validation_split=0.5)
+
     print(model_name+" test train valid pass!")
     model.save_weights(model_name + '_weights.h5')
     model.load_weights(model_name + '_weights.h5')

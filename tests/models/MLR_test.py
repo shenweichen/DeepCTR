@@ -5,6 +5,7 @@ from deepctr.utils import custom_objects
 from tensorflow.python.keras.models import save_model, load_model
 
 
+
 @pytest.mark.parametrize(
 
     'region_sparse,region_dense,base_sparse,base_dense,bias_sparse,bias_dense',
@@ -51,7 +52,6 @@ def test_MLRs(region_sparse, region_dense, base_sparse, base_dense, bias_sparse,
 
 def test_MLR():
     model_name = "MLR"
-
     sample_size = 64
     feature_dim_dict = {'sparse': {'sparse_1': 2, 'sparse_2': 5,
                                    'sparse_3': 10}, 'dense': ['dense_1', 'dense_2', 'dense_3']}
@@ -79,3 +79,4 @@ def test_MLR():
 
 if __name__ == "__main__":
     test_MLR()
+

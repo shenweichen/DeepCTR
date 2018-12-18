@@ -35,6 +35,7 @@ def test_DeepFM(use_fm, hidden_size, sparse_feature_num):
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
     model.fit(x, y, batch_size=100, epochs=1, validation_split=0.5)
+
     print(model_name+" test train valid pass!")
     model.save_weights(model_name + '_weights.h5')
     model.load_weights(model_name + '_weights.h5')
@@ -44,6 +45,7 @@ def test_DeepFM(use_fm, hidden_size, sparse_feature_num):
     print(model_name + " test save load model pass!")
 
     print(model_name + " test pass!")
+
 
 
 if __name__ == "__main__":

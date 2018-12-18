@@ -23,7 +23,6 @@ def test_AFM(use_attention, sparse_feature_num):
         else:
             for i in range(num):
                 feature_dim_dict[name].append(name + '_' + str(i))
-
     sparse_input = [np.random.randint(0, dim, sample_size)
                     for dim in feature_dim_dict['sparse'].values()]
     dense_input = [np.random.random(sample_size)

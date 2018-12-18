@@ -31,10 +31,12 @@ def get_xy_fd():
 @pytest.mark.xfail(reason="There is a bug when save model use Dice")
 # @pytest.mark.skip(reason="misunderstood the API")
 def test_DIN_model_io():
+
     model_name = "DIN_att"
     _, _, feature_dim_dict, behavior_feature_list = get_xy_fd()
 
     model = DIN(feature_dim_dict, behavior_feature_list, hist_len_max=4, embedding_size=8, att_activation=Dice,
+
                 use_din=True, hidden_size=[4, 4, 4], keep_prob=0.6,)
 
     model.compile('adam', 'binary_crossentropy',
@@ -45,9 +47,10 @@ def test_DIN_model_io():
     print(model_name + " test save load model pass!")
 
 
-def test_DIN_att():
 
+def test_DIN_att():
     model_name = "DIN_att"
+
     x, y, feature_dim_dict, behavior_feature_list = get_xy_fd()
 
     model = DIN(feature_dim_dict, behavior_feature_list, hist_len_max=4, embedding_size=8,
@@ -56,10 +59,12 @@ def test_DIN_att():
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
     model.fit(x, y, verbose=1, validation_split=0.5)
+
     print(model_name+" test train valid pass!")
     model.save_weights(model_name + '_weights.h5')
     model.load_weights(model_name + '_weights.h5')
     print(model_name+" test save load weight pass!")
+
 
     # try:
     #     save_model(model,  name + '.h5')
@@ -69,7 +74,6 @@ def test_DIN_att():
     #     print("【Error】There is a bug when save model use Dice---------------------------------------------------")
 
     print(model_name + " test pass!")
-
 
 def test_DIN_sum():
 
@@ -82,6 +86,7 @@ def test_DIN_sum():
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
     model.fit(x, y, verbose=1, validation_split=0.5)
+
     print(model_name+" test train valid pass!")
     model.save_weights(model_name + '_weights.h5')
     model.load_weights(model_name + '_weights.h5')
