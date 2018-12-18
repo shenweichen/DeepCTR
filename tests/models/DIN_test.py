@@ -32,7 +32,7 @@ def get_xy_fd():
 # @pytest.mark.skip(reason="misunderstood the API")
 def test_DIN_model_io():
     name = "DIN_att"
-    x, _, feature_dim_dict, behavior_feature_list = get_xy_fd()
+    _, _, feature_dim_dict, behavior_feature_list = get_xy_fd()
 
     model = DIN(feature_dim_dict, behavior_feature_list, hist_len_max=4, embedding_size=8, att_activation=Dice,
                 use_din=True, hidden_size=[4, 4, 4], keep_prob=0.6,)

@@ -254,7 +254,7 @@ class CrossNet(Layer):
 
 class MLP(Layer):
     """The Multi Layer Percetron
-        
+
       Input shape
         - nD tensor with shape: ``(batch_size, ..., input_dim)``. The most common situation would be a 2D input with shape ``(batch_size, input_dim)``.
 
@@ -275,7 +275,7 @@ class MLP(Layer):
         - **seed**: A Python integer to use as random seed.
     """
 
-    def __init__(self,  hidden_size, activation,l2_reg, keep_prob, use_bn,seed,**kwargs):
+    def __init__(self,  hidden_size, activation='relu',l2_reg=0, keep_prob=1, use_bn=False,seed=1024,**kwargs):
         self.hidden_size = hidden_size
         self.activation =activation
         self.keep_prob = keep_prob
@@ -338,7 +338,7 @@ class BiInteractionPooling(Layer):
     """Bi-Interaction Layer used in Neural FM,compress the pairwise element-wise product of features into one single vector.
 
       Input shape
-        - A list of 3D tensor with shape:``(batch_size,field_size,embedding_size)``.
+        - A 3D tensor with shape:``(batch_size,field_size,embedding_size)``.
 
       Output shape
         - 3D tensor with shape: ``(batch_size,1,embedding_size)``.
@@ -614,7 +614,7 @@ class LocalActivationUnit(Layer):
         - [Deep Interest Network for Click-Through Rate Prediction](https://arxiv.org/pdf/1706.06978.pdf)
     """
 
-    def __init__(self,hidden_size, activation,l2_reg, keep_prob, use_bn,seed,**kwargs):
+    def __init__(self,hidden_size=(64,32), activation='sigmoid',l2_reg=0, keep_prob=1, use_bn=False,seed=1024,**kwargs):
         self.hidden_size = hidden_size
         self.activation = activation
         self.l2_reg = l2_reg
@@ -663,7 +663,7 @@ class LocalActivationUnit(Layer):
         return input_shape[1][:2] + (1,)
 
     def get_config(self,):
-        config = {'activation': self.activation,'hidden_size':self.hidden_size, 'l2_reg':self.l2_reg, 'keep_prob':self.keep_prob,'seed': self.seed}
+        config = {'activation': self.activation,'hidden_size':self.hidden_size, 'l2_reg':self.l2_reg, 'keep_prob':self.keep_prob,'use_bn':self.use_bn,'seed': self.seed}
         base_config = super(LocalActivationUnit, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 

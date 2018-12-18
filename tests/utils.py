@@ -90,6 +90,7 @@ def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,
             input_dtype = K.floatx()
 
         input_data_shape = list(input_shape)
+        print(input_data_shape)
 
         for i, e in enumerate(input_data_shape):
 
@@ -97,9 +98,17 @@ def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,
 
                 input_data_shape[i] = np.random.randint(1, 4)
 
-        input_data = (10 * np.random.random(input_data_shape))
+        if all(isinstance(e, tuple) for e in input_data_shape):
+            input_data = []
+            for e in input_data_shape:
+                input_data.append(
+                    (10 * np.random.random(e)).astype(input_dtype))
 
-        input_data = input_data.astype(input_dtype)
+        else:
+
+            input_data = (10 * np.random.random(input_data_shape))
+
+            input_data = input_data.astype(input_dtype)
 
     else:
 
@@ -131,14 +140,22 @@ def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,
         expected_output_shape = layer._compute_output_shape(input_shape)
 
     # test in functional API
+    if isinstance(input_shape, list):
+        if fixed_batch_size:
 
-    if fixed_batch_size:
+            x = [Input(batch_shape=e, dtype=input_dtype) for e in input_shape]
 
-        x = Input(batch_shape=input_shape, dtype=input_dtype)
+        else:
 
+            x = [Input(shape=e[1:], dtype=input_dtype) for e in input_shape]
     else:
+        if fixed_batch_size:
 
-        x = Input(shape=input_shape[1:], dtype=input_dtype)
+            x = Input(batch_shape=input_shape, dtype=input_dtype)
+
+        else:
+
+            x = Input(shape=input_shape[1:], dtype=input_dtype)
 
     y = layer(x)
 
