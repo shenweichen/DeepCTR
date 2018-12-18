@@ -1,4 +1,5 @@
 *.h5
+.pytest_cache/
 tests/unused/*
 # Byte-compiled / optimized / DLL files
 __pycache__/

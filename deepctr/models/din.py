@@ -9,7 +9,7 @@ Reference:
 
 from tensorflow.python.keras.layers import Input, Dense, Embedding, Concatenate, Reshape
 from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.initializers import RandomNormal, TruncatedNormal
+from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.regularizers import l2
 
 from ..layers import MLP
@@ -30,7 +30,7 @@ def get_input(feature_dim_dict, seq_feature_list, seq_max_len):
 
 
 def DIN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
-        use_din=True, use_bn=False, hidden_size=[200, 80], activation='relu', att_hidden_size=[80, 40], att_activation=Dice, att_weight_normalization=False,
+        use_din=True, use_bn=False, hidden_size=(200, 80), activation='relu', att_hidden_size=(80, 40), att_activation=Dice, att_weight_normalization=False,
         l2_reg_deep=0, l2_reg_embedding=1e-5, final_activation='sigmoid', keep_prob=1, init_std=0.0001, seed=1024, ):
     """Instantiates the Deep Interest Network architecture.
 

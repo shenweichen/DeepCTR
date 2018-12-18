@@ -7,7 +7,7 @@ Reference:
     [1] Qu, Yanru, et al. "Product-based neural networks for user response prediction." Data Mining (ICDM), 2016 IEEE 16th International Conference on. IEEE, 2016.(https://arxiv.org/pdf/1611.00144.pdf)
 """
 
-from tensorflow.python.keras.layers import Dense, Embedding, Concatenate, Reshape,Flatten
+from tensorflow.python.keras.layers import Dense, Embedding, Concatenate, Reshape, Flatten
 from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.regularizers import l2
@@ -17,7 +17,7 @@ from ..layers import PredictionLayer, MLP, InnerProductLayer, OutterProductLayer
 from ..utils import get_input
 
 
-def PNN(feature_dim_dict, embedding_size=8, hidden_size=[128, 128], l2_reg_embedding=1e-5, l2_reg_deep=0,
+def PNN(feature_dim_dict, embedding_size=8, hidden_size=(128, 128), l2_reg_embedding=1e-5, l2_reg_deep=0,
         init_std=0.0001, seed=1024, keep_prob=1, activation='relu',
         final_activation='sigmoid', use_inner=True, use_outter=False, kernel_type='mat', ):
     """Instantiates the Product-based Neural Network architecture.

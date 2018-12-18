@@ -17,7 +17,7 @@ from ..utils import get_input
 
 
 def FNN(feature_dim_dict, embedding_size=8,
-        hidden_size=[128, 128],
+        hidden_size=(128, 128),
         l2_reg_embedding=1e-5, l2_reg_linear=1e-5, l2_reg_deep=0,
         init_std=0.0001, seed=1024, keep_prob=1,
         activation='relu', final_activation='sigmoid', ):
@@ -58,8 +58,7 @@ def FNN(feature_dim_dict, embedding_size=8,
         linear_term = add(linear_term)
     elif len(linear_term) > 0:
         linear_term = linear_term[0]
-    else:
-        linear_term = 0
+
     #linear_term = add([linear_embedding[i](sparse_input[i]) for i in range(len(feature_dim_dict["sparse"]))])
     if len(dense_input) > 0:
         continuous_embedding_list = list(

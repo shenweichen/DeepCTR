@@ -1,6 +1,6 @@
 from tensorflow.python.keras.layers import Layer,Activation,BatchNormalization
 from tensorflow.python.keras.regularizers import  l2
-from tensorflow.python.keras.initializers import  RandomNormal,Zeros,glorot_normal,glorot_uniform
+from tensorflow.python.keras.initializers import Zeros,glorot_normal,glorot_uniform
 from tensorflow.python.keras import backend as K
 
 import tensorflow as tf
@@ -61,7 +61,7 @@ class AFMLayer(Layer):
 
         - **l2_reg_w** : float between 0 and 1. L2 regularizer strength applied to attention network.
 
-        - **keep_prob** : float between 0 and 1. Fraction of the attention net output units to keep. 
+        - **keep_prob** : float between 0 and 1. Fraction of the attention net output units to keep.
 
         - **seed** : A Python integer to use as random seed.
 
@@ -175,9 +175,10 @@ class PredictionLayer(Layer):
 
         if isinstance(self.activation,str):
             output = Activation(self.activation)(x)
+        elif issubclass(self.activation,Layer):
+            output = self.activation()(x)
         else:
-            output = self.activation(x)
-
+            raise ValueError("Invalid activation of MLP,found %s.You should use a str or a Activation Layer Class." % (self.activation))
         output = tf.reshape(output,(-1,1))
 
         return output
@@ -254,7 +255,7 @@ class CrossNet(Layer):
 
 class MLP(Layer):
     """The Multi Layer Percetron
-        
+
       Input shape
         - nD tensor with shape: ``(batch_size, ..., input_dim)``. The most common situation would be a 2D input with shape ``(batch_size, input_dim)``.
 
@@ -268,14 +269,14 @@ class MLP(Layer):
 
         - **l2_reg**: float between 0 and 1. L2 regularizer strength applied to the kernel weights matrix.
 
-        - **keep_prob**: float between 0 and 1. Fraction of the units to keep. 
+        - **keep_prob**: float between 0 and 1. Fraction of the units to keep.
 
         - **use_bn**: bool. Whether use BatchNormalization before activation or not.
 
         - **seed**: A Python integer to use as random seed.
     """
 
-    def __init__(self,  hidden_size, activation,l2_reg, keep_prob, use_bn,seed,**kwargs):
+    def __init__(self,  hidden_size, activation='relu',l2_reg=0, keep_prob=1, use_bn=False,seed=1024,**kwargs):
         self.hidden_size = hidden_size
         self.activation =activation
         self.keep_prob = keep_prob
@@ -338,7 +339,7 @@ class BiInteractionPooling(Layer):
     """Bi-Interaction Layer used in Neural FM,compress the pairwise element-wise product of features into one single vector.
 
       Input shape
-        - A list of 3D tensor with shape:``(batch_size,field_size,embedding_size)``.
+        - A 3D tensor with shape:``(batch_size,field_size,embedding_size)``.
 
       Output shape
         - 3D tensor with shape: ``(batch_size,1,embedding_size)``.
@@ -381,7 +382,7 @@ class OutterProductLayer(Layer):
 
       Output shape
             - 2D tensor with shape:``(batch_size,N*(N-1)/2 )``.
-    
+
       Arguments
             - **kernel_type**: str. The kernel weight matrix type to use,can be mat,vec or num
 
@@ -557,7 +558,7 @@ class InnerProductLayer(Layer):
         row = []
         col = []
         num_inputs = len(embed_list)
-        num_pairs = int(num_inputs * (num_inputs - 1) / 2)
+        #num_pairs = int(num_inputs * (num_inputs - 1) / 2)
 
 
         for i in range(num_inputs - 1):
@@ -604,7 +605,7 @@ class LocalActivationUnit(Layer):
 
         - **l2_reg**: float between 0 and 1. L2 regularizer strength applied to the kernel weights matrix of attention net.
 
-        - **keep_prob**: float between 0 and 1. Fraction of the units to keep of attention net. 
+        - **keep_prob**: float between 0 and 1. Fraction of the units to keep of attention net.
 
         - **use_bn**: bool. Whether use BatchNormalization before activation or not in attention net.
 
@@ -614,7 +615,7 @@ class LocalActivationUnit(Layer):
         - [Deep Interest Network for Click-Through Rate Prediction](https://arxiv.org/pdf/1706.06978.pdf)
     """
 
-    def __init__(self,hidden_size, activation,l2_reg, keep_prob, use_bn,seed,**kwargs):
+    def __init__(self,hidden_size=(64,32), activation='sigmoid',l2_reg=0, keep_prob=1, use_bn=False,seed=1024,**kwargs):
         self.hidden_size = hidden_size
         self.activation = activation
         self.l2_reg = l2_reg
@@ -663,7 +664,7 @@ class LocalActivationUnit(Layer):
         return input_shape[1][:2] + (1,)
 
     def get_config(self,):
-        config = {'activation': self.activation,'hidden_size':self.hidden_size, 'l2_reg':self.l2_reg, 'keep_prob':self.keep_prob,'seed': self.seed}
+        config = {'activation': self.activation,'hidden_size':self.hidden_size, 'l2_reg':self.l2_reg, 'keep_prob':self.keep_prob,'use_bn':self.use_bn,'seed': self.seed}
         base_config = super(LocalActivationUnit, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 

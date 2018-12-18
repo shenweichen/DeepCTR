@@ -1,6 +1,5 @@
 from tensorflow.python.keras.layers import Layer
 from .layers import LocalActivationUnit
-from .activations import Dice
 import tensorflow as tf
 
 
