@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 REQUIRED_PACKAGES = [
-    'tensorflow>=1.4.0,!=1.5.0,!=1.7.*,!=1.8.0'
+    'tensorflow>=1.4.0,!=1.7.*,!=1.8.*'
 ]
 
 setuptools.setup(
@@ -16,12 +16,13 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/shenweichen/deepctr",
+    download_url='https://github.com/shenweichen/deepctr/tags',
     packages=setuptools.find_packages(exclude=["tests"]),
     python_requires='>=3.4.6',
     install_requires=REQUIRED_PACKAGES,
     extras_require={
-        "tf": ['tensorflow>=1.4.0,!=1.5.0,!=1.7.*,!=1.8.0'],
-        "tf_gpu": ['tensorflow-gpu>=1.4.0,!=1.5.0,!=1.7.*,!=1.8.0'],
+        "tf": ['tensorflow>=1.4.0,!=1.7.*,!=1.8.*'],
+        "tf_gpu": ['tensorflow-gpu>=1.4.0,!=1.7.*,!=1.8.*'],
     },
     entry_points={
     },
@@ -42,5 +43,6 @@ setuptools.setup(
         'Topic :: Software Development :: Libraries :: Python Modules',
     ),
     license="MIT license",
-    keywords=['ctr', 'click through rate', 'deep learning', 'tensorflow']
+    keywords=['ctr', 'click through rate',
+              'deep learning', 'tensorflow', 'tensor', 'keras']
 )
