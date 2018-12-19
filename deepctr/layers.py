@@ -36,10 +36,10 @@ class FM(Layer):
 
         concated_embeds_value = inputs
 
-        square_of_sum =  tf.square(tf.sum(concated_embeds_value, axis=1, keep_dims=True))
-        sum_of_square = tf.sum(concated_embeds_value * concated_embeds_value, axis=1, keep_dims=True)
+        square_of_sum =  tf.square(tf.reduce_sum(concated_embeds_value, axis=1, keep_dims=True))
+        sum_of_square = tf.reduce_sum(concated_embeds_value * concated_embeds_value, axis=1, keep_dims=True)
         cross_term = square_of_sum - sum_of_square
-        cross_term = 0.5 * tf.sum(cross_term, axis=2, keep_dims=False)
+        cross_term = 0.5 * tf.reduce_sum(cross_term, axis=2, keep_dims=False)
 
         return cross_term
     
