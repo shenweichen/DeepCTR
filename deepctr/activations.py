@@ -18,7 +18,7 @@ class Dice(Layer):
         - **epsilon** : Small float added to variance to avoid dividing by zero.
 
       References
-        - [Deep Interest Network for Click-Through Rate Prediction](https://arxiv.org/pdf/1706.06978.pdf)
+        - [Zhou G, Zhu X, Song C, et al. Deep interest network for click-through rate prediction[C]//Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. ACM, 2018: 1059-1068.](https://arxiv.org/pdf/1706.06978.pdf)
     """
 
     def __init__(self, axis=-1, epsilon=1e-9, **kwargs):
@@ -43,3 +43,6 @@ class Dice(Layer):
         config = {'axis': self.axis, 'epsilon': self.epsilon}
         base_config = super(Dice, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
+
+    def compute_output_shape(self, input_shape):
+        return input_shape

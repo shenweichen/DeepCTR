@@ -6,11 +6,32 @@
 Welcome to DeepCTR's documentation!
 ===================================
 
+|Downloads|_ |Stars|_ |Forks|_ |PyPi|_ |Issues|_ |Activity|_
+
+.. |Downloads| image:: https://pepy.tech/badge/deepctr
+.. _Downloads: https://pepy.tech/project/deepctr
+
+.. |Stars| image:: https://img.shields.io/github/stars/shenweichen/deepctr.svg
+.. _Stars: https://github.com/shenweichen/DeepCTR
+
+.. |Forks| image:: https://img.shields.io/github/forks/shenweichen/deepctr.svg
+.. _Forks: https://github.com/shenweichen/DeepCTR
+
+.. |PyPi| image:: https://img.shields.io/pypi/v/deepctr.svg
+.. _PyPi: https://pypi.org/project/deepctr/
+
+.. |Issues| image:: https://img.shields.io/github/issues/shenweichen/deepctr.svg
+.. _Issues: https://github.com/shenweichen/deepctr/issues
+
+.. |Activity| image:: https://img.shields.io/github/last-commit/shenweichen/deepctr.svg
+.. _Activity: https://github.com/shenweichen/DeepCTR
+
+
 DeepCTR is a **Easy-to-use** , **Modular** and **Extendible** package of deep-learning based CTR models along with lots of core components layer  which can be used to build your own custom model easily.You can use any complex model with ``model.fit()`` and ``model.predict()`` just like any other keras model.And the layers are compatible with tensorflow.
 
 Through  ``pip install deepctr``  get the package and `Get Started! <./Quick-Start.html>`_
 
-You can read the source code at https://github.com/shenweichen/DeepCTR
+You can read the latest code at https://github.com/shenweichen/DeepCTR
 
 .. toctree::
    :maxdepth: 2

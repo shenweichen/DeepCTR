@@ -1,3 +1,4 @@
+import itertools
 from tensorflow.python.keras.layers import Layer,Activation,BatchNormalization
 from tensorflow.python.keras.regularizers import  l2
 from tensorflow.python.keras.initializers import Zeros,glorot_normal,glorot_uniform
@@ -35,10 +36,10 @@ class FM(Layer):
 
         concated_embeds_value = inputs
 
-        square_of_sum =  K.square(K.sum(concated_embeds_value, axis=1, keepdims=True))
-        sum_of_square = K.sum(concated_embeds_value * concated_embeds_value, axis=1, keepdims=True)
+        square_of_sum =  tf.square(tf.reduce_sum(concated_embeds_value, axis=1, keep_dims=True))
+        sum_of_square = tf.reduce_sum(concated_embeds_value * concated_embeds_value, axis=1, keep_dims=True)
         cross_term = square_of_sum - sum_of_square
-        cross_term = 0.5 * K.sum(cross_term, axis=2, keepdims=False)
+        cross_term = 0.5 * tf.reduce_sum(cross_term, axis=2, keep_dims=False)
 
         return cross_term
     
@@ -56,7 +57,7 @@ class AFMLayer(Layer):
         - 2D tensor with shape: ``(batch_size, 1)``.
 
       Arguments
-      
+
         - **attention_factor** : Positive integer, dimensionality of the attention network output space.
 
         - **l2_reg_w** : float between 0 and 1. L2 regularizer strength applied to attention network.
@@ -99,7 +100,7 @@ class AFMLayer(Layer):
 
 
 
-        embedding_size = input_shape[0][-1]
+        embedding_size = input_shape[0][-1].value
 
         self.attention_W = self.add_weight(shape=(embedding_size, self.attention_factor), initializer=glorot_normal(seed=self.seed),regularizer=l2(self.l2_reg_w),
                                            name="attention_W")
@@ -119,13 +120,18 @@ class AFMLayer(Layer):
         embeds_vec_list = inputs
         row = []
         col = []
-        num_inputs = len(embeds_vec_list)
-        for i in range(num_inputs - 1):
-            for j in range(i + 1, num_inputs):
-                row.append(i)
-                col.append(j)
-        p = tf.concat([embeds_vec_list[idx] for idx in row],axis=1)
-        q = tf.concat([embeds_vec_list[idx] for idx in col],axis=1)
+        # num_inputs = len(embeds_vec_list)
+        # for i in range(num_inputs - 1):
+        #     for j in range(i + 1, num_inputs):
+        #         row.append(i)
+        #         col.append(j)
+        for r, c in itertools.combinations(embeds_vec_list, 2):
+            row.append(r)
+            col.append(c)
+        #p = tf.concat([embeds_vec_list[idx] for idx in row],axis=1)
+        #q = tf.concat([embeds_vec_list[idx] for idx in col], axis=1)
+        p = tf.concat(row,axis=1)
+        q = tf.concat(col,axis=1)
         inner_product = p * q
 
         bi_interaction = inner_product
@@ -155,7 +161,6 @@ class AFMLayer(Layer):
 
 class PredictionLayer(Layer):
 
-    
     def __init__(self, activation='sigmoid',use_bias=True, **kwargs):
         self.activation = activation
         self.use_bias = use_bias
@@ -208,7 +213,7 @@ class CrossNet(Layer):
         - **seed**: A Python integer to use as random seed.
 
       References
-        - [Deep & Cross Network for Ad Click Predictions](https://arxiv.org/abs/1708.05123)
+        - [Wang R, Fu B, Fu G, et al. Deep & cross network for ad click predictions[C]//Proceedings of the ADKDD'17. ACM, 2017: 12.](https://arxiv.org/abs/1708.05123)
     """
     def __init__(self, layer_num=2,l2_reg=0,seed=1024, **kwargs):
         self.layer_num = layer_num
@@ -221,7 +226,7 @@ class CrossNet(Layer):
         if len(input_shape) != 2:
             raise ValueError("Unexpected inputs dimensions %d, expect to be 2 dimensions" % (len(input_shape),))
 
-        dim = input_shape[-1]
+        dim = input_shape[-1].value
         self.kernels = [self.add_weight(name='kernel'+str(i),
                                         shape=(dim, 1),
                                        initializer=glorot_normal(seed=self.seed),
@@ -251,6 +256,9 @@ class CrossNet(Layer):
         config = {'layer_num': self.layer_num,'l2_reg':self.l2_reg,'seed':self.seed}
         base_config = super(CrossNet, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
+
+    def compute_output_shape(self, input_shape):
+        return input_shape
 
 
 class MLP(Layer):
@@ -345,7 +353,7 @@ class BiInteractionPooling(Layer):
         - 3D tensor with shape: ``(batch_size,1,embedding_size)``.
 
       References
-        - [Neural Factorization Machines for Sparse Predictive Analytics](http://arxiv.org/abs/1708.05027)
+        - [He X, Chua T S. Neural factorization machines for sparse predictive analytics[C]//Proceedings of the 40th International ACM SIGIR conference on Research and Development in Information Retrieval. ACM, 2017: 355-364.](http://arxiv.org/abs/1708.05027)
     """
 
     def __init__(self, **kwargs):
@@ -389,7 +397,7 @@ class OutterProductLayer(Layer):
             - **seed**: A Python integer to use as random seed.
 
       References
-            - [Product-based Neural Networks for User Response Prediction](https://arxiv.org/pdf/1611.00144.pdf)
+            - [Qu Y, Cai H, Ren K, et al. Product-based neural networks for user response prediction[C]//Data Mining (ICDM), 2016 IEEE 16th International Conference on. IEEE, 2016: 1149-1154.](https://arxiv.org/pdf/1611.00144.pdf)
     """
 
     def __init__(self, kernel_type='mat', seed=1024, **kwargs):
@@ -423,7 +431,7 @@ class OutterProductLayer(Layer):
         num_inputs = len(input_shape)
         num_pairs = int(num_inputs * (num_inputs - 1) / 2)
         input_shape = input_shape[0]
-        embed_size = input_shape[-1]
+        embed_size = input_shape[-1].value
         if self.kernel_type == 'mat':
 
             self.kernel = self.add_weight(shape=(embed_size,num_pairs,embed_size), initializer=glorot_uniform(seed=self.seed),
@@ -520,7 +528,7 @@ class InnerProductLayer(Layer):
         - **reduce_sum**: bool. Whether return inner product or element-wise product
 
       References
-            - [Product-based Neural Networks for User Response Prediction](https://arxiv.org/pdf/1611.00144.pdf)
+            - [Qu Y, Cai H, Ren K, et al. Product-based neural networks for user response prediction[C]//Data Mining (ICDM), 2016 IEEE 16th International Conference on. IEEE, 2016: 1149-1154.](https://arxiv.org/pdf/1611.00144.pdf)
     """
 
     def __init__(self,reduce_sum=True,**kwargs):
@@ -612,7 +620,7 @@ class LocalActivationUnit(Layer):
         - **seed**: A Python integer to use as random seed.
 
       References
-        - [Deep Interest Network for Click-Through Rate Prediction](https://arxiv.org/pdf/1706.06978.pdf)
+        - [Zhou G, Zhu X, Song C, et al. Deep interest network for click-through rate prediction[C]//Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. ACM, 2018: 1059-1068.](https://arxiv.org/pdf/1706.06978.pdf)
     """
 
     def __init__(self,hidden_size=(64,32), activation='sigmoid',l2_reg=0, keep_prob=1, use_bn=False,seed=1024,**kwargs):
