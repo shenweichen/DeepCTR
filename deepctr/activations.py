@@ -43,3 +43,6 @@ class Dice(Layer):
         config = {'axis': self.axis, 'epsilon': self.epsilon}
         base_config = super(Dice, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
+
+    def compute_output_shape(self, input_shape):
+        return input_shape

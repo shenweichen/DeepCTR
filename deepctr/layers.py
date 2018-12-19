@@ -99,7 +99,7 @@ class AFMLayer(Layer):
 
 
 
-        embedding_size = input_shape[0][-1]
+        embedding_size = input_shape[0][-1].value
 
         self.attention_W = self.add_weight(shape=(embedding_size, self.attention_factor), initializer=glorot_normal(seed=self.seed),regularizer=l2(self.l2_reg_w),
                                            name="attention_W")
@@ -220,7 +220,7 @@ class CrossNet(Layer):
         if len(input_shape) != 2:
             raise ValueError("Unexpected inputs dimensions %d, expect to be 2 dimensions" % (len(input_shape),))
 
-        dim = input_shape[-1]
+        dim = input_shape[-1].value
         self.kernels = [self.add_weight(name='kernel'+str(i),
                                         shape=(dim, 1),
                                        initializer=glorot_normal(seed=self.seed),
@@ -250,6 +250,9 @@ class CrossNet(Layer):
         config = {'layer_num': self.layer_num,'l2_reg':self.l2_reg,'seed':self.seed}
         base_config = super(CrossNet, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
+
+    def compute_output_shape(self, input_shape):
+        return input_shape
 
 
 class MLP(Layer):
@@ -422,7 +425,7 @@ class OutterProductLayer(Layer):
         num_inputs = len(input_shape)
         num_pairs = int(num_inputs * (num_inputs - 1) / 2)
         input_shape = input_shape[0]
-        embed_size = input_shape[-1]
+        embed_size = input_shape[-1].value
         if self.kernel_type == 'mat':
 
             self.kernel = self.add_weight(shape=(embed_size,num_pairs,embed_size), initializer=glorot_uniform(seed=self.seed),
