@@ -27,8 +27,9 @@ cache: pip
 install:
     - pip install -q pytest-cov==2.4.0
     #>=2.4.0,<2.6
-    - pip install -q codacy-coverage
     - pip install -q python-coveralls
+    - pip install -q codacy-coverage
+    - pip install codecov
     - pip install -q h5py
     - pip install -q tensorflow==$TF_VERSION
     - pip install -e .
@@ -45,5 +46,6 @@ notifications:
 
 after_success:
   - coveralls
+  - codecov
   - coverage xml 
   - python-codacy-coverage -r coverage.xml
