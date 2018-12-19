@@ -6,10 +6,7 @@
 Welcome to DeepCTR's documentation!
 ===================================
 
-|PyPi|_ |Downloads|_ |Stars|_ |Forks|_ |Activaty|_
-
-.. |PyPi| image:: https://img.shields.io/pypi/v/deepctr.svg
-.. _PyPi: https://pypi.org/project/deepctr/
+|Downloads|_ |Stars|_ |Forks|_ |PyPi|_ |Issues|_ |Activity|_
 
 .. |Downloads| image:: https://pepy.tech/badge/deepctr
 .. _Downloads: https://pepy.tech/project/deepctr
@@ -20,8 +17,15 @@ Welcome to DeepCTR's documentation!
 .. |Forks| image:: https://img.shields.io/github/forks/shenweichen/deepctr.svg
 .. _Forks: https://github.com/shenweichen/DeepCTR
 
-.. |Activaty| image:: https://img.shields.io/github/last-commit/shenweichen/deepctr.svg
-.. _Activaty: https://github.com/shenweichen/DeepCTR
+.. |PyPi| image:: https://img.shields.io/pypi/v/deepctr.svg
+.. _PyPi: https://pypi.org/project/deepctr/
+
+.. |Issues| image:: https://img.shields.io/github/issues/shenweichen/deepctr.svg
+.. _Issues: https://github.com/shenweichen/deepctr/issues
+
+.. |Activity| image:: https://img.shields.io/github/last-commit/shenweichen/deepctr.svg
+.. _Activity: https://github.com/shenweichen/DeepCTR
+
 
 DeepCTR is a **Easy-to-use** , **Modular** and **Extendible** package of deep-learning based CTR models along with lots of core components layer  which can be used to build your own custom model easily.You can use any complex model with ``model.fit()`` and ``model.predict()`` just like any other keras model.And the layers are compatible with tensorflow.
 

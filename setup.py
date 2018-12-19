@@ -12,7 +12,7 @@ setuptools.setup(
     version="0.1.6",
     author="Weichen Shen",
     author_email="wcshen1994@163.com",
-    description="DeepCTR is a Easy-to-use,Modular and Extendible package of deep-learning based CTR(Click Through Rate) prediction models.",
+    description="Easy-to-use,Modular and Extendible package of deep learning based CTR(Click Through Rate) prediction models with tensorflow.",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/shenweichen/deepctr",
@@ -44,5 +44,5 @@ setuptools.setup(
     ),
     license="MIT license",
     keywords=['ctr', 'click through rate',
-              'deep learning', 'tensorflow', 'tensor', 'keras']
+              'deep learning', 'tensorflow', 'tensor', 'keras'],
 )
