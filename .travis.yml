@@ -1,15 +1,15 @@
-sudo: required
+#sudo: required
 dist: trusty
 language: python
 
 python:
-  - "3.4"
-  - "3.5"
+  #- "3.4"
+  #- "3.5"
   - "3.6"
 
 env:
 - TF_VERSION=1.4.0
-- TF_VERSION=1.5.0
+#- TF_VERSION=1.5.0
 - TF_VERSION=1.5.1
 - TF_VERSION=1.6.0
 
@@ -26,6 +26,7 @@ cache: pip
 # command to install dependencies
 install:
     - pip install -q pytest-cov==2.4.0
+    - pip install codacy-coverage
 #>=2.4.0,<2.6
     - pip install -q python-coveralls
     - pip install -q h5py
@@ -44,3 +45,4 @@ notifications:
 
 after_success:
   coveralls
+  python-codacy-coverage -r coverage.xml

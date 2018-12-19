@@ -47,6 +47,5 @@ def test_FNN(sparse_feature_num):
     print(model_name + " test pass!")
 
 
-
 if __name__ == "__main__":
-    test_FNN()
+    test_FNN(2)
