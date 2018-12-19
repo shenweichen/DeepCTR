@@ -9,7 +9,7 @@ python:
 
 env:
 - TF_VERSION=1.4.0
-- TF_VERSION=1.5.0 #- TF_VERSION=1.5.1
+- TF_VERSION=1.5.1 #- TF_VERSION=1.5.0
 - TF_VERSION=1.6.0
 #Not Support- TF_VERSION=1.7.0
 #Not Support- TF_VERSION=1.7.1
@@ -23,7 +23,7 @@ matrix:
   allow_failures:
     - python: "3.4"
     - python: "3.5"
-    #- env: TF_VERSION=1.5.0 #local is ok
+    - env: TF_VERSION=1.5.0 #local is ok,but sometimes CI is failed
     - env: TF_VERSION=1.7.0
     - env: TF_VERSION=1.7.1
     - env: TF_VERSION=1.8.0
@@ -33,8 +33,7 @@ matrix:
 cache: pip
 # command to install dependencies
 install:
-    - pip install -q pytest-cov==2.4.0
-    #>=2.4.0,<2.6
+    - pip install -q pytest-cov==2.4.0 #>=2.4.0,<2.6
     - pip install -q python-coveralls
     - pip install -q codacy-coverage
     - pip install -q h5py
