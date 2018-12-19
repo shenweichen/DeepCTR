@@ -20,9 +20,12 @@ setuptools.setup(
     python_requires='>=3.4.6',
     install_requires=REQUIRED_PACKAGES,
     extras_require={
-        "tf": ["tensorflow>=1.4.0,<=1.12.0,"],
+        "tf": ["tensorflow>=1.4.0,<=1.12.0"],
         "tf_gpu": ["tensorflow-gpu>=1.4.0,<1.7.0"],
     },
+    tests_require=[
+        'h5py',
+    ],
     entry_points={
     },
     classifiers=(
