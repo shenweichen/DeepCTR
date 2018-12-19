@@ -26,8 +26,8 @@ cache: pip
 # command to install dependencies
 install:
     - pip install -q pytest-cov==2.4.0
-    - pip install codacy-coverage
-#>=2.4.0,<2.6
+    #>=2.4.0,<2.6
+    - pip install -q codacy-coverage
     - pip install -q python-coveralls
     - pip install -q h5py
     - pip install -q tensorflow==$TF_VERSION
@@ -45,4 +45,5 @@ notifications:
 
 after_success:
   - coveralls
+  - coverage xml 
   - python-codacy-coverage -r coverage.xml
