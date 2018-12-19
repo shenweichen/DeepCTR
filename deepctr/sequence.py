@@ -87,7 +87,7 @@ class AttentionSequencePoolingLayer(Layer):
         - **weight_normalization**: bool.Whether normalize the attention score of local activation unit.
 
       References
-        - [Deep Interest Network for Click-Through Rate Prediction](https://arxiv.org/pdf/1706.06978.pdf)
+        - [Zhou G, Zhu X, Song C, et al. Deep interest network for click-through rate prediction[C]//Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. ACM, 2018: 1059-1068.](https://arxiv.org/pdf/1706.06978.pdf)
     """
 
     def __init__(self, hidden_size=(80, 40), activation='sigmoid', weight_normalization=False, **kwargs):

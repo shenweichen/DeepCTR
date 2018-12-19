@@ -42,7 +42,8 @@ concatenates the embedding vectors and feeds them into a MLP(MultiLayer Perceptr
    :scale: 50 %
 
 
-Zhang, Weinan, Tianming Du, and Jun Wang. `"Deep learning over multi-field categorical data." <https://arxiv.org/pdf/1601.02376.pdf>`_ European conference on information retrieval. Springer, Cham, 2016.
+
+`Zhang W, Du T, Wang J. Deep learning over multi-field categorical data[C]//European conference on information retrieval. Springer, Cham, 2016: 45-57. <https://arxiv.org/pdf/1601.02376.pdf>`_ 
 
 
 PNN (Product-based Neural Network)
@@ -57,7 +58,7 @@ PNN concatenates sparse feature embeddings and the product between  embedding ve
    :scale: 70 %
 
 
-Qu, Yanru, et al. `"Product-based neural networks for user response prediction." <https://arxiv.org/pdf/1611.00144.pdf>`_ Data Mining (ICDM), 2016 IEEE 16th International Conference on. IEEE, 2016.
+`Qu Y, Cai H, Ren K, et al. Product-based neural networks for user response prediction[C]//Data Mining (ICDM), 2016 IEEE 16th International Conference on. IEEE, 2016: 1149-1154. <https://arxiv.org/pdf/1611.00144.pdf>`_
 
 
 Wide & Deep
@@ -72,7 +73,7 @@ The logits of deep part and wide part are added to get the prediction probabilit
    :align: center
    :scale: 50 %
 
-Cheng, Heng-Tze, et al. `"Wide & deep learning for recommender systems." <https://arxiv.org/pdf/1606.07792.pdf>`_ Proceedings of the 1st Workshop on Deep Learning for Recommender Systems. ACM, 2016.
+`Cheng H T, Koc L, Harmsen J, et al. Wide & deep learning for recommender systems[C]//Proceedings of the 1st Workshop on Deep Learning for Recommender Systems. ACM, 2016: 7-10. <https://arxiv.org/pdf/1606.07792.pdf>`_ 
 
 
 DeepFM
@@ -89,7 +90,7 @@ And they do not need a FM pretrained vector to initialiaze,they are learned end2
    :align: center
    :scale: 50 %
 
-Guo, Huifeng, et al. `"Deepfm: a factorization-machine based neural network for ctr prediction." <http://www.ijcai.org/proceedings/2017/0239.pdf>`_ arXiv preprint arXiv:1703.04247 (2017).
+`Guo H, Tang R, Ye Y, et al. Deepfm: a factorization-machine based neural network for ctr prediction[J]. arXiv preprint arXiv:1703.04247, 2017. <http://www.ijcai.org/proceedings/2017/0239.pdf>`_ 
 
 MLR(Mixed Logistic Regression/Piece-wise Linear Model)
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -104,7 +105,7 @@ Finally,the sample's CTR is a weighted sum of each region's click probability.No
    :align: center
    :scale: 50 %
 
-Gai, Kun, et al. `"Learning Piece-wise Linear Models from Large Scale Data for Ad Click Prediction." <http://arxiv.org/abs/1704.05194>`_ arXiv:1704.05194 (2017).
+`Gai K, Zhu X, Li H, et al. Learning Piece-wise Linear Models from Large Scale Data for Ad Click Prediction[J]. arXiv preprint arXiv:1704.05194, 2017. <http://arxiv.org/abs/1704.05194>`_ 
 
 
 NFM (Neural Factorization Machine)
@@ -120,7 +121,7 @@ And then fed it into a MLP.The output logit of MLP and the output logit of linea
    :align: center
    :scale: 50 %
 
-He, Xiangnan, and Tat-Seng Chua. `"Neural Factorization Machines for Sparse Predictive Analytics.(2017)." <https://arxiv.org/pdf/1708.05027.pdf>`_ (2017).
+`He X, Chua T S. Neural factorization machines for sparse predictive analytics[C]//Proceedings of the 40th International ACM SIGIR conference on Research and Development in Information Retrieval. ACM, 2017: 355-364. <https://arxiv.org/pdf/1708.05027.pdf>`_ 
 
 
 AFM (Attentional Factorization Machine)
@@ -135,7 +136,7 @@ AFM can be seen as weighted sum of feature interactions.The weight is learned by
    :align: center
    :scale: 70 %
 
-Xiao, Jun, et al. `"Attentional factorization machines: Learning the weight of feature interactions via attention networks." <http://www.ijcai.org/proceedings/2017/435>`_ arXiv preprint arXiv:1708.04617 (2017).
+`Xiao J, Ye H, He X, et al. Attentional factorization machines: Learning the weight of feature interactions via attention networks[J]. arXiv preprint arXiv:1708.04617, 2017. <http://www.ijcai.org/proceedings/2017/435>`_
 
 
 DCN (Deep & Cross Network)
@@ -150,7 +151,7 @@ The output of Cross Net and MLP are concatenated.The concatenated vector are fee
    :align: center
    :scale: 70 %
 
-Wang, Ruoxi, et al. `"Deep & cross network for ad click predictions." <https://arxiv.org/abs/1708.05123>`_ Proceedings of the ADKDD'17. ACM, 2017.
+`Wang R, Fu B, Fu G, et al. Deep & cross network for ad click predictions[C]//Proceedings of the ADKDD'17. ACM, 2017: 12. <https://arxiv.org/abs/1708.05123>`_ 
 
 
 DIN (Deep Interest Network)
@@ -168,7 +169,7 @@ user's interest vector and other embedding vectors are concatenated and fed into
    :align: center
    :scale: 70 %
 
-Zhou, Guorui, et al. `"Deep interest network for click-through rate prediction." <https://arxiv.org/pdf/1706.06978.pdf>`_ Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. ACM, 2018.
+`Zhou G, Zhu X, Song C, et al. Deep interest network for click-through rate prediction[C]//Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. ACM, 2018: 1059-1068. <https://arxiv.org/pdf/1706.06978.pdf>`_ 
 
 
 

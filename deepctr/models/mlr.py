@@ -94,12 +94,12 @@ def MLR(region_feature_dim_dict,base_feature_dim_dict={"sparse":{},"dense":[]},r
             add([region_embeddings[j][i](region_sparse_input[i]) for i in range(region_sparse_feature_num)])
             for j in range(region_num)]
         region_logits =Concatenate()([add([region_sparse_logits[i],region_dense_logits_[i]]) for i in range(region_num)])
-       
+
     if base_dense_feature_num > 0 and base_sparse_feature_num == 0:
         base_logits = base_dense_logits
     elif base_dense_feature_num == 0 and base_sparse_feature_num > 0:
         base_sparse_logits = [add(
-            [base_embeddings[j][i](base_sparse_input_[i]) for i in range(base_sparse_feature_num)]) if base_sparse_feature_num > 1 else base_embeddings[j][0](base_sparse_input_[0]) 
+            [base_embeddings[j][i](base_sparse_input_[i]) for i in range(base_sparse_feature_num)]) if base_sparse_feature_num > 1 else base_embeddings[j][0](base_sparse_input_[0])
             for j in range(region_num)]
         base_logits = base_sparse_logits
     else:
