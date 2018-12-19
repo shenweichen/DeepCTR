@@ -1,5 +1,5 @@
 #sudo: required
-dist: trusty
+#dist: trusty xenial
 language: python
 
 python:
@@ -44,5 +44,5 @@ notifications:
     on_failure: always
 
 after_success:
-  coveralls
-  python-codacy-coverage -r coverage.xml
+  - coveralls
+  - python-codacy-coverage -r coverage.xml
