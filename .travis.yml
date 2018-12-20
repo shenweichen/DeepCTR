@@ -36,7 +36,6 @@ install:
     - pip install -q pytest-cov==2.4.0 #>=2.4.0,<2.6
     - pip install -q python-coveralls
     - pip install -q codacy-coverage
-    - pip install -q h5py
     - pip install -q tensorflow==$TF_VERSION
     - pip install -e .
 # command to run tests

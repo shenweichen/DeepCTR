@@ -4,7 +4,7 @@ Author:
     Weichen Shen,wcshen1994@163.com
 
 Reference:
-    [1] Wide & Deep Learning for Recommender Systems(https://arxiv.org/pdf/1606.07792.pdf)
+    [1] Cheng H T, Koc L, Harmsen J, et al. Wide & deep learning for recommender systems[C]//Proceedings of the 1st Workshop on Deep Learning for Recommender Systems. ACM, 2016: 7-10.(https://arxiv.org/pdf/1606.07792.pdf)
 """
 
 from tensorflow.python.keras.layers import Dense, Embedding, Concatenate, Flatten, add

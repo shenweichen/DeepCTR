@@ -4,7 +4,7 @@ Author:
     Weichen Shen,wcshen1994@163.com
 
 Reference:
-    [1] Neural Factorization Machines for Sparse Predictive Analytics (https://arxiv.org/abs/1708.05027)
+    [1] He X, Chua T S. Neural factorization machines for sparse predictive analytics[C]//Proceedings of the 40th International ACM SIGIR conference on Research and Development in Information Retrieval. ACM, 2017: 355-364. (https://arxiv.org/abs/1708.05027)
 """
 
 from tensorflow.python.keras.layers import Dense, Embedding, Concatenate, Reshape, Dropout, add

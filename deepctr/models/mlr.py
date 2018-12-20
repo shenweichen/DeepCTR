@@ -4,7 +4,7 @@ Author:
     Weichen Shen,wcshen1994@163.com
 
 Reference:
-    [1] Learning Piece-wise Linear Models from Large Scale Data for Ad Click Prediction(https://arxiv.org/abs/1704.05194)
+    [1] Gai K, Zhu X, Li H, et al. Learning Piece-wise Linear Models from Large Scale Data for Ad Click Prediction[J]. arXiv preprint arXiv:1704.05194, 2017.(https://arxiv.org/abs/1704.05194)
 """
 from tensorflow.python.keras.layers import Input, Dense, Embedding, Concatenate, Activation,  Reshape,  add, dot
 from tensorflow.python.keras.models import Model

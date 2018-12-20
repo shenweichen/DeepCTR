@@ -4,7 +4,7 @@ Author:
     Weichen Shen,wcshen1994@163.com
 
 Reference:
-    [1] Zhang, Weinan, Tianming Du, and Jun Wang. "Deep learning over multi-field categorical data." European conference on information retrieval. Springer, Cham, 2016.(https://arxiv.org/pdf/1601.02376.pdf)
+    [1] Zhang W, Du T, Wang J. Deep learning over multi-field categorical data[C]//European conference on information retrieval. Springer, Cham, 2016: 45-57.(https://arxiv.org/pdf/1601.02376.pdf)
 """
 
 from tensorflow.python.keras.layers import Dense, Embedding, Concatenate, Reshape, add

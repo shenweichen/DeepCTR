@@ -4,7 +4,7 @@ Author:
     Weichen Shen,wcshen1994@163.com
 
 Reference:
-    [1] Deep & Cross Network for Ad Click Predictions (https://arxiv.org/abs/1708.05123)
+    [1] Wang R, Fu B, Fu G, et al. Deep & cross network for ad click predictions[C]//Proceedings of the ADKDD'17. ACM, 2017: 12. (https://arxiv.org/abs/1708.05123)
 """
 from tensorflow.python.keras.layers import Dense, Embedding, Concatenate, Flatten
 from tensorflow.python.keras.models import Model

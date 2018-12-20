@@ -4,7 +4,7 @@ Author:
     Weichen Shen,wcshen1994@163.com
 
 Reference:
-    [1] Qu, Yanru, et al. "Product-based neural networks for user response prediction." Data Mining (ICDM), 2016 IEEE 16th International Conference on. IEEE, 2016.(https://arxiv.org/pdf/1611.00144.pdf)
+    [1] Qu Y, Cai H, Ren K, et al. Product-based neural networks for user response prediction[C]//Data Mining (ICDM), 2016 IEEE 16th International Conference on. IEEE, 2016: 1149-1154.(https://arxiv.org/pdf/1611.00144.pdf)
 """
 
 from tensorflow.python.keras.layers import Dense, Embedding, Concatenate, Reshape, Flatten
@@ -34,7 +34,7 @@ def PNN(feature_dim_dict, embedding_size=8, hidden_size=(128, 128), l2_reg_embed
     :param final_activation: str,output activation,usually ``'sigmoid'`` or ``'linear'``
     :param use_inner: bool,whether use inner-product or not.
     :param use_outter: bool,whether use outter-product or not.
-    :param kernel_type: str,kerneo_type used in outter-product,can be ``'mat'`` , ``'vec'`` or ``'num'``
+    :param kernel_type: str,kernel_type used in outter-product,can be ``'mat'`` , ``'vec'`` or ``'num'``
     :return: A Keras model instance.
     """
     if not isinstance(feature_dim_dict,
