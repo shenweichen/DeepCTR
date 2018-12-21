@@ -46,3 +46,15 @@ class Dice(Layer):
 
     def compute_output_shape(self, input_shape):
         return input_shape
+
+
+def activation_fun(activation, fc):
+
+    if isinstance(activation, str):
+        fc = tf.keras.layers.Activation(activation)(fc)
+    elif issubclass(activation, Layer):
+        fc = activation()(fc)
+    else:
+        raise ValueError(
+            "Invalid activation,found %s.You should use a str or a Activation Layer Class." % (activation))
+    return fc

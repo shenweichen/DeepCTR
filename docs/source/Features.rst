@@ -180,7 +180,7 @@ The models of deepctr are modular,
 so you can use different modules to build your own models.
 
 The module is a class that inherits from ``tf.keras.layers.Layer``,it has
-the same properties and methods as keras Layers like ``tf.keras.layers.Dense()`` etc
+the same attributes and methods as keras Layers like ``tf.keras.layers.Dense()`` etc
 
 You can see layers API in `layers <./deepctr.layers.html>`_ 
 

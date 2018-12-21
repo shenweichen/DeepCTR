@@ -124,3 +124,30 @@ def test_AFMLayer():
     with CustomObjectScope({'AFMLayer': layers.AFMLayer}):
         layer_test(layers.AFMLayer, kwargs={}, input_shape=[(
             BATCH_SIZE, 1, EMBEDDING_SIZE)]*FIELD_SIZE)
+
+
+@pytest.mark.parametrize(
+    'layer_size,activation,direct',
+    [(layer_size, activation, direct)
+     for activation in ['linear', PReLU]
+     for direct in [True, False]
+     for layer_size in [(10,), (10, 8)]
+     ]
+)
+def test_CIN(layer_size, activation, direct):
+    with CustomObjectScope({'CIN': layers.CIN}):
+        layer_test(layers.CIN, kwargs={"layer_size": layer_size, "activation":
+                                       activation, "direct": direct}, input_shape=(
+            BATCH_SIZE, FIELD_SIZE, EMBEDDING_SIZE))
+
+
+@pytest.mark.parametrize(
+    'layer_size',
+    [(), (3, 10)
+     ]
+)
+def test_test_CIN_invalid(layer_size):
+    with pytest.raises(ValueError):
+        with CustomObjectScope({'CIN': layers.CIN}):
+            layer_test(layers.CIN, kwargs={"layer_size": layer_size}, input_shape=(
+                BATCH_SIZE, FIELD_SIZE, EMBEDDING_SIZE))
