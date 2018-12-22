@@ -1,8 +1,19 @@
-from tensorflow.python.keras.layers import Input, Embedding
+import json
+import logging
+from threading import Thread
+
+import requests
 from tensorflow.python.keras.initializers import RandomNormal
+from tensorflow.python.keras.layers import Embedding, Input
+
 from .activations import *
 from .layers import *
 from .sequence import *
+
+try:
+    from packaging.version import parse
+except ImportError:
+    from pip._vendor.packaging.version import parse
 
 custom_objects = {'InnerProductLayer': InnerProductLayer,
                   'OutterProductLayer': OutterProductLayer,
@@ -64,3 +75,27 @@ def get_sep_embeddings(deep_feature_dim_dict, wide_feature_dim_dict, embedding_s
                         i, feat in enumerate(wide_feature_dim_dict["sparse"])]
 
     return sparse_embedding, linear_embedding
+
+
+def check_version(version):
+    """Return version of package on pypi.python.org using json."""
+
+    def check(version):
+        try:
+            url_pattern = 'https://pypi.python.org/pypi/deepctr/json'
+            req = requests.get(url_pattern)
+            latest_version = parse('0')
+            version = parse(version)
+            if req.status_code == requests.codes.ok:
+                j = json.loads(req.text.encode('utf-8'))
+                releases = j.get('releases', [])
+                for release in releases:
+                    ver = parse(release)
+                    if not ver.is_prerelease:
+                        latest_version = max(latest_version, ver)
+                if latest_version > version:
+                    logging.warning('\nDeepCTR version {0} detected. Your version is {1}.\nUse `pip install -U deepctr` to upgrade.Changelog: https://github.com/shenweichen/DeepCTR/releases/tag/v{0}'.format(
+                        latest_version, version))
+        except:
+            pass
+    Thread(target=check, args=(version,)).start()

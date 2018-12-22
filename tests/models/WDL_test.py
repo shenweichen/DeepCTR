@@ -13,7 +13,7 @@ from deepctr.utils import custom_objects
 )
 def test_WDL(sparse_feature_num, wide_feature_num):
     model_name = "WDL"
-
+    sample_size = 64
     feature_dim_dict = {"sparse": {}, 'dense': []}
     wide_feature_dim_dict = {"sparse": {}, 'dense': []}
     for name, num in zip(["sparse", "dense"], [sparse_feature_num, sparse_feature_num]):
