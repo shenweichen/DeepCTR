@@ -171,7 +171,25 @@ user's interest vector and other embedding vectors are concatenated and fed into
 
 `Zhou G, Zhu X, Song C, et al. Deep interest network for click-through rate prediction[C]//Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. ACM, 2018: 1059-1068. <https://arxiv.org/pdf/1706.06978.pdf>`_ 
 
+xDeepFM
+>>>>>>>>>>
 
+xDeepFM use a Compressed Interaction Network (CIN) to learn both low and high order feature interaction explicitly,and use a MLP to learn feature interaction implicitly.
+In each layer of CIN,first compute outer products between :math:`x^k` and :math:`x_0` to get a tensor :math:`Z_{k+1}`,then use a 1DConv to learn feature maps :math:`H_{k+1}` on this tensor.
+Finally,apply sum pooling on all the feature maps :math:`H_k` to get one vector.The vector is used to compute the logit that CIN contributes.
+
+
+**xDeepFM api** `link <./deepctr.models.xdeepfm.html>`_
+
+.. image:: ../pics/CIN.png
+   :align: center
+   :scale: 70 %
+
+.. image:: ../pics/xDeepFM.png
+   :align: center
+   :scale: 70 %
+
+`Lian J, Zhou X, Zhang F, et al. xDeepFM: Combining Explicit and Implicit Feature Interactions for Recommender Systems[J]. arXiv preprint arXiv:1803.05170, 2018. <https://arxiv.org/pdf/1803.05170.pdf>`_ 
 
 Layers
 --------
@@ -180,7 +198,7 @@ The models of deepctr are modular,
 so you can use different modules to build your own models.
 
 The module is a class that inherits from ``tf.keras.layers.Layer``,it has
-the same properties and methods as keras Layers like ``tf.keras.layers.Dense()`` etc
+the same attributes and methods as keras Layers like ``tf.keras.layers.Dense()`` etc
 
 You can see layers API in `layers <./deepctr.layers.html>`_ 
 

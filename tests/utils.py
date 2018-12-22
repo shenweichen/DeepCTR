@@ -1,21 +1,12 @@
-from __future__ import absolute_import
-
-from __future__ import division
-
-from __future__ import print_function
-
-
+from __future__ import absolute_import, division, print_function
+import sys
+import inspect
 import numpy as np
-
 from numpy.testing import assert_allclose
-
-
-from generic_utils import has_arg
-
-from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.layers import Input
-
 from tensorflow.python.keras import backend as K
+from tensorflow.python.keras.layers import Input
+from tensorflow.python.keras.models import Model, save_model, load_model
+from deepctr.utils import custom_objects
 
 
 def get_test_data(num_train=1000, num_test=500, input_shape=(10,),
@@ -83,7 +74,8 @@ def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,
 
     if input_data is None:
 
-        assert input_shape
+        if not input_shape:
+            raise AssertionError()
 
         if not input_dtype:
 
@@ -108,7 +100,6 @@ def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,
             input_data = (10 * np.random.random(input_data_shape))
 
             input_data = input_data.astype(input_dtype)
-
 
     else:
 
@@ -136,7 +127,7 @@ def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,
 
     try:
         expected_output_shape = layer.compute_output_shape(input_shape)
-    except:
+    except Exception:
         expected_output_shape = layer._compute_output_shape(input_shape)
 
     # test in functional API
@@ -159,7 +150,8 @@ def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,
 
     y = layer(x)
 
-    assert K.dtype(y) == expected_output_dtype
+    if not (K.dtype(y) == expected_output_dtype):
+        raise AssertionError()
 
     # check with the functional API
 
@@ -175,7 +167,8 @@ def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,
 
         if expected_dim is not None:
 
-            assert expected_dim == actual_dim
+            if not (expected_dim == actual_dim):
+                raise AssertionError()
 
     if expected_output is not None:
 
@@ -218,3 +211,99 @@ def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,
     # for further checks in the caller function
 
     return actual_output
+
+
+def has_arg(fn, name, accept_all=False):
+    """Checks if a callable accepts a given keyword argument.
+
+
+
+    For Python 2, checks if there is an argument with the given name.
+
+
+
+    For Python 3, checks if there is an argument with the given name, and
+
+    also whether this argument can be called with a keyword (i.e. if it is
+
+    not a positional-only argument).
+
+
+
+    # Arguments
+
+        fn: Callable to inspect.
+
+        name: Check if `fn` can be called with `name` as a keyword argument.
+
+        accept_all: What to return if there is no parameter called `name`
+
+                    but the function accepts a `**kwargs` argument.
+
+
+
+    # Returns
+
+        bool, whether `fn` accepts a `name` keyword argument.
+
+    """
+
+    if sys.version_info < (3,):
+
+        arg_spec = inspect.getargspec(fn)
+
+        if accept_all and arg_spec.keywords is not None:
+
+            return True
+
+        return (name in arg_spec.args)
+
+    elif sys.version_info < (3, 3):
+
+        arg_spec = inspect.getfullargspec(fn)
+
+        if accept_all and arg_spec.varkw is not None:
+
+            return True
+
+        return (name in arg_spec.args or
+
+                name in arg_spec.kwonlyargs)
+
+    else:
+
+        signature = inspect.signature(fn)
+
+        parameter = signature.parameters.get(name)
+
+        if parameter is None:
+
+            if accept_all:
+
+                for param in signature.parameters.values():
+
+                    if param.kind == inspect.Parameter.VAR_KEYWORD:
+
+                        return True
+
+            return False
+
+        return (parameter.kind in (inspect.Parameter.POSITIONAL_OR_KEYWORD,
+
+                                   inspect.Parameter.KEYWORD_ONLY))
+
+
+def check_model(model, model_name, x, y):
+    model.compile('adam', 'binary_crossentropy',
+                  metrics=['binary_crossentropy'])
+    model.fit(x, y, batch_size=100, epochs=1, validation_split=0.5)
+
+    print(model_name+" test train valid pass!")
+    model.save_weights(model_name + '_weights.h5')
+    model.load_weights(model_name + '_weights.h5')
+    print(model_name+" test save load weight pass!")
+    save_model(model, model_name + '.h5')
+    model = load_model(model_name + '.h5', custom_objects)
+    print(model_name + " test save load model pass!")
+
+    print(model_name + " test pass!")

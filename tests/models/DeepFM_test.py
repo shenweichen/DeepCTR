@@ -3,6 +3,7 @@ import pytest
 from deepctr.models import DeepFM
 from deepctr.utils import custom_objects
 from tensorflow.python.keras.models import save_model, load_model
+from ..utils import check_model
 
 
 @pytest.mark.parametrize(
@@ -32,19 +33,7 @@ def test_DeepFM(use_fm, hidden_size, sparse_feature_num):
 
     model = DeepFM(feature_dim_dict,  use_fm=use_fm,
                    hidden_size=hidden_size, keep_prob=0.5, )
-    model.compile('adam', 'binary_crossentropy',
-                  metrics=['binary_crossentropy'])
-    model.fit(x, y, batch_size=100, epochs=1, validation_split=0.5)
-
-    print(model_name+" test train valid pass!")
-    model.save_weights(model_name + '_weights.h5')
-    model.load_weights(model_name + '_weights.h5')
-    print(model_name+" test save load weight pass!")
-    save_model(model,  model_name + '.h5')
-    model = load_model(model_name + '.h5', custom_objects)
-    print(model_name + " test save load model pass!")
-
-    print(model_name + " test pass!")
+    check_model(model, model_name, x, y)
 
 
 if __name__ == "__main__":

@@ -4,6 +4,7 @@ from deepctr.models import DIN
 from deepctr.activations import Dice
 from deepctr.utils import custom_objects
 from tensorflow.python.keras.models import load_model, save_model
+from ..utils import check_model
 
 
 def get_xy_fd():
@@ -47,7 +48,6 @@ def test_DIN_model_io():
     print(model_name + " test save load model pass!")
 
 
-
 def test_DIN_att():
     model_name = "DIN_att"
 
@@ -65,7 +65,6 @@ def test_DIN_att():
     model.load_weights(model_name + '_weights.h5')
     print(model_name+" test save load weight pass!")
 
-
     # try:
     #     save_model(model,  name + '.h5')
     #     model = load_model(name + '.h5', custom_objects)
@@ -75,6 +74,7 @@ def test_DIN_att():
 
     print(model_name + " test pass!")
 
+
 def test_DIN_sum():
 
     model_name = "DIN_sum"
@@ -83,20 +83,7 @@ def test_DIN_sum():
     model = DIN(feature_dim_dict, behavior_feature_list, hist_len_max=4, embedding_size=8,
                 use_din=False, hidden_size=[4, 4, 4], keep_prob=0.6, activation="sigmoid")
 
-    model.compile('adam', 'binary_crossentropy',
-                  metrics=['binary_crossentropy'])
-    model.fit(x, y, verbose=1, validation_split=0.5)
-
-    print(model_name+" test train valid pass!")
-    model.save_weights(model_name + '_weights.h5')
-    model.load_weights(model_name + '_weights.h5')
-    print(model_name+" test save load weight pass!")
-
-    save_model(model,  model_name + '.h5')
-    model = load_model(model_name + '.h5', custom_objects)
-    print(model_name + " test save load model pass!")
-
-    print(model_name + " test pass!")
+    check_model(model, model_name, x, y)
 
 
 if __name__ == "__main__":

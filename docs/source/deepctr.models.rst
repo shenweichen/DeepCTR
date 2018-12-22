@@ -15,6 +15,7 @@ Submodules
    deepctr.models.nfm
    deepctr.models.pnn
    deepctr.models.wdl
+   deepctr.models.xdeepfm
 
 Module contents
 ---------------

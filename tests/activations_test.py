@@ -1,6 +1,6 @@
 from deepctr import activations
-from utils import layer_test
 from tensorflow.python.keras.utils import CustomObjectScope
+from .utils import layer_test
 
 
 def test_dice():

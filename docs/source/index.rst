@@ -27,11 +27,20 @@ Welcome to DeepCTR's documentation!
 .. _Activity: https://github.com/shenweichen/DeepCTR
 
 
-DeepCTR is a **Easy-to-use** , **Modular** and **Extendible** package of deep-learning based CTR models along with lots of core components layer  which can be used to build your own custom model easily.You can use any complex model with ``model.fit()`` and ``model.predict()`` just like any other keras model.And the layers are compatible with tensorflow.
+DeepCTR is a **Easy-to-use** , **Modular** and **Extendible** package of deep-learning based CTR models along with lots of core components layer  which can be used to build your own custom model easily.You can use any complex model with ``model.fit()`` and ``model.predict()``.And the layers are compatible with tensorflow.
 
 Through  ``pip install deepctr``  get the package and `Get Started! <./Quick-Start.html>`_
 
 You can read the latest code at https://github.com/shenweichen/DeepCTR
+
+News
+-----
+
+12/22/2018 : Add `xDeepFM <./Features.html#xdeepfm>`_ and automatic check for new version. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.2.0a1>`_
+
+12/19/2018 : DeepCTR is compatible with tensorflow from ``1.4-1.12`` except for ``1.7`` and ``1.8``. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.1.6>`_
+
+11/24/2018 : DeepCTR is released! `PyPi <https://pypi.org/project/deepctr/>`_.
 
 .. toctree::
    :maxdepth: 2
@@ -41,6 +50,7 @@ You can read the latest code at https://github.com/shenweichen/DeepCTR
    Features
    Demo
    FAQ
+   History<History.md>
 
 .. toctree::
    :maxdepth: 3
