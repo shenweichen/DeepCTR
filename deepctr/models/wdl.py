@@ -7,10 +7,8 @@ Reference:
     [1] Cheng H T, Koc L, Harmsen J, et al. Wide & deep learning for recommender systems[C]//Proceedings of the 1st Workshop on Deep Learning for Recommender Systems. ACM, 2016: 7-10.(https://arxiv.org/pdf/1606.07792.pdf)
 """
 
-from tensorflow.python.keras.layers import Dense, Embedding, Concatenate, Flatten, add
+from tensorflow.python.keras.layers import Dense, Concatenate, Flatten, add
 from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.initializers import RandomNormal
-from tensorflow.python.keras.regularizers import l2
 from ..layers import PredictionLayer, MLP
 from ..utils import get_input, get_sep_embeddings
 

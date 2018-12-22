@@ -83,7 +83,8 @@ def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,
 
     if input_data is None:
 
-        assert input_shape
+        if not input_shape:
+            raise AssertionError()
 
         if not input_dtype:
 
@@ -108,7 +109,6 @@ def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,
             input_data = (10 * np.random.random(input_data_shape))
 
             input_data = input_data.astype(input_dtype)
-
 
     else:
 
@@ -136,7 +136,7 @@ def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,
 
     try:
         expected_output_shape = layer.compute_output_shape(input_shape)
-    except:
+    except Exception:
         expected_output_shape = layer._compute_output_shape(input_shape)
 
     # test in functional API
@@ -175,7 +175,8 @@ def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,
 
         if expected_dim is not None:
 
-            assert expected_dim == actual_dim
+            if not (expected_dim == actual_dim):
+                raise AssertionError()
 
     if expected_output is not None:
 

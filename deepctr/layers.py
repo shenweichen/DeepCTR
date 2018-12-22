@@ -174,7 +174,7 @@ class AFMLayer(Layer):
 
 
 class PredictionLayer(Layer):
-    
+
     def __init__(self, activation='sigmoid', use_bias=True, **kwargs):
         self.activation = activation
         self.use_bias = use_bias

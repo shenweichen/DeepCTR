@@ -9,7 +9,7 @@ from tensorflow.python.keras.models import save_model, load_model
     'hidden_size,sparse_feature_num',
     [((8,), 1), ((8, 8,), 2)]
 )
-def test_NFM():
+def test_NFM(hidden_size, sparse_feature_num):
 
     model_name = "NFM"
 
@@ -48,4 +48,4 @@ def test_NFM():
 
 
 if __name__ == "__main__":
-    test_NFM()
+    test_NFM((8, 8), 1)

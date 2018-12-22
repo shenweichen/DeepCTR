@@ -7,9 +7,8 @@ Reference:
     [1] Zhang W, Du T, Wang J. Deep learning over multi-field categorical data[C]//European conference on information retrieval. Springer, Cham, 2016: 45-57.(https://arxiv.org/pdf/1601.02376.pdf)
 """
 
-from tensorflow.python.keras.layers import Dense, Embedding, Concatenate, Reshape, add
+from tensorflow.python.keras.layers import Dense, Concatenate, Reshape, add
 from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.regularizers import l2
 
 from ..layers import PredictionLayer, MLP

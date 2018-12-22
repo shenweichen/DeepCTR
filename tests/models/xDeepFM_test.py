@@ -62,4 +62,4 @@ def test_xDeepFM_invalid(hidden_size, cin_layer_size):
 
 
 if __name__ == "__main__":
-    test_xDeepFM((256), (128,), False, 'linear', 3)
+    test_xDeepFM((256), (128,), False, 'linear', 3, 1)

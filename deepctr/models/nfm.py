@@ -7,9 +7,8 @@ Reference:
     [1] He X, Chua T S. Neural factorization machines for sparse predictive analytics[C]//Proceedings of the 40th International ACM SIGIR conference on Research and Development in Information Retrieval. ACM, 2017: 355-364. (https://arxiv.org/abs/1708.05027)
 """
 
-from tensorflow.python.keras.layers import Dense, Embedding, Concatenate, Reshape, Dropout, add
+from tensorflow.python.keras.layers import Dense, Concatenate, Reshape, Dropout, add
 from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.regularizers import l2
 from ..layers import PredictionLayer, MLP, BiInteractionPooling
 from ..utils import get_input, get_share_embeddings
