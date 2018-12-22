@@ -42,7 +42,8 @@ def WDL(deep_feature_dim_dict, wide_feature_dim_dict, embedding_size=8, hidden_s
 
     embed_list = [sparse_embedding[i](sparse_input[i])
                   for i in range(len(sparse_input))]
-    deep_input = Concatenate()(embed_list)
+    deep_input = Concatenate()(embed_list) if len(
+        embed_list) > 1 else embed_list[0]
     deep_input = Flatten()(deep_input)
     if len(dense_input) > 0:
         deep_input = Concatenate()([deep_input]+dense_input)

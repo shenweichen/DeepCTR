@@ -12,3 +12,4 @@ DeepCTR Models API
    AFM<deepctr.models.afm>
    DCN<deepctr.models.dcn>
    DIN<deepctr.models.din>
+   xDeepFM<deepctr.models.xdeepfm>

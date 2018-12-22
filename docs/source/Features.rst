@@ -171,7 +171,26 @@ user's interest vector and other embedding vectors are concatenated and fed into
 
 `Zhou G, Zhu X, Song C, et al. Deep interest network for click-through rate prediction[C]//Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. ACM, 2018: 1059-1068. <https://arxiv.org/pdf/1706.06978.pdf>`_ 
 
+xDeepFM
+>>>>>>>>>>
 
+DIN introduce a attention method to learn from sequence(multi-valued) feature.
+Tradional method usually use sum/mean pooling on sequence feature.
+DIN use a local activation unit to get the activation score between candidate item and history items.
+User's interest are represented by weighted sum of user behaviors.
+user's interest vector and other embedding vectors are concatenated and fed into a MLP to get the prediction. 
+
+**xDeepFM api** `link <./deepctr.models.xdeepfm.html>`_
+
+.. image:: ../pics/CIN.png
+   :align: center
+   :scale: 70 %
+
+.. image:: ../pics/xDeepFM.png
+   :align: center
+   :scale: 70 %
+
+`Lian J, Zhou X, Zhang F, et al. xDeepFM: Combining Explicit and Implicit Feature Interactions for Recommender Systems[J]. arXiv preprint arXiv:1803.05170, 2018. <https://arxiv.org/pdf/1803.05170.pdf>`_ 
 
 Layers
 --------

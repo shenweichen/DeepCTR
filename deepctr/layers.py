@@ -1,57 +1,10 @@
 import itertools
-from tensorflow.python.keras.layers import Layer,BatchNormalization
+from tensorflow.python.keras.layers import Layer, BatchNormalization
 from tensorflow.python.keras.regularizers import l2
 from tensorflow.python.keras.initializers import Zeros, glorot_normal, glorot_uniform
 from tensorflow.python.keras import backend as K
 import tensorflow as tf
 from .activations import activation_fun
-
-
-class FM(Layer):
-    """Factorization Machine models pairwise (order-2) feature interactions
-     without linear term and bias.
-
-      Input shape
-        - 3D tensor with shape: ``(batch_size,field_size,embedding_size)``.
-
-      Output shape
-        - 2D tensor with shape: ``(batch_size, 1)``.
-
-      References
-        - [Factorization Machines](https://www.csie.ntu.edu.tw/~b97053/paper/Rendle2010FM.pdf)
-    """
-
-    def __init__(self, **kwargs):
-
-        super(FM, self).__init__(**kwargs)
-
-    def build(self, input_shape):
-        if len(input_shape) != 3:
-            raise ValueError("Unexpected inputs dimensions % d,\
-                             expect to be 3 dimensions" % (len(input_shape)))
-
-        super(FM, self).build(input_shape)  # Be sure to call this somewhere!
-
-    def call(self, inputs, **kwargs):
-
-        if K.ndim(inputs) != 3:
-            raise ValueError(
-                "Unexpected inputs dimensions %d, expect to be 3 dimensions"
-                % (K.ndim(inputs)))
-
-        concated_embeds_value = inputs
-
-        square_of_sum = tf.square(tf.reduce_sum(
-            concated_embeds_value, axis=1, keep_dims=True))
-        sum_of_square = tf.reduce_sum(
-            concated_embeds_value * concated_embeds_value, axis=1, keep_dims=True)
-        cross_term = square_of_sum - sum_of_square
-        cross_term = 0.5 * tf.reduce_sum(cross_term, axis=2, keep_dims=False)
-
-        return cross_term
-
-    def compute_output_shape(self, input_shape):
-        return (None, 1)
 
 
 class AFMLayer(Layer):
@@ -106,7 +59,7 @@ class AFMLayer(Layer):
         if len(input_shape[0]) != 3 or input_shape[0][1] != 1:
             raise ValueError('A `AttentionalFM` layer requires '
                              'inputs of a list with same shape tensor like\
-                             (None, 1, embedding_size)'\
+                             (None, 1, embedding_size)'
                              'Got different shapes: %s' % (input_shape[0]))
 
         embedding_size = input_shape[0][-1].value
@@ -173,37 +126,176 @@ class AFMLayer(Layer):
         return dict(list(base_config.items()) + list(config.items()))
 
 
-class PredictionLayer(Layer):
+class BiInteractionPooling(Layer):
+    """Bi-Interaction Layer used in Neural FM,compress the pairwise element-wise product of features into one single vector.
 
-    def __init__(self, activation='sigmoid', use_bias=True, **kwargs):
-        self.activation = activation
-        self.use_bias = use_bias
-        super(PredictionLayer, self).__init__(**kwargs)
+      Input shape
+        - A 3D tensor with shape:``(batch_size,field_size,embedding_size)``.
+
+      Output shape
+        - 3D tensor with shape: ``(batch_size,1,embedding_size)``.
+
+      References
+        - [He X, Chua T S. Neural factorization machines for sparse predictive analytics[C]//Proceedings of the 40th International ACM SIGIR conference on Research and Development in Information Retrieval. ACM, 2017: 355-364.](http://arxiv.org/abs/1708.05027)
+    """
+
+    def __init__(self, **kwargs):
+
+        super(BiInteractionPooling, self).__init__(**kwargs)
 
     def build(self, input_shape):
 
-        if self.use_bias:
-            self.global_bias = self.add_weight(
-                shape=(1,), initializer=Zeros(), name="global_bias")
+        if len(input_shape) != 3:
+            raise ValueError(
+                "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (len(input_shape)))
 
-        # Be sure to call this somewhere!
-        super(PredictionLayer, self).build(input_shape)
+        super(BiInteractionPooling, self).build(
+            input_shape)  # Be sure to call this somewhere!
 
     def call(self, inputs, **kwargs):
-        x = inputs
-        if self.use_bias:
-            x = tf.nn.bias_add(x, self.global_bias, data_format='NHWC')
-        output = activation_fun(self.activation, x)
-        output = tf.reshape(output, (-1, 1))
 
-        return output
+        if K.ndim(inputs) != 3:
+            raise ValueError(
+                "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
+
+        concated_embeds_value = inputs
+        square_of_sum = tf.square(tf.reduce_sum(
+            concated_embeds_value, axis=1, keep_dims=True))
+        sum_of_square = tf.reduce_sum(
+            concated_embeds_value * concated_embeds_value, axis=1, keep_dims=True)
+        cross_term = 0.5*(square_of_sum - sum_of_square)
+
+        return cross_term
 
     def compute_output_shape(self, input_shape):
-        return (None, 1)
+        return (None, 1, input_shape[-1])
 
-    def get_config(self,):
-        config = {'activation': self.activation, 'use_bias': self.use_bias}
-        base_config = super(PredictionLayer, self).get_config()
+
+class CIN(Layer):
+    """Compressed Interaction Network used in xDeepFM.This implemention  is adapted from code that the author of the paper published on https://github.com/Leavingseason/xDeepFM.
+
+      Input shape
+        - 3D tensor with shape: ``(batch_size,field_size,embedding_size)``.
+
+      Output shape
+        - 2D tensor with shape: ``(batch_size, final_len)``.``final_len =  sum(layer_size)`` if ``direct=True``,else  ``sum(self.layer_size[:-1]) // 2 + self.layer_size[-1]`` .
+
+
+      Arguments
+        - **layer_size** : list of int.Feature maps in each layer.
+
+        - **activation** : activation function used on feature maps.
+
+        - **split_half** : bool.if set to False, half of the feature maps in each hidden will connect to output unit. 
+
+        - **seed** : A Python integer to use as random seed.
+
+      References
+        - [Lian J, Zhou X, Zhang F, et al. xDeepFM: Combining Explicit and Implicit Feature Interactions for Recommender Systems[J]. arXiv preprint arXiv:1803.05170, 2018.] (https://arxiv.org/pdf/1803.05170.pdf)
+    """
+
+    def __init__(self, layer_size=(128, 128), activation='relu',  split_half=True, seed=1024, **kwargs):
+        if len(layer_size) == 0:
+            raise ValueError(
+                "layer_size must be a list(tuple) of length greater than 1")
+        self.layer_size = layer_size
+        self.split_half = split_half
+        self.activation = activation
+        self.seed = seed
+        super(CIN, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+        if len(input_shape) != 3:
+            raise ValueError(
+                "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (len(input_shape)))
+
+        self.field_nums = [input_shape[1].value]
+        self.filters = []
+        self.bias = []
+        for i, size in enumerate(self.layer_size):
+
+            self.filters.append(self.add_weight(name='filter' + str(i),
+                                                shape=[1, self.field_nums[-1]
+                                                       * self.field_nums[0], size],
+                                                dtype=tf.float32, initializer=glorot_uniform(seed=self.seed + i)))
+
+            self.bias.append(self.add_weight(name='bias' + str(i), shape=[size], dtype=tf.float32,
+                                             initializer=tf.keras.initializers.Zeros()))
+
+            if self.direct:
+                self.field_nums.append(size)
+            else:
+                if i != len(self.layer_size) - 1 and size % 2 > 0:
+                    raise ValueError(
+                        "layer_size must be even number except for the last layer when direct=False")
+
+                self.field_nums.append(size // 2)
+
+        super(CIN, self).build(input_shape)  # Be sure to call this somewhere!
+
+    def call(self, inputs, **kwargs):
+
+        if K.ndim(inputs) != 3:
+            raise ValueError(
+                "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
+
+        dim = inputs.get_shape()[-1].value
+        hidden_nn_layers = [inputs]
+        final_result = []
+
+        split_tensor0 = tf.split(hidden_nn_layers[0], dim * [1], 2)
+        for idx, layer_size in enumerate(self.layer_size):
+            split_tensor = tf.split(hidden_nn_layers[-1], dim * [1], 2)
+
+            dot_result_m = tf.matmul(
+                split_tensor0, split_tensor, transpose_b=True)
+
+            dot_result_o = tf.reshape(
+                dot_result_m, shape=[dim, -1, self.field_nums[0] * self.field_nums[idx]])
+
+            dot_result = tf.transpose(dot_result_o, perm=[1, 0, 2])
+
+            curr_out = tf.nn.conv1d(
+                dot_result, filters=self.filters[idx], stride=1, padding='VALID')
+
+            curr_out = tf.nn.bias_add(curr_out, self.bias[idx])
+
+            curr_out = activation_fun(self.activation, curr_out)
+
+            curr_out = tf.transpose(curr_out, perm=[0, 2, 1])
+
+            if split_half:
+                if idx != len(self.layer_size) - 1:
+                    next_hidden, direct_connect = tf.split(
+                        curr_out, 2 * [layer_size // 2], 1)
+                else:
+                    direct_connect = curr_out
+                    next_hidden = 0
+            else:
+                direct_connect = curr_out
+                next_hidden = curr_out
+
+            final_result.append(direct_connect)
+            hidden_nn_layers.append(next_hidden)
+
+        result = tf.concat(final_result, axis=1)
+        result = tf.reduce_sum(result, -1, keep_dims=False)
+
+        return result
+
+    def compute_output_shape(self, input_shape):
+        if self.direct:
+            final_len = sum(self.layer_size)
+        else:
+            final_len = sum(self.layer_size[:-1]) // 2 + self.layer_size[-1]
+
+        return (None, final_len)
+
+    def get_config(self, ):
+
+        config = {'layer_size': self.layer_size, 'split_half': self.split_half, 'activation': self.activation,
+                  'seed': self.seed}
+        base_config = super(CIN, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
 
@@ -279,269 +371,51 @@ class CrossNet(Layer):
         return input_shape
 
 
-class MLP(Layer):
-    """The Multi Layer Percetron
+class FM(Layer):
+    """Factorization Machine models pairwise (order-2) feature interactions
+     without linear term and bias.
 
       Input shape
-        - nD tensor with shape: ``(batch_size, ..., input_dim)``. The most common situation would be a 2D input with shape ``(batch_size, input_dim)``.
+        - 3D tensor with shape: ``(batch_size,field_size,embedding_size)``.
 
       Output shape
-        - nD tensor with shape: ``(batch_size, ..., hidden_size[-1])``. For instance, for a 2D input with shape ``(batch_size, input_dim)``, the output would have shape ``(batch_size, hidden_size[-1])``.
-
-      Arguments
-        - **hidden_size**:list of positive integer, the layer number and units in each layer.
-
-        - **activation**: Activation function to use.
-
-        - **l2_reg**: float between 0 and 1. L2 regularizer strength applied to the kernel weights matrix.
-
-        - **keep_prob**: float between 0 and 1. Fraction of the units to keep.
-
-        - **use_bn**: bool. Whether use BatchNormalization before activation or not.
-
-        - **seed**: A Python integer to use as random seed.
-    """
-
-    def __init__(self,  hidden_size, activation='relu', l2_reg=0, keep_prob=1, use_bn=False, seed=1024, **kwargs):
-        self.hidden_size = hidden_size
-        self.activation = activation
-        self.keep_prob = keep_prob
-        self.seed = seed
-        self.l2_reg = l2_reg
-        self.use_bn = use_bn
-        super(MLP, self).__init__(**kwargs)
-
-    def build(self, input_shape):
-        input_size = input_shape[-1]
-        hidden_units = [int(input_size)] + list(self.hidden_size)
-        self.kernels = [self.add_weight(name='kernel' + str(i),
-                                        shape=(
-                                            hidden_units[i], hidden_units[i+1]),
-                                        initializer=glorot_normal(
-                                            seed=self.seed),
-                                        regularizer=l2(self.l2_reg),
-                                        trainable=True) for i in range(len(self.hidden_size))]
-        self.bias = [self.add_weight(name='bias' + str(i),
-                                     shape=(self.hidden_size[i],),
-                                     initializer=Zeros(),
-                                     trainable=True) for i in range(len(self.hidden_size))]
-
-        super(MLP, self).build(input_shape)  # Be sure to call this somewhere!
-
-    def call(self, inputs, **kwargs):
-        deep_input = inputs
-
-        for i in range(len(self.hidden_size)):
-            fc = tf.nn.bias_add(tf.tensordot(
-                deep_input, self.kernels[i], axes=(-1, 0)), self.bias[i])
-            # fc = Dense(self.hidden_size[i], activation=None, \
-            #           kernel_initializer=glorot_normal(seed=self.seed), \
-            #           kernel_regularizer=l2(self.l2_reg))(deep_input)
-            if self.use_bn:
-                fc = BatchNormalization()(fc)
-            fc = activation_fun(self.activation, fc)
-            fc = tf.nn.dropout(fc, self.keep_prob)
-            deep_input = fc
-
-        return deep_input
-
-    def compute_output_shape(self, input_shape):
-        if len(self.hidden_size) > 0:
-            shape = input_shape[:-1] + (self.hidden_size[-1],)
-        else:
-            shape = input_shape
-
-        return tuple(shape)
-
-    def get_config(self,):
-        config = {'activation': self.activation, 'hidden_size': self.hidden_size,
-                  'l2_reg': self.l2_reg, 'use_bn': self.use_bn, 'keep_prob': self.keep_prob, 'seed': self.seed}
-        base_config = super(MLP, self).get_config()
-        return dict(list(base_config.items()) + list(config.items()))
-
-
-class BiInteractionPooling(Layer):
-    """Bi-Interaction Layer used in Neural FM,compress the pairwise element-wise product of features into one single vector.
-
-      Input shape
-        - A 3D tensor with shape:``(batch_size,field_size,embedding_size)``.
-
-      Output shape
-        - 3D tensor with shape: ``(batch_size,1,embedding_size)``.
+        - 2D tensor with shape: ``(batch_size, 1)``.
 
       References
-        - [He X, Chua T S. Neural factorization machines for sparse predictive analytics[C]//Proceedings of the 40th International ACM SIGIR conference on Research and Development in Information Retrieval. ACM, 2017: 355-364.](http://arxiv.org/abs/1708.05027)
+        - [Factorization Machines](https://www.csie.ntu.edu.tw/~b97053/paper/Rendle2010FM.pdf)
     """
 
     def __init__(self, **kwargs):
 
-        super(BiInteractionPooling, self).__init__(**kwargs)
+        super(FM, self).__init__(**kwargs)
 
     def build(self, input_shape):
-
         if len(input_shape) != 3:
-            raise ValueError(
-                "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (len(input_shape)))
+            raise ValueError("Unexpected inputs dimensions % d,\
+                             expect to be 3 dimensions" % (len(input_shape)))
 
-        super(BiInteractionPooling, self).build(
-            input_shape)  # Be sure to call this somewhere!
+        super(FM, self).build(input_shape)  # Be sure to call this somewhere!
 
     def call(self, inputs, **kwargs):
 
         if K.ndim(inputs) != 3:
             raise ValueError(
-                "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
+                "Unexpected inputs dimensions %d, expect to be 3 dimensions"
+                % (K.ndim(inputs)))
 
         concated_embeds_value = inputs
+
         square_of_sum = tf.square(tf.reduce_sum(
             concated_embeds_value, axis=1, keep_dims=True))
         sum_of_square = tf.reduce_sum(
             concated_embeds_value * concated_embeds_value, axis=1, keep_dims=True)
-        cross_term = 0.5*(square_of_sum - sum_of_square)
+        cross_term = square_of_sum - sum_of_square
+        cross_term = 0.5 * tf.reduce_sum(cross_term, axis=2, keep_dims=False)
 
         return cross_term
 
     def compute_output_shape(self, input_shape):
-        return (None, 1, input_shape[-1])
-
-
-class OutterProductLayer(Layer):
-    """OutterProduct Layer used in PNN.This implemention  is adapted from code that the author of the paper published on https://github.com/Atomu2014/product-nets.
-
-      Input shape
-            - A list of N 3D tensor with shape: ``(batch_size,1,embedding_size)``.
-
-      Output shape
-            - 2D tensor with shape:``(batch_size,N*(N-1)/2 )``.
-
-      Arguments
-            - **kernel_type**: str. The kernel weight matrix type to use,can be mat,vec or num
-
-            - **seed**: A Python integer to use as random seed.
-
-      References
-            - [Qu Y, Cai H, Ren K, et al. Product-based neural networks for user response prediction[C]//Data Mining (ICDM), 2016 IEEE 16th International Conference on. IEEE, 2016: 1149-1154.](https://arxiv.org/pdf/1611.00144.pdf)
-    """
-
-    def __init__(self, kernel_type='mat', seed=1024, **kwargs):
-        if kernel_type not in ['mat', 'vec', 'num']:
-            raise ValueError("kernel_type must be mat,vec or num")
-        self.kernel_type = kernel_type
-        self.seed = seed
-        super(OutterProductLayer, self).__init__(**kwargs)
-
-    def build(self, input_shape):
-
-        if not isinstance(input_shape, list) or len(input_shape) < 2:
-            raise ValueError('A `OutterProductLayer` layer should be called '
-                             'on a list of at least 2 inputs')
-
-        reduced_inputs_shapes = [shape.as_list() for shape in input_shape]
-        shape_set = set()
-
-        for i in range(len(input_shape)):
-            shape_set.add(tuple(reduced_inputs_shapes[i]))
-
-        if len(shape_set) > 1:
-            raise ValueError('A `OutterProductLayer` layer requires '
-                             'inputs with same shapes '
-                             'Got different shapes: %s' % (shape_set))
-
-        if len(input_shape[0]) != 3 or input_shape[0][1] != 1:
-            raise ValueError('A `OutterProductLayer` layer requires '
-                             'inputs of a list with same shape tensor like (None,1,embedding_size)'
-                             'Got different shapes: %s' % (input_shape[0]))
-        num_inputs = len(input_shape)
-        num_pairs = int(num_inputs * (num_inputs - 1) / 2)
-        input_shape = input_shape[0]
-        embed_size = input_shape[-1].value
-        if self.kernel_type == 'mat':
-
-            self.kernel = self.add_weight(shape=(embed_size, num_pairs, embed_size), initializer=glorot_uniform(seed=self.seed),
-                                          name='kernel')
-        elif self.kernel_type == 'vec':
-            self.kernel = self.add_weight(shape=(num_pairs, embed_size,), initializer=glorot_uniform(self.seed), name='kernel'
-                                          )
-        elif self.kernel_type == 'num':
-            self.kernel = self.add_weight(
-                shape=(num_pairs, 1), initializer=glorot_uniform(self.seed), name='kernel')
-
-        super(OutterProductLayer, self).build(
-            input_shape)  # Be sure to call this somewhere!
-
-    def call(self, inputs, **kwargs):
-
-        if K.ndim(inputs[0]) != 3:
-            raise ValueError(
-                "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
-
-        embed_list = inputs
-        row = []
-        col = []
-        num_inputs = len(embed_list)
-        for i in range(num_inputs - 1):
-            for j in range(i + 1, num_inputs):
-                row.append(i)
-                col.append(j)
-        p = tf.concat([embed_list[idx]
-                       for idx in row], axis=1)  # batch num_pairs k
-        # Reshape([num_pairs, self.embedding_size])
-        q = tf.concat([embed_list[idx] for idx in col], axis=1)
-
-        # -------------------------
-        if self.kernel_type == 'mat':
-            p = tf.expand_dims(p, 1)
-            # k     k* pair* k
-            # batch * pair
-            kp = tf.reduce_sum(
-
-                # batch * pair * k
-
-                tf.multiply(
-
-                    # batch * pair * k
-
-                    tf.transpose(
-
-                        # batch * k * pair
-
-                        tf.reduce_sum(
-
-                            # batch * k * pair * k
-
-                            tf.multiply(
-
-                                p, self.kernel),
-
-                            -1),
-
-                        [0, 2, 1]),
-
-                    q),
-
-                -1)
-        else:
-            # 1 * pair * (k or 1)
-
-            k = tf.expand_dims(self.kernel, 0)
-
-            # batch * pair
-
-            kp = tf.reduce_sum(p * q * k, -1)
-
-            # p q # b * p * k
-
-        return kp
-
-    def compute_output_shape(self, input_shape):
-        num_inputs = len(input_shape)
-        num_pairs = int(num_inputs * (num_inputs - 1) / 2)
-        return (None, num_pairs)
-
-    def get_config(self,):
-        config = {'kernel_type': self.kernel_type, 'seed': self.seed}
-        base_config = super(OutterProductLayer, self).get_config()
-        return dict(list(base_config.items()) + list(config.items()))
+        return (None, 1)
 
 
 class InnerProductLayer(Layer):
@@ -717,128 +591,255 @@ class LocalActivationUnit(Layer):
         return dict(list(base_config.items()) + list(config.items()))
 
 
-class CIN(Layer):
-    """Compressed Interaction Network used in xDeepFM.This implemention  is adapted from code that the author of the paper published on https://github.com/Leavingseason/xDeepFM.
+class MLP(Layer):
+    """The Multi Layer Percetron
 
       Input shape
-        - 3D tensor with shape: ``(batch_size,field_size,embedding_size)``.
+        - nD tensor with shape: ``(batch_size, ..., input_dim)``. The most common situation would be a 2D input with shape ``(batch_size, input_dim)``.
 
       Output shape
-        - 2D tensor with shape: ``(batch_size, final_len)``.final_len =  sum(layer_size) if direct=True,else  sum(self.layer_size[:-1]) // 2 + self.layer_size[-1]
+        - nD tensor with shape: ``(batch_size, ..., hidden_size[-1])``. For instance, for a 2D input with shape ``(batch_size, input_dim)``, the output would have shape ``(batch_size, hidden_size[-1])``.
 
+      Arguments
+        - **hidden_size**:list of positive integer, the layer number and units in each layer.
 
-    Arguments
-        - **layer_size** : Positive integer, dimensionality of the attention network output space.
+        - **activation**: Activation function to use.
 
-        - **activation** : float between 0 and 1. L2 regularizer strength applied to attention network.
+        - **l2_reg**: float between 0 and 1. L2 regularizer strength applied to the kernel weights matrix.
 
-        - **direct** : float between 0 and 1. Fraction of the attention net output units to keep.
+        - **keep_prob**: float between 0 and 1. Fraction of the units to keep.
 
-        - **seed** : A Python integer to use as random seed.
+        - **use_bn**: bool. Whether use BatchNormalization before activation or not.
 
-      References
-        - [Lian J, Zhou X, Zhang F, et al. xDeepFM: Combining Explicit and Implicit Feature Interactions for Recommender Systems[J]. arXiv preprint arXiv:1803.05170, 2018.](https://arxiv.org/pdf/1803.05170.pdf)
+        - **seed**: A Python integer to use as random seed.
     """
 
-    def __init__(self, layer_size=(128, 128),activation='relu',  direct=False, seed=1024, **kwargs):
-        if len(layer_size) == 0:
-            raise ValueError("layer_size must be a list(tuple) of length greater than 1")
-        self.layer_size = layer_size
-        self.direct = direct
+    def __init__(self,  hidden_size, activation='relu', l2_reg=0, keep_prob=1, use_bn=False, seed=1024, **kwargs):
+        self.hidden_size = hidden_size
         self.activation = activation
+        self.keep_prob = keep_prob
         self.seed = seed
-        super(CIN, self).__init__(**kwargs)
+        self.l2_reg = l2_reg
+        self.use_bn = use_bn
+        super(MLP, self).__init__(**kwargs)
 
     def build(self, input_shape):
-        if len(input_shape) != 3:
-            raise ValueError(
-                "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (len(input_shape)))
+        input_size = input_shape[-1]
+        hidden_units = [int(input_size)] + list(self.hidden_size)
+        self.kernels = [self.add_weight(name='kernel' + str(i),
+                                        shape=(
+                                            hidden_units[i], hidden_units[i+1]),
+                                        initializer=glorot_normal(
+                                            seed=self.seed),
+                                        regularizer=l2(self.l2_reg),
+                                        trainable=True) for i in range(len(self.hidden_size))]
+        self.bias = [self.add_weight(name='bias' + str(i),
+                                     shape=(self.hidden_size[i],),
+                                     initializer=Zeros(),
+                                     trainable=True) for i in range(len(self.hidden_size))]
 
-        self.field_nums = [input_shape[1].value]
-        self.filters = []
-        self.bias = []
-        for i, size in enumerate(self.layer_size):
+        super(MLP, self).build(input_shape)  # Be sure to call this somewhere!
 
-            self.filters.append(self.add_weight(name='filter' + str(i),
-                                                shape=[1, self.field_nums[-1]
-                                                       * self.field_nums[0], size],
-                                                dtype=tf.float32, initializer=glorot_uniform(seed=self.seed + i)))
+    def call(self, inputs, **kwargs):
+        deep_input = inputs
 
-            self.bias.append(self.add_weight(name='bias' + str(i), shape=[size], dtype=tf.float32,
-                                             initializer=tf.keras.initializers.Zeros()))
+        for i in range(len(self.hidden_size)):
+            fc = tf.nn.bias_add(tf.tensordot(
+                deep_input, self.kernels[i], axes=(-1, 0)), self.bias[i])
+            # fc = Dense(self.hidden_size[i], activation=None, \
+            #           kernel_initializer=glorot_normal(seed=self.seed), \
+            #           kernel_regularizer=l2(self.l2_reg))(deep_input)
+            if self.use_bn:
+                fc = BatchNormalization()(fc)
+            fc = activation_fun(self.activation, fc)
+            fc = tf.nn.dropout(fc, self.keep_prob)
+            deep_input = fc
 
-            if self.direct:
-                self.field_nums.append(size)
-            else:
-                if i != len(self.layer_size) - 1 and size % 2 > 0:
-                    raise ValueError(
-                        "layer_size must be even number except for the last layer when direct=False")
+        return deep_input
 
-                self.field_nums.append(size // 2)
+    def compute_output_shape(self, input_shape):
+        if len(self.hidden_size) > 0:
+            shape = input_shape[:-1] + (self.hidden_size[-1],)
+        else:
+            shape = input_shape
 
-        super(CIN, self).build(input_shape)  # Be sure to call this somewhere!
+        return tuple(shape)
+
+    def get_config(self,):
+        config = {'activation': self.activation, 'hidden_size': self.hidden_size,
+                  'l2_reg': self.l2_reg, 'use_bn': self.use_bn, 'keep_prob': self.keep_prob, 'seed': self.seed}
+        base_config = super(MLP, self).get_config()
+        return dict(list(base_config.items()) + list(config.items()))
+
+
+class OutterProductLayer(Layer):
+    """OutterProduct Layer used in PNN.This implemention  is adapted from code that the author of the paper published on https://github.com/Atomu2014/product-nets.
+
+      Input shape
+            - A list of N 3D tensor with shape: ``(batch_size,1,embedding_size)``.
+
+      Output shape
+            - 2D tensor with shape:``(batch_size,N*(N-1)/2 )``.
+
+      Arguments
+            - **kernel_type**: str. The kernel weight matrix type to use,can be mat,vec or num
+
+            - **seed**: A Python integer to use as random seed.
+
+      References
+            - [Qu Y, Cai H, Ren K, et al. Product-based neural networks for user response prediction[C]//Data Mining (ICDM), 2016 IEEE 16th International Conference on. IEEE, 2016: 1149-1154.](https://arxiv.org/pdf/1611.00144.pdf)
+    """
+
+    def __init__(self, kernel_type='mat', seed=1024, **kwargs):
+        if kernel_type not in ['mat', 'vec', 'num']:
+            raise ValueError("kernel_type must be mat,vec or num")
+        self.kernel_type = kernel_type
+        self.seed = seed
+        super(OutterProductLayer, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+
+        if not isinstance(input_shape, list) or len(input_shape) < 2:
+            raise ValueError('A `OutterProductLayer` layer should be called '
+                             'on a list of at least 2 inputs')
+
+        reduced_inputs_shapes = [shape.as_list() for shape in input_shape]
+        shape_set = set()
+
+        for i in range(len(input_shape)):
+            shape_set.add(tuple(reduced_inputs_shapes[i]))
+
+        if len(shape_set) > 1:
+            raise ValueError('A `OutterProductLayer` layer requires '
+                             'inputs with same shapes '
+                             'Got different shapes: %s' % (shape_set))
+
+        if len(input_shape[0]) != 3 or input_shape[0][1] != 1:
+            raise ValueError('A `OutterProductLayer` layer requires '
+                             'inputs of a list with same shape tensor like (None,1,embedding_size)'
+                             'Got different shapes: %s' % (input_shape[0]))
+        num_inputs = len(input_shape)
+        num_pairs = int(num_inputs * (num_inputs - 1) / 2)
+        input_shape = input_shape[0]
+        embed_size = input_shape[-1].value
+        if self.kernel_type == 'mat':
+
+            self.kernel = self.add_weight(shape=(embed_size, num_pairs, embed_size), initializer=glorot_uniform(seed=self.seed),
+                                          name='kernel')
+        elif self.kernel_type == 'vec':
+            self.kernel = self.add_weight(shape=(num_pairs, embed_size,), initializer=glorot_uniform(self.seed), name='kernel'
+                                          )
+        elif self.kernel_type == 'num':
+            self.kernel = self.add_weight(
+                shape=(num_pairs, 1), initializer=glorot_uniform(self.seed), name='kernel')
+
+        super(OutterProductLayer, self).build(
+            input_shape)  # Be sure to call this somewhere!
 
     def call(self, inputs, **kwargs):
 
-        if K.ndim(inputs) != 3:
+        if K.ndim(inputs[0]) != 3:
             raise ValueError(
                 "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
 
-        dim = inputs.get_shape()[-1].value
-        hidden_nn_layers = [inputs]
-        final_result = []
+        embed_list = inputs
+        row = []
+        col = []
+        num_inputs = len(embed_list)
+        for i in range(num_inputs - 1):
+            for j in range(i + 1, num_inputs):
+                row.append(i)
+                col.append(j)
+        p = tf.concat([embed_list[idx]
+                       for idx in row], axis=1)  # batch num_pairs k
+        # Reshape([num_pairs, self.embedding_size])
+        q = tf.concat([embed_list[idx] for idx in col], axis=1)
 
-        split_tensor0 = tf.split(hidden_nn_layers[0], dim * [1], 2)
-        for idx, layer_size in enumerate(self.layer_size):
-            split_tensor = tf.split(hidden_nn_layers[-1], dim * [1], 2)
+        # -------------------------
+        if self.kernel_type == 'mat':
+            p = tf.expand_dims(p, 1)
+            # k     k* pair* k
+            # batch * pair
+            kp = tf.reduce_sum(
 
-            dot_result_m = tf.matmul(
-                split_tensor0, split_tensor, transpose_b=True)
+                # batch * pair * k
 
-            dot_result_o = tf.reshape(
-                dot_result_m, shape=[dim, -1, self.field_nums[0] * self.field_nums[idx]])
+                tf.multiply(
 
-            dot_result = tf.transpose(dot_result_o, perm=[1, 0, 2])
+                    # batch * pair * k
 
-            curr_out = tf.nn.conv1d(
-                dot_result, filters=self.filters[idx], stride=1, padding='VALID')
+                    tf.transpose(
 
-            curr_out = tf.nn.bias_add(curr_out, self.bias[idx])
+                        # batch * k * pair
 
-            curr_out = activation_fun(self.activation, curr_out)
+                        tf.reduce_sum(
 
-            curr_out = tf.transpose(curr_out, perm=[0, 2, 1])
+                            # batch * k * pair * k
 
-            if self.direct:
-                direct_connect = curr_out
-                next_hidden = curr_out
-            else:
-                if idx != len(self.layer_size) - 1:
-                    next_hidden, direct_connect = tf.split(
-                        curr_out, 2 * [layer_size // 2], 1)
-                else:
-                    direct_connect = curr_out
-                    next_hidden = 0
+                            tf.multiply(
 
-            final_result.append(direct_connect)
-            hidden_nn_layers.append(next_hidden)
+                                p, self.kernel),
 
-        result = tf.concat(final_result, axis=1)
-        result = tf.reduce_sum(result, -1, keep_dims=False)
+                            -1),
 
-        return result
+                        [0, 2, 1]),
+
+                    q),
+
+                -1)
+        else:
+            # 1 * pair * (k or 1)
+
+            k = tf.expand_dims(self.kernel, 0)
+
+            # batch * pair
+
+            kp = tf.reduce_sum(p * q * k, -1)
+
+            # p q # b * p * k
+
+        return kp
 
     def compute_output_shape(self, input_shape):
-        if self.direct:
-            final_len = sum(self.layer_size)
-        else:
-            final_len = sum(self.layer_size[:-1]) // 2 + self.layer_size[-1]
+        num_inputs = len(input_shape)
+        num_pairs = int(num_inputs * (num_inputs - 1) / 2)
+        return (None, num_pairs)
 
-        return (None, final_len)
+    def get_config(self,):
+        config = {'kernel_type': self.kernel_type, 'seed': self.seed}
+        base_config = super(OutterProductLayer, self).get_config()
+        return dict(list(base_config.items()) + list(config.items()))
 
-    def get_config(self, ):
 
-        config = {'layer_size': self.layer_size, 'direct': self.direct, 'activation': self.activation,
-                  'seed': self.seed}
-        base_config = super(CIN, self).get_config()
+class PredictionLayer(Layer):
+
+    def __init__(self, activation='sigmoid', use_bias=True, **kwargs):
+        self.activation = activation
+        self.use_bias = use_bias
+        super(PredictionLayer, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+
+        if self.use_bias:
+            self.global_bias = self.add_weight(
+                shape=(1,), initializer=Zeros(), name="global_bias")
+
+        # Be sure to call this somewhere!
+        super(PredictionLayer, self).build(input_shape)
+
+    def call(self, inputs, **kwargs):
+        x = inputs
+        if self.use_bias:
+            x = tf.nn.bias_add(x, self.global_bias, data_format='NHWC')
+        output = activation_fun(self.activation, x)
+        output = tf.reshape(output, (-1, 1))
+
+        return output
+
+    def compute_output_shape(self, input_shape):
+        return (None, 1)
+
+    def get_config(self,):
+        config = {'activation': self.activation, 'use_bias': self.use_bias}
+        base_config = super(PredictionLayer, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))

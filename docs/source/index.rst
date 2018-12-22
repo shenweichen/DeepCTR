@@ -27,7 +27,7 @@ Welcome to DeepCTR's documentation!
 .. _Activity: https://github.com/shenweichen/DeepCTR
 
 
-DeepCTR is a **Easy-to-use** , **Modular** and **Extendible** package of deep-learning based CTR models along with lots of core components layer  which can be used to build your own custom model easily.You can use any complex model with ``model.fit()`` and ``model.predict()`` just like any other keras model.And the layers are compatible with tensorflow.
+DeepCTR is a **Easy-to-use** , **Modular** and **Extendible** package of deep-learning based CTR models along with lots of core components layer  which can be used to build your own custom model easily.You can use any complex model with ``model.fit()`` and ``model.predict()``.And the layers are compatible with tensorflow.
 
 Through  ``pip install deepctr``  get the package and `Get Started! <./Quick-Start.html>`_
 
