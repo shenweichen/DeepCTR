@@ -3,6 +3,7 @@ import pytest
 from deepctr.models import DeepFM
 from deepctr.utils import custom_objects
 from tensorflow.python.keras.models import save_model, load_model
+from ..utils import check_model
 
 
 @pytest.mark.parametrize(

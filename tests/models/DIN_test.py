@@ -4,6 +4,7 @@ from deepctr.models import DIN
 from deepctr.activations import Dice
 from deepctr.utils import custom_objects
 from tensorflow.python.keras.models import load_model, save_model
+from ..utils import check_model
 
 
 def get_xy_fd():
