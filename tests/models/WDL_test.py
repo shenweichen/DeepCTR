@@ -1,7 +1,9 @@
 import numpy as np
+import pytest
+from tensorflow.python.keras.models import load_model, save_model
+
 from deepctr.models import WDL
 from deepctr.utils import custom_objects
-from tensorflow.python.keras.models import save_model, load_model
 
 
 @pytest.mark.parametrize(
