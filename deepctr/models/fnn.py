@@ -13,7 +13,7 @@ from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.regularizers import l2
 
 from ..layers import PredictionLayer, MLP
-from ..utils import get_input
+from ..utils import get_input, get_share_embeddings
 
 
 def FNN(feature_dim_dict, embedding_size=8,
@@ -42,12 +42,8 @@ def FNN(feature_dim_dict, embedding_size=8,
             "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
 
     sparse_input, dense_input = get_input(feature_dim_dict, None)
-    # sparse_embedding = [Embedding(feature_dim_dict["sparse"][feat], embedding_size,
-    #                              embeddings_initializer=RandomNormal( mean=0.0, stddev=init_std, seed=seed),
-    #   embeddings_regularizer=l2( l2_reg_embedding),name='sparse_emb_' + str(i) + '-' + feat) for i, feat in
-    #   enumerate(feature_dim_dict["sparse"])]
-    sparse_embedding, linear_embedding, = get_embeddings(feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding,
-                                                         l2_reg_linear)
+    sparse_embedding, linear_embedding, = get_share_embeddings(feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding,
+                                                               l2_reg_linear)
 
     embed_list = [sparse_embedding[i](sparse_input[i])
                   for i in range(len(feature_dim_dict["sparse"]))]
@@ -56,10 +52,11 @@ def FNN(feature_dim_dict, embedding_size=8,
                    for i in range(len(sparse_input))]
     if len(linear_term) > 1:
         linear_term = add(linear_term)
-    elif len(linear_term) > 0:
+    elif len(linear_term) == 1:
         linear_term = linear_term[0]
+    else:
+        linear_term = 0
 
-    #linear_term = add([linear_embedding[i](sparse_input[i]) for i in range(len(feature_dim_dict["sparse"]))])
     if len(dense_input) > 0:
         continuous_embedding_list = list(
             map(Dense(embedding_size, use_bias=False, kernel_regularizer=l2(l2_reg_embedding), ),
@@ -85,19 +82,3 @@ def FNN(feature_dim_dict, embedding_size=8,
     model = Model(inputs=sparse_input + dense_input,
                   outputs=output)
     return model
-
-
-def get_embeddings(feature_dim_dict, embedding_size, init_std, seed, l2_rev_V, l2_reg_w):
-    sparse_embedding = [Embedding(feature_dim_dict["sparse"][feat], embedding_size,
-                                  embeddings_initializer=RandomNormal(
-                                      mean=0.0, stddev=init_std, seed=seed),
-                                  embeddings_regularizer=l2(l2_rev_V),
-                                  name='sparse_emb_' + str(i) + '-' + feat) for i, feat in
-                        enumerate(feature_dim_dict["sparse"])]
-    linear_embedding = [Embedding(feature_dim_dict["sparse"][feat], 1,
-                                  embeddings_initializer=RandomNormal(mean=0.0, stddev=init_std,
-                                                                      seed=seed), embeddings_regularizer=l2(l2_reg_w),
-                                  name='linear_emb_' + str(i) + '-' + feat) for
-                        i, feat in enumerate(feature_dim_dict["sparse"])]
-
-    return sparse_embedding, linear_embedding

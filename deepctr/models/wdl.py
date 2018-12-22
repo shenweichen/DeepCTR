@@ -12,12 +12,10 @@ from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.regularizers import l2
 from ..layers import PredictionLayer, MLP
-from ..utils import get_input
+from ..utils import get_input, get_sep_embeddings
 
 
-def WDL(deep_feature_dim_dict, wide_feature_dim_dict, embedding_size=8, hidden_size=(128, 128), l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_deep=0,
-        init_std=0.0001, seed=1024, keep_prob=1, activation='relu', final_activation='sigmoid',
-        ):
+def WDL(deep_feature_dim_dict, wide_feature_dim_dict, embedding_size=8, hidden_size=(128, 128), l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_deep=0, init_std=0.0001, seed=1024, keep_prob=1, activation='relu', final_activation='sigmoid',):
     """Instantiates the Wide&Deep Learning architecture.
 
     :param deep_feature_dim_dict: dict,to indicate sparse field and dense field in deep part like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
@@ -41,7 +39,7 @@ def WDL(deep_feature_dim_dict, wide_feature_dim_dict, embedding_size=8, hidden_s
 
     sparse_input, dense_input, bias_sparse_input, bias_dense_input = get_input(
         deep_feature_dim_dict, wide_feature_dim_dict)
-    sparse_embedding, wide_linear_embedding = get_embeddings(
+    sparse_embedding, wide_linear_embedding = get_sep_embeddings(
         deep_feature_dim_dict, wide_feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding, l2_reg_linear)
 
     embed_list = [sparse_embedding[i](sparse_input[i])
@@ -71,19 +69,3 @@ def WDL(deep_feature_dim_dict, wide_feature_dim_dict, embedding_size=8, hidden_s
     model = Model(inputs=sparse_input + dense_input +
                   bias_sparse_input + bias_dense_input, outputs=output)
     return model
-
-
-def get_embeddings(deep_feature_dim_dict, wide_feature_dim_dict, embedding_size, init_std, seed, l2_rev_V, l2_reg_w):
-    sparse_embedding = [Embedding(deep_feature_dim_dict["sparse"][feat], embedding_size,
-                                  embeddings_initializer=RandomNormal(
-                                      mean=0.0, stddev=init_std, seed=seed),
-                                  embeddings_regularizer=l2(l2_rev_V),
-                                  name='sparse_emb_' + str(i) + '-' + feat) for i, feat in
-                        enumerate(deep_feature_dim_dict["sparse"])]
-    linear_embedding = [Embedding(wide_feature_dim_dict["sparse"][feat], 1,
-                                  embeddings_initializer=RandomNormal(mean=0.0, stddev=init_std,
-                                                                      seed=seed), embeddings_regularizer=l2(l2_reg_w),
-                                  name='linear_emb_' + str(i) + '-' + feat) for
-                        i, feat in enumerate(wide_feature_dim_dict["sparse"])]
-
-    return sparse_embedding, linear_embedding

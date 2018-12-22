@@ -6,8 +6,8 @@ from tensorflow.python.keras.models import save_model, load_model
 
 
 @pytest.mark.parametrize(
-    'hidden_size,cin_layer_size,cin_direct,cin_activation,sparse_feature_num',
-    [((256,), (), False, 'linear', 1), ((), (256,), False, 'linear', 2), ((256,), (256,), True, 'relu', 3)
+    'hidden_size,cin_layer_size,cin_direct,cin_activation,sparse_feature_num,dense_feature_dim',
+    [((), (), False, 'linear', 1, 2), ((16,), (), False, 'linear', 1, 1), ((), (16,), False, 'linear', 2, 2), ((16,), (16,), True, 'relu', 1, 0)
      ]
 )
 def test_xDeepFM(hidden_size, cin_layer_size, cin_direct, cin_activation, sparse_feature_num):
@@ -50,7 +50,7 @@ def test_xDeepFM(hidden_size, cin_layer_size, cin_direct, cin_activation, sparse
 
 @pytest.mark.parametrize(
     'hidden_size,cin_layer_size,',
-    [((), ()), ((8,), (3, 8)),
+    [((8,), (3, 8)),
      ]
 )
 def test_xDeepFM_invalid(hidden_size, cin_layer_size):
@@ -62,4 +62,4 @@ def test_xDeepFM_invalid(hidden_size, cin_layer_size):
 
 
 if __name__ == "__main__":
-    test_xDeepFM((256), (128,), False, 'linear')
+    test_xDeepFM((256), (128,), False, 'linear', 3)

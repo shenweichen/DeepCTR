@@ -6,17 +6,23 @@ from deepctr.utils import custom_objects
 from tensorflow.python.keras.models import save_model, load_model
 
 
-
 @pytest.mark.parametrize(
-    'use_inner, use_outter',
-    [(True, True), (True, False), (False, True), (False, False)
+    'use_inner, use_outter,sparse_feature_num',
+    [(True, True, 1), (True, False, 2), (False, True, 3), (False, False, 1)
      ]
 )
-def test_PNN(use_inner, use_outter):
+def test_PNN(use_inner, use_outter, sparse_feature_num):
     model_name = "PNN"
     sample_size = 64
-    feature_dim_dict = {'sparse': {'sparse_1': 2, 'sparse_2': 5,
-                                   'sparse_3': 10}, 'dense': ['dense_1', 'dense_2', 'dense_3']}
+    feature_dim_dict = {"sparse": {}, 'dense': []}
+    for name, num in zip(["sparse", "dense"], [sparse_feature_num, sparse_feature_num]):
+        if name == "sparse":
+            for i in range(num):
+                feature_dim_dict[name][name + '_' +
+                                       str(i)] = np.random.randint(1, 10)
+        else:
+            for i in range(num):
+                feature_dim_dict[name].append(name + '_' + str(i))
     sparse_input = [np.random.randint(0, dim, sample_size)
                     for dim in feature_dim_dict['sparse'].values()]
     dense_input = [np.random.random(sample_size)
@@ -41,4 +47,4 @@ def test_PNN(use_inner, use_outter):
 
 
 if __name__ == "__main__":
-    test_PNN(use_inner=True, use_outter=False)
+    test_PNN(use_inner=True, use_outter=False, 1)

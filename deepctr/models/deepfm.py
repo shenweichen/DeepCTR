@@ -12,9 +12,7 @@ from tensorflow.python.keras.layers import Dense, Embedding, Concatenate, Reshap
 from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.regularizers import l2
-
-
-from ..utils import get_input
+from ..utils import get_input, get_share_embeddings
 from ..layers import PredictionLayer, MLP, FM
 
 
@@ -50,7 +48,7 @@ def DeepFM(feature_dim_dict, embedding_size=8,
             feature_dim_dict['dense']))
 
     sparse_input, dense_input = get_input(feature_dim_dict, None)
-    sparse_embedding, linear_embedding, = get_embeddings(
+    sparse_embedding, linear_embedding, = get_share_embeddings(
         feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding, l2_reg_linear)
 
     embed_list = [sparse_embedding[i](sparse_input[i])
@@ -97,19 +95,3 @@ def DeepFM(feature_dim_dict, embedding_size=8,
     output = PredictionLayer(final_activation)(final_logit)
     model = Model(inputs=sparse_input + dense_input, outputs=output)
     return model
-
-
-def get_embeddings(feature_dim_dict, embedding_size, init_std, seed, l2_rev_V, l2_reg_w):
-    sparse_embedding = [Embedding(feature_dim_dict["sparse"][feat], embedding_size,
-                                  embeddings_initializer=RandomNormal(
-                                      mean=0.0, stddev=init_std, seed=seed),
-                                  embeddings_regularizer=l2(l2_rev_V),
-                                  name='sparse_emb_' + str(i) + '-' + feat) for i, feat in
-                        enumerate(feature_dim_dict["sparse"])]
-    linear_embedding = [Embedding(feature_dim_dict["sparse"][feat], 1,
-                                  embeddings_initializer=RandomNormal(mean=0.0, stddev=init_std,
-                                                                      seed=seed), embeddings_regularizer=l2(l2_reg_w),
-                                  name='linear_emb_' + str(i) + '-' + feat) for
-                        i, feat in enumerate(feature_dim_dict["sparse"])]
-
-    return sparse_embedding, linear_embedding

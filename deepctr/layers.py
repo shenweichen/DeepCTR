@@ -1,5 +1,5 @@
 import itertools
-from tensorflow.python.keras.layers import Layer, Activation, BatchNormalization
+from tensorflow.python.keras.layers import Layer,BatchNormalization
 from tensorflow.python.keras.regularizers import l2
 from tensorflow.python.keras.initializers import Zeros, glorot_normal, glorot_uniform
 from tensorflow.python.keras import backend as K
@@ -55,7 +55,7 @@ class FM(Layer):
 
 
 class AFMLayer(Layer):
-    """Attentonal Factorization Machine models pairwise (order-2) feature 
+    """Attentonal Factorization Machine models pairwise (order-2) feature
     interactions without linear term and bias.
 
       Input shape
@@ -76,7 +76,7 @@ class AFMLayer(Layer):
         - **seed** : A Python integer to use as random seed.
 
       References
-        - [Attentional Factorization Machines : Learning the Weight of Feature 
+        - [Attentional Factorization Machines : Learning the Weight of Feature
         Interactions via Attention Networks](https://arxiv.org/pdf/1708.04617.pdf)
     """
 
@@ -193,7 +193,6 @@ class PredictionLayer(Layer):
         x = inputs
         if self.use_bias:
             x = tf.nn.bias_add(x, self.global_bias, data_format='NHWC')
-        
         output = activation_fun(self.activation, x)
         output = tf.reshape(output, (-1, 1))
 

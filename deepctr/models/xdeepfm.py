@@ -7,11 +7,8 @@ from deepctr.utils import get_input
 from deepctr.layers import PredictionLayer, MLP, CIN
 
 
-def xDeepFM(feature_dim_dict, embedding_size=8, hidden_size=(256, 256), cin_layer_size=(128, 128, ), cin_direct=False, cin_activation='linear', l2_reg_linear=0.00001, l2_reg_embedding=0.00001, l2_reg_deep=0,
-            init_std=0.0001, seed=1024, keep_prob=1, activation='relu', final_activation='sigmoid', use_bn=False):
+def xDeepFM(feature_dim_dict, embedding_size=8, hidden_size=(256, 256), cin_layer_size=(128, 128, ), cin_direct=False, cin_activation='linear', l2_reg_linear=0.00001, l2_reg_embedding=0.00001, l2_reg_deep=0, init_std=0.0001, seed=1024, keep_prob=1, activation='relu', final_activation='sigmoid', use_bn=False):
     """DNN with three hidden layers, and dropout of 0.1 probability."""
-    if len(hidden_size) == 0 and len(cin_layer_size) == 0:
-        raise ValueError("Either hidden_layer_size or cin_layer_size must > 0")
     if not isinstance(feature_dim_dict, dict) or "sparse" not in feature_dim_dict or "dense" not in feature_dim_dict:
         raise ValueError(
             "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
