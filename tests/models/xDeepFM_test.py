@@ -6,11 +6,11 @@ from tensorflow.python.keras.models import save_model, load_model
 
 
 @pytest.mark.parametrize(
-    'hidden_size,cin_layer_size,cin_direct,cin_activation,sparse_feature_num,dense_feature_dim',
-    [((), (), False, 'linear', 1, 2), ((16,), (), False, 'linear', 1, 1), ((), (16,), False, 'linear', 2, 2), ((16,), (16,), True, 'relu', 1, 0)
+    'hidden_size,cin_layer_size,split_half,cin_activation,sparse_feature_num,dense_feature_dim',
+    [((), (), True, 'linear', 1, 2), ((16,), (), True, 'linear', 1, 1), ((), (16,), True, 'linear', 2, 2), ((16,), (16,), False, 'relu', 1, 0)
      ]
 )
-def test_xDeepFM(hidden_size, cin_layer_size, cin_direct, cin_activation, sparse_feature_num, dense_feature_dim):
+def test_xDeepFM(hidden_size, cin_layer_size, split_half, cin_activation, sparse_feature_num, dense_feature_dim):
     model_name = "xDeepFM"
 
     sample_size = 64
@@ -32,7 +32,7 @@ def test_xDeepFM(hidden_size, cin_layer_size, cin_direct, cin_activation, sparse
     x = sparse_input + dense_input
 
     model = xDeepFM(feature_dim_dict, hidden_size=hidden_size, cin_layer_size=cin_layer_size,
-                    cin_direct=cin_direct, cin_activation=cin_activation, keep_prob=0.5, )
+                    split_half=split_half, cin_activation=cin_activation, keep_prob=0.5, )
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
     model.fit(x, y, batch_size=100, epochs=1, validation_split=0.5)

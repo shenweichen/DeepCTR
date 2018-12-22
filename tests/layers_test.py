@@ -127,17 +127,17 @@ def test_AFMLayer():
 
 
 @pytest.mark.parametrize(
-    'layer_size,activation,direct',
-    [(layer_size, activation, direct)
+    'layer_size,activation,split_half',
+    [(layer_size, activation, split_half)
      for activation in ['linear', PReLU]
-     for direct in [True, False]
+     for split_half in [True, False]
      for layer_size in [(10,), (10, 8)]
      ]
 )
-def test_CIN(layer_size, activation, direct):
+def test_CIN(layer_size, activation, split_half):
     with CustomObjectScope({'CIN': layers.CIN}):
         layer_test(layers.CIN, kwargs={"layer_size": layer_size, "activation":
-                                       activation, "direct": direct}, input_shape=(
+                                       activation, "split_half": split_half}, input_shape=(
             BATCH_SIZE, FIELD_SIZE, EMBEDDING_SIZE))
 
 

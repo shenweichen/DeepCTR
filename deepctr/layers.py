@@ -127,7 +127,8 @@ class AFMLayer(Layer):
 
 
 class BiInteractionPooling(Layer):
-    """Bi-Interaction Layer used in Neural FM,compress the pairwise element-wise product of features into one single vector.
+    """Bi-Interaction Layer used in Neural FM,compress the
+     pairwise element-wise product of features into one single vector.
 
       Input shape
         - A 3D tensor with shape:``(batch_size,field_size,embedding_size)``.
@@ -172,14 +173,14 @@ class BiInteractionPooling(Layer):
 
 
 class CIN(Layer):
-    """Compressed Interaction Network used in xDeepFM.This implemention  is adapted from code that the author of the paper published on https://github.com/Leavingseason/xDeepFM.
+    """Compressed Interaction Network used in xDeepFM.This implemention  is 
+    adapted from code that the author of the paper published on https://github.com/Leavingseason/xDeepFM.
 
       Input shape
         - 3D tensor with shape: ``(batch_size,field_size,embedding_size)``.
 
       Output shape
-        - 2D tensor with shape: ``(batch_size, final_len)``.``final_len =  sum(layer_size)`` if ``direct=True``,else  ``sum(self.layer_size[:-1]) // 2 + self.layer_size[-1]`` .
-
+        - 2D tensor with shape: ``(batch_size, featuremap_num)`` ``featuremap_num =  sum(layer_size)`` if ``direct=True``,else  ``sum(self.layer_size[:-1]) // 2 + self.layer_size[-1]`` .
 
       Arguments
         - **layer_size** : list of int.Feature maps in each layer.
@@ -300,7 +301,8 @@ class CIN(Layer):
 
 
 class CrossNet(Layer):
-    """The Cross Network part of Deep&Cross Network model,which leans both low and high degree cross feature.
+    """The Cross Network part of Deep&Cross Network model,
+    which leans both low and high degree cross feature.
 
       Input shape
         - 2D tensor with shape: ``(batch_size, units)``.
@@ -419,7 +421,8 @@ class FM(Layer):
 
 
 class InnerProductLayer(Layer):
-    """InnerProduct Layer used in PNN that compute the element-wise product or inner product between feature vectors.
+    """InnerProduct Layer used in PNN that compute the element-wise 
+    product or inner product between feature vectors.
 
       Input shape
         - A list of N 3D tensor with shape: ``(batch_size,1,embedding_size)``.
@@ -503,7 +506,8 @@ class InnerProductLayer(Layer):
 
 
 class LocalActivationUnit(Layer):
-    """The LocalActivationUnit used in DIN with which the representation of user interests varies adaptively given different candidate items.
+    """The LocalActivationUnit used in DIN with which the representation of 
+    user interests varies adaptively given different candidate items.
 
       Input shape
         - A list of two 3D tensor with shape:  ``(batch_size, 1, embedding_size)`` and ``(batch_size, T, embedding_size)``
@@ -673,7 +677,8 @@ class MLP(Layer):
 
 
 class OutterProductLayer(Layer):
-    """OutterProduct Layer used in PNN.This implemention  is adapted from code that the author of the paper published on https://github.com/Atomu2014/product-nets.
+    """OutterProduct Layer used in PNN.This implemention is 
+    adapted from code that the author of the paper published on https://github.com/Atomu2014/product-nets.
 
       Input shape
             - A list of N 3D tensor with shape: ``(batch_size,1,embedding_size)``.
@@ -812,6 +817,12 @@ class OutterProductLayer(Layer):
 
 
 class PredictionLayer(Layer):
+    """
+      Arguments
+         - **activation**: Activation function to use.
+
+         - **use_bias**: bool.Whther add bias term.
+    """
 
     def __init__(self, activation='sigmoid', use_bias=True, **kwargs):
         self.activation = activation
