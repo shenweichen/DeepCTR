@@ -4,13 +4,13 @@ Author:
     Weichen Shen,wcshen1994@163.com
 
 Reference:
-    [1] Lian J, Zhou X, Zhang F, et al. xDeepFM: Combining Explicit and Implicit Feature Interactions for Recommender Systems[J]. arXiv preprint arXiv:1803.05170, 2018. (https://arxiv.org/pdf/1803.05170.pdf)
+    [1] Lian J, Zhou X, Zhang F, et al. xDeepFM: Combining Explicit and Implicit Feature Interactions for Recommender Systems[J]. arXiv preprint arXiv:1803.05170, 2018.(https://arxiv.org/pdf/1803.05170.pdf)
 """
 from tensorflow.python.keras.layers import Dense, Embedding, Concatenate, Flatten, add, Reshape
 from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.regularizers import l2
-from deepctr.utils import get_input
+from deepctr.utils import get_input, get_share_embeddings
 from deepctr.layers import PredictionLayer, MLP, CIN
 
 
@@ -38,8 +38,8 @@ def xDeepFM(feature_dim_dict, embedding_size=8, hidden_size=(256, 256), cin_laye
         raise ValueError(
             "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
     sparse_input, dense_input = get_input(feature_dim_dict, None)
-    sparse_embedding, linear_embedding, = get_embeddings(feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding,
-                                                         l2_reg_linear)
+    sparse_embedding, linear_embedding, = get_share_embeddings(feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding,
+                                                               l2_reg_linear)
 
     embed_list = [sparse_embedding[i](sparse_input[i])
                   for i in range(len(sparse_input))]
@@ -94,19 +94,3 @@ def xDeepFM(feature_dim_dict, embedding_size=8, hidden_size=(256, 256), cin_laye
     output = PredictionLayer(final_activation)(final_logit)
     model = Model(inputs=sparse_input + dense_input, outputs=output)
     return model
-
-
-def get_embeddings(feature_dim_dict, embedding_size, init_std, seed, l2_rev_V, l2_reg_w):
-    sparse_embedding = [Embedding(feature_dim_dict["sparse"][feat], embedding_size,
-                                  embeddings_initializer=RandomNormal(
-                                      mean=0.0, stddev=init_std, seed=seed),
-                                  embeddings_regularizer=l2(l2_rev_V),
-                                  name='sparse_emb_' + str(i) + '-' + feat) for i, feat in
-                        enumerate(feature_dim_dict["sparse"])]
-    linear_embedding = [Embedding(feature_dim_dict["sparse"][feat], 1,
-                                  embeddings_initializer=RandomNormal(mean=0.0, stddev=init_std,
-                                                                      seed=seed), embeddings_regularizer=l2(l2_reg_w),
-                                  name='linear_emb_' + str(i) + '-' + feat) for
-                        i, feat in enumerate(feature_dim_dict["sparse"])]
-
-    return sparse_embedding, linear_embedding

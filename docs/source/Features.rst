@@ -175,8 +175,8 @@ xDeepFM
 >>>>>>>>>>
 
 xDeepFM use a Compressed Interaction Network (CIN) to learn both low and high order feature interaction explicitly,and use a MLP to learn feature interaction implicitly.
-In each layer of CIN,first compute outer products between:math:`x^k` :math:`x_0` and get a tensor :math:`Z_{k+1}`,then use a 1DConv to learn feature maps on this tensor.
-Finally,apply sum pooling on all the feature maps to get a vector.The vector is used to compute the logit that CIN contributes.
+In each layer of CIN,first compute outer products between :math:`x^k` and :math:`x_0` to get a tensor :math:`Z_{k+1}`,then use a 1DConv to learn feature maps :math:`H_{k+1}` on this tensor.
+Finally,apply sum pooling on all the feature maps :math:`H_k` to get one vector.The vector is used to compute the logit that CIN contributes.
 
 
 **xDeepFM api** `link <./deepctr.models.xdeepfm.html>`_

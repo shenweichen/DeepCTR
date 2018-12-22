@@ -159,7 +159,8 @@ def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,
 
     y = layer(x)
 
-    assert K.dtype(y) == expected_output_dtype
+    if not (K.dtype(y) == expected_output_dtype):
+        raise AssertionError()
 
     # check with the functional API
 

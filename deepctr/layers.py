@@ -187,7 +187,7 @@ class CIN(Layer):
 
         - **activation** : activation function used on feature maps.
 
-        - **split_half** : bool.if set to False, half of the feature maps in each hidden will connect to output unit. 
+        - **split_half** : bool.if set to False, half of the feature maps in each hidden will connect to output unit.
 
         - **seed** : A Python integer to use as random seed.
 
@@ -289,7 +289,6 @@ class CIN(Layer):
             featuremap_num = sum(self.layer_size[:-1]) // 2 + self.layer_size[-1]
         else:
             featuremap_num = sum(self.layer_size)
-            
         return (None, featuremap_num)
 
     def get_config(self, ):

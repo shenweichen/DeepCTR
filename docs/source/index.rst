@@ -33,6 +33,15 @@ Through  ``pip install deepctr``  get the package and `Get Started! <./Quick-Sta
 
 You can read the latest code at https://github.com/shenweichen/DeepCTR
 
+News
+-----
+
+12/22/2018 : Add `xDeepFM <./Features.html#xdeepfm>`_ and auto version check. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.1.7>`_
+
+12/19/2018 : DeepCTR is compatible with tensorflow from ``1.4-1.12`` except for ``1.7`` and ``1.8``. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.1.6>`_
+
+11/24/2018 : DeepCTR is released! `PyPi <https://pypi.org/project/deepctr/>`_.
+
 .. toctree::
    :maxdepth: 2
    :caption: Home:
@@ -41,6 +50,7 @@ You can read the latest code at https://github.com/shenweichen/DeepCTR
    Features
    Demo
    FAQ
+   History<History.md>
 
 .. toctree::
    :maxdepth: 3
