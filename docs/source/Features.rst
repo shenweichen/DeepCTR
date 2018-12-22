@@ -174,11 +174,10 @@ user's interest vector and other embedding vectors are concatenated and fed into
 xDeepFM
 >>>>>>>>>>
 
-DIN introduce a attention method to learn from sequence(multi-valued) feature.
-Tradional method usually use sum/mean pooling on sequence feature.
-DIN use a local activation unit to get the activation score between candidate item and history items.
-User's interest are represented by weighted sum of user behaviors.
-user's interest vector and other embedding vectors are concatenated and fed into a MLP to get the prediction. 
+xDeepFM use a Compressed Interaction Network (CIN) to learn both low and high order feature interaction explicitly,and use a MLP to learn feature interaction implicitly.
+In each layer of CIN,first compute outer products between:math:`x^k` :math:`x_0` and get a tensor :math:`Z_{k+1}`,then use a 1DConv to learn feature maps on this tensor.
+Finally,apply sum pooling on all the feature maps to get a vector.The vector is used to compute the logit that CIN contributes.
+
 
 **xDeepFM api** `link <./deepctr.models.xdeepfm.html>`_
 

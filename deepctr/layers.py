@@ -173,14 +173,14 @@ class BiInteractionPooling(Layer):
 
 
 class CIN(Layer):
-    """Compressed Interaction Network used in xDeepFM.This implemention  is 
+    """Compressed Interaction Network used in xDeepFM.This implemention is
     adapted from code that the author of the paper published on https://github.com/Leavingseason/xDeepFM.
 
       Input shape
         - 3D tensor with shape: ``(batch_size,field_size,embedding_size)``.
 
       Output shape
-        - 2D tensor with shape: ``(batch_size, featuremap_num)`` ``featuremap_num =  sum(layer_size)`` if ``direct=True``,else  ``sum(self.layer_size[:-1]) // 2 + self.layer_size[-1]`` .
+        - 2D tensor with shape: ``(batch_size, featuremap_num)`` ``featuremap_num =  sum(self.layer_size[:-1]) // 2 + self.layer_size[-1]`` if ``split_half=True``,else  ``sum(layer_size)`` .
 
       Arguments
         - **layer_size** : list of int.Feature maps in each layer.
@@ -223,14 +223,14 @@ class CIN(Layer):
             self.bias.append(self.add_weight(name='bias' + str(i), shape=[size], dtype=tf.float32,
                                              initializer=tf.keras.initializers.Zeros()))
 
-            if self.direct:
-                self.field_nums.append(size)
-            else:
+            if self.split_half:
                 if i != len(self.layer_size) - 1 and size % 2 > 0:
                     raise ValueError(
-                        "layer_size must be even number except for the last layer when direct=False")
+                        "layer_size must be even number except for the last layer when split_half=True")
 
                 self.field_nums.append(size // 2)
+            else:
+                self.field_nums.append(size)
 
         super(CIN, self).build(input_shape)  # Be sure to call this somewhere!
 
@@ -265,7 +265,7 @@ class CIN(Layer):
 
             curr_out = tf.transpose(curr_out, perm=[0, 2, 1])
 
-            if split_half:
+            if self.split_half:
                 if idx != len(self.layer_size) - 1:
                     next_hidden, direct_connect = tf.split(
                         curr_out, 2 * [layer_size // 2], 1)
@@ -285,12 +285,12 @@ class CIN(Layer):
         return result
 
     def compute_output_shape(self, input_shape):
-        if self.direct:
-            final_len = sum(self.layer_size)
+        if self.split_half:
+            featuremap_num = sum(self.layer_size[:-1]) // 2 + self.layer_size[-1]
         else:
-            final_len = sum(self.layer_size[:-1]) // 2 + self.layer_size[-1]
-
-        return (None, final_len)
+            featuremap_num = sum(self.layer_size)
+            
+        return (None, featuremap_num)
 
     def get_config(self, ):
 
@@ -421,7 +421,7 @@ class FM(Layer):
 
 
 class InnerProductLayer(Layer):
-    """InnerProduct Layer used in PNN that compute the element-wise 
+    """InnerProduct Layer used in PNN that compute the element-wise
     product or inner product between feature vectors.
 
       Input shape
@@ -506,7 +506,7 @@ class InnerProductLayer(Layer):
 
 
 class LocalActivationUnit(Layer):
-    """The LocalActivationUnit used in DIN with which the representation of 
+    """The LocalActivationUnit used in DIN with which the representation of
     user interests varies adaptively given different candidate items.
 
       Input shape
@@ -677,7 +677,7 @@ class MLP(Layer):
 
 
 class OutterProductLayer(Layer):
-    """OutterProduct Layer used in PNN.This implemention is 
+    """OutterProduct Layer used in PNN.This implemention is
     adapted from code that the author of the paper published on https://github.com/Atomu2014/product-nets.
 
       Input shape
