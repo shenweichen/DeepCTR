@@ -6,9 +6,8 @@ Author:
 Reference:
     [1] Lian J, Zhou X, Zhang F, et al. xDeepFM: Combining Explicit and Implicit Feature Interactions for Recommender Systems[J]. arXiv preprint arXiv:1803.05170, 2018.(https://arxiv.org/pdf/1803.05170.pdf)
 """
-from tensorflow.python.keras.layers import Dense, Embedding, Concatenate, Flatten, add, Reshape
+from tensorflow.python.keras.layers import Dense, Concatenate, Flatten, add, Reshape
 from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.regularizers import l2
 from deepctr.utils import get_input, get_share_embeddings
 from deepctr.layers import PredictionLayer, MLP, CIN

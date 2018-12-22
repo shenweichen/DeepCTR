@@ -31,18 +31,7 @@ def test_AFM(use_attention, sparse_feature_num):
     x = sparse_input + dense_input
 
     model = AFM(feature_dim_dict, use_attention=use_attention, keep_prob=0.5,)
-    model.compile('adam', 'binary_crossentropy',
-                  metrics=['binary_crossentropy'])
-    model.fit(x, y, batch_size=100, epochs=1, validation_split=0.5)
-    print(model_name+" test train valid pass!")
-    model.save_weights(model_name + '_weights.h5')
-    model.load_weights(model_name + '_weights.h5')
-    print(model_name+" test save load weight pass!")
-    save_model(model,  model_name + '.h5')
-    model = load_model(model_name + '.h5', custom_objects)
-    print(model_name + " test save load model pass!")
-
-    print(model_name + " test pass!")
+    check_model(model, model_name, x, y)
 
 
 if __name__ == "__main__":

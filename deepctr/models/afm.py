@@ -10,9 +10,8 @@ Reference:
 
 """
 
-from tensorflow.python.keras.layers import Dense, Embedding, Concatenate, Reshape, add
+from tensorflow.python.keras.layers import Dense, Concatenate, Reshape, add
 from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.regularizers import l2
 
 from ..utils import get_input, get_share_embeddings

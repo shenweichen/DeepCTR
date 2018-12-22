@@ -33,19 +33,7 @@ def test_DCN(embedding_size, cross_num, hidden_size, sparse_feature_num):
 
     model = DCN(feature_dim_dict, embedding_size=embedding_size, cross_num=cross_num,
                 hidden_size=hidden_size, keep_prob=0.5, )
-    model.compile('adam', 'binary_crossentropy',
-                  metrics=['binary_crossentropy'])
-    model.fit(x, y, batch_size=100, epochs=1, validation_split=0.5)
-
-    print(model_name+" test train valid pass!")
-    model.save_weights(model_name + '_weights.h5')
-    model.load_weights(model_name + '_weights.h5')
-    print(model_name+" test save load weight pass!")
-    save_model(model, model_name + '.h5')
-    model = load_model(model_name + '.h5', custom_objects)
-    print(model_name + " test save load model pass!")
-
-    print(model_name + " test pass!")
+    check_model(model, model_name, x, y)
 
 
 def test_DCN_invalid(embedding_size=8, cross_num=0, hidden_size=()):
