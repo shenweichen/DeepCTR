@@ -10,12 +10,12 @@ from tensorflow.python.keras.models import save_model, load_model
     [((), (), False, 'linear', 1, 2), ((16,), (), False, 'linear', 1, 1), ((), (16,), False, 'linear', 2, 2), ((16,), (16,), True, 'relu', 1, 0)
      ]
 )
-def test_xDeepFM(hidden_size, cin_layer_size, cin_direct, cin_activation, sparse_feature_num):
+def test_xDeepFM(hidden_size, cin_layer_size, cin_direct, cin_activation, sparse_feature_num, dense_feature_dim):
     model_name = "xDeepFM"
 
     sample_size = 64
     feature_dim_dict = {"sparse": {}, 'dense': []}
-    for name, num in zip(["sparse", "dense"], [sparse_feature_num, sparse_feature_num]):
+    for name, num in zip(["sparse", "dense"], [sparse_feature_num, dense_feature_dim]):
         if name == "sparse":
             for i in range(num):
                 feature_dim_dict[name][name + '_' +
