@@ -1,4 +1,5 @@
 *.h5
+*.ipynb
 .pytest_cache/
 tests/unused/*
 # Byte-compiled / optimized / DLL files

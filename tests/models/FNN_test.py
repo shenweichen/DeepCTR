@@ -1,7 +1,6 @@
 import numpy as np
 import pytest
 from deepctr.models import FNN
-from deepctr.utils import custom_objects
 
 from ..utils import check_model
 

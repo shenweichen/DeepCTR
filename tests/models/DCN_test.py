@@ -1,8 +1,6 @@
 import numpy as np
 import pytest
 from deepctr.models import DCN
-from deepctr.utils import custom_objects
-from tensorflow.python.keras.models import save_model, load_model
 from ..utils import check_model
 
 
