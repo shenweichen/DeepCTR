@@ -6,6 +6,7 @@ from numpy.testing import assert_allclose
 from tensorflow.python.keras import backend as K
 from tensorflow.python.keras.layers import Input
 from tensorflow.python.keras.models import Model, save_model, load_model
+from deepctr.utils import custom_objects
 
 
 def get_test_data(num_train=1000, num_test=500, input_shape=(10,),

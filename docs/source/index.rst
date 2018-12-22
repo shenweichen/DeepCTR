@@ -36,7 +36,7 @@ You can read the latest code at https://github.com/shenweichen/DeepCTR
 News
 -----
 
-12/22/2018 : Add `xDeepFM <./Features.html#xdeepfm>`_ and auto version check. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.1.7>`_
+12/22/2018 : Add `xDeepFM <./Features.html#xdeepfm>`_ and auto version check. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.2.0a1>`_
 
 12/19/2018 : DeepCTR is compatible with tensorflow from ``1.4-1.12`` except for ``1.7`` and ``1.8``. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.1.6>`_
 
