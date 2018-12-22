@@ -1,10 +1,11 @@
 import pytest
+from tensorflow.python.keras.layers import PReLU
+from tensorflow.python.keras.utils import CustomObjectScope
+
 from deepctr import layers
 from deepctr.activations import Dice
-from utils import layer_test
-from tensorflow.python.keras.utils import CustomObjectScope
-from tensorflow.python.keras.layers import PReLU
 
+from .utils import layer_test
 
 BATCH_SIZE = 4
 FIELD_SIZE = 3

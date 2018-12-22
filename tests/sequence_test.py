@@ -1,8 +1,9 @@
-from deepctr import sequence
 import pytest
-from utils import layer_test
 from tensorflow.python.keras.utils import CustomObjectScope
 
+from deepctr import sequence
+
+from .utils import layer_test
 
 BATCH_SIZE = 4
 EMBEDDING_SIZE = 8
