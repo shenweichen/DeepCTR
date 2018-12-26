@@ -15,7 +15,7 @@ Welcome to DeepCTR's documentation!
 .. _Stars: https://github.com/shenweichen/DeepCTR
 
 .. |Forks| image:: https://img.shields.io/github/forks/shenweichen/deepctr.svg
-.. _Forks: https://github.com/shenweichen/DeepCTR
+.. _Forks: https://github.com/shenweichen/DeepCTR/fork
 
 .. |PyPi| image:: https://img.shields.io/pypi/v/deepctr.svg
 .. _PyPi: https://pypi.org/project/deepctr/

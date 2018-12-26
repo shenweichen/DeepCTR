@@ -22,7 +22,25 @@ To save/load models,just a little different.
     from deepctr.utils import custom_objects
     model = load_model('DeepFM.h5',custom_objects)# load_model,just add a parameter
 
-2. How can I get the attentional weights of feature interactions in AFM?
+2. How to set learning rate and use earlystopping?
+
+You can use any models in DeepCTR like a keras model object.
+Here is a example of how to set learning rate and earlystopping:
+
+.. code-block:: python
+
+    import deepctr
+    from tensorflow.python.keras.optimizers import Adam,Adagrad
+    from tensorflow.python.keras.callbacks import EarlyStopping
+
+    model = deepctr.models.DeepFM({"sparse": sparse_feature_dict, "dense": dense_feature_list})
+    model.compile(Adagrad('0.0808'),'binary_crossentropy',metrics=['binary_crossentropy'])
+
+    es = EarlyStopping(monitor='val_binary_crossentropy')
+    history = model.fit(model_input, data[target].values,batch_size=256, epochs=10, verbose=2, validation_split=0.2,callbacks=[es] )
+
+
+3. How can I get the attentional weights of feature interactions in AFM?
 
 First,make sure that you have install the latest version of deepctr.
 
@@ -46,7 +64,7 @@ Then,use the following code,the ``attentional_weights[:,i,0]`` is the ``feature_
 
 
 
-3. Does the models support multi-value input?
+4. Does the models support multi-value input?
 
 Now only the `DIN <Features.html#din-deep-interest-network>`_ model support multi-value input,you can use layers in `sequence <deepctr.sequence.html>`_ to build your own models!
 And I will add the feature soon~

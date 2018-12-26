@@ -161,9 +161,9 @@ class BiInteractionPooling(Layer):
 
         concated_embeds_value = inputs
         square_of_sum = tf.square(tf.reduce_sum(
-            concated_embeds_value, axis=1, keep_dims=True))
+            concated_embeds_value, axis=1, keepdims=True))
         sum_of_square = tf.reduce_sum(
-            concated_embeds_value * concated_embeds_value, axis=1, keep_dims=True)
+            concated_embeds_value * concated_embeds_value, axis=1, keepdims=True)
         cross_term = 0.5*(square_of_sum - sum_of_square)
 
         return cross_term
@@ -280,13 +280,14 @@ class CIN(Layer):
             hidden_nn_layers.append(next_hidden)
 
         result = tf.concat(final_result, axis=1)
-        result = tf.reduce_sum(result, -1, keep_dims=False)
+        result = tf.reduce_sum(result, -1, keepdims=False)
 
         return result
 
     def compute_output_shape(self, input_shape):
         if self.split_half:
-            featuremap_num = sum(self.layer_size[:-1]) // 2 + self.layer_size[-1]
+            featuremap_num = sum(
+                self.layer_size[:-1]) // 2 + self.layer_size[-1]
         else:
             featuremap_num = sum(self.layer_size)
         return (None, featuremap_num)
@@ -407,11 +408,11 @@ class FM(Layer):
         concated_embeds_value = inputs
 
         square_of_sum = tf.square(tf.reduce_sum(
-            concated_embeds_value, axis=1, keep_dims=True))
+            concated_embeds_value, axis=1, keepdims=True))
         sum_of_square = tf.reduce_sum(
-            concated_embeds_value * concated_embeds_value, axis=1, keep_dims=True)
+            concated_embeds_value * concated_embeds_value, axis=1, keepdims=True)
         cross_term = square_of_sum - sum_of_square
-        cross_term = 0.5 * tf.reduce_sum(cross_term, axis=2, keep_dims=False)
+        cross_term = 0.5 * tf.reduce_sum(cross_term, axis=2, keepdims=False)
 
         return cross_term
 
@@ -485,7 +486,7 @@ class InnerProductLayer(Layer):
         inner_product = p * q
         if self.reduce_sum:
             inner_product = tf.reduce_sum(
-                inner_product, axis=2, keep_dims=True)
+                inner_product, axis=2, keepdims=True)
         return inner_product
 
     def compute_output_shape(self, input_shape):
