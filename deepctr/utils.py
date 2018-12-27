@@ -27,7 +27,8 @@ custom_objects = {'InnerProductLayer': InnerProductLayer,
                   'Dice': Dice,
                   'SequencePoolingLayer': SequencePoolingLayer,
                   'AttentionSequencePoolingLayer': AttentionSequencePoolingLayer,
-                  'CIN': CIN, }
+                  'CIN': CIN,
+                  'InteractingLayer': InteractingLayer}
 
 
 def get_input(feature_dim_dict, bias_feature_dim_dict=None):

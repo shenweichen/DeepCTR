@@ -152,3 +152,17 @@ def test_test_CIN_invalid(layer_size):
         with CustomObjectScope({'CIN': layers.CIN}):
             layer_test(layers.CIN, kwargs={"layer_size": layer_size}, input_shape=(
                 BATCH_SIZE, FIELD_SIZE, EMBEDDING_SIZE))
+
+
+@pytest.mark.parametrize(
+    'head_num,use_res',
+    [(head_num, use_res,)
+     for head_num in [1, 2]
+     for use_res in [True, False]
+     ]
+)
+def test_InteractingLayer(head_num, use_res,):
+    with CustomObjectScope({'InteractingLayer': layers.InteractingLayer}):
+        layer_test(layers.InteractingLayer, kwargs={"head_num": head_num, "use_res":
+                                                    use_res, }, input_shape=(
+            BATCH_SIZE, FIELD_SIZE, EMBEDDING_SIZE))
