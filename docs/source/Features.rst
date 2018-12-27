@@ -163,7 +163,8 @@ DIN use a local activation unit to get the activation score between candidate it
 User's interest are represented by weighted sum of user behaviors.
 user's interest vector and other embedding vectors are concatenated and fed into a MLP to get the prediction. 
 
-**DIN api** `link <./deepctr.models.din.html>`_
+**DIN api** `link <./deepctr.models.din.html>`_ **DIN demo** `link <https://github.com/shenweichen/DeepCTR/tree/master/examples
+/run_din.py>`_
 
 .. image:: ../pics/DIN.png
    :align: center
@@ -190,6 +191,25 @@ Finally,apply sum pooling on all the feature maps :math:`H_k` to get one vector.
    :scale: 70 %
 
 `Lian J, Zhou X, Zhang F, et al. xDeepFM: Combining Explicit and Implicit Feature Interactions for Recommender Systems[J]. arXiv preprint arXiv:1803.05170, 2018. <https://arxiv.org/pdf/1803.05170.pdf>`_ 
+
+AutoInt(Automatic Feature Interaction)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+AutoInt use a interacting layer to model the interactions between different features.
+Within each interacting layer, each feature is allowed to interact with all the other features and is able to automatically identify relevant features to form meaningful higher-order features via the multi-head attention mechanism.
+By stacking multiple interacting layers,AutoInt is able to model different orders of feature interactions. 
+
+**AutoInt api** `link <./deepctr.models.autoint.html>`_
+
+.. image:: ../pics/InteractingLayer.png
+   :align: center
+   :scale: 70 %
+
+.. image:: ../pics/AutoInt.png
+   :align: center
+   :scale: 70 %
+
+`Song W, Shi C, Xiao Z, et al. AutoInt: Automatic Feature Interaction Learning via Self-Attentive Neural Networks[J]. arXiv preprint arXiv:1810.11921, 2018. <https://arxiv.org/abs/1810.11921>`_ 
 
 Layers
 --------

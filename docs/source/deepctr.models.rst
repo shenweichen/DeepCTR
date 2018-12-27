@@ -7,6 +7,7 @@ Submodules
 .. toctree::
 
    deepctr.models.afm
+   deepctr.models.autoint
    deepctr.models.dcn
    deepctr.models.deepfm
    deepctr.models.din

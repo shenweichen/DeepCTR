@@ -13,3 +13,4 @@ DeepCTR Models API
    DCN<deepctr.models.dcn>
    DIN<deepctr.models.din>
    xDeepFM<deepctr.models.xdeepfm>
+   AutoInt<deepctr.models.autoint>

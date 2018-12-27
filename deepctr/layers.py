@@ -161,9 +161,9 @@ class BiInteractionPooling(Layer):
 
         concated_embeds_value = inputs
         square_of_sum = tf.square(tf.reduce_sum(
-            concated_embeds_value, axis=1, keepdims=True))
+            concated_embeds_value, axis=1, keep_dims=True))
         sum_of_square = tf.reduce_sum(
-            concated_embeds_value * concated_embeds_value, axis=1, keepdims=True)
+            concated_embeds_value * concated_embeds_value, axis=1, keep_dims=True)
         cross_term = 0.5*(square_of_sum - sum_of_square)
 
         return cross_term
@@ -280,7 +280,7 @@ class CIN(Layer):
             hidden_nn_layers.append(next_hidden)
 
         result = tf.concat(final_result, axis=1)
-        result = tf.reduce_sum(result, -1, keepdims=False)
+        result = tf.reduce_sum(result, -1, keep_dims=False)
 
         return result
 
@@ -408,11 +408,11 @@ class FM(Layer):
         concated_embeds_value = inputs
 
         square_of_sum = tf.square(tf.reduce_sum(
-            concated_embeds_value, axis=1, keepdims=True))
+            concated_embeds_value, axis=1, keep_dims=True))
         sum_of_square = tf.reduce_sum(
-            concated_embeds_value * concated_embeds_value, axis=1, keepdims=True)
+            concated_embeds_value * concated_embeds_value, axis=1, keep_dims=True)
         cross_term = square_of_sum - sum_of_square
-        cross_term = 0.5 * tf.reduce_sum(cross_term, axis=2, keepdims=False)
+        cross_term = 0.5 * tf.reduce_sum(cross_term, axis=2, keep_dims=False)
 
         return cross_term
 
@@ -485,7 +485,7 @@ class InnerProductLayer(Layer):
         inner_product = p * q
         if self.reduce_sum:
             inner_product = tf.reduce_sum(
-                inner_product, axis=2, keepdims=True)
+                inner_product, axis=2, keep_dims=True)
         return inner_product
 
     def compute_output_shape(self, input_shape):
@@ -567,7 +567,7 @@ class InteractingLayer(Layer):
         result = tf.matmul(self.normalized_att_scores, values)#head_num None F D
         result = tf.concat(tf.split(result, self.head_num, ), axis=-1)
         result = tf.squeeze(result, axis=0)#None F D*head_num
-        
+
         if self.use_res:
             result += tf.tensordot(inputs, self.W_Res, axes=(-1, 0))
         result = tf.nn.relu(result)

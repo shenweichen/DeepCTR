@@ -35,6 +35,7 @@ You can read the latest code at https://github.com/shenweichen/DeepCTR
 
 News
 -----
+12/27/2018 : Add `AutoInt <./Features.html#autoint-automatic-feature-interaction>`_ . `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.2.1>`_
 
 12/22/2018 : Add `xDeepFM <./Features.html#xdeepfm>`_ and automatic check for new version. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.2.0>`_
 

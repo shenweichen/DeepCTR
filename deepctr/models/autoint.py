@@ -14,13 +14,12 @@ from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.regularizers import l2
 import tensorflow as tf
-from tensorflow.python.keras import backend as K
 
 from ..utils import get_input
 from ..layers import PredictionLayer, MLP, InteractingLayer
 
 
-def AutoInt(feature_dim_dict, embedding_size=8, att_layer_num=3, att_embedding_size=8, att_head_num=2, att_res=True, hidden_size=[256, 256], activation='relu',
+def AutoInt(feature_dim_dict, embedding_size=8, att_layer_num=3, att_embedding_size=8, att_head_num=2, att_res=True, hidden_size=(256, 256), activation='relu',
             l2_reg_deep=0, l2_reg_embedding=1e-5, use_bn=False, keep_prob=1.0, init_std=0.0001, seed=1024,
             final_activation='sigmoid',):
     """Instantiates the AutoInt Network architecture.
@@ -40,7 +39,7 @@ def AutoInt(feature_dim_dict, embedding_size=8, att_layer_num=3, att_embedding_s
     :param init_std: float,to use as the initialize std of embedding vector
     :param seed: integer ,to use as random seed.
     :param final_activation: output activation,usually ``'sigmoid'`` or ``'linear'``
-    :return:A Keras model instance.
+    :return: A Keras model instance.
     """
 
     if len(hidden_size) <= 0 and att_layer_num <= 0:
