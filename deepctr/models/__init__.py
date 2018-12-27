@@ -8,6 +8,7 @@ from .fnn import FNN
 from .pnn import PNN
 from .wdl import WDL
 from .xdeepfm import xDeepFM
+from .autoint import AutoInt
 
 __all__ = ["AFM", "DCN", "MLR",  "DeepFM",
-           "MLR", "NFM", "DIN", "FNN", "PNN", "WDL", "xDeepFM"]
+           "MLR", "NFM", "DIN", "FNN", "PNN", "WDL", "xDeepFM", "AutoInt"]

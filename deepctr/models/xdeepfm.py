@@ -20,7 +20,7 @@ def xDeepFM(feature_dim_dict, embedding_size=8, hidden_size=(256, 256), cin_laye
     :param embedding_size: positive integer,sparse feature embedding_size
     :param hidden_size: list,list of positive integer or empty list, the layer number and units in each layer of deep net
     :param cin_layer_size: list,list of positive integer or empty list, the feature maps  in each hidden layer of Compressed Interaction Network
-    :param cin_split_half: bool.if set to False, half of the feature maps in each hidden will connect to output unit
+    :param cin_split_half: bool.if set to True, half of the feature maps in each hidden will connect to output unit
     :param cin_activation: activation function used on feature maps
     :param l2_reg_linear: float. L2 regularizer strength applied to linear part
     :param l2_reg_embedding: L2 regularizer strength applied to embedding vector

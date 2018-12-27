@@ -286,7 +286,8 @@ class CIN(Layer):
 
     def compute_output_shape(self, input_shape):
         if self.split_half:
-            featuremap_num = sum(self.layer_size[:-1]) // 2 + self.layer_size[-1]
+            featuremap_num = sum(
+                self.layer_size[:-1]) // 2 + self.layer_size[-1]
         else:
             featuremap_num = sum(self.layer_size)
         return (None, featuremap_num)
@@ -480,7 +481,6 @@ class InnerProductLayer(Layer):
                 col.append(j)
         p = tf.concat([embed_list[idx]
                        for idx in row], axis=1)  # batch num_pairs k
-        # Reshape([num_pairs, self.embedding_size])
         q = tf.concat([embed_list[idx] for idx in col], axis=1)
         inner_product = p * q
         if self.reduce_sum:
@@ -501,6 +501,87 @@ class InnerProductLayer(Layer):
     def get_config(self,):
         config = {'reduce_sum': self.reduce_sum, }
         base_config = super(InnerProductLayer, self).get_config()
+        return dict(list(base_config.items()) + list(config.items()))
+
+
+
+class InteractingLayer(Layer):
+    """A Layer used in AutoInt that model the correlations between different feature fields by multi-head self-attention mechanism.
+
+      Input shape
+            - A 3D tensor with shape: ``(batch_size,field_size,embedding_size)``.
+
+      Output shape
+            - 3D tensor with shape:``(batch_size,field_size,att_embedding_size * head_num)``.
+
+
+      Arguments
+            - **att_embedding_size**: int.The embedding size in multi-head self-attention network.
+            - **head_num**: int.The head number in multi-head  self-attention network.
+            - **use_res**: bool.Whether or not use standard residual connections before output.
+            - **seed**: A Python integer to use as random seed.
+
+      References
+            - [Song W, Shi C, Xiao Z, et al. AutoInt: Automatic Feature Interaction Learning via Self-Attentive Neural Networks[J]. arXiv preprint arXiv:1810.11921, 2018.](https://arxiv.org/abs/1810.11921)
+    """
+    def __init__(self, att_embedding_size=8, head_num=2, use_res=True, seed=1024, **kwargs):
+        if head_num <= 0:
+            raise ValueError('head_num must be a int > 0')
+        self.att_embedding_size = att_embedding_size
+        self.head_num = head_num
+        self.use_res = use_res
+        self.seed = seed
+        super(InteractingLayer, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+        if len(input_shape) != 3:
+            raise ValueError("Unexpected inputs dimensions %d, expect to be 3 dimensions" % (len(input_shape)))
+        embedding_size = input_shape[-1].value
+        self.W_Query = self.add_weight(name='query', shape=[embedding_size, self.att_embedding_size * self.head_num], dtype=tf.float32,
+                                       initializer=tf.keras.initializers.glorot_uniform(seed=self.seed))
+        self.W_key = self.add_weight(name='key', shape=[embedding_size, self.att_embedding_size * self.head_num], dtype=tf.float32,
+                                     initializer=tf.keras.initializers.glorot_uniform(seed=self.seed))
+        self.W_Value = self.add_weight(name='value', shape=[embedding_size, self.att_embedding_size * self.head_num], dtype=tf.float32,
+                                       initializer=tf.keras.initializers.glorot_uniform(seed=self.seed))
+        if self.use_res:
+            self.W_Res = self.add_weight(name='res', shape=[embedding_size, self.att_embedding_size * self.head_num], dtype=tf.float32,
+                                         initializer=tf.keras.initializers.glorot_uniform(seed=self.seed))
+
+        super(InteractingLayer, self).build(input_shape)  # Be sure to call this somewhere!
+
+    def call(self, inputs, **kwargs):
+        if K.ndim(inputs) != 3:
+            raise ValueError("Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
+
+        querys = tf.tensordot(inputs, self.W_Query, axes=(-1, 0))  # None F D*head_num
+        keys = tf.tensordot(inputs, self.W_key, axes=(-1, 0))
+        values = tf.tensordot(inputs, self.W_Value, axes=(-1, 0))
+
+        querys = tf.stack(tf.split(querys, self.head_num, axis=2))  # head_num None F D
+        keys = tf.stack(tf.split(keys, self.head_num, axis=2))
+        values = tf.stack(tf.split(values, self.head_num, axis=2))
+
+        inner_product = tf.matmul(querys, keys, transpose_b=True)  # head_num None F F
+        self.normalized_att_scores = tf.nn.softmax(inner_product)
+
+        result = tf.matmul(self.normalized_att_scores, values)#head_num None F D
+        result = tf.concat(tf.split(result, self.head_num, ), axis=-1)
+        result = tf.squeeze(result, axis=0)#None F D*head_num
+
+        if self.use_res:
+            result += tf.tensordot(inputs, self.W_Res, axes=(-1, 0))
+        result = tf.nn.relu(result)
+
+        return result
+
+    def compute_output_shape(self, input_shape):
+
+        return (None, input_shape[1], self.att_embedding_size * self.head_num)
+
+    def get_config(self, ):
+        config = {'att_embedding_size': self.att_embedding_size, 'head_num': self.head_num, 'use_res': self.use_res,
+                  'seed': self.seed}
+        base_config = super(InteractingLayer, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
 
