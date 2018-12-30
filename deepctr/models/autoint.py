@@ -8,12 +8,11 @@ Reference:
     [1] Song W, Shi C, Xiao Z, et al. AutoInt: Automatic Feature Interaction Learning via Self-Attentive Neural Networks[J]. arXiv preprint arXiv:1810.11921, 2018.(https://arxiv.org/abs/1810.11921)
 
 """
-from itertools import  chain
 from tensorflow.python.keras.layers import Dense, Concatenate
 from tensorflow.python.keras.models import Model
 import tensorflow as tf
 
-from ..utils import create_input_dict,create_embedding_dict,get_embedding_vec_list,embed_dense_input,get_inputs_list
+from ..utils import create_input_dict, create_embedding_dict, get_embedding_vec_list, embed_dense_input, get_inputs_list
 from ..layers import PredictionLayer, MLP, InteractingLayer
 
 
@@ -47,22 +46,23 @@ def AutoInt(feature_dim_dict, embedding_size=8, att_layer_num=3, att_embedding_s
             "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
 
     sparse_input, dense_input = create_input_dict(feature_dim_dict)
-    sparse_embedding = create_embedding_dict(feature_dim_dict,embedding_size,init_std,seed,l2_reg_embedding)
+    sparse_embedding = create_embedding_dict(
+        feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding)
 
-    embed_list = get_embedding_vec_list(sparse_embedding,sparse_input)
-    embed_list = embed_dense_input(dense_input, embed_list, embedding_size, l2_reg_embedding)
+    embed_list = get_embedding_vec_list(sparse_embedding, sparse_input)
+    embed_list = embed_dense_input(
+        dense_input, embed_list, embedding_size, l2_reg_embedding)
 
     att_input = Concatenate(axis=1)(embed_list) if len(
         embed_list) > 1 else embed_list[0]
 
-    for i in range(att_layer_num):
+    for _ in range(att_layer_num):
         att_input = InteractingLayer(
             att_embedding_size, att_head_num, att_res)(att_input)
     att_output = tf.keras.layers.Flatten()(att_input)
 
     deep_input = tf.keras.layers.Flatten()(Concatenate()(embed_list)
                                            if len(embed_list) > 1 else embed_list[0])
-
 
     if len(hidden_size) > 0 and att_layer_num > 0:  # Deep & Interacting Layer
         deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
@@ -79,8 +79,7 @@ def AutoInt(feature_dim_dict, embedding_size=8, att_layer_num=3, att_embedding_s
         raise NotImplementedError
 
     output = PredictionLayer(final_activation)(final_logit)
-    inputs_list = get_inputs_list([sparse_input,dense_input])
+    inputs_list = get_inputs_list([sparse_input, dense_input])
     model = Model(inputs=inputs_list, outputs=output)
 
     return model
-

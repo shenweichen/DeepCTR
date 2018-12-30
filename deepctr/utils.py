@@ -6,7 +6,7 @@ from threading import Thread
 
 import requests
 from tensorflow.python.keras.initializers import RandomNormal
-from tensorflow.python.keras.layers import Embedding, Input,Dense,Concatenate,Reshape,add
+from tensorflow.python.keras.layers import Embedding, Input, Dense, Concatenate, Reshape, add
 
 from .activations import *
 from .layers import *
@@ -44,6 +44,7 @@ def create_input_dict(feature_dim_dict, prefix=''):
                    enumerate(feature_dim_dict["dense"])}
     return sparse_input, dense_input
 
+
 def create_sequence_input_dict(sequence_dim_dict):
     sequence_input_dict = {feat.name: Input(shape=(feat.maxlen,), name='seq_' + str(
         i) + '-' + feat.name) for i, feat in enumerate(sequence_dim_dict)}
@@ -55,7 +56,8 @@ def create_sequence_input_dict(sequence_dim_dict):
                              for i, feat in enumerate(sequence_dim_dict)}
     return sequence_input_dict, sequence_pooling_dict, sequence_len_dict, sequence_max_len_dict
 
-def create_embedding_dict(feature_dim_dict, embedding_size, init_std, seed, l2_reg,prefix='sparse'):
+
+def create_embedding_dict(feature_dim_dict, embedding_size, init_std, seed, l2_reg, prefix='sparse'):
 
     sparse_embedding = {feat: Embedding(feature_dim_dict["sparse"][feat], embedding_size,
                                         embeddings_initializer=RandomNormal(
@@ -63,6 +65,7 @@ def create_embedding_dict(feature_dim_dict, embedding_size, init_std, seed, l2_r
         embeddings_regularizer=l2(l2_reg),
         name=prefix+'_emb_' + str(i) + '-' + feat) for i, feat in
         enumerate(feature_dim_dict["sparse"])}
+
     if 'sequence' in feature_dim_dict:
         count = len(sparse_embedding)
         sequence_dim_list = feature_dim_dict['sequence']
@@ -76,17 +79,16 @@ def create_embedding_dict(feature_dim_dict, embedding_size, init_std, seed, l2_r
                                                         name=prefix+'_emb_' + str(count) + '-' + feat.name)
                 count += 1
 
-    return sparse_embedding,
+    return sparse_embedding
 
 
-
-
-
-def get_linear_logit(linear_term,dense_input_,l2_reg):
+def get_linear_logit(linear_term, dense_input_, l2_reg):
     if len(linear_term) > 1:
         linear_term = add(linear_term)
     elif len(linear_term) == 1:
         linear_term = linear_term[0]
+    else:
+        linear_term = None
 
     dense_input = list(dense_input_.values())
     if len(dense_input) > 0:
@@ -94,7 +96,7 @@ def get_linear_logit(linear_term,dense_input_,l2_reg):
             dense_input) == 1 else Concatenate()(dense_input)
         linear_dense_logit = Dense(
             1, activation=None, use_bias=False, kernel_regularizer=l2(l2_reg))(dense_input__)
-        if len(linear_term) > 0:
+        if linear_term is not None:
             linear_term = add([linear_dense_logit, linear_term])
         else:
             linear_term = linear_dense_logit
@@ -102,8 +104,7 @@ def get_linear_logit(linear_term,dense_input_,l2_reg):
     return linear_term
 
 
-
-def embed_dense_input(dense_input_,embed_list,embedding_size,l2_reg):
+def embed_dense_input(dense_input_, embed_list, embedding_size, l2_reg):
     dense_input = list(dense_input_.values())
     if len(dense_input) > 0:
         continuous_embedding_list = list(
@@ -115,14 +116,15 @@ def embed_dense_input(dense_input_,embed_list,embedding_size,l2_reg):
 
     return embed_list
 
-def get_embedding_vec_list(embedding_dict,input_dict):
+
+def get_embedding_vec_list(embedding_dict, input_dict):
 
     return [embedding_dict[feat](v)
-                  for feat,v in input_dict.items() ]
+            for feat, v in input_dict.items()]
+
 
 def get_inputs_list(inputs):
-    return  list(chain(*list(map(lambda x:x.values(),inputs))))
-
+    return list(chain(*list(map(lambda x: x.values(), inputs))))
 
 
 def check_version(version):
