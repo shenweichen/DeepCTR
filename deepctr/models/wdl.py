@@ -10,7 +10,7 @@ Reference:
 from tensorflow.python.keras.layers import Dense, Concatenate, Flatten, add
 from tensorflow.python.keras.models import Model
 from ..layers import PredictionLayer, MLP
-from input_embedding import create_input_dict, create_embedding_dict, get_embedding_vec_list, get_inputs_list
+from ..input_embedding import create_input_dict, create_embedding_dict, get_embedding_vec_list, get_inputs_list
 
 
 def WDL(deep_feature_dim_dict, wide_feature_dim_dict, embedding_size=8, hidden_size=(128, 128), l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_deep=0, init_std=0.0001, seed=1024, keep_prob=1, activation='relu', final_activation='sigmoid',):

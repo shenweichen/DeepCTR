@@ -11,7 +11,7 @@ from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.regularizers import l2
 
-from input_embedding import create_input_dict, get_embedding_vec_list, get_inputs_list
+from ..input_embedding import create_input_dict, get_embedding_vec_list, get_inputs_list
 from ..layers import CrossNet, PredictionLayer, MLP
 
 

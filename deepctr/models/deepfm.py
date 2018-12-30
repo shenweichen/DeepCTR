@@ -11,7 +11,7 @@ Reference:
 from tensorflow.python.keras.layers import Dense, Concatenate, Flatten, add
 from tensorflow.python.keras.models import Model
 from ..utils import get_linear_logit
-from input_embedding import create_input_dict, create_embedding_dict, merge_dense_input, get_embedding_vec_list, \
+from ..input_embedding import create_input_dict, create_embedding_dict, merge_dense_input, get_embedding_vec_list, \
     get_inputs_list
 from ..layers import PredictionLayer, MLP, FM
 
