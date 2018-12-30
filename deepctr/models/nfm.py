@@ -10,7 +10,7 @@ Reference:
 from tensorflow.python.keras.layers import Dense, Concatenate, Dropout, add
 from tensorflow.python.keras.models import Model
 from ..layers import PredictionLayer, MLP, BiInteractionPooling
-from ..utils import create_input_dict, create_embedding_dict,get_embedding_vec_list,get_inputs_list,get_linear_logit,embed_dense_input
+from ..utils import create_input_dict, create_embedding_dict, get_embedding_vec_list, get_inputs_list, get_linear_logit, embed_dense_input
 
 
 def NFM(feature_dim_dict, embedding_size=8,
@@ -38,14 +38,16 @@ def NFM(feature_dim_dict, embedding_size=8,
             "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
 
     sparse_input, dense_input = create_input_dict(feature_dim_dict,)
-    sparse_embedding, linear_embedding = create_embedding_dict(
-        feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding, l2_reg_linear)
+    sparse_embedding,  = create_embedding_dict(
+        feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding)
+    linear_embedding = create_embedding_dict(
+        feature_dim_dict, embedding_size, init_std, seed, l2_reg_linear, prefix='linear')
+    embed_list = get_embedding_vec_list(sparse_embedding, sparse_input)
+    linear_term = get_embedding_vec_list(linear_embedding, sparse_input)
 
-    embed_list = get_embedding_vec_list(sparse_embedding,sparse_input)
-    linear_term = get_embedding_vec_list(linear_embedding,sparse_input)
-
-    embed_list = embed_dense_input(dense_input,embed_list,embedding_size,l2_reg_embedding)
-    linear_term = get_linear_logit(linear_term,dense_input,l2_reg_linear)
+    embed_list = embed_dense_input(
+        dense_input, embed_list, embedding_size, l2_reg_embedding)
+    linear_term = get_linear_logit(linear_term, dense_input, l2_reg_linear)
 
     fm_input = Concatenate(axis=1)(embed_list)
     bi_out = BiInteractionPooling()(fm_input)
@@ -60,6 +62,6 @@ def NFM(feature_dim_dict, embedding_size=8,
         final_logit = add([final_logit, deep_logit])
 
     output = PredictionLayer(final_activation)(final_logit)
-    inputs_list = get_inputs_list([sparse_input,dense_input])
+    inputs_list = get_inputs_list([sparse_input, dense_input])
     model = Model(inputs=inputs_list, outputs=output)
     return model

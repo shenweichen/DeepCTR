@@ -10,7 +10,7 @@ Reference:
 from tensorflow.python.keras.layers import Dense, Concatenate, Flatten, add
 from tensorflow.python.keras.models import Model
 from ..layers import PredictionLayer, MLP
-from ..utils import create_input_dict,create_embedding_dict,get_inputs_list,get_embedding_vec_list
+from ..utils import create_input_dict, create_embedding_dict, get_inputs_list, get_embedding_vec_list
 
 
 def WDL(deep_feature_dim_dict, wide_feature_dim_dict, embedding_size=8, hidden_size=(128, 128), l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_deep=0, init_std=0.0001, seed=1024, keep_prob=1, activation='relu', final_activation='sigmoid',):
@@ -39,10 +39,12 @@ def WDL(deep_feature_dim_dict, wide_feature_dim_dict, embedding_size=8, hidden_s
         deep_feature_dim_dict)
     bias_sparse_input, bias_dense_input = create_input_dict(
         wide_feature_dim_dict, 'bias')
-    sparse_embedding = create_embedding_dict(deep_feature_dim_dict,embedding_size,init_std,seed,l2_reg_embedding)
-    wide_linear_embedding = create_embedding_dict(wide_feature_dim_dict,1,init_std,seed,l2_reg_linear,'linear')
+    sparse_embedding = create_embedding_dict(
+        deep_feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding)
+    wide_linear_embedding = create_embedding_dict(
+        wide_feature_dim_dict, 1, init_std, seed, l2_reg_linear, 'linear')
 
-    embed_list =get_embedding_vec_list(sparse_embedding,sparse_input)
+    embed_list = get_embedding_vec_list(sparse_embedding, sparse_input)
 
     deep_input = Concatenate()(embed_list) if len(
         embed_list) > 1 else embed_list[0]
@@ -68,6 +70,7 @@ def WDL(deep_feature_dim_dict, wide_feature_dim_dict, embedding_size=8, hidden_s
 
     output = PredictionLayer(final_activation)(final_logit)
 
-    inputs_list = get_inputs_list([sparse_input,dense_input,bias_sparse_input,bias_dense_input])
+    inputs_list = get_inputs_list(
+        [sparse_input, dense_input, bias_sparse_input, bias_dense_input])
     model = Model(inputs=inputs_list, outputs=output)
     return model
