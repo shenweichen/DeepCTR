@@ -10,7 +10,7 @@ Reference:
 
 from tensorflow.python.keras.layers import Dense, Concatenate, Flatten, add
 from tensorflow.python.keras.models import Model
-from ..utils import create_input_dict, create_embedding_dict,get_embedding_vec_list,get_inputs_list,embed_dense_input,get_linear_logit
+from ..utils import create_input_dict, create_embedding_dict, get_embedding_vec_list, get_inputs_list, embed_dense_input, get_linear_logit
 from ..layers import PredictionLayer, MLP, FM
 
 
@@ -46,14 +46,17 @@ def DeepFM(feature_dim_dict, embedding_size=8,
             feature_dim_dict['dense']))
 
     sparse_input, dense_input = create_input_dict(feature_dim_dict)
-    sparse_embedding, linear_embedding, = create_embedding_dict(
-        feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding, l2_reg_linear)
+    sparse_embedding = create_embedding_dict(
+        feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding)
+    linear_embedding = create_embedding_dict(
+        feature_dim_dict, 1, init_std, seed, l2_reg_linear, prefix='linear')
 
-    embed_list = get_embedding_vec_list(sparse_embedding,sparse_input)
-    linear_term = get_embedding_vec_list(linear_embedding,sparse_input)
+    embed_list = get_embedding_vec_list(sparse_embedding, sparse_input)
+    linear_term = get_embedding_vec_list(linear_embedding, sparse_input)
 
-    embed_list = embed_dense_input(dense_input,embed_list,embedding_size,l2_reg_embedding,)
-    linear_term = get_linear_logit(linear_term,dense_input,l2_reg_linear)
+    embed_list = embed_dense_input(
+        dense_input, embed_list, embedding_size, l2_reg_embedding,)
+    linear_term = get_linear_logit(linear_term, dense_input, l2_reg_linear)
 
     fm_input = Concatenate(axis=1)(embed_list)
     deep_input = Flatten()(fm_input)
@@ -74,6 +77,6 @@ def DeepFM(feature_dim_dict, embedding_size=8,
         raise NotImplementedError
 
     output = PredictionLayer(final_activation)(final_logit)
-    inputs_list = get_inputs_list([sparse_input,dense_input])
+    inputs_list = get_inputs_list([sparse_input, dense_input])
     model = Model(inputs=inputs_list, outputs=output)
     return model
