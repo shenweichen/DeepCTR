@@ -12,7 +12,8 @@ from tensorflow.python.keras.layers import Dense, Concatenate
 from tensorflow.python.keras.models import Model
 import tensorflow as tf
 
-from ..utils import create_input_dict, create_embedding_dict, get_embedding_vec_list, embed_dense_input, get_inputs_list
+from input_embedding import create_input_dict, create_embedding_dict, merge_dense_input, get_embedding_vec_list, \
+    get_inputs_list
 from ..layers import PredictionLayer, MLP, InteractingLayer
 
 
@@ -50,7 +51,7 @@ def AutoInt(feature_dim_dict, embedding_size=8, att_layer_num=3, att_embedding_s
         feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding)
 
     embed_list = get_embedding_vec_list(sparse_embedding, sparse_input)
-    embed_list = embed_dense_input(
+    embed_list = merge_dense_input(
         dense_input, embed_list, embedding_size, l2_reg_embedding)
 
     att_input = Concatenate(axis=1)(embed_list) if len(

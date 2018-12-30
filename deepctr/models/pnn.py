@@ -12,7 +12,8 @@ from tensorflow.python.keras.models import Model
 
 
 from ..layers import PredictionLayer, MLP, InnerProductLayer, OutterProductLayer
-from ..utils import create_input_dict,get_embedding_vec_list,get_inputs_list,embed_dense_input,create_embedding_dict
+from input_embedding import create_input_dict, create_embedding_dict, merge_dense_input, get_embedding_vec_list, \
+    get_inputs_list
 
 
 def PNN(feature_dim_dict, embedding_size=8, hidden_size=(128, 128), l2_reg_embedding=1e-5, l2_reg_deep=0,
@@ -45,7 +46,7 @@ def PNN(feature_dim_dict, embedding_size=8, hidden_size=(128, 128), l2_reg_embed
     sparse_embedding = create_embedding_dict(feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding,)
 
     embed_list = get_embedding_vec_list(sparse_embedding,sparse_input)
-    embed_list = embed_dense_input(dense_input,embed_list,embedding_size,l2_reg_embedding)
+    embed_list = merge_dense_input(dense_input, embed_list, embedding_size, l2_reg_embedding)
 
     inner_product = Flatten()(InnerProductLayer()(embed_list))
     outter_product = OutterProductLayer(kernel_type)(embed_list)

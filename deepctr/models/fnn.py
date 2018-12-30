@@ -11,7 +11,9 @@ from tensorflow.python.keras.layers import Dense, Concatenate, Reshape, add
 from tensorflow.python.keras.models import Model
 
 from ..layers import PredictionLayer, MLP
-from ..utils import create_input_dict, create_embedding_dict, get_embedding_vec_list, get_inputs_list, get_linear_logit, embed_dense_input
+from ..utils import get_linear_logit
+from input_embedding import create_input_dict, create_embedding_dict, merge_dense_input, get_embedding_vec_list, \
+    get_inputs_list
 
 
 def FNN(feature_dim_dict, embedding_size=8,
@@ -47,7 +49,7 @@ def FNN(feature_dim_dict, embedding_size=8,
     embed_list = get_embedding_vec_list(sparse_embedding, sparse_input)
     linear_term = get_embedding_vec_list(linear_embedding, sparse_input)
 
-    embed_list = embed_dense_input(
+    embed_list = merge_dense_input(
         dense_input, embed_list, embedding_size, l2_reg_embedding)
     linear_term = get_linear_logit(linear_term, dense_input, l2_reg_linear)
 
