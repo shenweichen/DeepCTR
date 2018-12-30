@@ -11,7 +11,7 @@ Reference:
 from tensorflow.python.keras.layers import Dense, Concatenate, Reshape, Flatten, add
 from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.regularizers import l2
-from ..utils import get_input, get_share_embeddings
+from ..utils import get_input_list, get_share_embeddings
 from ..layers import PredictionLayer, MLP, FM
 
 
@@ -46,7 +46,7 @@ def DeepFM(feature_dim_dict, embedding_size=8,
         raise ValueError("feature_dim_dict['dense'] must be a list,cur is", type(
             feature_dim_dict['dense']))
 
-    sparse_input, dense_input = get_input(feature_dim_dict, None)
+    sparse_input, dense_input = get_input_list(feature_dim_dict)
     sparse_embedding, linear_embedding, = get_share_embeddings(
         feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding, l2_reg_linear)
 

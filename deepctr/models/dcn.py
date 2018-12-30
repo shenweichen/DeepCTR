@@ -11,7 +11,7 @@ from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.regularizers import l2
 
-from ..utils import get_input
+from ..utils import get_input_list
 from ..layers import CrossNet, PredictionLayer, MLP
 
 
@@ -43,7 +43,7 @@ def DCN(feature_dim_dict, embedding_size='auto',
         raise ValueError(
             "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
 
-    sparse_input, dense_input = get_input(feature_dim_dict, None,)
+    sparse_input, dense_input = get_input_list(feature_dim_dict)
     sparse_embedding = get_embeddings(
         feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding)
     embed_list = [sparse_embedding[i](sparse_input[i])

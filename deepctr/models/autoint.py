@@ -15,7 +15,7 @@ from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.regularizers import l2
 import tensorflow as tf
 
-from ..utils import get_input
+from ..utils import get_input_list
 from ..layers import PredictionLayer, MLP, InteractingLayer
 
 
@@ -48,7 +48,7 @@ def AutoInt(feature_dim_dict, embedding_size=8, att_layer_num=3, att_embedding_s
         raise ValueError(
             "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
 
-    sparse_input, dense_input = get_input(feature_dim_dict, None,)
+    sparse_input, dense_input = get_input_list(feature_dim_dict)
     sparse_embedding = get_embeddings(
         feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding)
     embed_list = [sparse_embedding[i](sparse_input[i])

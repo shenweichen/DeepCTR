@@ -14,7 +14,7 @@ from tensorflow.python.keras.regularizers import l2
 
 
 from ..layers import PredictionLayer, MLP, InnerProductLayer, OutterProductLayer
-from ..utils import get_input
+from ..utils import get_input_list
 
 
 def PNN(feature_dim_dict, embedding_size=8, hidden_size=(128, 128), l2_reg_embedding=1e-5, l2_reg_deep=0,
@@ -43,7 +43,7 @@ def PNN(feature_dim_dict, embedding_size=8, hidden_size=(128, 128), l2_reg_embed
             "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
     if kernel_type not in ['mat', 'vec', 'num']:
         raise ValueError("kernel_type must be mat,vec or num")
-    sparse_input, dense_input = get_input(feature_dim_dict, None)
+    sparse_input, dense_input = get_input_list(feature_dim_dict)
     sparse_embedding = [Embedding(feature_dim_dict["sparse"][feat], embedding_size,
                                   embeddings_initializer=RandomNormal(
         mean=0.0, stddev=init_std, seed=seed),
