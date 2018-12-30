@@ -38,7 +38,7 @@ def NFM(feature_dim_dict, embedding_size=8,
             "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
 
     sparse_input, dense_input = create_input_dict(feature_dim_dict,)
-    sparse_embedding,  = create_embedding_dict(
+    sparse_embedding = create_embedding_dict(
         feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding)
     linear_embedding = create_embedding_dict(
         feature_dim_dict, embedding_size, init_std, seed, l2_reg_linear, prefix='linear')

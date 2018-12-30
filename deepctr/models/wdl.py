@@ -50,7 +50,7 @@ def WDL(deep_feature_dim_dict, wide_feature_dim_dict, embedding_size=8, hidden_s
         embed_list) > 1 else embed_list[0]
     deep_input = Flatten()(deep_input)
     if len(dense_input) > 0:
-        deep_input = Concatenate()([deep_input]+dense_input)
+        deep_input = Concatenate()([deep_input]+list(dense_input.values()))
 
     deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
                    False, seed)(deep_input)
@@ -58,14 +58,14 @@ def WDL(deep_feature_dim_dict, wide_feature_dim_dict, embedding_size=8, hidden_s
     final_logit = deep_logit
     if len(wide_feature_dim_dict['dense']) + len(wide_feature_dim_dict['sparse']) > 0:
         if len(wide_feature_dim_dict['sparse']) > 0:
-            bias_embed_list = [wide_linear_embedding[i](
-                bias_sparse_input[i]) for i in range(len(bias_sparse_input))]
+            bias_embed_list = get_embedding_vec_list(
+                wide_linear_embedding, bias_sparse_input)
             linear_term = add(bias_embed_list) if len(
                 bias_embed_list) > 1 else bias_embed_list[0]
             final_logit = add([final_logit, linear_term])
         if len(wide_feature_dim_dict['dense']) > 0:
             wide_dense_term = Dense(1, use_bias=False, activation=None)(Concatenate()(
-                bias_dense_input) if len(bias_dense_input) > 1 else bias_dense_input[0])
+                list(bias_dense_input.values())) if len(bias_dense_input) > 1 else list(bias_dense_input.values())[0])
             final_logit = add([final_logit, wide_dense_term])
 
     output = PredictionLayer(final_activation)(final_logit)
