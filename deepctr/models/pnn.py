@@ -7,14 +7,12 @@ Reference:
     [1] Qu Y, Cai H, Ren K, et al. Product-based neural networks for user response prediction[C]//Data Mining (ICDM), 2016 IEEE 16th International Conference on. IEEE, 2016: 1149-1154.(https://arxiv.org/pdf/1611.00144.pdf)
 """
 
-from tensorflow.python.keras.layers import Dense, Embedding, Concatenate, Reshape, Flatten
+from tensorflow.python.keras.layers import Dense, Concatenate, Reshape, Flatten
 from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.initializers import RandomNormal
-from tensorflow.python.keras.regularizers import l2
 
 
 from ..layers import PredictionLayer, MLP, InnerProductLayer, OutterProductLayer
-from ..utils import get_input_list
+from ..utils import create_input_dict,get_embedding_vec_list,get_inputs_list,embed_dense_input,create_embedding_dict
 
 
 def PNN(feature_dim_dict, embedding_size=8, hidden_size=(128, 128), l2_reg_embedding=1e-5, l2_reg_deep=0,
@@ -43,25 +41,11 @@ def PNN(feature_dim_dict, embedding_size=8, hidden_size=(128, 128), l2_reg_embed
             "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
     if kernel_type not in ['mat', 'vec', 'num']:
         raise ValueError("kernel_type must be mat,vec or num")
-    sparse_input, dense_input = get_input_list(feature_dim_dict)
-    sparse_embedding = [Embedding(feature_dim_dict["sparse"][feat], embedding_size,
-                                  embeddings_initializer=RandomNormal(
-        mean=0.0, stddev=init_std, seed=seed),
-        embeddings_regularizer=l2(
-        l2_reg_embedding),
-        name='sparse_emb_' + str(i) + '-' + feat) for i, feat in
-        enumerate(feature_dim_dict["sparse"])]
+    sparse_input, dense_input = create_input_dict(feature_dim_dict)
+    sparse_embedding = create_embedding_dict(feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding,)
 
-    embed_list = [sparse_embedding[i](sparse_input[i])
-                  for i in range(len(feature_dim_dict["sparse"]))]
-
-    if len(dense_input) > 0:
-        continuous_embedding_list = list(
-            map(Dense(embedding_size, use_bias=False, kernel_regularizer=l2(l2_reg_embedding), ),
-                dense_input))
-        continuous_embedding_list = list(
-            map(Reshape((1, embedding_size)), continuous_embedding_list))
-        embed_list += continuous_embedding_list
+    embed_list = get_embedding_vec_list(sparse_embedding,sparse_input)
+    embed_list = embed_dense_input(dense_input,embed_list,embedding_size,l2_reg_embedding)
 
     inner_product = Flatten()(InnerProductLayer()(embed_list))
     outter_product = OutterProductLayer(kernel_type)(embed_list)
@@ -85,6 +69,8 @@ def PNN(feature_dim_dict, embedding_size=8, hidden_size=(128, 128), l2_reg_embed
     deep_logit = Dense(1, use_bias=False, activation=None)(deep_out)
     final_logit = deep_logit
     output = PredictionLayer(final_activation)(final_logit)
-    model = Model(inputs=sparse_input + dense_input,
+
+    inputs_list = get_inputs_list([sparse_input,dense_input])
+    model = Model(inputs=inputs_list,
                   outputs=output)
     return model

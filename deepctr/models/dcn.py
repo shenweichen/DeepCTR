@@ -11,7 +11,7 @@ from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.regularizers import l2
 
-from ..utils import get_input_list
+from ..utils import create_input_dict,get_inputs_list,get_embedding_vec_list
 from ..layers import CrossNet, PredictionLayer, MLP
 
 
@@ -43,11 +43,11 @@ def DCN(feature_dim_dict, embedding_size='auto',
         raise ValueError(
             "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
 
-    sparse_input, dense_input = get_input_list(feature_dim_dict)
+    sparse_input, dense_input = create_input_dict(feature_dim_dict)
     sparse_embedding = get_embeddings(
         feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding)
-    embed_list = [sparse_embedding[i](sparse_input[i])
-                  for i in range(len(sparse_input))]
+
+    embed_list = get_embedding_vec_list(sparse_embedding,sparse_input)
 
     deep_input = Flatten()(Concatenate()(embed_list)
                            if len(embed_list) > 1 else embed_list[0])
@@ -77,27 +77,28 @@ def DCN(feature_dim_dict, embedding_size='auto',
 
     # Activation(self.final_activation)(final_logit)
     output = PredictionLayer(final_activation)(final_logit)
-    model = Model(inputs=sparse_input + dense_input, outputs=output)
+    inputs_list = get_inputs_list([sparse_input,dense_input])
+    model = Model(inputs=inputs_list, outputs=output)
 
     return model
 
 
 def get_embeddings(feature_dim_dict, embedding_size, init_std, seed, l2_rev_V):
     if embedding_size == "auto":
-        sparse_embedding = [Embedding(feature_dim_dict["sparse"][feat], 6*int(pow(feature_dim_dict["sparse"][feat], 0.25)),
+        sparse_embedding = {feat:Embedding(feature_dim_dict["sparse"][feat], 6*int(pow(feature_dim_dict["sparse"][feat], 0.25)),
                                       embeddings_initializer=RandomNormal(
                                           mean=0.0, stddev=init_std, seed=seed),
                                       embeddings_regularizer=l2(l2_rev_V), name='sparse_emb_' + str(i) + '-'+feat) for i, feat in
-                            enumerate(feature_dim_dict["sparse"])]
+                            enumerate(feature_dim_dict["sparse"])}
 
         print("Using auto embedding size,the connected vector dimension is", sum(
             [6*int(pow(feature_dim_dict["sparse"][k], 0.25)) for k, v in feature_dim_dict["sparse"].items()]))
     else:
-        sparse_embedding = [Embedding(feature_dim_dict["sparse"][feat], embedding_size,
+        sparse_embedding = {feat:Embedding(feature_dim_dict["sparse"][feat], embedding_size,
                                       embeddings_initializer=RandomNormal(
                                           mean=0.0, stddev=init_std, seed=seed),
                                       embeddings_regularizer=l2(l2_rev_V),
                                       name='sparse_emb_' + str(i) + '-' + feat) for i, feat in
-                            enumerate(feature_dim_dict["sparse"])]
+                            enumerate(feature_dim_dict["sparse"])}
 
     return sparse_embedding

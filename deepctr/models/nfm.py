@@ -7,11 +7,10 @@ Reference:
     [1] He X, Chua T S. Neural factorization machines for sparse predictive analytics[C]//Proceedings of the 40th International ACM SIGIR conference on Research and Development in Information Retrieval. ACM, 2017: 355-364. (https://arxiv.org/abs/1708.05027)
 """
 
-from tensorflow.python.keras.layers import Dense, Concatenate, Reshape, Dropout, add
+from tensorflow.python.keras.layers import Dense, Concatenate, Dropout, add
 from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.regularizers import l2
 from ..layers import PredictionLayer, MLP, BiInteractionPooling
-from ..utils import get_input_list, get_share_embeddings
+from ..utils import create_input_dict, create_embedding_dict,get_embedding_vec_list,get_inputs_list,get_linear_logit,embed_dense_input
 
 
 def NFM(feature_dim_dict, embedding_size=8,
@@ -38,36 +37,17 @@ def NFM(feature_dim_dict, embedding_size=8,
         raise ValueError(
             "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
 
-    sparse_input, dense_input = get_input_list(feature_dim_dict,)
-    sparse_embedding, linear_embedding = get_share_embeddings(
+    sparse_input, dense_input = create_input_dict(feature_dim_dict,)
+    sparse_embedding, linear_embedding = create_embedding_dict(
         feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding, l2_reg_linear)
 
-    embed_list = [sparse_embedding[i](sparse_input[i])
-                  for i in range(len(sparse_input))]
+    embed_list = get_embedding_vec_list(sparse_embedding,sparse_input)
+    linear_term = get_embedding_vec_list(linear_embedding,sparse_input)
 
-    linear_term = [linear_embedding[i](sparse_input[i])
-                   for i in range(len(sparse_input))]
-    if len(linear_term) > 1:
-        linear_term = add(linear_term)
-    elif len(linear_term) == 1:
-        linear_term = linear_term[0]
-
-    if len(dense_input) > 0:
-        continuous_embedding_list = list(
-            map(Dense(embedding_size, use_bias=False, kernel_regularizer=l2(l2_reg_embedding), ),
-                dense_input))
-        continuous_embedding_list = list(
-            map(Reshape((1, embedding_size)), continuous_embedding_list))
-        embed_list += continuous_embedding_list
-
-        dense_input_ = dense_input[0] if len(
-            dense_input) == 1 else Concatenate()(dense_input)
-        linear_dense_logit = Dense(
-            1, activation=None, use_bias=False, kernel_regularizer=l2(l2_reg_linear))(dense_input_)
-        linear_term = add([linear_dense_logit, linear_term])
+    embed_list = embed_dense_input(dense_input,embed_list,embedding_size,l2_reg_embedding)
+    linear_term = get_linear_logit(linear_term,dense_input,l2_reg_linear)
 
     fm_input = Concatenate(axis=1)(embed_list)
-
     bi_out = BiInteractionPooling()(fm_input)
     bi_out = Dropout(1 - keep_prob)(bi_out)
     deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
@@ -80,6 +60,6 @@ def NFM(feature_dim_dict, embedding_size=8,
         final_logit = add([final_logit, deep_logit])
 
     output = PredictionLayer(final_activation)(final_logit)
-    print(output)
-    model = Model(inputs=sparse_input + dense_input, outputs=output)
+    inputs_list = get_inputs_list([sparse_input,dense_input])
+    model = Model(inputs=inputs_list, outputs=output)
     return model

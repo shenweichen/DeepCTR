@@ -8,14 +8,12 @@ Reference:
     [1] Song W, Shi C, Xiao Z, et al. AutoInt: Automatic Feature Interaction Learning via Self-Attentive Neural Networks[J]. arXiv preprint arXiv:1810.11921, 2018.(https://arxiv.org/abs/1810.11921)
 
 """
-
-from tensorflow.python.keras.layers import Dense, Embedding, Concatenate
+from itertools import  chain
+from tensorflow.python.keras.layers import Dense, Concatenate
 from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.initializers import RandomNormal
-from tensorflow.python.keras.regularizers import l2
 import tensorflow as tf
 
-from ..utils import get_input_list
+from ..utils import create_input_dict,create_embedding_dict,get_embedding_vec_list,embed_dense_input,get_inputs_list
 from ..layers import PredictionLayer, MLP, InteractingLayer
 
 
@@ -48,11 +46,11 @@ def AutoInt(feature_dim_dict, embedding_size=8, att_layer_num=3, att_embedding_s
         raise ValueError(
             "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
 
-    sparse_input, dense_input = get_input_list(feature_dim_dict)
-    sparse_embedding = get_embeddings(
-        feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding)
-    embed_list = [sparse_embedding[i](sparse_input[i])
-                  for i in range(len(sparse_input))]
+    sparse_input, dense_input = create_input_dict(feature_dim_dict)
+    sparse_embedding = create_embedding_dict(feature_dim_dict,embedding_size,init_std,seed,l2_reg_embedding)
+
+    embed_list = get_embedding_vec_list(sparse_embedding,sparse_input)
+    embed_list = embed_dense_input(dense_input, embed_list, embedding_size, l2_reg_embedding)
 
     att_input = Concatenate(axis=1)(embed_list) if len(
         embed_list) > 1 else embed_list[0]
@@ -64,13 +62,7 @@ def AutoInt(feature_dim_dict, embedding_size=8, att_layer_num=3, att_embedding_s
 
     deep_input = tf.keras.layers.Flatten()(Concatenate()(embed_list)
                                            if len(embed_list) > 1 else embed_list[0])
-    if len(dense_input) > 0:
-        if len(dense_input) == 1:
-            continuous_list = dense_input[0]
-        else:
-            continuous_list = Concatenate()(dense_input)
 
-        deep_input = Concatenate()([deep_input, continuous_list])
 
     if len(hidden_size) > 0 and att_layer_num > 0:  # Deep & Interacting Layer
         deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
@@ -87,17 +79,8 @@ def AutoInt(feature_dim_dict, embedding_size=8, att_layer_num=3, att_embedding_s
         raise NotImplementedError
 
     output = PredictionLayer(final_activation)(final_logit)
-    model = Model(inputs=sparse_input + dense_input, outputs=output)
+    inputs_list = get_inputs_list([sparse_input,dense_input])
+    model = Model(inputs=inputs_list, outputs=output)
 
     return model
 
-
-def get_embeddings(feature_dim_dict, embedding_size, init_std, seed, l2_rev_V):
-    sparse_embedding = [Embedding(feature_dim_dict["sparse"][feat], embedding_size,
-                                  embeddings_initializer=RandomNormal(
-        mean=0.0, stddev=init_std, seed=seed),
-        embeddings_regularizer=l2(l2_rev_V),
-        name='sparse_emb_' + str(i) + '-' + feat) for i, feat in
-        enumerate(feature_dim_dict["sparse"])]
-
-    return sparse_embedding
