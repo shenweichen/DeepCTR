@@ -1,7 +1,6 @@
-import numpy as np
 import pytest
 from deepctr.models import DeepFM
-from ..utils import check_model
+from ..utils import check_model, get_test_data
 
 
 @pytest.mark.parametrize(
@@ -11,7 +10,6 @@ from ..utils import check_model
 )
 def test_DeepFM(use_fm, hidden_size, sparse_feature_num):
     model_name = "DeepFM"
-    sample_size = 64
     sample_size = 64
     x, y, feature_dim_dict = get_test_data(
         sample_size, sparse_feature_num, sparse_feature_num)

@@ -1,4 +1,3 @@
-import numpy as np
 import pytest
 from deepctr.models import AFM
 from ..utils import check_model, get_test_data

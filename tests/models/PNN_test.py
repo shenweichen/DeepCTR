@@ -1,8 +1,7 @@
-import numpy as np
 import pytest
 
 from deepctr.models import PNN
-from ..utils import check_model
+from ..utils import check_model, get_test_data
 
 
 @pytest.mark.parametrize(
