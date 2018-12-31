@@ -17,7 +17,7 @@ def create_input_dict(feature_dim_dict, prefix=''):
 
 def create_sequence_input_dict(feature_dim_dict):
 
-    sequence_dim_dict = feature_dim_dict.get('sequence',[])
+    sequence_dim_dict = feature_dim_dict.get('sequence', [])
     sequence_input_dict = {feat.name: Input(shape=(feat.maxlen,), name='seq_' + str(
         i) + '-' + feat.name) for i, feat in enumerate(sequence_dim_dict)}
     sequence_pooling_dict = {feat.name: feat.combiner
@@ -66,21 +66,32 @@ def merge_dense_input(dense_input_, embed_list, embedding_size, l2_reg):
 
     return embed_list
 
-def merge_sequence_input(embedding_dict,embed_list,sequence_input_dict,sequence_len_dict,sequence_max_len_dict,sequence_pooling_dict):
+
+def merge_sequence_input(embedding_dict, embed_list, sequence_input_dict, sequence_len_dict, sequence_max_len_dict, sequence_pooling_dict):
     if len(sequence_input_dict) > 0:
-        sequence_embed_dict = get_embedding_vec_list(embedding_dict,sequence_input_dict)
-        sequence_embed_list = get_pooling_vec_list(sequence_embed_dict,sequence_len_dict,sequence_max_len_dict,sequence_pooling_dict)
+        sequence_embed_dict = get_varlen_embedding_vec_dict(
+            embedding_dict, sequence_input_dict)
+        sequence_embed_list = get_pooling_vec_list(
+            sequence_embed_dict, sequence_len_dict, sequence_max_len_dict, sequence_pooling_dict)
         embed_list += sequence_embed_list
 
     return embed_list
+
 
 def get_embedding_vec_list(embedding_dict, input_dict):
 
     return [embedding_dict[feat](v)
             for feat, v in input_dict.items()]
 
-def get_pooling_vec_list(sequence_embed_dict,sequence_len_dict,sequence_max_len_dict,sequence_pooling_dict):
-    return  [SequencePoolingLayer(sequence_max_len_dict[feat], sequence_pooling_dict[feat])(
+
+def get_varlen_embedding_vec_dict(embedding_dict, input_dict):
+
+    return {feat: embedding_dict[feat](v)
+            for feat, v in input_dict.items()}
+
+
+def get_pooling_vec_list(sequence_embed_dict, sequence_len_dict, sequence_max_len_dict, sequence_pooling_dict):
+    return [SequencePoolingLayer(sequence_max_len_dict[feat], sequence_pooling_dict[feat])(
         [v, sequence_len_dict[feat]]) for feat, v in sequence_embed_dict.items()]
 
 

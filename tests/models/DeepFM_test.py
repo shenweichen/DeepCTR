@@ -12,22 +12,9 @@ from ..utils import check_model
 def test_DeepFM(use_fm, hidden_size, sparse_feature_num):
     model_name = "DeepFM"
     sample_size = 64
-    feature_dim_dict = {"sparse": {}, 'dense': []}
-    for name, num in zip(["sparse", "dense"], [sparse_feature_num, sparse_feature_num]):
-        if name == "sparse":
-            for i in range(num):
-                feature_dim_dict[name][name + '_' +
-                                       str(i)] = np.random.randint(1, 10)
-        else:
-            for i in range(num):
-                feature_dim_dict[name].append(name + '_' + str(i))
-
-    sparse_input = [np.random.randint(0, dim, sample_size)
-                    for dim in feature_dim_dict['sparse'].values()]
-    dense_input = [np.random.random(sample_size)
-                   for name in feature_dim_dict['dense']]
-    y = np.random.randint(0, 2, sample_size)
-    x = sparse_input + dense_input
+    sample_size = 64
+    x, y, feature_dim_dict = get_test_data(
+        sample_size, sparse_feature_num, sparse_feature_num)
 
     model = DeepFM(feature_dim_dict,  use_fm=use_fm,
                    hidden_size=hidden_size, keep_prob=0.5, )

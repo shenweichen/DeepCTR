@@ -6,12 +6,10 @@ Author:
 Reference:
     [1] Wang R, Fu B, Fu G, et al. Deep & cross network for ad click predictions[C]//Proceedings of the ADKDD'17. ACM, 2017: 12. (https://arxiv.org/abs/1708.05123)
 """
-from tensorflow.python.keras.layers import Dense, Embedding, Concatenate, Flatten
+from tensorflow.python.keras.layers import  Concatenate, Flatten
 from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.initializers import RandomNormal
-from tensorflow.python.keras.regularizers import l2
 
-from ..input_embedding import create_input_dict, get_embedding_vec_list, get_inputs_list
+from ..input_embedding import *
 from ..layers import CrossNet, PredictionLayer, MLP
 
 
@@ -43,19 +41,27 @@ def DCN(feature_dim_dict, embedding_size='auto',
         raise ValueError(
             "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
 
-    sparse_input, dense_input = create_input_dict(feature_dim_dict)
-    sparse_embedding = get_embeddings(
+    sparse_input_dict, dense_input_dict = create_input_dict(feature_dim_dict)
+    sequence_input_dict, sequence_pooling_dict, sequence_input_len_dict, sequence_max_len_dict = create_sequence_input_dict(
+        feature_dim_dict)
+
+    deep_sparse_emb_dict = get_embeddings(
         feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding)
 
-    embed_list = get_embedding_vec_list(sparse_embedding, sparse_input)
+    deep_emb_list = get_embedding_vec_list(deep_sparse_emb_dict, sparse_input_dict)
 
-    deep_input = Flatten()(Concatenate()(embed_list)
-                           if len(embed_list) > 1 else embed_list[0])
-    if len(dense_input) > 0:
-        if len(dense_input) == 1:
-            continuous_list = list(dense_input.values())[0]
+    deep_emb_list = merge_sequence_input(deep_sparse_emb_dict, deep_emb_list, sequence_input_dict,
+                                         sequence_input_len_dict, sequence_max_len_dict, sequence_pooling_dict)
+    deep_emb_list = merge_dense_input(
+        dense_input_dict, deep_emb_list, embedding_size, l2_reg_embedding)
+
+    deep_input = Flatten()(Concatenate()(deep_emb_list)
+                           if len(deep_emb_list) > 1 else deep_emb_list[0])
+    if len(dense_input_dict) > 0:
+        if len(dense_input_dict) == 1:
+            continuous_list = list(dense_input_dict.values())[0]
         else:
-            continuous_list = Concatenate()(list(dense_input.values()))
+            continuous_list = Concatenate()(list(dense_input_dict.values()))
 
         deep_input = Concatenate()([deep_input, continuous_list])
 
@@ -77,18 +83,18 @@ def DCN(feature_dim_dict, embedding_size='auto',
 
     # Activation(self.final_activation)(final_logit)
     output = PredictionLayer(final_activation)(final_logit)
-    inputs_list = get_inputs_list([sparse_input, dense_input])
+    inputs_list = get_inputs_list([sparse_input_dict, dense_input_dict,sequence_input_dict,sequence_input_len_dict])
     model = Model(inputs=inputs_list, outputs=output)
 
     return model
 
 
-def get_embeddings(feature_dim_dict, embedding_size, init_std, seed, l2_rev_V):
+def get_embeddings(feature_dim_dict, embedding_size, init_std, seed, l2_reg_V):
     if embedding_size == "auto":
         sparse_embedding = {feat: Embedding(feature_dim_dict["sparse"][feat], 6*int(pow(feature_dim_dict["sparse"][feat], 0.25)),
                                             embeddings_initializer=RandomNormal(
             mean=0.0, stddev=init_std, seed=seed),
-            embeddings_regularizer=l2(l2_rev_V), name='sparse_emb_' + str(i) + '-'+feat) for i, feat in
+            embeddings_regularizer=l2(l2_reg_V), name='sparse_emb_' + str(i) + '-'+feat) for i, feat in
             enumerate(feature_dim_dict["sparse"])}
 
         print("Using auto embedding size,the connected vector dimension is", sum(
@@ -97,7 +103,7 @@ def get_embeddings(feature_dim_dict, embedding_size, init_std, seed, l2_rev_V):
         sparse_embedding = {feat: Embedding(feature_dim_dict["sparse"][feat], embedding_size,
                                             embeddings_initializer=RandomNormal(
             mean=0.0, stddev=init_std, seed=seed),
-            embeddings_regularizer=l2(l2_rev_V),
+            embeddings_regularizer=l2(l2_reg_V),
             name='sparse_emb_' + str(i) + '-' + feat) for i, feat in
             enumerate(feature_dim_dict["sparse"])}
 

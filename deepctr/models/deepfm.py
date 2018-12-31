@@ -8,11 +8,10 @@ Reference:
 
 """
 
-from tensorflow.python.keras.layers import Dense, Concatenate, Flatten, add
+from tensorflow.python.keras.layers import  Concatenate, Flatten, add
 from tensorflow.python.keras.models import Model
 from ..utils import get_linear_logit
-from ..input_embedding import create_input_dict, create_embedding_dict, merge_dense_input, get_embedding_vec_list, \
-    get_inputs_list
+from ..input_embedding import *
 from ..layers import PredictionLayer, MLP, FM
 
 
@@ -47,20 +46,28 @@ def DeepFM(feature_dim_dict, embedding_size=8,
         raise ValueError("feature_dim_dict['dense'] must be a list,cur is", type(
             feature_dim_dict['dense']))
 
-    sparse_input, dense_input = create_input_dict(feature_dim_dict)
-    sparse_embedding = create_embedding_dict(
+    sparse_input_dict, dense_input_dict = create_input_dict(feature_dim_dict)
+    sequence_input_dict, sequence_pooling_dict, sequence_input_len_dict, sequence_max_len_dict = create_sequence_input_dict(
+        feature_dim_dict)
+
+    deep_sparse_emb_dict = create_embedding_dict(
         feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding)
-    linear_embedding = create_embedding_dict(
-        feature_dim_dict, 1, init_std, seed, l2_reg_linear, prefix='linear')
+    linear_sparse_emb_dict = create_embedding_dict(
+        feature_dim_dict, 1, init_std, seed, l2_reg_embedding, 'linear')
 
-    embed_list = get_embedding_vec_list(sparse_embedding, sparse_input)
-    linear_term = get_embedding_vec_list(linear_embedding, sparse_input)
+    deep_emb_list = get_embedding_vec_list(deep_sparse_emb_dict, sparse_input_dict)
+    linear_emb_list = get_embedding_vec_list(linear_sparse_emb_dict, sparse_input_dict)
 
-    embed_list = merge_dense_input(
-        dense_input, embed_list, embedding_size, l2_reg_embedding,)
-    linear_term = get_linear_logit(linear_term, dense_input, l2_reg_linear)
+    deep_emb_list = merge_sequence_input(deep_sparse_emb_dict, deep_emb_list, sequence_input_dict,
+                                      sequence_input_len_dict, sequence_max_len_dict, sequence_pooling_dict)
+    linear_emb_list = merge_sequence_input(linear_sparse_emb_dict, linear_emb_list, sequence_input_dict, sequence_input_len_dict,
+                                       sequence_max_len_dict, sequence_pooling_dict)
 
-    fm_input = Concatenate(axis=1)(embed_list)
+    deep_emb_list = merge_dense_input(
+        dense_input_dict, deep_emb_list, embedding_size, l2_reg_embedding)
+    linear_logit = get_linear_logit(linear_emb_list, dense_input_dict, l2_reg_linear)
+
+    fm_input = Concatenate(axis=1)(deep_emb_list)
     deep_input = Flatten()(fm_input)
     fm_out = FM()(fm_input)
     deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
@@ -68,17 +75,17 @@ def DeepFM(feature_dim_dict, embedding_size=8,
     deep_logit = Dense(1, use_bias=False, activation=None)(deep_out)
 
     if len(hidden_size) == 0 and use_fm == False:  # only linear
-        final_logit = linear_term
+        final_logit = linear_logit
     elif len(hidden_size) == 0 and use_fm == True:  # linear + FM
-        final_logit = add([linear_term, fm_out])
+        final_logit = add([linear_logit, fm_out])
     elif len(hidden_size) > 0 and use_fm == False:  # linear +　Deep
-        final_logit = add([linear_term, deep_logit])
+        final_logit = add([linear_logit, deep_logit])
     elif len(hidden_size) > 0 and use_fm == True:  # linear + FM + Deep
-        final_logit = add([linear_term, fm_out, deep_logit])
+        final_logit = add([linear_logit, fm_out, deep_logit])
     else:
         raise NotImplementedError
 
     output = PredictionLayer(final_activation)(final_logit)
-    inputs_list = get_inputs_list([sparse_input, dense_input])
+    inputs_list = get_inputs_list([sparse_input_dict, dense_input_dict,sequence_input_dict,sequence_input_len_dict])
     model = Model(inputs=inputs_list, outputs=output)
     return model
