@@ -44,7 +44,8 @@ def AFM(feature_dim_dict, embedding_size=8, use_attention=True, attention_factor
         raise ValueError("feature_dim_dict['dense'] must be a list,cur is", type(
             feature_dim_dict['dense']))
 
-    deep_emb_list,linear_logit,inputs_list = get_inputs_embedding(feature_dim_dict,embedding_size,l2_reg_embedding,l2_reg_linear,init_std,seed)
+    deep_emb_list, linear_logit, inputs_list = get_inputs_embedding(
+        feature_dim_dict, embedding_size, l2_reg_embedding, l2_reg_linear, init_std, seed)
 
     fm_input = tf.keras.layers.Concatenate(axis=1)(deep_emb_list)
     if use_attention:

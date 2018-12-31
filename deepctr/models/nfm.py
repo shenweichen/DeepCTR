@@ -6,7 +6,7 @@ Author:
 Reference:
     [1] He X, Chua T S. Neural factorization machines for sparse predictive analytics[C]//Proceedings of the 40th International ACM SIGIR conference on Research and Development in Information Retrieval. ACM, 2017: 355-364. (https://arxiv.org/abs/1708.05027)
 """
-import  tensorflow as tf
+import tensorflow as tf
 from ..layers import PredictionLayer, MLP, BiInteractionPooling
 from ..input_embedding import get_inputs_embedding
 
@@ -35,14 +35,16 @@ def NFM(feature_dim_dict, embedding_size=8,
         raise ValueError(
             "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
 
-    deep_emb_list,linear_logit,inputs_list = get_inputs_embedding(feature_dim_dict,embedding_size,l2_reg_embedding,l2_reg_linear,init_std,seed)
+    deep_emb_list, linear_logit, inputs_list = get_inputs_embedding(
+        feature_dim_dict, embedding_size, l2_reg_embedding, l2_reg_linear, init_std, seed)
 
     fm_input = tf.keras.layers.Concatenate(axis=1)(deep_emb_list)
     bi_out = BiInteractionPooling()(fm_input)
     bi_out = tf.keras.layers.Dropout(1 - keep_prob)(bi_out)
     deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
                    False, seed)(bi_out)
-    deep_logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(deep_out)
+    deep_logit = tf.keras.layers.Dense(
+        1, use_bias=False, activation=None)(deep_out)
 
     final_logit = linear_logit
 

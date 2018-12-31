@@ -8,7 +8,7 @@ Reference:
 
 """
 
-import  tensorflow as tf
+import tensorflow as tf
 from ..input_embedding import get_inputs_embedding
 from ..layers import PredictionLayer, MLP, FM
 
@@ -44,14 +44,16 @@ def DeepFM(feature_dim_dict, embedding_size=8,
         raise ValueError("feature_dim_dict['dense'] must be a list,cur is", type(
             feature_dim_dict['dense']))
 
-    deep_emb_list,linear_logit,inputs_list = get_inputs_embedding(feature_dim_dict,embedding_size,l2_reg_embedding,l2_reg_linear,init_std,seed)
+    deep_emb_list, linear_logit, inputs_list = get_inputs_embedding(
+        feature_dim_dict, embedding_size, l2_reg_embedding, l2_reg_linear, init_std, seed)
 
     fm_input = tf.keras.layers.Concatenate(axis=1)(deep_emb_list)
     deep_input = tf.keras.layers.Flatten()(fm_input)
     fm_out = FM()(fm_input)
     deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
                    use_bn, seed)(deep_input)
-    deep_logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(deep_out)
+    deep_logit = tf.keras.layers.Dense(
+        1, use_bias=False, activation=None)(deep_out)
 
     if len(hidden_size) == 0 and use_fm == False:  # only linear
         final_logit = linear_logit

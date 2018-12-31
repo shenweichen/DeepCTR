@@ -2,7 +2,7 @@ from itertools import chain
 
 from tensorflow.python.keras import Input
 from tensorflow.python.keras.initializers import RandomNormal
-from tensorflow.python.keras.layers import Embedding, Dense, Reshape
+from tensorflow.python.keras.layers import Embedding, Dense, Reshape,Concatenate
 from tensorflow.python.keras.regularizers import l2
 from .sequence import SequencePoolingLayer
 from .utils import get_linear_logit
@@ -78,11 +78,17 @@ def create_embedding_dict(feature_dim_dict, embedding_size, init_std, seed, l2_r
 def merge_dense_input(dense_input_, embed_list, embedding_size, l2_reg):
     dense_input = list(dense_input_.values())
     if len(dense_input) > 0:
-        continuous_embedding_list = list(
-            map(Dense(embedding_size, use_bias=False, kernel_regularizer=l2(l2_reg), ),
-                dense_input))
-        continuous_embedding_list = list(
-            map(Reshape((1, embedding_size)), continuous_embedding_list))
+        if embedding_size == "auto":
+            if len(dense_input) == 1:
+                continuous_embedding_list = dense_input[0]
+            else:
+                continuous_embedding_list = Concatenate()(dense_input)
+        else:
+            continuous_embedding_list = list(
+                map(Dense(embedding_size, use_bias=False, kernel_regularizer=l2(l2_reg), ),
+                    dense_input))
+            continuous_embedding_list = list(
+                map(Reshape((1, embedding_size)), continuous_embedding_list))
         embed_list += continuous_embedding_list
 
     return embed_list

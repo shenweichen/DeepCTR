@@ -6,7 +6,7 @@ Author:
 Reference:
     [1] Wang R, Fu B, Fu G, et al. Deep & cross network for ad click predictions[C]//Proceedings of the ADKDD'17. ACM, 2017: 12. (https://arxiv.org/abs/1708.05123)
 """
-import  tensorflow as tf
+import tensorflow as tf
 
 from ..input_embedding import *
 from ..layers import CrossNet, PredictionLayer, MLP
@@ -40,10 +40,11 @@ def DCN(feature_dim_dict, embedding_size='auto',
         raise ValueError(
             "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
 
-    deep_emb_list,_,inputs_list  = get_inputs_embedding(feature_dim_dict,embedding_size,l2_reg_embedding,0,init_std,seed,False)
+    deep_emb_list, _, inputs_list = get_inputs_embedding(
+        feature_dim_dict, embedding_size, l2_reg_embedding, 0, init_std, seed, False)
 
     deep_input = tf.keras.layers.Flatten()(tf.keras.layers.Concatenate()(deep_emb_list)
-                           if len(deep_emb_list) > 1 else deep_emb_list[0])
+                                           if len(deep_emb_list) > 1 else deep_emb_list[0])
 
     if len(hidden_size) > 0 and cross_num > 0:  # Deep & Cross
         deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,

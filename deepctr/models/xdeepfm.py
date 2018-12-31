@@ -6,8 +6,7 @@ Author:
 Reference:
     [1] Lian J, Zhou X, Zhang F, et al. xDeepFM: Combining Explicit and Implicit Feature Interactions for Recommender Systems[J]. arXiv preprint arXiv:1803.05170, 2018.(https://arxiv.org/pdf/1803.05170.pdf)
 """
-from tensorflow.python.keras.layers import Concatenate, Flatten, add
-from tensorflow.python.keras.models import Model
+import tensorflow as tf
 from ..input_embedding import get_inputs_embedding
 from deepctr.layers import PredictionLayer, MLP, CIN
 
@@ -36,33 +35,36 @@ def xDeepFM(feature_dim_dict, embedding_size=8, hidden_size=(256, 256), cin_laye
         raise ValueError(
             "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
 
-    deep_emb_list,linear_logit,inputs_list = get_inputs_embedding(feature_dim_dict,embedding_size,l2_reg_embedding,l2_reg_linear,init_std,seed)
+    deep_emb_list, linear_logit, inputs_list = get_inputs_embedding(
+        feature_dim_dict, embedding_size, l2_reg_embedding, l2_reg_linear, init_std, seed)
 
-    fm_input = Concatenate(axis=1)(deep_emb_list) if len(
+    fm_input = tf.keras.layers.Concatenate(axis=1)(deep_emb_list) if len(
         deep_emb_list) > 1 else deep_emb_list[0]
 
     if len(cin_layer_size) > 0:
         exFM_out = CIN(cin_layer_size, cin_activation,
                        cin_split_half, seed)(fm_input)
-        exFM_logit = Dense(1, activation=None,)(exFM_out)
+        exFM_logit = tf.keras.layers.Dense(1, activation=None,)(exFM_out)
 
-    deep_input = Flatten()(fm_input)
+    deep_input = tf.keras.layers.Flatten()(fm_input)
     deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
                    use_bn, seed)(deep_input)
-    deep_logit = Dense(1, use_bias=False, activation=None)(deep_out)
+    deep_logit = tf.keras.layers.Dense(
+        1, use_bias=False, activation=None)(deep_out)
 
     if len(hidden_size) == 0 and len(cin_layer_size) == 0:  # only linear
         final_logit = linear_logit
     elif len(hidden_size) == 0 and len(cin_layer_size) > 0:  # linear + CIN
-        final_logit = add([linear_logit, exFM_logit])
+        final_logit = tf.keras.layers.add([linear_logit, exFM_logit])
     elif len(hidden_size) > 0 and len(cin_layer_size) == 0:  # linear +　Deep
-        final_logit = add([linear_logit, deep_logit])
+        final_logit = tf.keras.layers.add([linear_logit, deep_logit])
     elif len(hidden_size) > 0 and len(cin_layer_size) > 0:  # linear + CIN + Deep
-        final_logit = add([linear_logit, deep_logit, exFM_logit])
+        final_logit = tf.keras.layers.add(
+            [linear_logit, deep_logit, exFM_logit])
     else:
         raise NotImplementedError
 
     output = PredictionLayer(final_activation)(final_logit)
 
-    model = Model(inputs=inputs_list, outputs=output)
+    model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
     return model

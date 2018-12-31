@@ -7,9 +7,10 @@ Reference:
     [1] Qu Y, Cai H, Ren K, et al. Product-based neural networks for user response prediction[C]//Data Mining (ICDM), 2016 IEEE 16th International Conference on. IEEE, 2016: 1149-1154.(https://arxiv.org/pdf/1611.00144.pdf)
 """
 
-import  tensorflow as tf
+import tensorflow as tf
 from ..layers import PredictionLayer, MLP, InnerProductLayer, OutterProductLayer
 from ..input_embedding import get_inputs_embedding
+
 
 def PNN(feature_dim_dict, embedding_size=8, hidden_size=(128, 128), l2_reg_embedding=1e-5, l2_reg_deep=0,
         init_std=0.0001, seed=1024, keep_prob=1, activation='relu',
@@ -37,7 +38,8 @@ def PNN(feature_dim_dict, embedding_size=8, hidden_size=(128, 128), l2_reg_embed
             "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
     if kernel_type not in ['mat', 'vec', 'num']:
         raise ValueError("kernel_type must be mat,vec or num")
-    deep_emb_list,_,inputs_list  = get_inputs_embedding(feature_dim_dict,embedding_size,l2_reg_embedding,0,init_std,seed,False)
+    deep_emb_list, _, inputs_list = get_inputs_embedding(
+        feature_dim_dict, embedding_size, l2_reg_embedding, 0, init_std, seed, False)
 
     inner_product = tf.keras.layers.Flatten()(InnerProductLayer()(deep_emb_list))
     outter_product = OutterProductLayer(kernel_type)(deep_emb_list)
@@ -50,18 +52,21 @@ def PNN(feature_dim_dict, embedding_size=8, hidden_size=(128, 128), l2_reg_embed
         deep_input = tf.keras.layers.Concatenate()(
             [linear_signal, inner_product, outter_product])
     elif use_inner:
-        deep_input = tf.keras.layers.Concatenate()([linear_signal, inner_product])
+        deep_input = tf.keras.layers.Concatenate()(
+            [linear_signal, inner_product])
     elif use_outter:
-        deep_input = tf.keras.layers.Concatenate()([linear_signal, outter_product])
+        deep_input = tf.keras.layers.Concatenate()(
+            [linear_signal, outter_product])
     else:
         deep_input = linear_signal
 
     deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
                    False, seed)(deep_input)
-    deep_logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(deep_out)
+    deep_logit = tf.keras.layers.Dense(
+        1, use_bias=False, activation=None)(deep_out)
 
     output = PredictionLayer(final_activation)(deep_logit)
 
     model = tf.keras.models.Model(inputs=inputs_list,
-                  outputs=output)
+                                  outputs=output)
     return model

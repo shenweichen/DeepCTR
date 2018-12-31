@@ -43,8 +43,8 @@ def AutoInt(feature_dim_dict, embedding_size=8, att_layer_num=3, att_embedding_s
         raise ValueError(
             "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
 
-
-    deep_emb_list,_,inputs_list  = get_inputs_embedding(feature_dim_dict,embedding_size,l2_reg_embedding,0,init_std,seed,False)
+    deep_emb_list, _, inputs_list = get_inputs_embedding(
+        feature_dim_dict, embedding_size, l2_reg_embedding, 0, init_std, seed, False)
 
     att_input = tf.keras.layers.Concatenate(axis=1)(deep_emb_list) if len(
         deep_emb_list) > 1 else deep_emb_list[0]
@@ -60,13 +60,16 @@ def AutoInt(feature_dim_dict, embedding_size=8, att_layer_num=3, att_embedding_s
         deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
                        use_bn, seed)(deep_input)
         stack_out = tf.keras.layers.Concatenate()([att_output, deep_out])
-        final_logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(stack_out)
+        final_logit = tf.keras.layers.Dense(
+            1, use_bias=False, activation=None)(stack_out)
     elif len(hidden_size) > 0:  # Only Deep
         deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
                        use_bn, seed)(deep_input)
-        final_logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(deep_out)
+        final_logit = tf.keras.layers.Dense(
+            1, use_bias=False, activation=None)(deep_out)
     elif att_layer_num > 0:  # Only Interacting Layer
-        final_logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(att_output)
+        final_logit = tf.keras.layers.Dense(
+            1, use_bias=False, activation=None)(att_output)
     else:  # Error
         raise NotImplementedError
 
