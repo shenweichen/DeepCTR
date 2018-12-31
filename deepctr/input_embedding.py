@@ -5,6 +5,7 @@ from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.layers import Embedding, Dense, Reshape
 from tensorflow.python.keras.regularizers import l2
 from .sequence import SequencePoolingLayer
+from .utils import get_linear_logit
 
 
 def create_input_dict(feature_dim_dict, prefix=''):
@@ -30,25 +31,45 @@ def create_sequence_input_dict(feature_dim_dict):
 
 
 def create_embedding_dict(feature_dim_dict, embedding_size, init_std, seed, l2_reg, prefix='sparse'):
+    if embedding_size == 'auto':
 
-    sparse_embedding = {feat: Embedding(feature_dim_dict["sparse"][feat], embedding_size,
-                                        embeddings_initializer=RandomNormal(
-        mean=0.0, stddev=init_std, seed=seed),
-        embeddings_regularizer=l2(l2_reg),
-        name=prefix+'_emb_' + str(i) + '-' + feat) for i, feat in
-        enumerate(feature_dim_dict["sparse"])}
+        sparse_embedding = {feat: Embedding(feature_dim_dict["sparse"][feat], 6 * int(pow(feature_dim_dict["sparse"][feat], 0.25)),
+                                            embeddings_initializer=RandomNormal(
+            mean=0.0, stddev=init_std, seed=seed),
+            embeddings_regularizer=l2(l2_reg),
+            name=prefix+'_emb_' + str(i) + '-' + feat) for i, feat in
+            enumerate(feature_dim_dict["sparse"])}
+    else:
+
+        sparse_embedding = {feat: Embedding(feature_dim_dict["sparse"][feat], embedding_size,
+                                            embeddings_initializer=RandomNormal(
+            mean=0.0, stddev=init_std, seed=seed),
+            embeddings_regularizer=l2(l2_reg),
+            name=prefix+'_emb_' + str(i) + '-' + feat) for i, feat in
+            enumerate(feature_dim_dict["sparse"])}
 
     if 'sequence' in feature_dim_dict:
         count = len(sparse_embedding)
         sequence_dim_list = feature_dim_dict['sequence']
         for feat in sequence_dim_list:
             if feat.name not in sparse_embedding:
-                sparse_embedding[feat.name] = Embedding(feat.dimension, embedding_size,
-                                                        embeddings_initializer=RandomNormal(
-                                                            mean=0.0, stddev=init_std, seed=seed),
-                                                        embeddings_regularizer=l2(
-                                                            l2_reg),
-                                                        name=prefix+'_emb_' + str(count) + '-' + feat.name)
+                if embedding_size == "auto":
+                    sparse_embedding[feat.name] = Embedding(feat.dimension, 6 * int(pow(feat.dimension, 0.25)),
+                                                            embeddings_initializer=RandomNormal(
+                                                                mean=0.0, stddev=init_std, seed=seed),
+                                                            embeddings_regularizer=l2(
+                                                                l2_reg),
+                                                            name=prefix + '_emb_' + str(count) + '-' + feat.name)
+
+                else:
+                    sparse_embedding[feat.name] = Embedding(feat.dimension, embedding_size,
+                                                            embeddings_initializer=RandomNormal(
+                                                                mean=0.0, stddev=init_std, seed=seed),
+                                                            embeddings_regularizer=l2(
+                                                                l2_reg),
+                                                            name=prefix+'_emb_' + str(count) + '-' + feat.name)
+
+
                 count += 1
 
     return sparse_embedding
@@ -97,3 +118,34 @@ def get_pooling_vec_list(sequence_embed_dict, sequence_len_dict, sequence_max_le
 
 def get_inputs_list(inputs):
     return list(chain(*list(map(lambda x: x.values(), inputs))))
+
+def get_inputs_embedding(feature_dim_dict,embedding_size,l2_reg_embedding,l2_reg_linear,init_std,seed,include_linear=True):
+    sparse_input_dict, dense_input_dict = create_input_dict(feature_dim_dict)
+    sequence_input_dict, sequence_pooling_dict, sequence_input_len_dict, sequence_max_len_dict = create_sequence_input_dict(
+        feature_dim_dict)
+
+    deep_sparse_emb_dict = create_embedding_dict(
+        feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding)
+
+    deep_emb_list = get_embedding_vec_list(deep_sparse_emb_dict, sparse_input_dict)
+
+    deep_emb_list = merge_sequence_input(deep_sparse_emb_dict, deep_emb_list, sequence_input_dict,
+                                         sequence_input_len_dict, sequence_max_len_dict, sequence_pooling_dict)
+
+    deep_emb_list = merge_dense_input(
+        dense_input_dict, deep_emb_list, embedding_size, l2_reg_embedding)
+    if include_linear:
+        linear_sparse_emb_dict = create_embedding_dict(
+            feature_dim_dict, 1, init_std, seed, l2_reg_linear, 'linear')
+        linear_emb_list = get_embedding_vec_list(linear_sparse_emb_dict, sparse_input_dict)
+        linear_emb_list = merge_sequence_input(linear_sparse_emb_dict, linear_emb_list, sequence_input_dict,
+                                               sequence_input_len_dict,
+                                               sequence_max_len_dict, sequence_pooling_dict)
+
+        linear_logit = get_linear_logit(linear_emb_list, dense_input_dict, l2_reg_linear)
+    else:
+        linear_logit = None
+
+    inputs_list = get_inputs_list(
+        [sparse_input_dict, dense_input_dict, sequence_input_dict, sequence_input_len_dict])
+    return deep_emb_list,linear_logit,inputs_list

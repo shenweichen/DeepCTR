@@ -9,13 +9,8 @@ Reference:
     (https://arxiv.org/abs/1708.04617)
 
 """
-
-from tensorflow.python.keras.layers import Concatenate, add
-from tensorflow.python.keras.models import Model
-
-
-from ..utils import get_linear_logit
-from ..input_embedding import *
+import tensorflow as tf
+from ..input_embedding import get_inputs_embedding
 from ..layers import PredictionLayer, AFMLayer, FM
 
 
@@ -49,40 +44,17 @@ def AFM(feature_dim_dict, embedding_size=8, use_attention=True, attention_factor
         raise ValueError("feature_dim_dict['dense'] must be a list,cur is", type(
             feature_dim_dict['dense']))
 
-    sparse_input_dict, dense_input_dict = create_input_dict(feature_dim_dict)
-    sequence_input_dict, sequence_pooling_dict, sequence_input_len_dict, sequence_max_len_dict = create_sequence_input_dict(
-        feature_dim_dict)
+    deep_emb_list,linear_logit,inputs_list = get_inputs_embedding(feature_dim_dict,embedding_size,l2_reg_embedding,l2_reg_linear,init_std,seed)
 
-    deep_sparse_emb_dict = create_embedding_dict(
-        feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding)
-    linear_sparse_emb_dict = create_embedding_dict(
-        feature_dim_dict, 1, init_std, seed, l2_reg_embedding, 'linear')
-
-    deep_emb_list = get_embedding_vec_list(
-        deep_sparse_emb_dict, sparse_input_dict)
-    linear_emb_list = get_embedding_vec_list(
-        linear_sparse_emb_dict, sparse_input_dict)
-
-    deep_emb_list = merge_sequence_input(deep_sparse_emb_dict, deep_emb_list, sequence_input_dict,
-                                         sequence_input_len_dict, sequence_max_len_dict, sequence_pooling_dict)
-    linear_emb_list = merge_sequence_input(linear_sparse_emb_dict, linear_emb_list, sequence_input_dict, sequence_input_len_dict,
-                                           sequence_max_len_dict, sequence_pooling_dict)
-
-    deep_emb_list = merge_dense_input(
-        dense_input_dict, deep_emb_list, embedding_size, l2_reg_embedding)
-    linear_logit = get_linear_logit(
-        linear_emb_list, dense_input_dict, l2_reg_linear)
-
-    fm_input = Concatenate(axis=1)(deep_emb_list)
+    fm_input = tf.keras.layers.Concatenate(axis=1)(deep_emb_list)
     if use_attention:
         fm_logit = AFMLayer(attention_factor, l2_reg_att,
                             keep_prob, seed)(deep_emb_list)
     else:
         fm_logit = FM()(fm_input)
 
-    final_logit = add([linear_logit, fm_logit])
+    final_logit = tf.keras.layers.add([linear_logit, fm_logit])
     output = PredictionLayer(final_activation)(final_logit)
-    inputs_list = get_inputs_list(
-        [sparse_input_dict, dense_input_dict, sequence_input_dict, sequence_input_len_dict])
-    model = Model(inputs=inputs_list, outputs=output)
+
+    model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
     return model

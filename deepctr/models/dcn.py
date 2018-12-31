@@ -6,8 +6,7 @@ Author:
 Reference:
     [1] Wang R, Fu B, Fu G, et al. Deep & cross network for ad click predictions[C]//Proceedings of the ADKDD'17. ACM, 2017: 12. (https://arxiv.org/abs/1708.05123)
 """
-from tensorflow.python.keras.layers import  Concatenate, Flatten
-from tensorflow.python.keras.models import Model
+import  tensorflow as tf
 
 from ..input_embedding import *
 from ..layers import CrossNet, PredictionLayer, MLP
@@ -41,35 +40,16 @@ def DCN(feature_dim_dict, embedding_size='auto',
         raise ValueError(
             "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
 
-    sparse_input_dict, dense_input_dict = create_input_dict(feature_dim_dict)
-    sequence_input_dict, sequence_pooling_dict, sequence_input_len_dict, sequence_max_len_dict = create_sequence_input_dict(
-        feature_dim_dict)
+    deep_emb_list,_,inputs_list  = get_inputs_embedding(feature_dim_dict,embedding_size,l2_reg_embedding,0,init_std,seed,False)
 
-    deep_sparse_emb_dict = get_embeddings(
-        feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding)
-
-    deep_emb_list = get_embedding_vec_list(deep_sparse_emb_dict, sparse_input_dict)
-
-    deep_emb_list = merge_sequence_input(deep_sparse_emb_dict, deep_emb_list, sequence_input_dict,
-                                         sequence_input_len_dict, sequence_max_len_dict, sequence_pooling_dict)
-    deep_emb_list = merge_dense_input(
-        dense_input_dict, deep_emb_list, embedding_size, l2_reg_embedding)
-
-    deep_input = Flatten()(Concatenate()(deep_emb_list)
+    deep_input = tf.keras.layers.Flatten()(tf.keras.layers.Concatenate()(deep_emb_list)
                            if len(deep_emb_list) > 1 else deep_emb_list[0])
-    if len(dense_input_dict) > 0:
-        if len(dense_input_dict) == 1:
-            continuous_list = list(dense_input_dict.values())[0]
-        else:
-            continuous_list = Concatenate()(list(dense_input_dict.values()))
-
-        deep_input = Concatenate()([deep_input, continuous_list])
 
     if len(hidden_size) > 0 and cross_num > 0:  # Deep & Cross
         deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
                        use_bn, seed)(deep_input)
         cross_out = CrossNet(cross_num, l2_reg=l2_reg_cross)(deep_input)
-        stack_out = Concatenate()([cross_out, deep_out])
+        stack_out = tf.keras.layers.Concatenate()([cross_out, deep_out])
         final_logit = Dense(1, use_bias=False, activation=None)(stack_out)
     elif len(hidden_size) > 0:  # Only Deep
         deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
@@ -81,30 +61,8 @@ def DCN(feature_dim_dict, embedding_size='auto',
     else:  # Error
         raise NotImplementedError
 
-    # Activation(self.final_activation)(final_logit)
     output = PredictionLayer(final_activation)(final_logit)
-    inputs_list = get_inputs_list([sparse_input_dict, dense_input_dict,sequence_input_dict,sequence_input_len_dict])
-    model = Model(inputs=inputs_list, outputs=output)
+
+    model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
 
     return model
-
-
-def get_embeddings(feature_dim_dict, embedding_size, init_std, seed, l2_reg_V):
-    if embedding_size == "auto":
-        sparse_embedding = {feat: Embedding(feature_dim_dict["sparse"][feat], 6*int(pow(feature_dim_dict["sparse"][feat], 0.25)),
-                                            embeddings_initializer=RandomNormal(
-            mean=0.0, stddev=init_std, seed=seed),
-            embeddings_regularizer=l2(l2_reg_V), name='sparse_emb_' + str(i) + '-'+feat) for i, feat in
-            enumerate(feature_dim_dict["sparse"])}
-
-        print("Using auto embedding size,the connected vector dimension is", sum(
-            [6*int(pow(feature_dim_dict["sparse"][k], 0.25)) for k, v in feature_dim_dict["sparse"].items()]))
-    else:
-        sparse_embedding = {feat: Embedding(feature_dim_dict["sparse"][feat], embedding_size,
-                                            embeddings_initializer=RandomNormal(
-            mean=0.0, stddev=init_std, seed=seed),
-            embeddings_regularizer=l2(l2_reg_V),
-            name='sparse_emb_' + str(i) + '-' + feat) for i, feat in
-            enumerate(feature_dim_dict["sparse"])}
-
-    return sparse_embedding

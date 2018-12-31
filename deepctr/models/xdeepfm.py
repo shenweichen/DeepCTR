@@ -8,8 +8,7 @@ Reference:
 """
 from tensorflow.python.keras.layers import Concatenate, Flatten, add
 from tensorflow.python.keras.models import Model
-from deepctr.utils import get_linear_logit
-from ..input_embedding import *
+from ..input_embedding import get_inputs_embedding
 from deepctr.layers import PredictionLayer, MLP, CIN
 
 
@@ -36,26 +35,8 @@ def xDeepFM(feature_dim_dict, embedding_size=8, hidden_size=(256, 256), cin_laye
     if not isinstance(feature_dim_dict, dict) or "sparse" not in feature_dim_dict or "dense" not in feature_dim_dict:
         raise ValueError(
             "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
-    sparse_input_dict, dense_input_dict = create_input_dict(feature_dim_dict)
-    sequence_input_dict, sequence_pooling_dict, sequence_input_len_dict, sequence_max_len_dict = create_sequence_input_dict(
-        feature_dim_dict)
 
-    deep_sparse_emb_dict = create_embedding_dict(
-        feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding)
-    linear_sparse_emb_dict = create_embedding_dict(
-        feature_dim_dict, 1, init_std, seed, l2_reg_embedding, 'linear')
-
-    deep_emb_list = get_embedding_vec_list(deep_sparse_emb_dict, sparse_input_dict)
-    linear_emb_list = get_embedding_vec_list(linear_sparse_emb_dict, sparse_input_dict)
-
-    deep_emb_list = merge_sequence_input(deep_sparse_emb_dict, deep_emb_list, sequence_input_dict,
-                                      sequence_input_len_dict, sequence_max_len_dict, sequence_pooling_dict)
-    linear_emb_list = merge_sequence_input(linear_sparse_emb_dict, linear_emb_list, sequence_input_dict, sequence_input_len_dict,
-                                       sequence_max_len_dict, sequence_pooling_dict)
-
-    deep_emb_list = merge_dense_input(
-        dense_input_dict, deep_emb_list, embedding_size, l2_reg_embedding)
-    linear_logit = get_linear_logit(linear_emb_list, dense_input_dict, l2_reg_linear)
+    deep_emb_list,linear_logit,inputs_list = get_inputs_embedding(feature_dim_dict,embedding_size,l2_reg_embedding,l2_reg_linear,init_std,seed)
 
     fm_input = Concatenate(axis=1)(deep_emb_list) if len(
         deep_emb_list) > 1 else deep_emb_list[0]
@@ -82,6 +63,6 @@ def xDeepFM(feature_dim_dict, embedding_size=8, hidden_size=(256, 256), cin_laye
         raise NotImplementedError
 
     output = PredictionLayer(final_activation)(final_logit)
-    inputs_list = get_inputs_list([sparse_input_dict, dense_input_dict,sequence_input_dict,sequence_input_len_dict])
+
     model = Model(inputs=inputs_list, outputs=output)
     return model

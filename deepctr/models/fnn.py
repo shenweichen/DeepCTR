@@ -6,13 +6,10 @@ Author:
 Reference:
     [1] Zhang W, Du T, Wang J. Deep learning over multi-field categorical data[C]//European conference on information retrieval. Springer, Cham, 2016: 45-57.(https://arxiv.org/pdf/1601.02376.pdf)
 """
-
-from tensorflow.python.keras.layers import Concatenate, add
-from tensorflow.python.keras.models import Model
+import  tensorflow as tf
 
 from ..layers import PredictionLayer, MLP
-from ..utils import get_linear_logit
-from ..input_embedding import *
+from ..input_embedding import get_inputs_embedding
 
 def FNN(feature_dim_dict, embedding_size=8,
         hidden_size=(128, 128),
@@ -39,36 +36,16 @@ def FNN(feature_dim_dict, embedding_size=8,
         raise ValueError(
             "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
 
-    sparse_input_dict, dense_input_dict = create_input_dict(feature_dim_dict)
-    sequence_input_dict, sequence_pooling_dict, sequence_input_len_dict, sequence_max_len_dict = create_sequence_input_dict(
-        feature_dim_dict)
+    deep_emb_list,linear_logit,inputs_list = get_inputs_embedding(feature_dim_dict,embedding_size,l2_reg_embedding,l2_reg_linear,init_std,seed)
 
-    deep_sparse_emb_dict = create_embedding_dict(
-        feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding)
-    linear_sparse_emb_dict = create_embedding_dict(
-        feature_dim_dict, 1, init_std, seed, l2_reg_embedding, 'linear')
-
-    deep_emb_list = get_embedding_vec_list(deep_sparse_emb_dict, sparse_input_dict)
-    linear_emb_list = get_embedding_vec_list(linear_sparse_emb_dict, sparse_input_dict)
-
-    deep_emb_list = merge_sequence_input(deep_sparse_emb_dict, deep_emb_list, sequence_input_dict,
-                                      sequence_input_len_dict, sequence_max_len_dict, sequence_pooling_dict)
-    linear_emb_list = merge_sequence_input(linear_sparse_emb_dict, linear_emb_list, sequence_input_dict, sequence_input_len_dict,
-                                       sequence_max_len_dict, sequence_pooling_dict)
-
-    deep_emb_list = merge_dense_input(
-        dense_input_dict, deep_emb_list, embedding_size, l2_reg_embedding)
-    linear_logit = get_linear_logit(linear_emb_list, dense_input_dict, l2_reg_linear)
-
-    num_inputs = len(dense_input_dict) + len(sparse_input_dict) + len(sequence_input_dict)
-    deep_input = Reshape([num_inputs*embedding_size]
-                         )(Concatenate()(deep_emb_list))
+    #num_inputs = len(dense_input_dict) + len(sparse_input_dict) + len(sequence_input_dict)
+    deep_input = tf.keras.layers.Flatten()(tf.keras.layers.Concatenate()(deep_emb_list))
     deep_out = MLP(hidden_size, activation, l2_reg_deep,
                    keep_prob, False, seed)(deep_input)
-    deep_logit = Dense(1, use_bias=False, activation=None)(deep_out)
-    final_logit = add([deep_logit, linear_logit])
+    deep_logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(deep_out)
+    final_logit = tf.keras.layers.add([deep_logit, linear_logit])
     output = PredictionLayer(final_activation)(final_logit)
-    inputs_list = get_inputs_list([sparse_input_dict, dense_input_dict,sequence_input_dict,sequence_input_len_dict])
-    model = Model(inputs=inputs_list,
+
+    model = tf.keras.models.Model(inputs=inputs_list,
                   outputs=output)
     return model
