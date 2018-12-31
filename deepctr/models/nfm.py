@@ -43,7 +43,7 @@ def NFM(feature_dim_dict, embedding_size=8,
     sparse_embedding = create_embedding_dict(
         feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding)
     linear_embedding = create_embedding_dict(
-        feature_dim_dict, embedding_size, init_std, seed, l2_reg_linear, prefix='linear')
+        feature_dim_dict, 1, init_std, seed, l2_reg_linear, prefix='linear')
     embed_list = get_embedding_vec_list(sparse_embedding, sparse_input)
     linear_term = get_embedding_vec_list(linear_embedding, sparse_input)
 
@@ -58,7 +58,7 @@ def NFM(feature_dim_dict, embedding_size=8,
                    False, seed)(bi_out)
     deep_logit = Dense(1, use_bias=False, activation=None)(deep_out)
 
-    final_logit = linear_term  # TODO add bias term
+    final_logit = linear_term
 
     if len(hidden_size) > 0:
         final_logit = add([final_logit, deep_logit])
