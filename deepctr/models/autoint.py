@@ -47,7 +47,7 @@ def AutoInt(feature_dim_dict, embedding_size=8, att_layer_num=3, att_embedding_s
     deep_emb_list, _, inputs_list = get_inputs_embedding(
         feature_dim_dict, embedding_size, l2_reg_embedding, 0, init_std, seed, False)
 
-    att_input = concat_fun(deep_emb_list,axis=1)
+    att_input = concat_fun(deep_emb_list, axis=1)
 
     for _ in range(att_layer_num):
         att_input = InteractingLayer(
