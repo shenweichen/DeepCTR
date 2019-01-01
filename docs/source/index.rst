@@ -35,13 +35,11 @@ You can read the latest code at https://github.com/shenweichen/DeepCTR
 
 News
 -----
-01/01/2019 : Add `sequence(multi-value) input support for AFM,AutoInt,DCN,DeepFM,FNN,NFM,PNN,xDeepFM <./Features.html#autoint-automatic-feature-interactiont) models>`_ . `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.2.2>`_
+01/01/2019 : Add `sequence(multi-value) input support <./Examples.html#multi-value-input-movielens>`_ for ``AFM,AutoInt,DCN,DeepFM,FNN,NFM,PNN,xDeepFM`` models. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.2.2>`_
 
 12/27/2018 : Add `AutoInt <./Features.html#autoint-automatic-feature-interaction>`_ . `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.2.1>`_
 
 12/22/2018 : Add `xDeepFM <./Features.html#xdeepfm>`_ and automatic check for new version. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.2.0>`_
-
-12/19/2018 : DeepCTR is compatible with tensorflow from ``1.4-1.12`` except for ``1.7`` and ``1.8``. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.1.6>`_
 
 .. toctree::
    :maxdepth: 2

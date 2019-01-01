@@ -40,7 +40,6 @@ def FNN(feature_dim_dict, embedding_size=8,
     deep_emb_list, linear_logit, inputs_list = get_inputs_embedding(
         feature_dim_dict, embedding_size, l2_reg_embedding, l2_reg_linear, init_std, seed)
 
-    #num_inputs = len(dense_input_dict) + len(sparse_input_dict) + len(sequence_input_dict)
     deep_input = tf.keras.layers.Flatten()(
         tf.keras.layers.Concatenate()(deep_emb_list))
     deep_out = MLP(hidden_size, activation, l2_reg_deep,
