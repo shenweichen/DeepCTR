@@ -83,13 +83,16 @@ def merge_dense_input(dense_input_, embed_list, embedding_size, l2_reg):
                 continuous_embedding_list = dense_input[0]
             else:
                 continuous_embedding_list = Concatenate()(dense_input)
+            continuous_embedding_list = Reshape([1,len(dense_input)])(continuous_embedding_list)
+            embed_list.append(continuous_embedding_list)
+
         else:
             continuous_embedding_list = list(
                 map(Dense(embedding_size, use_bias=False, kernel_regularizer=l2(l2_reg), ),
                     dense_input))
             continuous_embedding_list = list(
-                map(Reshape((1, embedding_size)), continuous_embedding_list))
-        embed_list += continuous_embedding_list
+                    map(Reshape((1, embedding_size)), continuous_embedding_list))
+            embed_list += continuous_embedding_list
 
     return embed_list
 
