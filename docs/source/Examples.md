@@ -150,7 +150,7 @@ key2index = {}
 genres_list = list(map(split, data['genres'].values))
 genres_length = np.array(list(map(len, genres_list)))
 max_len = max(genres_length)
-genres_list = pad_sequences(genres_list, maxlen=max_len, padding='post',)
+genres_list = pad_sequences(genres_list, maxlen=max_len, padding='post',)# Notice : padding='post'
 
 # 2.count #unique features for each sparse field and generate feature config for sequence feature
 

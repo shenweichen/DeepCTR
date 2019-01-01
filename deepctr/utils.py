@@ -56,6 +56,11 @@ def get_linear_logit(linear_term, dense_input_, l2_reg):
 
     return linear_term
 
+def concat_fun(inputs,axis=-1):
+    if len(inputs) == 1:
+        return inputs[0]
+    else:
+        return Concatenate(axis=axis)(inputs)
 
 def check_version(version):
     """Return version of package on pypi.python.org using json."""

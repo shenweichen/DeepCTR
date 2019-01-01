@@ -10,6 +10,7 @@ import tensorflow as tf
 
 from ..input_embedding import *
 from ..layers import CrossNet, PredictionLayer, MLP
+from ..utils import concat_fun
 
 
 def DCN(feature_dim_dict, embedding_size='auto',
@@ -43,8 +44,7 @@ def DCN(feature_dim_dict, embedding_size='auto',
     deep_emb_list, _, inputs_list = get_inputs_embedding(
         feature_dim_dict, embedding_size, l2_reg_embedding, 0, init_std, seed, False)
 
-    deep_input = tf.keras.layers.Flatten()(tf.keras.layers.Concatenate()(deep_emb_list)
-                                           if len(deep_emb_list) > 1 else deep_emb_list[0])
+    deep_input = tf.keras.layers.Flatten()(concat_fun(deep_emb_list))
 
     if len(hidden_size) > 0 and cross_num > 0:  # Deep & Cross
         deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,

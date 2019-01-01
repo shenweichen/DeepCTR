@@ -10,6 +10,7 @@ Reference:
 import tensorflow as tf
 from ..layers import PredictionLayer, MLP, InnerProductLayer, OutterProductLayer
 from ..input_embedding import get_inputs_embedding
+from ..utils import concat_fun
 
 
 def PNN(feature_dim_dict, embedding_size=8, hidden_size=(128, 128), l2_reg_embedding=1e-5, l2_reg_deep=0,
@@ -46,7 +47,7 @@ def PNN(feature_dim_dict, embedding_size=8, hidden_size=(128, 128), l2_reg_embed
 
     # ipnn deep input
     linear_signal = tf.keras.layers.Reshape(
-        [len(deep_emb_list)*embedding_size])(tf.keras.layers.Concatenate()(deep_emb_list))
+        [len(deep_emb_list)*embedding_size])(concat_fun(deep_emb_list))
 
     if use_inner and use_outter:
         deep_input = tf.keras.layers.Concatenate()(

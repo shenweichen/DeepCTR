@@ -12,6 +12,7 @@ Reference:
 import tensorflow as tf
 from ..input_embedding import get_inputs_embedding
 from ..layers import PredictionLayer, MLP, InteractingLayer
+from ..utils import concat_fun
 
 
 def AutoInt(feature_dim_dict, embedding_size=8, att_layer_num=3, att_embedding_size=8, att_head_num=2, att_res=True, hidden_size=(256, 256), activation='relu',
@@ -46,15 +47,14 @@ def AutoInt(feature_dim_dict, embedding_size=8, att_layer_num=3, att_embedding_s
     deep_emb_list, _, inputs_list = get_inputs_embedding(
         feature_dim_dict, embedding_size, l2_reg_embedding, 0, init_std, seed, False)
 
-    att_input = tf.keras.layers.Concatenate(axis=1)(deep_emb_list) if len(
-        deep_emb_list) > 1 else deep_emb_list[0]
+    att_input = concat_fun(deep_emb_list,axis=1)
+
     for _ in range(att_layer_num):
         att_input = InteractingLayer(
             att_embedding_size, att_head_num, att_res)(att_input)
     att_output = tf.keras.layers.Flatten()(att_input)
 
-    deep_input = tf.keras.layers.Flatten()(tf.keras.layers.Concatenate()(deep_emb_list)
-                                           if len(deep_emb_list) > 1 else deep_emb_list[0])
+    deep_input = tf.keras.layers.Flatten()(concat_fun(deep_emb_list))
 
     if len(hidden_size) > 0 and att_layer_num > 0:  # Deep & Interacting Layer
         deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,

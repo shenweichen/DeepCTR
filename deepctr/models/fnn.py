@@ -10,6 +10,7 @@ import tensorflow as tf
 
 from ..layers import PredictionLayer, MLP
 from ..input_embedding import get_inputs_embedding
+from ..utils import  concat_fun
 
 
 def FNN(feature_dim_dict, embedding_size=8,
@@ -40,8 +41,7 @@ def FNN(feature_dim_dict, embedding_size=8,
     deep_emb_list, linear_logit, inputs_list = get_inputs_embedding(
         feature_dim_dict, embedding_size, l2_reg_embedding, l2_reg_linear, init_std, seed)
 
-    deep_input = tf.keras.layers.Flatten()(
-        tf.keras.layers.Concatenate()(deep_emb_list))
+    deep_input = tf.keras.layers.Flatten()(concat_fun(deep_emb_list))
     deep_out = MLP(hidden_size, activation, l2_reg_deep,
                    keep_prob, False, seed)(deep_input)
     deep_logit = tf.keras.layers.Dense(

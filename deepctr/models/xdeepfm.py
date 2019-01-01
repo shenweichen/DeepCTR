@@ -8,7 +8,8 @@ Reference:
 """
 import tensorflow as tf
 from ..input_embedding import get_inputs_embedding
-from deepctr.layers import PredictionLayer, MLP, CIN
+from ..layers import PredictionLayer, MLP, CIN
+from ..utils import concat_fun
 
 
 def xDeepFM(feature_dim_dict, embedding_size=8, hidden_size=(256, 256), cin_layer_size=(128, 128,), cin_split_half=True, cin_activation='relu', l2_reg_linear=0.00001, l2_reg_embedding=0.00001, l2_reg_deep=0, init_std=0.0001, seed=1024, keep_prob=1, activation='relu', final_activation='sigmoid', use_bn=False):
@@ -38,8 +39,7 @@ def xDeepFM(feature_dim_dict, embedding_size=8, hidden_size=(256, 256), cin_laye
     deep_emb_list, linear_logit, inputs_list = get_inputs_embedding(
         feature_dim_dict, embedding_size, l2_reg_embedding, l2_reg_linear, init_std, seed)
 
-    fm_input = tf.keras.layers.Concatenate(axis=1)(deep_emb_list) if len(
-        deep_emb_list) > 1 else deep_emb_list[0]
+    fm_input = concat_fun(deep_emb_list,axis=1)
 
     if len(cin_layer_size) > 0:
         exFM_out = CIN(cin_layer_size, cin_activation,

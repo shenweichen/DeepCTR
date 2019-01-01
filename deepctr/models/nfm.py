@@ -9,6 +9,7 @@ Reference:
 import tensorflow as tf
 from ..layers import PredictionLayer, MLP, BiInteractionPooling
 from ..input_embedding import get_inputs_embedding
+from ..utils import concat_fun
 
 
 def NFM(feature_dim_dict, embedding_size=8,
@@ -38,7 +39,7 @@ def NFM(feature_dim_dict, embedding_size=8,
     deep_emb_list, linear_logit, inputs_list = get_inputs_embedding(
         feature_dim_dict, embedding_size, l2_reg_embedding, l2_reg_linear, init_std, seed)
 
-    fm_input = tf.keras.layers.Concatenate(axis=1)(deep_emb_list)
+    fm_input = concat_fun(deep_emb_list,axis=1)
     bi_out = BiInteractionPooling()(fm_input)
     bi_out = tf.keras.layers.Dropout(1 - keep_prob)(bi_out)
     deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,

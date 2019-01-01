@@ -12,6 +12,7 @@ Reference:
 import tensorflow as tf
 from ..input_embedding import get_inputs_embedding
 from ..layers import PredictionLayer, AFMLayer, FM
+from ..utils import concat_fun
 
 
 def AFM(feature_dim_dict, embedding_size=8, use_attention=True, attention_factor=8,
@@ -47,7 +48,7 @@ def AFM(feature_dim_dict, embedding_size=8, use_attention=True, attention_factor
     deep_emb_list, linear_logit, inputs_list = get_inputs_embedding(
         feature_dim_dict, embedding_size, l2_reg_embedding, l2_reg_linear, init_std, seed)
 
-    fm_input = tf.keras.layers.Concatenate(axis=1)(deep_emb_list)
+    fm_input = concat_fun(deep_emb_list,axis=1)
     if use_attention:
         fm_logit = AFMLayer(attention_factor, l2_reg_att,
                             keep_prob, seed)(deep_emb_list)
