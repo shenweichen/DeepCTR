@@ -35,7 +35,7 @@ You can read the latest code at https://github.com/shenweichen/DeepCTR
 
 News
 -----
-01/01/2019 : Add `sequence(multi-value) input support for AFM,AutoInt,DCN,DeepFM,FNN,NFM,PNN,xDeepFM <./Features.html#autoint-automatic-feature-interactiont) models>`_.`Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.2.2>`_
+01/01/2019 : Add `sequence(multi-value) input support for AFM,AutoInt,DCN,DeepFM,FNN,NFM,PNN,xDeepFM <./Features.html#autoint-automatic-feature-interactiont) models>`_ . `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.2.2>`_
 
 12/27/2018 : Add `AutoInt <./Features.html#autoint-automatic-feature-interaction>`_ . `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.2.1>`_
 
@@ -50,7 +50,7 @@ News
    Quick-Start
    Features
    Examples<Examples.md>
-   FAQ
+   FAQ<FAQ.md>
    History<History.md>
 
 .. toctree::

@@ -9,7 +9,7 @@ click-through rate. It has 13 integer features and
 
 ![image](../pics/criteo_sample.png)
 
-In this demo,we simply normailize the integer feature between 0 and 1,you
+In this example,we simply normailize the integer feature between 0 and 1,you
 can try other transformation technique like log normalization or discretization.
 
 This example shows how to use ``DeepFM`` to solve a simple binary classification task. You can get the demo data [criteo_sample.txt](https://github.com/shenweichen/DeepCTR/tree/master/examples/criteo_sample.txt)
@@ -114,6 +114,7 @@ There are 2 additional steps to use DeepCTR with sequence feature input.
 - maxlen : maximum length of this feature for all samples
 - combiner : pooling method,can be ``sum``,``mean`` or ``max``
 
+Now multi-value input is avaliable for `AFM,AutoInt,DCN,DeepFM,FNN,NFM,PNN,xDeepFM`,for `DIN` please read the example in [run_din.py](https://github.com/shenweichen/DeepCTR/blob/master/examples/run_din.py)  
 This example shows how to use ``DeepFM`` with sequence(multi-value) feature. You can get the demo data 
 [movielens_sample.txt](https://github.com/shenweichen/DeepCTR/tree/master/examples/movielens_sample.txt) and run the following codes.
 
