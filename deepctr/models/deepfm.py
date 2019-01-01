@@ -8,11 +8,10 @@ Reference:
 
 """
 
-from tensorflow.python.keras.layers import Dense, Concatenate, Reshape, Flatten, add
-from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.regularizers import l2
-from ..utils import get_input, get_share_embeddings
+import tensorflow as tf
+from ..input_embedding import get_inputs_embedding
 from ..layers import PredictionLayer, MLP, FM
+from ..utils import concat_fun
 
 
 def DeepFM(feature_dim_dict, embedding_size=8,
@@ -46,51 +45,28 @@ def DeepFM(feature_dim_dict, embedding_size=8,
         raise ValueError("feature_dim_dict['dense'] must be a list,cur is", type(
             feature_dim_dict['dense']))
 
-    sparse_input, dense_input = get_input(feature_dim_dict, None)
-    sparse_embedding, linear_embedding, = get_share_embeddings(
-        feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding, l2_reg_linear)
+    deep_emb_list, linear_logit, inputs_list = get_inputs_embedding(
+        feature_dim_dict, embedding_size, l2_reg_embedding, l2_reg_linear, init_std, seed)
 
-    embed_list = [sparse_embedding[i](sparse_input[i])
-                  for i in range(len(sparse_input))]
-    linear_term = [linear_embedding[i](sparse_input[i])
-                   for i in range(len(sparse_input))]
-    if len(linear_term) > 1:
-        linear_term = add(linear_term)
-    elif len(linear_term) == 1:
-        linear_term = linear_term[0]
-
-    if len(dense_input) > 0:
-        continuous_embedding_list = list(
-            map(Dense(embedding_size, use_bias=False, kernel_regularizer=l2(l2_reg_embedding), ),
-                dense_input))
-        continuous_embedding_list = list(
-            map(Reshape((1, embedding_size)), continuous_embedding_list))
-        embed_list += continuous_embedding_list
-
-        dense_input_ = dense_input[0] if len(
-            dense_input) == 1 else Concatenate()(dense_input)
-        linear_dense_logit = Dense(
-            1, activation=None, use_bias=False, kernel_regularizer=l2(l2_reg_linear))(dense_input_)
-        linear_term = add([linear_dense_logit, linear_term])
-
-    fm_input = Concatenate(axis=1)(embed_list)
-    deep_input = Flatten()(fm_input)
+    fm_input = concat_fun(deep_emb_list,axis=1)
+    deep_input = tf.keras.layers.Flatten()(fm_input)
     fm_out = FM()(fm_input)
     deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
                    use_bn, seed)(deep_input)
-    deep_logit = Dense(1, use_bias=False, activation=None)(deep_out)
+    deep_logit = tf.keras.layers.Dense(
+        1, use_bias=False, activation=None)(deep_out)
 
     if len(hidden_size) == 0 and use_fm == False:  # only linear
-        final_logit = linear_term
+        final_logit = linear_logit
     elif len(hidden_size) == 0 and use_fm == True:  # linear + FM
-        final_logit = add([linear_term, fm_out])
+        final_logit = tf.keras.layers.add([linear_logit, fm_out])
     elif len(hidden_size) > 0 and use_fm == False:  # linear +　Deep
-        final_logit = add([linear_term, deep_logit])
+        final_logit = tf.keras.layers.add([linear_logit, deep_logit])
     elif len(hidden_size) > 0 and use_fm == True:  # linear + FM + Deep
-        final_logit = add([linear_term, fm_out, deep_logit])
+        final_logit = tf.keras.layers.add([linear_logit, fm_out, deep_logit])
     else:
         raise NotImplementedError
 
     output = PredictionLayer(final_activation)(final_logit)
-    model = Model(inputs=sparse_input + dense_input, outputs=output)
+    model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
     return model

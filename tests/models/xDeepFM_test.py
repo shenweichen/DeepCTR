@@ -1,7 +1,6 @@
-import numpy as np
 import pytest
 from deepctr.models import xDeepFM
-from ..utils import check_model
+from ..utils import check_model, get_test_data
 
 
 @pytest.mark.parametrize(
@@ -13,22 +12,8 @@ def test_xDeepFM(hidden_size, cin_layer_size, cin_split_half, cin_activation, sp
     model_name = "xDeepFM"
 
     sample_size = 64
-    feature_dim_dict = {"sparse": {}, 'dense': []}
-    for name, num in zip(["sparse", "dense"], [sparse_feature_num, dense_feature_dim]):
-        if name == "sparse":
-            for i in range(num):
-                feature_dim_dict[name][name + '_' +
-                                       str(i)] = np.random.randint(1, 10)
-        else:
-            for i in range(num):
-                feature_dim_dict[name].append(name + '_' + str(i))
-    sparse_input = [np.random.randint(0, dim, sample_size)
-                    for dim in feature_dim_dict['sparse'].values()]
-    dense_input = [np.random.random(sample_size)
-                   for name in feature_dim_dict['dense']]
-
-    y = np.random.randint(0, 2, sample_size)
-    x = sparse_input + dense_input
+    x, y, feature_dim_dict = get_test_data(
+        sample_size, sparse_feature_num, sparse_feature_num)
 
     model = xDeepFM(feature_dim_dict, hidden_size=hidden_size, cin_layer_size=cin_layer_size,
                     cin_split_half=cin_split_half, cin_activation=cin_activation, keep_prob=0.5, )

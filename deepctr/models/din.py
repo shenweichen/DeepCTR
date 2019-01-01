@@ -15,6 +15,7 @@ from tensorflow.python.keras.regularizers import l2
 from ..layers import MLP
 from ..sequence import SequencePoolingLayer, AttentionSequencePoolingLayer
 from ..activations import Dice
+from ..utils import concat_fun
 
 
 def get_input(feature_dim_dict, seq_feature_list, seq_max_len):
@@ -77,12 +78,9 @@ def DIN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
     deep_input_emb_list = [sparse_embedding_dict[feat](
         sparse_input[feat]) for feat in feature_dim_dict["sparse"]]
 
-    query_emb = Concatenate()(query_emb_list) if len(
-        query_emb_list) > 1 else query_emb_list[0]
-    keys_emb = Concatenate()(keys_emb_list) if len(
-        keys_emb_list) > 1 else keys_emb_list[0]
-    deep_input_emb = Concatenate()(deep_input_emb_list) if len(
-        deep_input_emb_list) > 1 else deep_input_emb_list[0]
+    query_emb = concat_fun(query_emb_list)
+    keys_emb = concat_fun(keys_emb_list)
+    deep_input_emb = concat_fun(deep_input_emb_list)
 
     if use_din:
         hist = AttentionSequencePoolingLayer(att_hidden_size, att_activation, weight_normalization=att_weight_normalization)([

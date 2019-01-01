@@ -6,13 +6,11 @@ Author:
 Reference:
     [1] Zhang W, Du T, Wang J. Deep learning over multi-field categorical data[C]//European conference on information retrieval. Springer, Cham, 2016: 45-57.(https://arxiv.org/pdf/1601.02376.pdf)
 """
-
-from tensorflow.python.keras.layers import Dense, Concatenate, Reshape, add
-from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.regularizers import l2
+import tensorflow as tf
 
 from ..layers import PredictionLayer, MLP
-from ..utils import get_input, get_share_embeddings
+from ..input_embedding import get_inputs_embedding
+from ..utils import  concat_fun
 
 
 def FNN(feature_dim_dict, embedding_size=8,
@@ -40,42 +38,17 @@ def FNN(feature_dim_dict, embedding_size=8,
         raise ValueError(
             "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
 
-    sparse_input, dense_input = get_input(feature_dim_dict, None)
-    sparse_embedding, linear_embedding, = get_share_embeddings(feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding,
-                                                               l2_reg_linear)
+    deep_emb_list, linear_logit, inputs_list = get_inputs_embedding(
+        feature_dim_dict, embedding_size, l2_reg_embedding, l2_reg_linear, init_std, seed)
 
-    embed_list = [sparse_embedding[i](sparse_input[i])
-                  for i in range(len(feature_dim_dict["sparse"]))]
-
-    linear_term = [linear_embedding[i](sparse_input[i])
-                   for i in range(len(sparse_input))]
-    if len(linear_term) > 1:
-        linear_term = add(linear_term)
-    elif len(linear_term) == 1:
-        linear_term = linear_term[0]
-
-    if len(dense_input) > 0:
-        continuous_embedding_list = list(
-            map(Dense(embedding_size, use_bias=False, kernel_regularizer=l2(l2_reg_embedding), ),
-                dense_input))
-        continuous_embedding_list = list(
-            map(Reshape((1, embedding_size)), continuous_embedding_list))
-        embed_list += continuous_embedding_list
-
-        dense_input_ = dense_input[0] if len(
-            dense_input) == 1 else Concatenate()(dense_input)
-        linear_dense_logit = Dense(
-            1, activation=None, use_bias=False, kernel_regularizer=l2(l2_reg_linear))(dense_input_)
-        linear_term = add([linear_dense_logit, linear_term])
-
-    num_inputs = len(dense_input) + len(sparse_input)
-    deep_input = Reshape([num_inputs*embedding_size]
-                         )(Concatenate()(embed_list))
+    deep_input = tf.keras.layers.Flatten()(concat_fun(deep_emb_list))
     deep_out = MLP(hidden_size, activation, l2_reg_deep,
                    keep_prob, False, seed)(deep_input)
-    deep_logit = Dense(1, use_bias=False, activation=None)(deep_out)
-    final_logit = add([deep_logit, linear_term])
+    deep_logit = tf.keras.layers.Dense(
+        1, use_bias=False, activation=None)(deep_out)
+    final_logit = tf.keras.layers.add([deep_logit, linear_logit])
     output = PredictionLayer(final_activation)(final_logit)
-    model = Model(inputs=sparse_input + dense_input,
-                  outputs=output)
+
+    model = tf.keras.models.Model(inputs=inputs_list,
+                                  outputs=output)
     return model

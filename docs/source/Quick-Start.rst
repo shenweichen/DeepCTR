@@ -88,7 +88,7 @@ There are two rules here that we must follow
                         batch_size=256, epochs=1, verbose=2, validation_split=0.2,)
 
 
-You can check the full code `here <./Demo.html>`_
+You can check the full code `here <./Examples.html#classification-criteo>`_
 
 
 

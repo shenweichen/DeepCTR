@@ -6,12 +6,10 @@ Author:
 Reference:
     [1] He X, Chua T S. Neural factorization machines for sparse predictive analytics[C]//Proceedings of the 40th International ACM SIGIR conference on Research and Development in Information Retrieval. ACM, 2017: 355-364. (https://arxiv.org/abs/1708.05027)
 """
-
-from tensorflow.python.keras.layers import Dense, Concatenate, Reshape, Dropout, add
-from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.regularizers import l2
+import tensorflow as tf
 from ..layers import PredictionLayer, MLP, BiInteractionPooling
-from ..utils import get_input, get_share_embeddings
+from ..input_embedding import get_inputs_embedding
+from ..utils import concat_fun
 
 
 def NFM(feature_dim_dict, embedding_size=8,
@@ -38,48 +36,23 @@ def NFM(feature_dim_dict, embedding_size=8,
         raise ValueError(
             "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
 
-    sparse_input, dense_input = get_input(feature_dim_dict, None)
-    sparse_embedding, linear_embedding = get_share_embeddings(
-        feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding, l2_reg_linear)
+    deep_emb_list, linear_logit, inputs_list = get_inputs_embedding(
+        feature_dim_dict, embedding_size, l2_reg_embedding, l2_reg_linear, init_std, seed)
 
-    embed_list = [sparse_embedding[i](sparse_input[i])
-                  for i in range(len(sparse_input))]
-
-    linear_term = [linear_embedding[i](sparse_input[i])
-                   for i in range(len(sparse_input))]
-    if len(linear_term) > 1:
-        linear_term = add(linear_term)
-    elif len(linear_term) == 1:
-        linear_term = linear_term[0]
-
-    if len(dense_input) > 0:
-        continuous_embedding_list = list(
-            map(Dense(embedding_size, use_bias=False, kernel_regularizer=l2(l2_reg_embedding), ),
-                dense_input))
-        continuous_embedding_list = list(
-            map(Reshape((1, embedding_size)), continuous_embedding_list))
-        embed_list += continuous_embedding_list
-
-        dense_input_ = dense_input[0] if len(
-            dense_input) == 1 else Concatenate()(dense_input)
-        linear_dense_logit = Dense(
-            1, activation=None, use_bias=False, kernel_regularizer=l2(l2_reg_linear))(dense_input_)
-        linear_term = add([linear_dense_logit, linear_term])
-
-    fm_input = Concatenate(axis=1)(embed_list)
-
+    fm_input = concat_fun(deep_emb_list,axis=1)
     bi_out = BiInteractionPooling()(fm_input)
-    bi_out = Dropout(1 - keep_prob)(bi_out)
+    bi_out = tf.keras.layers.Dropout(1 - keep_prob)(bi_out)
     deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
                    False, seed)(bi_out)
-    deep_logit = Dense(1, use_bias=False, activation=None)(deep_out)
+    deep_logit = tf.keras.layers.Dense(
+        1, use_bias=False, activation=None)(deep_out)
 
-    final_logit = linear_term  # TODO add bias term
+    final_logit = linear_logit
 
     if len(hidden_size) > 0:
-        final_logit = add([final_logit, deep_logit])
+        final_logit = tf.keras.layers.add([final_logit, deep_logit])
 
     output = PredictionLayer(final_activation)(final_logit)
-    print(output)
-    model = Model(inputs=sparse_input + dense_input, outputs=output)
+
+    model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
     return model

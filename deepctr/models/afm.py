@@ -9,13 +9,10 @@ Reference:
     (https://arxiv.org/abs/1708.04617)
 
 """
-
-from tensorflow.python.keras.layers import Dense, Concatenate, Reshape, add
-from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.regularizers import l2
-
-from ..utils import get_input, get_share_embeddings
+import tensorflow as tf
+from ..input_embedding import get_inputs_embedding
 from ..layers import PredictionLayer, AFMLayer, FM
+from ..utils import concat_fun
 
 
 def AFM(feature_dim_dict, embedding_size=8, use_attention=True, attention_factor=8,
@@ -48,41 +45,18 @@ def AFM(feature_dim_dict, embedding_size=8, use_attention=True, attention_factor
         raise ValueError("feature_dim_dict['dense'] must be a list,cur is", type(
             feature_dim_dict['dense']))
 
-    sparse_input, dense_input = get_input(feature_dim_dict, None)
-    sparse_embedding, linear_embedding, = get_share_embeddings(
-        feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding, l2_reg_linear)
+    deep_emb_list, linear_logit, inputs_list = get_inputs_embedding(
+        feature_dim_dict, embedding_size, l2_reg_embedding, l2_reg_linear, init_std, seed)
 
-    embed_list = [sparse_embedding[i](sparse_input[i])
-                  for i in range(len(sparse_input))]
-    linear_term = [linear_embedding[i](sparse_input[i])
-                   for i in range(len(sparse_input))]
-    if len(linear_term) > 1:
-        linear_term = add(linear_term)
-    elif len(linear_term) == 1:
-        linear_term = linear_term[0]
-
-    if len(dense_input) > 0:
-        continuous_embedding_list = list(
-            map(Dense(embedding_size, use_bias=False, kernel_regularizer=l2(l2_reg_embedding), ),
-                dense_input))
-        continuous_embedding_list = list(
-            map(Reshape((1, embedding_size)), continuous_embedding_list))
-        embed_list += continuous_embedding_list
-
-        dense_input_ = dense_input[0] if len(
-            dense_input) == 1 else Concatenate()(dense_input)
-        linear_dense_logit = Dense(
-            1, activation=None, use_bias=False, kernel_regularizer=l2(l2_reg_linear))(dense_input_)
-        linear_term = add([linear_dense_logit, linear_term])
-
-    fm_input = Concatenate(axis=1)(embed_list)
+    fm_input = concat_fun(deep_emb_list,axis=1)
     if use_attention:
-        fm_out = AFMLayer(attention_factor, l2_reg_att,
-                          keep_prob, seed)(embed_list)
+        fm_logit = AFMLayer(attention_factor, l2_reg_att,
+                            keep_prob, seed)(deep_emb_list)
     else:
-        fm_out = FM()(fm_input)
+        fm_logit = FM()(fm_input)
 
-    final_logit = add([linear_term, fm_out])
+    final_logit = tf.keras.layers.add([linear_logit, fm_logit])
     output = PredictionLayer(final_activation)(final_logit)
-    model = Model(inputs=sparse_input + dense_input, outputs=output)
+
+    model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
     return model

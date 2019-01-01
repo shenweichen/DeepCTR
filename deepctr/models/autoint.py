@@ -9,14 +9,10 @@ Reference:
 
 """
 
-from tensorflow.python.keras.layers import Dense, Embedding, Concatenate
-from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.initializers import RandomNormal
-from tensorflow.python.keras.regularizers import l2
 import tensorflow as tf
-
-from ..utils import get_input
+from ..input_embedding import get_inputs_embedding
 from ..layers import PredictionLayer, MLP, InteractingLayer
+from ..utils import concat_fun
 
 
 def AutoInt(feature_dim_dict, embedding_size=8, att_layer_num=3, att_embedding_size=8, att_head_num=2, att_res=True, hidden_size=(256, 256), activation='relu',
@@ -48,56 +44,37 @@ def AutoInt(feature_dim_dict, embedding_size=8, att_layer_num=3, att_embedding_s
         raise ValueError(
             "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
 
-    sparse_input, dense_input = get_input(feature_dim_dict, None,)
-    sparse_embedding = get_embeddings(
-        feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding)
-    embed_list = [sparse_embedding[i](sparse_input[i])
-                  for i in range(len(sparse_input))]
+    deep_emb_list, _, inputs_list = get_inputs_embedding(
+        feature_dim_dict, embedding_size, l2_reg_embedding, 0, init_std, seed, False)
 
-    att_input = Concatenate(axis=1)(embed_list) if len(
-        embed_list) > 1 else embed_list[0]
+    att_input = concat_fun(deep_emb_list, axis=1)
 
-    for i in range(att_layer_num):
+    for _ in range(att_layer_num):
         att_input = InteractingLayer(
             att_embedding_size, att_head_num, att_res)(att_input)
     att_output = tf.keras.layers.Flatten()(att_input)
 
-    deep_input = tf.keras.layers.Flatten()(Concatenate()(embed_list)
-                                           if len(embed_list) > 1 else embed_list[0])
-    if len(dense_input) > 0:
-        if len(dense_input) == 1:
-            continuous_list = dense_input[0]
-        else:
-            continuous_list = Concatenate()(dense_input)
-
-        deep_input = Concatenate()([deep_input, continuous_list])
+    deep_input = tf.keras.layers.Flatten()(concat_fun(deep_emb_list))
 
     if len(hidden_size) > 0 and att_layer_num > 0:  # Deep & Interacting Layer
         deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
                        use_bn, seed)(deep_input)
-        stack_out = Concatenate()([att_output, deep_out])
-        final_logit = Dense(1, use_bias=False, activation=None)(stack_out)
+        stack_out = tf.keras.layers.Concatenate()([att_output, deep_out])
+        final_logit = tf.keras.layers.Dense(
+            1, use_bias=False, activation=None)(stack_out)
     elif len(hidden_size) > 0:  # Only Deep
         deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
                        use_bn, seed)(deep_input)
-        final_logit = Dense(1, use_bias=False, activation=None)(deep_out)
+        final_logit = tf.keras.layers.Dense(
+            1, use_bias=False, activation=None)(deep_out)
     elif att_layer_num > 0:  # Only Interacting Layer
-        final_logit = Dense(1, use_bias=False, activation=None)(att_output)
+        final_logit = tf.keras.layers.Dense(
+            1, use_bias=False, activation=None)(att_output)
     else:  # Error
         raise NotImplementedError
 
     output = PredictionLayer(final_activation)(final_logit)
-    model = Model(inputs=sparse_input + dense_input, outputs=output)
+
+    model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
 
     return model
-
-
-def get_embeddings(feature_dim_dict, embedding_size, init_std, seed, l2_rev_V):
-    sparse_embedding = [Embedding(feature_dim_dict["sparse"][feat], embedding_size,
-                                  embeddings_initializer=RandomNormal(
-        mean=0.0, stddev=init_std, seed=seed),
-        embeddings_regularizer=l2(l2_rev_V),
-        name='sparse_emb_' + str(i) + '-' + feat) for i, feat in
-        enumerate(feature_dim_dict["sparse"])]
-
-    return sparse_embedding

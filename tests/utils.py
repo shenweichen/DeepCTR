@@ -6,57 +6,48 @@ from numpy.testing import assert_allclose
 from tensorflow.python.keras import backend as K
 from tensorflow.python.keras.layers import Input
 from tensorflow.python.keras.models import Model, save_model, load_model
-from deepctr.utils import custom_objects
+from deepctr.utils import custom_objects, VarLenFeature
 
 
-def get_test_data(num_train=1000, num_test=500, input_shape=(10,),
-
-                  output_shape=(2,),
-
-                  classification=True, num_classes=2):
-    """Generates test data to train a model on.
+def gen_sequence(dim, max_len, sample_size):
+    return np.array([np.random.randint(0, dim, max_len) for _ in range(sample_size)]), np.random.randint(1, max_len + 1, sample_size)
 
 
+def get_test_data(sample_size=1000, sparse_feature_num=1, dense_feature_num=1, sequence_feature=('max', 'mean', 'sum'),
+                  classification=True,):
 
-    classification=True overrides output_shape
+    feature_dim_dict = {"sparse": {}, 'dense': [], 'sequence': []}
 
-    (i.e. output_shape is set to (1,)) and the output
+    for i in range(sparse_feature_num):
+        dim = np.random.randint(1, 10)
+        feature_dim_dict['sparse']['sparse_'+str(i)] = dim
+    for i in range(dense_feature_num):
+        feature_dim_dict['dense'].append('dense_'+str(i))
+    for i, mode in enumerate(sequence_feature):
+        dim = np.random.randint(1, 10)
+        maxlen = np.random.randint(1, 10)
+        feature_dim_dict['sequence'].append(
+            VarLenFeature('sequence_'+str(i), dim, maxlen, mode))
 
-    consists in integers in [0, num_classes-1].
-
-
-
-    Otherwise: float output with shape output_shape.
-
-    """
-
-    samples = num_train + num_test
-
+    sparse_input = [np.random.randint(0, dim, sample_size)
+                    for dim in feature_dim_dict['sparse'].values()]
+    dense_input = [np.random.random(sample_size)
+                   for name in feature_dim_dict['dense']]
+    sequence_input = []
+    sequence_len_input = []
+    for var in feature_dim_dict['sequence']:
+        s_input, s_len_input = gen_sequence(
+            var.dimension, var.maxlen, sample_size)
+        sequence_input.append(s_input)
+        sequence_len_input.append(s_len_input)
     if classification:
-
-        y = np.random.randint(0, num_classes, size=(samples,))
-
-        X = np.zeros((samples,) + input_shape, dtype=np.float32)
-
-        for i in range(samples):
-
-            X[i] = np.random.normal(loc=y[i], scale=0.7, size=input_shape)
-
+        y = np.random.randint(0, 2, sample_size)
     else:
+        y = np.random.random(sample_size)
 
-        y_loc = np.random.random((samples,))
+    x = sparse_input + dense_input + sequence_input + sequence_len_input
 
-        X = np.zeros((samples,) + input_shape, dtype=np.float32)
-
-        y = np.zeros((samples,) + output_shape, dtype=np.float32)
-
-        for i in range(samples):
-
-            X[i] = np.random.normal(loc=y_loc[i], scale=0.7, size=input_shape)
-
-            y[i] = np.random.normal(loc=y_loc[i], scale=0.7, size=output_shape)
-
-    return (X[:num_train], y[:num_train]), (X[num_train:], y[num_train:])
+    return x, y, feature_dim_dict
 
 
 def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,
@@ -64,12 +55,6 @@ def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,
                input_data=None, expected_output=None,
 
                expected_output_dtype=None, fixed_batch_size=False):
-    """Test routine for a layer with a single input tensor
-
-    and single output tensor.
-
-    """
-
     # generate input data
 
     if input_data is None:
