@@ -1,5 +1,7 @@
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import log_loss, roc_auc_score
 from deepctr.models import DeepFM
 
 if __name__ == "__main__":
@@ -27,17 +29,20 @@ if __name__ == "__main__":
 
     # 3.generate input data for model
 
-    model_input = [data[feat].values for feat in sparse_feature_dict] + \
-        [data[feat].values for feat in dense_feature_list]  # + [data[target[0]].values]
+    train, test = train_test_split(data, test_size=0.2)
+    train_model_input = [train[feat].values for feat in sparse_feature_dict] + \
+        [train[feat].values for feat in dense_feature_list]
+    test_model_input = [test[feat].values for feat in sparse_feature_dict] + \
+        [test[feat].values for feat in dense_feature_list]
 
-    # 4.Define Model,compile and train
+    # 4.Define Model,train,predict and evaluate
     model = DeepFM({"sparse": sparse_feature_dict,
                     "dense": dense_feature_list}, final_activation='sigmoid')
-
     model.compile("adam", "binary_crossentropy",
                   metrics=['binary_crossentropy'], )
 
-    history = model.fit(model_input, data[target].values,
-
+    history = model.fit(train_model_input, train[target].values,
                         batch_size=256, epochs=10, verbose=2, validation_split=0.2, )
-    print("demo done")
+    pred_ans = model.predict(test_model_input, batch_size=256)
+    print("test LogLoss", round(log_loss(test[target].values, pred_ans), 4))
+    print("test AUC", round(roc_auc_score(test[target].values, pred_ans), 4))

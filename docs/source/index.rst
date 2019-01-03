@@ -45,7 +45,7 @@ News
    :maxdepth: 2
    :caption: Home:
 
-   Quick-Start
+   Quick-Start<Quick-Start.md>
    Features
    Examples<Examples.md>
    FAQ<FAQ.md>
