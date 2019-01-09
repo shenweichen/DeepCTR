@@ -10,7 +10,7 @@ import tensorflow as tf
 
 from ..layers import PredictionLayer, MLP
 from ..input_embedding import get_inputs_embedding
-from ..utils import  concat_fun
+from ..utils import concat_fun, check_feature_config_dict
 
 
 def FNN(feature_dim_dict, embedding_size=8,
@@ -33,10 +33,7 @@ def FNN(feature_dim_dict, embedding_size=8,
     :param final_activation: str,output activation,usually ``'sigmoid'`` or ``'linear'``
     :return: A Keras model instance.
     """
-    if not isinstance(feature_dim_dict,
-                      dict) or "sparse" not in feature_dim_dict or "dense" not in feature_dim_dict:
-        raise ValueError(
-            "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
+    check_feature_config_dict(feature_dim_dict)
 
     deep_emb_list, linear_logit, inputs_list = get_inputs_embedding(
         feature_dim_dict, embedding_size, l2_reg_embedding, l2_reg_linear, init_std, seed)

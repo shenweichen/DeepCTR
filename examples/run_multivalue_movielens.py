@@ -10,7 +10,8 @@ def split(x):
     key_ans = x.split('|')
     for key in key_ans:
         if key not in key2index:
-            key2index[key] = len(key2index)
+            # Notice : input value 0 is a special "padding",so we do not use 0 to encode valid feature for sequence input
+            key2index[key] = len(key2index) + 1
     return list(map(lambda x: key2index[x], key_ans))
 
 
@@ -29,20 +30,21 @@ key2index = {}
 genres_list = list(map(split, data['genres'].values))
 genres_length = np.array(list(map(len, genres_list)))
 max_len = max(genres_length)
+# Notice : padding=`post`
 genres_list = pad_sequences(genres_list, maxlen=max_len, padding='post',)
 
 # 2.count #unique features for each sparse field and generate feature config for sequence feature
 
 sparse_feature_dim = {feat: data[feat].nunique() for feat in sparse_features}
-sequence_feature = [VarLenFeature('genres', len(key2index), max_len, 'mean')]
+sequence_feature = [VarLenFeature('genres', len(
+    key2index)+1, max_len, 'mean')]  # Notice : value 0 is for padding for sequence input feature
 
 # 3.generate input data for model
 sparse_input = [data[feat].values for feat in sparse_feature_dim]
 dense_input = []
 sequence_input = [genres_list]
-sequence_length_input = [genres_length]
-model_input = sparse_input + dense_input + sequence_input + \
-    sequence_length_input  # make sure the order is right
+model_input = sparse_input + dense_input + \
+    sequence_input  # make sure the order is right
 
 # 4.Define Model,compile and train
 model = DeepFM({"sparse": sparse_feature_dim, "dense": [],

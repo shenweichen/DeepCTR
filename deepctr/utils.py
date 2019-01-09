@@ -56,11 +56,13 @@ def get_linear_logit(linear_term, dense_input_, l2_reg):
 
     return linear_term
 
-def concat_fun(inputs,axis=-1):
+
+def concat_fun(inputs, axis=-1):
     if len(inputs) == 1:
         return inputs[0]
     else:
         return Concatenate(axis=axis)(inputs)
+
 
 def check_version(version):
     """Return version of package on pypi.python.org using json."""
@@ -84,3 +86,20 @@ def check_version(version):
         except Exception:
             return
     Thread(target=check, args=(version,)).start()
+
+
+def check_feature_config_dict(feature_dim_dict):
+    if not isinstance(feature_dim_dict, dict):
+        raise ValueError(
+            "feature_dim_dict must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}")
+    if "sparse" not in feature_dim_dict:
+        feature_dim_dict['sparse'] = {}
+    if "dense" not in feature_dim_dict:
+        feature_dim_dict['dense'] = []
+    if not isinstance(feature_dim_dict["sparse"], dict):
+        raise ValueError("feature_dim_dict['sparse'] must be a dict,cur is", type(
+            feature_dim_dict['sparse']))
+
+    if not isinstance(feature_dim_dict["dense"], list):
+        raise ValueError("feature_dim_dict['dense'] must be a list,cur is", type(
+            feature_dim_dict['dense']))

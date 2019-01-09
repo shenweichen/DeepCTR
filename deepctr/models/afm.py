@@ -12,7 +12,7 @@ Reference:
 import tensorflow as tf
 from ..input_embedding import get_inputs_embedding
 from ..layers import PredictionLayer, AFMLayer, FM
-from ..utils import concat_fun
+from ..utils import concat_fun, check_feature_config_dict
 
 
 def AFM(feature_dim_dict, embedding_size=8, use_attention=True, attention_factor=8,
@@ -34,21 +34,12 @@ def AFM(feature_dim_dict, embedding_size=8, use_attention=True, attention_factor
     :return: A Keras model instance.
     """
 
-    if not isinstance(feature_dim_dict,
-                      dict) or "sparse" not in feature_dim_dict or "dense" not in feature_dim_dict:
-        raise ValueError(
-            "feature_dim_dict must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}")
-    if not isinstance(feature_dim_dict["sparse"], dict):
-        raise ValueError("feature_dim_dict['sparse'] must be a dict,cur is", type(
-            feature_dim_dict['sparse']))
-    if not isinstance(feature_dim_dict["dense"], list):
-        raise ValueError("feature_dim_dict['dense'] must be a list,cur is", type(
-            feature_dim_dict['dense']))
+    check_feature_config_dict(feature_dim_dict)
 
     deep_emb_list, linear_logit, inputs_list = get_inputs_embedding(
         feature_dim_dict, embedding_size, l2_reg_embedding, l2_reg_linear, init_std, seed)
 
-    fm_input = concat_fun(deep_emb_list,axis=1)
+    fm_input = concat_fun(deep_emb_list, axis=1)
     if use_attention:
         fm_logit = AFMLayer(attention_factor, l2_reg_att,
                             keep_prob, seed)(deep_emb_list)

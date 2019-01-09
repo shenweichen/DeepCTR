@@ -122,7 +122,7 @@ Here is a small fraction of data include  sparse fields and a multivalent field.
 
 There are 2 additional steps to use DeepCTR with sequence feature input.
 
-1. Generate the paded and encoded sequence feature and valid length of sequence feature.
+1. Generate the paded and encoded sequence feature  of sequence input feature(value 0 is for padding).
 2. Generate config of sequence feature with `deepctr.utils.VarLenFeature`
 
 ``VarLenFeature`` is a namedtuple with signature ``VarLenFeature(name, dimension, maxlen, combiner)``
@@ -139,8 +139,8 @@ This example shows how to use ``DeepFM`` with sequence(multi-value) feature. You
 ```python
 import pandas as pd
 import numpy as np
-from sklearn.preprocessing import LabelEncoder
 from tensorflow.python.keras.preprocessing.sequence import pad_sequences
+from sklearn.preprocessing import LabelEncoder
 from deepctr.models import DeepFM
 from deepctr.utils import VarLenFeature
 
@@ -149,7 +149,8 @@ def split(x):
     key_ans = x.split('|')
     for key in key_ans:
         if key not in key2index:
-            key2index[key] = len(key2index)
+            # Notice : input value 0 is a special "padding",so we do not use 0 to encode valid feature for sequence input
+            key2index[key] = len(key2index) + 1
     return list(map(lambda x: key2index[x], key_ans))
 
 
@@ -168,20 +169,20 @@ key2index = {}
 genres_list = list(map(split, data['genres'].values))
 genres_length = np.array(list(map(len, genres_list)))
 max_len = max(genres_length)
-genres_list = pad_sequences(genres_list, maxlen=max_len, padding='post',)# Notice : padding='post'
+genres_list = pad_sequences(genres_list, maxlen=max_len, padding='post',)# Notice : padding=`post`
 
 # 2.count #unique features for each sparse field and generate feature config for sequence feature
 
 sparse_feature_dim = {feat: data[feat].nunique() for feat in sparse_features}
-sequence_feature = [VarLenFeature('genres', len(key2index), max_len, 'mean')]
+sequence_feature = [VarLenFeature('genres', len(
+    key2index)+1, max_len, 'mean')]  # Notice : value 0 is for padding for sequence input feature
 
 # 3.generate input data for model
 sparse_input = [data[feat].values for feat in sparse_feature_dim]
 dense_input = []
 sequence_input = [genres_list]
-sequence_length_input = [genres_length]
-model_input = sparse_input + dense_input + sequence_input + \
-    sequence_length_input  # make sure the order is right
+model_input = sparse_input + dense_input + \
+    sequence_input  # make sure the order is right
 
 # 4.Define Model,compile and train
 model = DeepFM({"sparse": sparse_feature_dim, "dense": [],
@@ -190,4 +191,5 @@ model = DeepFM({"sparse": sparse_feature_dim, "dense": [],
 model.compile("adam", "mse", metrics=['mse'],)
 history = model.fit(model_input, data[target].values,
                     batch_size=256, epochs=10, verbose=2, validation_split=0.2,)
+
 ```

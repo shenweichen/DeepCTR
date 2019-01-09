@@ -10,7 +10,7 @@ Reference:
 import tensorflow as tf
 from ..layers import PredictionLayer, MLP, InnerProductLayer, OutterProductLayer
 from ..input_embedding import get_inputs_embedding
-from ..utils import concat_fun
+from ..utils import concat_fun, check_feature_config_dict
 
 
 def PNN(feature_dim_dict, embedding_size=8, hidden_size=(128, 128), l2_reg_embedding=1e-5, l2_reg_deep=0,
@@ -33,10 +33,8 @@ def PNN(feature_dim_dict, embedding_size=8, hidden_size=(128, 128), l2_reg_embed
     :param kernel_type: str,kernel_type used in outter-product,can be ``'mat'`` , ``'vec'`` or ``'num'``
     :return: A Keras model instance.
     """
-    if not isinstance(feature_dim_dict,
-                      dict) or "sparse" not in feature_dim_dict or "dense" not in feature_dim_dict:
-        raise ValueError(
-            "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
+    check_feature_config_dict(feature_dim_dict)
+
     if kernel_type not in ['mat', 'vec', 'num']:
         raise ValueError("kernel_type must be mat,vec or num")
     deep_emb_list, _, inputs_list = get_inputs_embedding(

@@ -15,7 +15,7 @@ from tensorflow.python.keras.regularizers import l2
 from ..layers import MLP
 from ..sequence import SequencePoolingLayer, AttentionSequencePoolingLayer
 from ..activations import Dice
-from ..utils import concat_fun
+from ..utils import concat_fun, check_feature_config_dict
 
 
 def get_input(feature_dim_dict, seq_feature_list, seq_max_len):
@@ -55,11 +55,8 @@ def DIN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
     :return: A Keras model instance.
 
     """
-    for feature_dim_dict in [feature_dim_dict]:
-        if not isinstance(feature_dim_dict,
-                          dict) or "sparse" not in feature_dim_dict or "dense" not in feature_dim_dict:
-            raise ValueError(
-                "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
+    check_feature_config_dict(feature_dim_dict)
+
     if len(feature_dim_dict['dense']) > 0:
         raise ValueError('Now DIN only support sparse input')
     sparse_input, user_behavior_input, user_behavior_length = get_input(
