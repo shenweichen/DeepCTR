@@ -139,6 +139,7 @@ This example shows how to use ``DeepFM`` with sequence(multi-value) feature. You
 ```python
 import pandas as pd
 import numpy as np
+from sklearn.preprocessing import LabelEncoder
 from tensorflow.python.keras.preprocessing.sequence import pad_sequences
 from deepctr.models import DeepFM
 from deepctr.utils import VarLenFeature

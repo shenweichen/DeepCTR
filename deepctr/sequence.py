@@ -1,6 +1,7 @@
 from tensorflow.python.keras.layers import Layer
 from .layers import LocalActivationUnit
 import tensorflow as tf
+from tensorflow.python.keras.layers import GRU
 
 
 class SequencePoolingLayer(Layer):
@@ -9,7 +10,7 @@ class SequencePoolingLayer(Layer):
       Input shape
         - A list of two  tensor [seq_value,seq_len]
 
-        - seq_value is a 3D tensor with shape: ``(batch_size, T, embedding_size``
+        - seq_value is a 3D tensor with shape: ``(batch_size, T, embedding_size)``
 
         - seq_len is a 2D tensor with shape : ``(batch_size, 1)``,indicate valid length of each sequence.
 

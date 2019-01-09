@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from tensorflow.python.keras.preprocessing.sequence import pad_sequences
+from sklearn.preprocessing import LabelEncoder
 from deepctr.models import DeepFM
 from deepctr.utils import VarLenFeature
 
