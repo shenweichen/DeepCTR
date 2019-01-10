@@ -14,7 +14,7 @@ def gen_sequence(dim, max_len, sample_size):
 
 
 def get_test_data(sample_size=1000, sparse_feature_num=1, dense_feature_num=1, sequence_feature=('max', 'mean', 'sum'),
-                  classification=True,):
+                  classification=True, include_length=False):
 
     feature_dim_dict = {"sparse": {}, 'dense': [], 'sequence': []}
 
@@ -45,7 +45,9 @@ def get_test_data(sample_size=1000, sparse_feature_num=1, dense_feature_num=1, s
     else:
         y = np.random.random(sample_size)
 
-    x = sparse_input + dense_input + sequence_input# + sequence_len_input
+    x = sparse_input + dense_input + sequence_input
+    if include_length:
+        x += sequence_len_input
 
     return x, y, feature_dim_dict
 
