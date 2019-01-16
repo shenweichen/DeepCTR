@@ -18,7 +18,7 @@ class SequencePoolingLayer(Layer):
         - 3D tensor with shape: ``(batch_size, 1, embedding_size)``.
 
       Arguments
-        - **seq_len_max**:Positive integer indicates that the max length of all the sequence feature,usually same as T.
+        - **seq_len_max**:Positive integer indicates that the max length of all the sequence feature,usually same as T.If set to -1,then the input need to support masking.
 
         - **mode**:str.Pooling operation to be used,can be sum,mean or max.
     """
@@ -29,7 +29,7 @@ class SequencePoolingLayer(Layer):
             raise ValueError("mode must be sum or mean")
         self.seq_len_max = seq_len_max
         self.mode = mode
-        self.eps = 1e-9
+        self.eps = 1e-8
         if self.seq_len_max == -1:
             self.supports_masking = True
 
@@ -41,6 +41,9 @@ class SequencePoolingLayer(Layer):
 
     def call(self, seq_value_len_list, mask=None, **kwargs):
         if self.seq_len_max == -1:
+            if mask is None:
+                raise ValueError(
+                    "When seq_len_max=-1,input must support masking")
             uiseq_embed_list = seq_value_len_list
             mask = tf.to_float(mask)
             user_behavior_length = tf.reduce_sum(mask, axis=-1, keep_dims=True)
@@ -53,7 +56,7 @@ class SequencePoolingLayer(Layer):
             mask = tf.transpose(mask, (0, 2, 1))
 
         embedding_size = uiseq_embed_list.shape[-1]
-        
+
         mask = tf.tile(mask, [1, 1, embedding_size])
 
         uiseq_embed_list *= mask
