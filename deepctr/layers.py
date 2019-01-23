@@ -1,7 +1,7 @@
 import itertools
 from tensorflow.python.keras.layers import Layer, BatchNormalization
 from tensorflow.python.keras.regularizers import l2
-from tensorflow.python.keras.initializers import Zeros, glorot_normal, glorot_uniform
+from tensorflow.python.keras.initializers import Zeros, Ones,glorot_normal, glorot_uniform
 from tensorflow.python.keras import backend as K
 import tensorflow as tf
 from .activations import activation_fun
@@ -965,5 +965,5 @@ class LayerNormalization(Layer):
 
     def get_config(self,):
         config = {'axis': self.axis, 'eps': self.eps}
-        base_config = super(PredictionLayer, self).get_config()
+        base_config = super(LayerNormalization, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
