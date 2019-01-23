@@ -166,3 +166,14 @@ def test_InteractingLayer(head_num, use_res,):
         layer_test(layers.InteractingLayer, kwargs={"head_num": head_num, "use_res":
                                                     use_res, }, input_shape=(
             BATCH_SIZE, FIELD_SIZE, EMBEDDING_SIZE))
+
+
+@pytest.mark.parametrize(
+    'axis',
+    [-1, -2
+     ]
+)
+def test_InteractingLayer(axis):
+    with CustomObjectScope({'LayerNormalization': layers.LayerNormalization}):
+        layer_test(layers.LayerNormalization, kwargs={"axis": axis, }, input_shape=(
+            BATCH_SIZE, FIELD_SIZE, EMBEDDING_SIZE))
