@@ -1,6 +1,7 @@
 from tensorflow.python.keras.layers import Layer
 from .layers import LocalActivationUnit
 import tensorflow as tf
+from tensorflow.python.keras import backend as K
 
 
 class SequencePoolingLayer(Layer):
@@ -9,7 +10,7 @@ class SequencePoolingLayer(Layer):
       Input shape
         - A list of two  tensor [seq_value,seq_len]
 
-        - seq_value is a 3D tensor with shape: ``(batch_size, T, embedding_size``
+        - seq_value is a 3D tensor with shape: ``(batch_size, T, embedding_size)``
 
         - seq_len is a 2D tensor with shape : ``(batch_size, 1)``,indicate valid length of each sequence.
 
@@ -17,7 +18,7 @@ class SequencePoolingLayer(Layer):
         - 3D tensor with shape: ``(batch_size, 1, embedding_size)``.
 
       Arguments
-        - **seq_len_max**:Positive integer indicates that the max length of all the sequence feature,usually same as T.
+        - **seq_len_max**:Positive integer indicates that the max length of all the sequence feature,usually same as T.If set to -1,then the input need to support masking.
 
         - **mode**:str.Pooling operation to be used,can be sum,mean or max.
     """
@@ -28,35 +29,54 @@ class SequencePoolingLayer(Layer):
             raise ValueError("mode must be sum or mean")
         self.seq_len_max = seq_len_max
         self.mode = mode
+        self.eps = 1e-8
+        if self.seq_len_max == -1:
+            self.supports_masking = True
+
         super(SequencePoolingLayer, self).__init__(**kwargs)
 
     def build(self, input_shape):
         super(SequencePoolingLayer, self).build(
             input_shape)  # Be sure to call this somewhere!
 
-    def call(self, seq_value_len_list, **kwargs):
-        uiseq_embed_list, user_behavior_length = seq_value_len_list
-        embedding_size = uiseq_embed_list.shape[-1]
-        mask = tf.sequence_mask(user_behavior_length,
-                                self.seq_len_max, dtype=tf.float32)
+    def call(self, seq_value_len_list, mask=None, **kwargs):
+        if self.seq_len_max == -1:
+            if mask is None:
+                raise ValueError(
+                    "When seq_len_max=-1,input must support masking")
+            uiseq_embed_list = seq_value_len_list
+            mask = tf.to_float(mask)
+            user_behavior_length = tf.reduce_sum(mask, axis=-1, keep_dims=True)
+            mask = tf.expand_dims(mask, axis=2)
+        else:
+            uiseq_embed_list, user_behavior_length = seq_value_len_list
 
-        mask = tf.transpose(mask, (0, 2, 1))
+            mask = tf.sequence_mask(user_behavior_length,
+                                    self.seq_len_max, dtype=tf.float32)
+            mask = tf.transpose(mask, (0, 2, 1))
+
+        embedding_size = uiseq_embed_list.shape[-1]
 
         mask = tf.tile(mask, [1, 1, embedding_size])
+
         uiseq_embed_list *= mask
         hist = uiseq_embed_list
         if self.mode == "max":
             return tf.reduce_max(hist, 1, keep_dims=True)
 
         hist = tf.reduce_sum(hist, 1, keep_dims=False)
-        if self.mode == "mean":
 
-            hist = tf.div(hist, user_behavior_length)
+        if self.mode == "mean":
+            hist = tf.div(hist, user_behavior_length+self.eps)
+
         hist = tf.expand_dims(hist, axis=1)
         return hist
 
     def compute_output_shape(self, input_shape):
         return (None, 1, input_shape[0][-1])
+
+    def compute_mask(self, inputs, mask):
+        return None
 
     def get_config(self,):
         config = {'seq_len_max': self.seq_len_max, 'mode': self.mode}

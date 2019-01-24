@@ -4,7 +4,7 @@ import logging
 from threading import Thread
 
 import requests
-from tensorflow.python.keras.layers import Dense, Concatenate, add
+from tensorflow.python.keras.layers import Concatenate
 
 from .activations import *
 from .layers import *
@@ -28,35 +28,16 @@ custom_objects = {'InnerProductLayer': InnerProductLayer,
                   'SequencePoolingLayer': SequencePoolingLayer,
                   'AttentionSequencePoolingLayer': AttentionSequencePoolingLayer,
                   'CIN': CIN,
-                  'InteractingLayer': InteractingLayer}
+                  'InteractingLayer': InteractingLayer,}
 
 
-VarLenFeature = collections.namedtuple(
+VarLenFeat = collections.namedtuple(
     'VarLenFeatureConfig', ['name', 'dimension', 'maxlen', 'combiner'])
+SingleFeat = collections.namedtuple(
+    'SingleFeatureConfig', ['name', 'dimension', ])
 
 
-def get_linear_logit(linear_term, dense_input_, l2_reg):
-    if len(linear_term) > 1:
-        linear_term = add(linear_term)
-    elif len(linear_term) == 1:
-        linear_term = linear_term[0]
-    else:
-        linear_term = None
-
-    dense_input = list(dense_input_.values())
-    if len(dense_input) > 0:
-        dense_input__ = dense_input[0] if len(
-            dense_input) == 1 else Concatenate()(dense_input)
-        linear_dense_logit = Dense(
-            1, activation=None, use_bias=False, kernel_regularizer=l2(l2_reg))(dense_input__)
-        if linear_term is not None:
-            linear_term = add([linear_dense_logit, linear_term])
-        else:
-            linear_term = linear_dense_logit
-
-    return linear_term
-
-def concat_fun(inputs,axis=-1):
+def concat_fun(inputs, axis=-1):
     if len(inputs) == 1:
         return inputs[0]
     else:
@@ -84,3 +65,20 @@ def check_version(version):
         except Exception:
             return
     Thread(target=check, args=(version,)).start()
+
+
+def check_feature_config_dict(feature_dim_dict):
+    if not isinstance(feature_dim_dict, dict):
+        raise ValueError(
+            "feature_dim_dict must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}")
+    if "sparse" not in feature_dim_dict:
+        feature_dim_dict['sparse'] = []
+    if "dense" not in feature_dim_dict:
+        feature_dim_dict['dense'] = []
+    if not isinstance(feature_dim_dict["sparse"], list):
+        raise ValueError("feature_dim_dict['sparse'] must be a list,cur is", type(
+            feature_dim_dict['sparse']))
+
+    if not isinstance(feature_dim_dict["dense"], list):
+        raise ValueError("feature_dim_dict['dense'] must be a list,cur is", type(
+            feature_dim_dict['dense']))

@@ -1,10 +1,11 @@
 import pytest
 from tensorflow.python.keras.utils import CustomObjectScope
-
+import  tensorflow as tf
 from deepctr import sequence
 
 from .utils import layer_test
 
+tf.keras.backend.set_learning_phase(True)
 BATCH_SIZE = 4
 EMBEDDING_SIZE = 8
 SEQ_LENGTH = 10
@@ -14,9 +15,7 @@ SEQ_LENGTH = 10
 
     'weight_normalization',
 
-    [weight_normalization
-        for
-     weight_normalization in [True, False, ]
+    [True,False
      ]
 
 )

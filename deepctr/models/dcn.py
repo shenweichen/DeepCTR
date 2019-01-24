@@ -10,7 +10,7 @@ import tensorflow as tf
 
 from ..input_embedding import *
 from ..layers import CrossNet, PredictionLayer, MLP
-from ..utils import concat_fun
+from ..utils import concat_fun, check_feature_config_dict
 
 
 def DCN(feature_dim_dict, embedding_size='auto',
@@ -37,9 +37,8 @@ def DCN(feature_dim_dict, embedding_size='auto',
     """
     if len(hidden_size) == 0 and cross_num == 0:
         raise ValueError("Either hidden_layer or cross layer must > 0")
-    if not isinstance(feature_dim_dict, dict) or "sparse" not in feature_dim_dict or "dense" not in feature_dim_dict:
-        raise ValueError(
-            "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
+
+    check_feature_config_dict(feature_dim_dict)
 
     deep_emb_list, _, inputs_list = get_inputs_embedding(
         feature_dim_dict, embedding_size, l2_reg_embedding, 0, init_std, seed, False)

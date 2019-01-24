@@ -15,11 +15,11 @@ from tensorflow.python.keras.regularizers import l2
 from ..layers import MLP
 from ..sequence import SequencePoolingLayer, AttentionSequencePoolingLayer
 from ..activations import Dice
-from ..utils import concat_fun
+from ..utils import concat_fun, check_feature_config_dict
 
 
 def get_input(feature_dim_dict, seq_feature_list, seq_max_len):
-    sparse_input = {feat: Input(shape=(1,), name='sparse_' + str(i) + '-' + feat) for i, feat in
+    sparse_input = {feat.name: Input(shape=(1,), name='sparse_' + str(i) + '-' + feat.name) for i, feat in
                     enumerate(feature_dim_dict["sparse"])}
 
     user_behavior_input = {feat: Input(shape=(seq_max_len,), name='seq_' + str(i) + '-' + feat) for i, feat in
@@ -55,28 +55,26 @@ def DIN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
     :return: A Keras model instance.
 
     """
-    for feature_dim_dict in [feature_dim_dict]:
-        if not isinstance(feature_dim_dict,
-                          dict) or "sparse" not in feature_dim_dict or "dense" not in feature_dim_dict:
-            raise ValueError(
-                "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
+    check_feature_config_dict(feature_dim_dict)
+
     if len(feature_dim_dict['dense']) > 0:
         raise ValueError('Now DIN only support sparse input')
     sparse_input, user_behavior_input, user_behavior_length = get_input(
         feature_dim_dict, seq_feature_list, hist_len_max)
-    sparse_embedding_dict = {feat: Embedding(feature_dim_dict["sparse"][feat], embedding_size,
+    sparse_embedding_dict = {feat.name: Embedding(feat.dimension, embedding_size,
                                              embeddings_initializer=RandomNormal(
                                                  mean=0.0, stddev=init_std, seed=seed),
                                              embeddings_regularizer=l2(
                                                  l2_reg_embedding),
-                                             name='sparse_emb_' + str(i) + '-' + feat) for i, feat in
+                                             name='sparse_emb_' + str(i) + '-' + feat.name) for i, feat in
                              enumerate(feature_dim_dict["sparse"])}
+
     query_emb_list = [sparse_embedding_dict[feat](
         sparse_input[feat]) for feat in seq_feature_list]
     keys_emb_list = [sparse_embedding_dict[feat](
         user_behavior_input[feat]) for feat in seq_feature_list]
-    deep_input_emb_list = [sparse_embedding_dict[feat](
-        sparse_input[feat]) for feat in feature_dim_dict["sparse"]]
+    deep_input_emb_list = [sparse_embedding_dict[feat.name](
+        sparse_input[feat.name]) for feat in feature_dim_dict["sparse"]]
 
     query_emb = concat_fun(query_emb_list)
     keys_emb = concat_fun(keys_emb_list)

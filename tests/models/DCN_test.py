@@ -1,5 +1,6 @@
 import pytest
 from deepctr.models import DCN
+from deepctr import SingleFeat
 from ..utils import check_model, get_test_data
 
 
@@ -21,8 +22,8 @@ def test_DCN(embedding_size, cross_num, hidden_size, sparse_feature_num):
 
 
 def test_DCN_invalid(embedding_size=8, cross_num=0, hidden_size=()):
-    feature_dim_dict = {'sparse': {'sparse_1': 2, 'sparse_2': 5,
-                                   'sparse_3': 10}, 'dense': ['dense_1', 'dense_2', 'dense_3']}
+    feature_dim_dict = {'sparse': [SingleFeat('sparse_1',2),SingleFeat('sparse_2',5),SingleFeat('sparse_3',10)],
+    'dense': [SingleFeat('dense_1',1),SingleFeat('dense_1',1),SingleFeat('dense_1',1)]}
     with pytest.raises(ValueError):
         _ = DCN(feature_dim_dict, embedding_size=embedding_size, cross_num=cross_num,
                 hidden_size=hidden_size, keep_prob=0.5, )

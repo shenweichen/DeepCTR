@@ -1,11 +1,11 @@
 import numpy as np
 from deepctr.models import DIN
+from deepctr import  SingleFeat
 
 
 def get_xy_fd():
 
-    feature_dim_dict = {"sparse": {'user_age': 4, 'user_gender': 2,
-                                   'item_id': 4, 'item_gender': 2}, "dense": []}  # raw feature:single value feature
+    feature_dim_dict = {"sparse": [SingleFeat('user_age',4),SingleFeat('user_gender',2),SingleFeat('item_id',4),SingleFeat('item_gender',4)]}# raw feature:single value feature
 
     # history behavior feature:multi-value value feature
     behavior_feature_list = ["item_id", "item_gender"]
@@ -24,7 +24,7 @@ def get_xy_fd():
     feature_dict = {'user_age': user_age, 'user_gender': user_gender, 'item_id': item_id, 'item_gender': item_gender,
                     'hist_item_id': hist_item_id, 'hist_item_gender': hist_item_gender, }
 
-    x = [feature_dict[feat] for feat in feature_dim_dict["sparse"]] + \
+    x = [feature_dict[feat.name] for feat in feature_dim_dict["sparse"]] + \
         [feature_dict['hist_'+feat]
             for feat in behavior_feature_list] + [hist_length]
     # Notice the concatenation order: single feature + multi-value feature + length
@@ -39,4 +39,4 @@ if __name__ == "__main__":
     model = DIN(feature_dim_dict, behavior_feature_list, hist_len_max=4,)
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
-    history = model.fit(x, y, verbose=1, validation_split=0.5)
+    history = model.fit(x, y, verbose=1, epochs=10,validation_split=0.5)

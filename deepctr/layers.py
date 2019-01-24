@@ -1,7 +1,7 @@
 import itertools
 from tensorflow.python.keras.layers import Layer, BatchNormalization
 from tensorflow.python.keras.regularizers import l2
-from tensorflow.python.keras.initializers import Zeros, glorot_normal, glorot_uniform
+from tensorflow.python.keras.initializers import Zeros, Ones, glorot_normal, glorot_uniform
 from tensorflow.python.keras import backend as K
 import tensorflow as tf
 from .activations import activation_fun
@@ -355,10 +355,9 @@ class CrossNet(Layer):
         x_0 = tf.expand_dims(inputs, axis=2)
         x_l = x_0
         for i in range(self.layer_num):
-            xl_w = tf.tensordot(tf.transpose(
-                x_l, [0, 2, 1]), self.kernels[i], axes=(-1, 0))
+            xl_w = tf.tensordot(x_l, self.kernels[i], axes=(1, 0))
             dot_ = tf.matmul(x_0, xl_w)
-            x_l = dot_ + x_l + self.bias[i]
+            x_l = dot_ + self.bias[i] + x_l
         x_l = tf.squeeze(x_l, axis=2)
         return x_l
 
@@ -504,7 +503,6 @@ class InnerProductLayer(Layer):
         return dict(list(base_config.items()) + list(config.items()))
 
 
-
 class InteractingLayer(Layer):
     """A Layer used in AutoInt that model the correlations between different feature fields by multi-head self-attention mechanism.
 
@@ -524,6 +522,7 @@ class InteractingLayer(Layer):
       References
             - [Song W, Shi C, Xiao Z, et al. AutoInt: Automatic Feature Interaction Learning via Self-Attentive Neural Networks[J]. arXiv preprint arXiv:1810.11921, 2018.](https://arxiv.org/abs/1810.11921)
     """
+
     def __init__(self, att_embedding_size=8, head_num=2, use_res=True, seed=1024, **kwargs):
         if head_num <= 0:
             raise ValueError('head_num must be a int > 0')
@@ -535,7 +534,8 @@ class InteractingLayer(Layer):
 
     def build(self, input_shape):
         if len(input_shape) != 3:
-            raise ValueError("Unexpected inputs dimensions %d, expect to be 3 dimensions" % (len(input_shape)))
+            raise ValueError(
+                "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (len(input_shape)))
         embedding_size = input_shape[-1].value
         self.W_Query = self.add_weight(name='query', shape=[embedding_size, self.att_embedding_size * self.head_num], dtype=tf.float32,
                                        initializer=tf.keras.initializers.glorot_uniform(seed=self.seed))
@@ -547,26 +547,32 @@ class InteractingLayer(Layer):
             self.W_Res = self.add_weight(name='res', shape=[embedding_size, self.att_embedding_size * self.head_num], dtype=tf.float32,
                                          initializer=tf.keras.initializers.glorot_uniform(seed=self.seed))
 
-        super(InteractingLayer, self).build(input_shape)  # Be sure to call this somewhere!
+        # Be sure to call this somewhere!
+        super(InteractingLayer, self).build(input_shape)
 
     def call(self, inputs, **kwargs):
         if K.ndim(inputs) != 3:
-            raise ValueError("Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
+            raise ValueError(
+                "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
 
-        querys = tf.tensordot(inputs, self.W_Query, axes=(-1, 0))  # None F D*head_num
+        querys = tf.tensordot(inputs, self.W_Query,
+                              axes=(-1, 0))  # None F D*head_num
         keys = tf.tensordot(inputs, self.W_key, axes=(-1, 0))
         values = tf.tensordot(inputs, self.W_Value, axes=(-1, 0))
 
-        querys = tf.stack(tf.split(querys, self.head_num, axis=2))  # head_num None F D
+        # head_num None F D
+        querys = tf.stack(tf.split(querys, self.head_num, axis=2))
         keys = tf.stack(tf.split(keys, self.head_num, axis=2))
         values = tf.stack(tf.split(values, self.head_num, axis=2))
 
-        inner_product = tf.matmul(querys, keys, transpose_b=True)  # head_num None F F
+        inner_product = tf.matmul(
+            querys, keys, transpose_b=True)  # head_num None F F
         self.normalized_att_scores = tf.nn.softmax(inner_product)
 
-        result = tf.matmul(self.normalized_att_scores, values)#head_num None F D
+        result = tf.matmul(self.normalized_att_scores,
+                           values)  # head_num None F D
         result = tf.concat(tf.split(result, self.head_num, ), axis=-1)
-        result = tf.squeeze(result, axis=0)#None F D*head_num
+        result = tf.squeeze(result, axis=0)  # None F D*head_num
 
         if self.use_res:
             result += tf.tensordot(inputs, self.W_Res, axes=(-1, 0))
@@ -648,7 +654,7 @@ class LocalActivationUnit(Layer):
         super(LocalActivationUnit, self).build(
             input_shape)  # Be sure to call this somewhere!
 
-    def call(self, inputs, **kwargs):
+    def call(self, inputs, training=None, **kwargs):
 
         query, keys = inputs
 
@@ -657,7 +663,7 @@ class LocalActivationUnit(Layer):
 
         att_input = tf.concat(
             [queries, keys, queries - keys, queries * keys], axis=-1)
-        att_input = tf.layers.batch_normalization(att_input)
+
         att_out = MLP(self.hidden_size, self.activation, self.l2_reg,
                       self.keep_prob, self.use_bn, seed=self.seed)(att_input)
         attention_score = tf.nn.bias_add(tf.tensordot(
@@ -724,7 +730,8 @@ class MLP(Layer):
 
         super(MLP, self).build(input_shape)  # Be sure to call this somewhere!
 
-    def call(self, inputs, **kwargs):
+    def call(self, inputs, training=None, **kwargs):
+
         deep_input = inputs
 
         for i in range(len(self.hidden_size)):
@@ -734,9 +741,10 @@ class MLP(Layer):
             #           kernel_initializer=glorot_normal(seed=self.seed), \
             #           kernel_regularizer=l2(self.l2_reg))(deep_input)
             if self.use_bn:
-                fc = BatchNormalization()(fc)
+                fc = tf.keras.layers.BatchNormalization()(fc)
             fc = activation_fun(self.activation, fc)
-            fc = tf.nn.dropout(fc, self.keep_prob)
+            #fc = tf.nn.dropout(fc, self.keep_prob)
+            fc = tf.keras.layers.Dropout(1 - self.keep_prob)(fc,)
             deep_input = fc
 
         return deep_input
@@ -901,7 +909,7 @@ class PredictionLayer(Layer):
       Arguments
          - **activation**: Activation function to use.
 
-         - **use_bias**: bool.Whther add bias term.
+         - **use_bias**: bool.Whether add bias term or not.
     """
 
     def __init__(self, activation='sigmoid', use_bias=True, **kwargs):

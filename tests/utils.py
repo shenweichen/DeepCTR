@@ -6,7 +6,7 @@ from numpy.testing import assert_allclose
 from tensorflow.python.keras import backend as K
 from tensorflow.python.keras.layers import Input
 from tensorflow.python.keras.models import Model, save_model, load_model
-from deepctr.utils import custom_objects, VarLenFeature
+from deepctr.utils import custom_objects,VarLenFeat,SingleFeat
 
 
 def gen_sequence(dim, max_len, sample_size):
@@ -14,23 +14,23 @@ def gen_sequence(dim, max_len, sample_size):
 
 
 def get_test_data(sample_size=1000, sparse_feature_num=1, dense_feature_num=1, sequence_feature=('max', 'mean', 'sum'),
-                  classification=True,):
+                  classification=True, include_length=False):
 
-    feature_dim_dict = {"sparse": {}, 'dense': [], 'sequence': []}
+    feature_dim_dict = {"sparse": [], 'dense': [], 'sequence': []}
 
     for i in range(sparse_feature_num):
         dim = np.random.randint(1, 10)
-        feature_dim_dict['sparse']['sparse_'+str(i)] = dim
+        feature_dim_dict['sparse'].append(SingleFeat('sparse_'+str(i),dim))
     for i in range(dense_feature_num):
-        feature_dim_dict['dense'].append('dense_'+str(i))
+        feature_dim_dict['dense'].append(SingleFeat('sparse_'+str(i),0))
     for i, mode in enumerate(sequence_feature):
         dim = np.random.randint(1, 10)
         maxlen = np.random.randint(1, 10)
         feature_dim_dict['sequence'].append(
-            VarLenFeature('sequence_'+str(i), dim, maxlen, mode))
+            VarLenFeat('sequence_' + str(i), dim, maxlen, mode))
 
     sparse_input = [np.random.randint(0, dim, sample_size)
-                    for dim in feature_dim_dict['sparse'].values()]
+                    for feat,dim in feature_dim_dict['sparse']]
     dense_input = [np.random.random(sample_size)
                    for name in feature_dim_dict['dense']]
     sequence_input = []
@@ -45,7 +45,9 @@ def get_test_data(sample_size=1000, sparse_feature_num=1, dense_feature_num=1, s
     else:
         y = np.random.random(sample_size)
 
-    x = sparse_input + dense_input + sequence_input + sequence_len_input
+    x = sparse_input + dense_input + sequence_input
+    if include_length:
+        x += sequence_len_input
 
     return x, y, feature_dim_dict
 

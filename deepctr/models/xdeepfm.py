@@ -9,7 +9,7 @@ Reference:
 import tensorflow as tf
 from ..input_embedding import get_inputs_embedding
 from ..layers import PredictionLayer, MLP, CIN
-from ..utils import concat_fun
+from ..utils import concat_fun, check_feature_config_dict
 
 
 def xDeepFM(feature_dim_dict, embedding_size=8, hidden_size=(256, 256), cin_layer_size=(128, 128,), cin_split_half=True, cin_activation='relu', l2_reg_linear=0.00001, l2_reg_embedding=0.00001, l2_reg_deep=0, init_std=0.0001, seed=1024, keep_prob=1, activation='relu', final_activation='sigmoid', use_bn=False):
@@ -32,14 +32,12 @@ def xDeepFM(feature_dim_dict, embedding_size=8, hidden_size=(256, 256), cin_laye
     :param use_bn: bool. Whether use BatchNormalization before activation or not.in deep net
     :return: A Keras model instance.
     """
-    if not isinstance(feature_dim_dict, dict) or "sparse" not in feature_dim_dict or "dense" not in feature_dim_dict:
-        raise ValueError(
-            "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
+    check_feature_config_dict(feature_dim_dict)
 
     deep_emb_list, linear_logit, inputs_list = get_inputs_embedding(
         feature_dim_dict, embedding_size, l2_reg_embedding, l2_reg_linear, init_std, seed)
 
-    fm_input = concat_fun(deep_emb_list,axis=1)
+    fm_input = concat_fun(deep_emb_list, axis=1)
 
     if len(cin_layer_size) > 0:
         exFM_out = CIN(cin_layer_size, cin_activation,
