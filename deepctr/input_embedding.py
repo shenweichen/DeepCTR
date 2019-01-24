@@ -1,11 +1,8 @@
 from collections import OrderedDict
 from itertools import chain
 
-from tensorflow.python.keras import Input
-from tensorflow.python.keras._impl.keras.layers import add, Concatenate, Dense
-from tensorflow.python.keras._impl.keras.regularizers import l2
 from tensorflow.python.keras.initializers import RandomNormal
-from tensorflow.python.keras.layers import Embedding, Dense, Reshape, Concatenate
+from tensorflow.python.keras.layers import Embedding, Dense, Reshape, Concatenate, Input, add
 from tensorflow.python.keras.regularizers import l2
 from .sequence import SequencePoolingLayer
 

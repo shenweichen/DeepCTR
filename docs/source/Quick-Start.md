@@ -4,14 +4,14 @@
 ### CPU version
 Install `deepctr` package is through `pip` 
 ```bash
-pip install deepctr
+$ pip install deepctr
 ```
 ### GPU version
 If you have a `tensorflow-gpu` on your local machine,make sure its version is
 **`tensorflow-gpu>=1.4.0,!=1.7.*,!=1.8.*`**  
 Then,use the following command to install
 ```bash
-pip install deepctr --no-deps
+$ pip install deepctr --no-deps
 ```
 ## Getting started: 4 steps to DeepCTR
 
@@ -21,18 +21,19 @@ pip install deepctr --no-deps
 
 ```python
 import pandas as pd
-from sklearn.preprocessing import LabelEncoder,MinMaxScaler
-
+from sklearn.preprocessing import LabelEncoder, MinMaxScaler
+from sklearn.model_selection import train_test_split
 from deepctr.models import DeepFM
+from deepctr import SingleFeat
 
 data = pd.read_csv('./criteo_sample.txt')
 
-sparse_features  = ['C' + str(i) for i in range(1, 27)]
-dense_features = ['I'+str(i) for i in range(1,14)]
-target = ['label']
+sparse_features = ['C' + str(i) for i in range(1, 27)]
+dense_features = ['I'+str(i) for i in range(1, 14)]
 
 data[sparse_features] = data[sparse_features].fillna('-1', )
 data[dense_features] = data[dense_features].fillna(0,)
+target = ['label']
 ```
     
 
@@ -64,8 +65,10 @@ That is to say, all dense features under the same field share the same embedding
 In some implementations, the dense feature is concatened to the input embedding vectors of the deep network, you can modify the code yourself.
 
 ```python
-sparse_feature_dict = {feat: data[feat].nunique() for feat in sparse_features}
-dense_feature_list = dense_features
+sparse_feature_list = [SingleFeat(feat, data[feat].nunique())
+                        for feat in sparse_features]
+dense_feature_list = [SingleFeat(feat, 0)
+                      for feat in dense_features]
 ```
 
 ### Step 4: Generate the training samples and train the model
@@ -73,17 +76,24 @@ dense_feature_list = dense_features
 There are two rules here that we must follow
 
   - The sparse features are placed in front of the dense features.
-  - The order of the feature we fit into the model must be consistent with the order of the feature dictionary iterations
+  - The order of the feature we fit into the model must be consistent with the order of the feature config list.
 
 
 ```python
-# make sure the order is right
-model_input = [data[feat].values for feat in sparse_feature_dict] + [data[feat].values for feat in dense_feature_list]
+train, test = train_test_split(data, test_size=0.2)
+train_model_input = [train[feat.name].values for feat in sparse_feature_list] + \
+    [train[feat.name].values for feat in dense_feature_list]
+test_model_input = [test[feat.name].values for feat in sparse_feature_list] + \
+    [test[feat.name].values for feat in dense_feature_list]
 
-model = DeepFM({"sparse": sparse_feature_dict, "dense": dense_feature_list}, final_activation='sigmoid')
-model.compile("adam", "binary_crossentropy", metrics=['binary_crossentropy'], )
-history = model.fit(model_input, data[target].values,
-                    batch_size=256, epochs=1, verbose=2, validation_split=0.2,)
+model = DeepFM({"sparse": sparse_feature_list,
+                "dense": dense_feature_list}, final_activation='sigmoid')
+model.compile("adam", "binary_crossentropy",
+              metrics=['binary_crossentropy'], )
+
+history = model.fit(train_model_input, train[target].values,
+                    batch_size=256, epochs=10, verbose=2, validation_split=0.2, )
+pred_ans = model.predict(test_model_input, batch_size=256)
 
 ```
 You can check the full code [here](./Examples.html#classification-criteo).

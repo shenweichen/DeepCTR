@@ -1,7 +1,7 @@
 from tensorflow.python.keras.layers import Layer
 from .layers import LocalActivationUnit
 import tensorflow as tf
-from tensorflow.python.keras.layers import GRU
+from tensorflow.python.keras import backend as K
 
 
 class SequencePoolingLayer(Layer):

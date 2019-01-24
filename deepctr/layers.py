@@ -654,7 +654,7 @@ class LocalActivationUnit(Layer):
         super(LocalActivationUnit, self).build(
             input_shape)  # Be sure to call this somewhere!
 
-    def call(self, inputs, **kwargs):
+    def call(self, inputs, training=None, **kwargs):
 
         query, keys = inputs
 
@@ -663,7 +663,7 @@ class LocalActivationUnit(Layer):
 
         att_input = tf.concat(
             [queries, keys, queries - keys, queries * keys], axis=-1)
-        att_input = tf.layers.batch_normalization(att_input)
+
         att_out = MLP(self.hidden_size, self.activation, self.l2_reg,
                       self.keep_prob, self.use_bn, seed=self.seed)(att_input)
         attention_score = tf.nn.bias_add(tf.tensordot(
@@ -730,7 +730,8 @@ class MLP(Layer):
 
         super(MLP, self).build(input_shape)  # Be sure to call this somewhere!
 
-    def call(self, inputs, **kwargs):
+    def call(self, inputs, training=None, **kwargs):
+
         deep_input = inputs
 
         for i in range(len(self.hidden_size)):
@@ -740,10 +741,10 @@ class MLP(Layer):
             #           kernel_initializer=glorot_normal(seed=self.seed), \
             #           kernel_regularizer=l2(self.l2_reg))(deep_input)
             if self.use_bn:
-                fc = BatchNormalization()(fc)
+                fc = tf.keras.layers.BatchNormalization()(fc)
             fc = activation_fun(self.activation, fc)
             #fc = tf.nn.dropout(fc, self.keep_prob)
-            fc = tf.keras.layers.Dropout(1 - self.keep_prob)(fc)
+            fc = tf.keras.layers.Dropout(1 - self.keep_prob)(fc,)
             deep_input = fc
 
         return deep_input
