@@ -19,7 +19,7 @@ from ..utils import concat_fun, check_feature_config_dict
 
 
 def get_input(feature_dim_dict, seq_feature_list, seq_max_len):
-    sparse_input = {feat: Input(shape=(1,), name='sparse_' + str(i) + '-' + feat) for i, feat in
+    sparse_input = {feat.name: Input(shape=(1,), name='sparse_' + str(i) + '-' + feat.name) for i, feat in
                     enumerate(feature_dim_dict["sparse"])}
 
     user_behavior_input = {feat: Input(shape=(seq_max_len,), name='seq_' + str(i) + '-' + feat) for i, feat in
@@ -61,19 +61,20 @@ def DIN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
         raise ValueError('Now DIN only support sparse input')
     sparse_input, user_behavior_input, user_behavior_length = get_input(
         feature_dim_dict, seq_feature_list, hist_len_max)
-    sparse_embedding_dict = {feat: Embedding(feature_dim_dict["sparse"][feat], embedding_size,
+    sparse_embedding_dict = {feat.name: Embedding(feat.dimension, embedding_size,
                                              embeddings_initializer=RandomNormal(
                                                  mean=0.0, stddev=init_std, seed=seed),
                                              embeddings_regularizer=l2(
                                                  l2_reg_embedding),
-                                             name='sparse_emb_' + str(i) + '-' + feat) for i, feat in
+                                             name='sparse_emb_' + str(i) + '-' + feat.name) for i, feat in
                              enumerate(feature_dim_dict["sparse"])}
+
     query_emb_list = [sparse_embedding_dict[feat](
         sparse_input[feat]) for feat in seq_feature_list]
     keys_emb_list = [sparse_embedding_dict[feat](
         user_behavior_input[feat]) for feat in seq_feature_list]
-    deep_input_emb_list = [sparse_embedding_dict[feat](
-        sparse_input[feat]) for feat in feature_dim_dict["sparse"]]
+    deep_input_emb_list = [sparse_embedding_dict[feat.name](
+        sparse_input[feat.name]) for feat in feature_dim_dict["sparse"]]
 
     query_emb = concat_fun(query_emb_list)
     keys_emb = concat_fun(keys_emb_list)

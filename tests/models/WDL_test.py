@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from deepctr.models import WDL
-from ..utils import check_model
+from ..utils import check_model,SingleFeat
 
 
 @pytest.mark.parametrize(
@@ -13,33 +13,31 @@ from ..utils import check_model
 def test_WDL(sparse_feature_num, wide_feature_num):
     model_name = "WDL"
     sample_size = 64
-    feature_dim_dict = {"sparse": {}, 'dense': []}
-    wide_feature_dim_dict = {"sparse": {}, 'dense': []}
+    feature_dim_dict = {"sparse": [], 'dense': []}
+    wide_feature_dim_dict = {"sparse": [], 'dense': []}
     for name, num in zip(["sparse", "dense"], [sparse_feature_num, sparse_feature_num]):
         if name == "sparse":
             for i in range(num):
-                feature_dim_dict[name][name + '_' +
-                                       str(i)] = np.random.randint(1, 10)
+                feature_dim_dict[name].append(SingleFeat(name + '_' +str(i),np.random.randint(1, 10)))
         else:
             for i in range(num):
-                feature_dim_dict[name].append(name + '_' + str(i))
+                feature_dim_dict[name].append(SingleFeat(name + '_' + str(i),0))
     for name, num in zip(["sparse", "dense"], [wide_feature_num, wide_feature_num]):
         if name == "sparse":
             for i in range(num):
-                wide_feature_dim_dict[name][name + 'wide_' +
-                                            str(i)] = np.random.randint(1, 10)
+                wide_feature_dim_dict[name].append(SingleFeat(name + 'wide_' +str(i),np.random.randint(1, 10)))
         else:
             for i in range(num):
-                wide_feature_dim_dict[name].append(name + 'wide_' + str(i))
+                wide_feature_dim_dict[name].append(SingleFeat(name + 'wide_' + str(i),0))
 
     sparse_input = [np.random.randint(0, dim, sample_size)
-                    for dim in feature_dim_dict['sparse'].values()]
+                    for feat,dim in feature_dim_dict['sparse']]
     dense_input = [np.random.random(sample_size)
-                   for name in feature_dim_dict['dense']]
+                   for _ in feature_dim_dict['dense']]
     wide_sparse_input = [np.random.randint(0, dim, sample_size)
-                         for dim in wide_feature_dim_dict['sparse'].values()]
+                         for feat,dim in wide_feature_dim_dict['sparse']]
     wide_dense_input = [np.random.random(sample_size)
-                        for name in wide_feature_dim_dict['dense']]
+                        for _ in wide_feature_dim_dict['dense']]
     y = np.random.randint(0, 2, sample_size)
     x = sparse_input + dense_input
     x_wide = wide_sparse_input + wide_dense_input

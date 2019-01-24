@@ -1,7 +1,7 @@
 import itertools
 from tensorflow.python.keras.layers import Layer, BatchNormalization
 from tensorflow.python.keras.regularizers import l2
-from tensorflow.python.keras.initializers import Zeros, Ones,glorot_normal, glorot_uniform
+from tensorflow.python.keras.initializers import Zeros, Ones, glorot_normal, glorot_uniform
 from tensorflow.python.keras import backend as K
 import tensorflow as tf
 from .activations import activation_fun
@@ -742,7 +742,8 @@ class MLP(Layer):
             if self.use_bn:
                 fc = BatchNormalization()(fc)
             fc = activation_fun(self.activation, fc)
-            fc = tf.nn.dropout(fc, self.keep_prob)
+            #fc = tf.nn.dropout(fc, self.keep_prob)
+            fc = tf.keras.layers.Dropout(1 - self.keep_prob)(fc)
             deep_input = fc
 
         return deep_input

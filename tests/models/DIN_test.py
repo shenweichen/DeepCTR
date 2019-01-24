@@ -2,14 +2,13 @@ import numpy as np
 import pytest
 from deepctr.models import DIN
 from deepctr.activations import Dice
-from deepctr.utils import custom_objects
+from deepctr.utils import custom_objects,SingleFeat
 from tensorflow.python.keras.models import load_model, save_model
 from ..utils import check_model
 
 
 def get_xy_fd():
-    feature_dim_dict = {"sparse": {'user': 4, 'gender': 2,
-                                   'item': 4, 'item_gender': 2}, "dense": []}
+    feature_dim_dict = {"sparse":[SingleFeat('user',4),SingleFeat('gender',2),SingleFeat('item',4),SingleFeat('item_gender',2)], "dense": []}
     behavior_feature_list = ["item"]
     uid = np.array([1, 2, 3])
     ugender = np.array([0, 1, 0])
@@ -22,7 +21,7 @@ def get_xy_fd():
 
     feature_dict = {'user': uid, 'gender': ugender, 'item': iid, 'item_gender': igender,
                     'hist_item': hist_iid, 'hist_item_gender': hist_igender, }
-    x = [feature_dict[feat] for feat in feature_dim_dict["sparse"]] \
+    x = [feature_dict[feat.name] for feat in feature_dim_dict["sparse"]] \
         + [feature_dict['hist_'+feat] for feat in behavior_feature_list]\
         + [hist_length]
     y = [1, 0, 1]
