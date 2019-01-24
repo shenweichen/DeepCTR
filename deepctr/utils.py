@@ -28,8 +28,7 @@ custom_objects = {'InnerProductLayer': InnerProductLayer,
                   'SequencePoolingLayer': SequencePoolingLayer,
                   'AttentionSequencePoolingLayer': AttentionSequencePoolingLayer,
                   'CIN': CIN,
-                  'InteractingLayer': InteractingLayer,
-                  'LayerNormalization': LayerNormalization, }
+                  'InteractingLayer': InteractingLayer,}
 
 
 VarLenFeat = collections.namedtuple(
