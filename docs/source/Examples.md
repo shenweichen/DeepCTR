@@ -10,7 +10,12 @@ click-through rate. It has 13 integer features and
 ![image](../pics/criteo_sample.png)
 
 In this example,we simply normailize the integer feature between 0 and 1,you
-can try other transformation technique like log normalization or discretization.
+can try other transformation technique like log normalization or discretization.Then we use `SingleFeat` to generate feature config dict for sparse features and dense features.
+
+``SingleFeat`` is a namedtuple with signature ``SingleFeat(name, dimension)``
+
+- name : feature name
+- dimension : number of unique feature values for sprase feature, any value for dense feature.
 
 This example shows how to use ``DeepFM`` to solve a simple binary classification task. You can get the demo data [criteo_sample.txt](https://github.com/shenweichen/DeepCTR/tree/master/examples/criteo_sample.txt)
 and run the following codes.
@@ -130,13 +135,13 @@ Here is a small fraction of data include  sparse fields and a multivalent field.
 
 There are 2 additional steps to use DeepCTR with sequence feature input.
 
-1. Generate the paded and encoded sequence feature  of sequence input feature(value 0 is for padding).
-2. Generate config of sequence feature with `deepctr.utils.VarLenFeature`
+1. Generate the paded and encoded sequence feature  of sequence input feature(**value 0 is for padding**).
+2. Generate config of sequence feature with `deepctr.utils.VarLenFeat`
 
-``VarLenFeature`` is a namedtuple with signature ``VarLenFeature(name, dimension, maxlen, combiner)``
+``VarLenFeat`` is a namedtuple with signature ``VarLenFeat(name, dimension, maxlen, combiner)``
 
 - name : feature name,if it is already used in sparse_feature_dim,then a shared embedding mechanism will be used.
-- dimension : number of unique features
+- dimension : number of unique feature values
 - maxlen : maximum length of this feature for all samples
 - combiner : pooling method,can be ``sum``,``mean`` or ``max``
 
