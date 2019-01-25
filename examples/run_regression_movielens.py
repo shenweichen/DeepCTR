@@ -3,7 +3,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 from deepctr.models import DeepFM
-from deepctr import VarLenFeat,SingleFeat
+from deepctr import SingleFeat
 
 if __name__ == "__main__":
 
@@ -17,7 +17,8 @@ if __name__ == "__main__":
         lbe = LabelEncoder()
         data[feat] = lbe.fit_transform(data[feat])
     # 2.count #unique features for each sparse field
-    sparse_feat_list = [SingleFeat(feat,data[feat].nunique()) for feat in sparse_features]
+    sparse_feat_list = [SingleFeat(feat, data[feat].nunique())
+                        for feat in sparse_features]
 
     # 3.generate input data for model
     train, test = train_test_split(data, test_size=0.2)
