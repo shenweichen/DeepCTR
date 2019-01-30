@@ -1,7 +1,8 @@
-from tensorflow.python.keras.layers import Layer,LSTM,Bidirectional,Lambda
-from .layers import LocalActivationUnit
 import tensorflow as tf
 from tensorflow.python.keras import backend as K
+from tensorflow.python.keras.layers import LSTM, Bidirectional, Lambda, Layer
+
+from .layers import LocalActivationUnit
 
 
 class SequencePoolingLayer(Layer):
@@ -23,7 +24,7 @@ class SequencePoolingLayer(Layer):
         - **supports_masking**:If True,the input need to support masking.
     """
 
-    def __init__(self, mode='mean',supports_masking=False, **kwargs):
+    def __init__(self, mode='mean', supports_masking=False, **kwargs):
 
         if mode not in ['sum', 'mean', 'max']:
             raise ValueError("mode must be sum or mean")
@@ -39,7 +40,6 @@ class SequencePoolingLayer(Layer):
             self.seq_len_max = input_shape[0][1].value
         super(SequencePoolingLayer, self).build(
             input_shape)  # Be sure to call this somewhere!
-
 
     def call(self, seq_value_len_list, mask=None, **kwargs):
         if self.supports_masking:
@@ -76,7 +76,7 @@ class SequencePoolingLayer(Layer):
 
     def compute_output_shape(self, input_shape):
         if self.supports_masking:
-            return (None,1,input_shape[-1])
+            return (None, 1, input_shape[-1])
         else:
             return (None, 1, input_shape[0][-1])
 
@@ -84,7 +84,7 @@ class SequencePoolingLayer(Layer):
         return None
 
     def get_config(self,):
-        config = { 'mode': self.mode,'supports_masking':self.supports_masking}
+        config = {'mode': self.mode, 'supports_masking': self.supports_masking}
         base_config = super(SequencePoolingLayer, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
@@ -117,7 +117,7 @@ class AttentionSequencePoolingLayer(Layer):
         - [Zhou G, Zhu X, Song C, et al. Deep interest network for click-through rate prediction[C]//Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. ACM, 2018: 1059-1068.](https://arxiv.org/pdf/1706.06978.pdf)
     """
 
-    def __init__(self, hidden_size=(80, 40), activation='sigmoid', weight_normalization=False,supports_masking=False,**kwargs):
+    def __init__(self, hidden_size=(80, 40), activation='sigmoid', weight_normalization=False, supports_masking=False, **kwargs):
 
         self.hidden_size = hidden_size
         self.activation = activation
@@ -145,12 +145,12 @@ class AttentionSequencePoolingLayer(Layer):
         super(AttentionSequencePoolingLayer, self).build(
             input_shape)  # Be sure to call this somewhere!
 
-    def call(self, inputs, mask=None,**kwargs):
+    def call(self, inputs, mask=None, **kwargs):
 
         if self.supports_masking:
             if mask is None:
-               raise ValueError(
-                   "When supports_masking=True,input must support masking")
+                raise ValueError(
+                    "When supports_masking=True,input must support masking")
             queries, keys = inputs
             key_masks = tf.expand_dims(mask[-1], axis=1)
 
@@ -188,7 +188,7 @@ class AttentionSequencePoolingLayer(Layer):
     def get_config(self,):
 
         config = {'hidden_size': self.hidden_size, 'activation': self.activation,
-                  'weight_normalization': self.weight_normalization,'supports_masking':self.supports_masking}
+                  'weight_normalization': self.weight_normalization, 'supports_masking': self.supports_masking}
         base_config = super(AttentionSequencePoolingLayer, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
@@ -231,9 +231,10 @@ class BiLSTM(Layer):
     Raises:
         ValueError: In case of invalid `merge_mode` argument.
     """
-    def __init__(self,num_units, num_layers=2, num_res_layers=0,dropout_rate=0.2, mode='ave',**kwargs):
 
-        if mode not in ['fw','bw','sum', 'mul', 'ave', 'concat', None]:
+    def __init__(self, num_units, num_layers=2, num_res_layers=0, dropout_rate=0.2, mode='ave', **kwargs):
+
+        if mode not in ['fw', 'bw', 'sum', 'mul', 'ave', 'concat', None]:
             raise ValueError('Invalid merge mode. '
                              'Merge mode should be one of '
                              '{"fw","bw","sum", "mul", "ave", "concat", None}')
@@ -268,31 +269,32 @@ class BiLSTM(Layer):
         self.bw_lstm = []
         for i in range(self.num_layers):
             self.fw_lstm.append(LSTM(self.num_units, dropout=self.dropout_rate, bias_initializer='ones', return_sequences=True,
-                             unroll=True))
-            self.bw_lstm.append( LSTM(self.num_units, dropout=self.dropout_rate, bias_initializer='ones', return_sequences=True,
-                             go_backwards=True, unroll=True))
+                                     unroll=True))
+            self.bw_lstm.append(LSTM(self.num_units, dropout=self.dropout_rate, bias_initializer='ones', return_sequences=True,
+                                     go_backwards=True, unroll=True))
 
         super(BiLSTM, self).build(
             input_shape)  # Be sure to call this somewhere!
 
-    def call(self, inputs,mask=None,**kwargs):
+    def call(self, inputs, mask=None, **kwargs):
 
         input_fw = inputs
         input_bw = inputs
         for i in range(self.num_layers):
             output_fw = self.fw_lstm[i](input_fw)
             output_bw = self.bw_lstm[i](input_bw)
-            output_bw = Lambda(lambda x:K.reverse(x,1),mask=lambda inputs,mask: mask)(output_bw)
+            output_bw = Lambda(lambda x: K.reverse(
+                x, 1), mask=lambda inputs, mask: mask)(output_bw)
 
             if i >= self.num_layers - self.num_res_layers:
-                output_fw += input_fw #= add([output_fw, input_fw])
-                output_bw += input_bw  #add([output_bw, input_bw])
+                output_fw += input_fw  # = add([output_fw, input_fw])
+                output_bw += input_bw  # add([output_bw, input_bw])
             input_fw = output_fw
             input_bw = output_bw
 
         output_fw = input_fw
         output_bw = input_bw
-        #if self.rev:
+        # if self.rev:
         #    output_bw = K.reverse(output_bw,1)
 
         if self.mode == "fw":
@@ -314,17 +316,18 @@ class BiLSTM(Layer):
 
     def compute_output_shape(self, input_shape):
         if self.mode is None:
-            return [input_shape,input_shape]
+            return [input_shape, input_shape]
         elif self.mode == 'concat':
             return input_shape[:-1]+(input_shape[-1]*2)
         else:
             return input_shape
+
     def compute_mask(self, inputs, mask):
         return mask
 
     def get_config(self,):
 
         config = {'num_units': self.num_units, 'num_layers': self.num_layers,
-                  'num_res_layers': self.num_res_layers,'dropout_rate':self.dropout_rate,'mode':self.mode}
+                  'num_res_layers': self.num_res_layers, 'dropout_rate': self.dropout_rate, 'mode': self.mode}
         base_config = super(BiLSTM, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))

@@ -1,11 +1,13 @@
 import itertools
 
 import tensorflow as tf
-from ..activations import activation_fun
 from tensorflow.python.keras import backend as K
+from tensorflow.python.keras.initializers import (Zeros, glorot_normal,
+                                                  glorot_uniform)
 from tensorflow.python.keras.layers import Layer
-from tensorflow.python.keras.initializers import glorot_normal, glorot_uniform,Zeros
 from tensorflow.python.keras.regularizers import l2
+
+from ..activations import activation_fun
 
 
 class AFMLayer(Layer):

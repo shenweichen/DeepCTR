@@ -1,6 +1,7 @@
+from tensorflow.python.keras import backend as K
+from tensorflow.python.keras.initializers import Ones, Zeros
 from tensorflow.python.keras.layers import Layer
-from tensorflow.python.keras.initializers import Ones,Zeros
-from tensorflow.python.keras import  backend as K
+
 
 class LayerNormalization(Layer):
     def __init__(self, axis=-1, eps=1e-9, **kwargs):

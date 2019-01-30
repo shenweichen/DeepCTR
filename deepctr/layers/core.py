@@ -1,8 +1,9 @@
+import tensorflow as tf
+from tensorflow.python.keras import backend as K
+from tensorflow.python.keras.initializers import Zeros, glorot_normal
 from tensorflow.python.keras.layers import Layer
 from tensorflow.python.keras.regularizers import l2
-from tensorflow.python.keras.initializers import Zeros, glorot_normal
-from tensorflow.python.keras import backend as K
-import tensorflow as tf
+
 from ..activations import activation_fun
 
 
@@ -89,8 +90,10 @@ class LocalActivationUnit(Layer):
 
     def compute_output_shape(self, input_shape):
         return input_shape[1][:2] + (1,)
+
     def compute_mask(self, inputs, mask):
         return mask
+
     def get_config(self,):
         config = {'activation': self.activation, 'hidden_size': self.hidden_size,
                   'l2_reg': self.l2_reg, 'keep_prob': self.keep_prob, 'use_bn': self.use_bn, 'seed': self.seed}

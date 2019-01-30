@@ -28,7 +28,7 @@ custom_objects = {'InnerProductLayer': InnerProductLayer,
                   'SequencePoolingLayer': SequencePoolingLayer,
                   'AttentionSequencePoolingLayer': AttentionSequencePoolingLayer,
                   'CIN': CIN,
-                  'InteractingLayer': InteractingLayer,}
+                  'InteractingLayer': InteractingLayer, }
 
 
 VarLenFeat = collections.namedtuple(
@@ -42,6 +42,7 @@ def concat_fun(inputs, axis=-1):
         return inputs[0]
     else:
         return Concatenate(axis=axis)(inputs)
+
 
 def check_version(version):
     """Return version of package on pypi.python.org using json."""

@@ -2,8 +2,10 @@ from collections import OrderedDict
 from itertools import chain
 
 from tensorflow.python.keras.initializers import RandomNormal
-from tensorflow.python.keras.layers import Embedding, Dense, Reshape, Concatenate, Input, add
+from tensorflow.python.keras.layers import (Concatenate, Dense, Embedding,
+                                            Input, Reshape, add)
 from tensorflow.python.keras.regularizers import l2
+
 from .sequence import SequencePoolingLayer
 
 
@@ -131,9 +133,9 @@ def get_varlen_embedding_vec_dict(embedding_dict, input_dict):
 
 def get_pooling_vec_list(sequence_embed_dict, sequence_len_dict, sequence_max_len_dict, sequence_pooling_dict):
     if sequence_max_len_dict is None or sequence_len_dict is None:
-        return [SequencePoolingLayer(sequence_pooling_dict[feat],supports_masking=True)(v) for feat, v in sequence_embed_dict.items()]
+        return [SequencePoolingLayer(sequence_pooling_dict[feat], supports_masking=True)(v) for feat, v in sequence_embed_dict.items()]
     else:
-        return [SequencePoolingLayer( sequence_pooling_dict[feat],supports_masking=False)(
+        return [SequencePoolingLayer(sequence_pooling_dict[feat], supports_masking=False)(
             [v, sequence_len_dict[feat]]) for feat, v in sequence_embed_dict.items()]
 
 
