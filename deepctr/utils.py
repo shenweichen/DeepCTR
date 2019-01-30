@@ -32,9 +32,9 @@ custom_objects = {'InnerProductLayer': InnerProductLayer,
 
 
 VarLenFeat = collections.namedtuple(
-    'VarLenFeatureConfig', ['name', 'dimension', 'maxlen', 'combiner'])
+    'VarLenFeat', ['name', 'dimension', 'maxlen', 'combiner'])
 SingleFeat = collections.namedtuple(
-    'SingleFeatureConfig', ['name', 'dimension', ])
+    'SingleFeat', ['name', 'dimension', ])
 
 
 def concat_fun(inputs, axis=-1):

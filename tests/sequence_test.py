@@ -27,15 +27,13 @@ def test_AttentionSequencePoolingLayer(weight_normalization):
 
 @pytest.mark.parametrize(
 
-    'seq_len_max,mode',
+    'mode,supports_masking,input_shape',
 
-    [(SEQ_LENGTH, mode)
-
-     for mode in ['sum', 'mean', 'max']
+    [ ('sum',False,[(BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE),(BATCH_SIZE,1)]) ,('mean',True,(BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE)),( 'max',True,(BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE))
      ]
 
 )
-def test_SequencePoolingLayer(seq_len_max, mode):
+def test_SequencePoolingLayer(mode,supports_masking,input_shape):
     with CustomObjectScope({'SequencePoolingLayer': sequence.SequencePoolingLayer}):
-        layer_test(sequence.SequencePoolingLayer, kwargs={'seq_len_max': seq_len_max, 'mode': mode},
-                   input_shape=[(BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE), (BATCH_SIZE, 1)])
+        layer_test(sequence.SequencePoolingLayer, kwargs={ 'mode': mode,'supports_masking':supports_masking},
+                   input_shape=input_shape,supports_masking=supports_masking)

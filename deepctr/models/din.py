@@ -84,8 +84,7 @@ def DIN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
         hist = AttentionSequencePoolingLayer(att_hidden_size, att_activation, weight_normalization=att_weight_normalization)([
             query_emb, keys_emb, user_behavior_length])
     else:
-        hist = SequencePoolingLayer(hist_len_max, 'sum')(
-            [keys_emb, user_behavior_length])
+        hist = SequencePoolingLayer('sum',supports_masking=False)([keys_emb,user_behavior_length])#
 
     deep_input_emb = Concatenate()([deep_input_emb, hist])
     output = MLP(hidden_size, activation, l2_reg_deep,

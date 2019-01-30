@@ -11,7 +11,8 @@ Reference:
 """
 import tensorflow as tf
 from ..input_embedding import get_inputs_embedding
-from ..layers import PredictionLayer, AFMLayer, FM
+from ..layers import PredictionLayer
+from ..layers.interactions import AFMLayer, FM
 from ..utils import concat_fun, check_feature_config_dict
 
 

@@ -111,7 +111,7 @@ def test_PredictionLayer(activation, use_bias):
 def test_test_PredictionLayer_invalid():
     # with pytest.raises(ValueError):
     with CustomObjectScope({'PredictionLayer': layers.PredictionLayer}):
-        layer_test(layers.PredictionLayer, kwargs={'use_bias': use_bias
+        layer_test(layers.PredictionLayer, kwargs={'use_bias': True,
                                                    }, input_shape=(BATCH_SIZE, 2, 1))
 
 

@@ -7,7 +7,8 @@ Reference:
     [1] He X, Chua T S. Neural factorization machines for sparse predictive analytics[C]//Proceedings of the 40th International ACM SIGIR conference on Research and Development in Information Retrieval. ACM, 2017: 355-364. (https://arxiv.org/abs/1708.05027)
 """
 import tensorflow as tf
-from ..layers import PredictionLayer, MLP, BiInteractionPooling
+from ..layers import PredictionLayer, MLP
+from ..layers.interactions import BiInteractionPooling
 from ..input_embedding import get_inputs_embedding
 from ..utils import concat_fun, check_feature_config_dict
 

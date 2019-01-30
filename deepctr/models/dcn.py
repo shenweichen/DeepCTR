@@ -9,7 +9,8 @@ Reference:
 import tensorflow as tf
 
 from ..input_embedding import *
-from ..layers import CrossNet, PredictionLayer, MLP
+from ..layers import PredictionLayer, MLP
+from ..layers.interactions import CrossNet
 from ..utils import concat_fun, check_feature_config_dict
 
 

@@ -11,7 +11,8 @@ Reference:
 
 import tensorflow as tf
 from ..input_embedding import get_inputs_embedding
-from ..layers import PredictionLayer, MLP, InteractingLayer
+from ..layers import PredictionLayer, MLP
+from ..layers.interactions import InteractingLayer
 from ..utils import concat_fun, check_feature_config_dict
 
 

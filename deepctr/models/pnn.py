@@ -8,7 +8,8 @@ Reference:
 """
 
 import tensorflow as tf
-from ..layers import PredictionLayer, MLP, InnerProductLayer, OutterProductLayer
+from ..layers import PredictionLayer, MLP
+from ..layers.interactions import InnerProductLayer, OutterProductLayer
 from ..input_embedding import get_inputs_embedding
 from ..utils import concat_fun, check_feature_config_dict
 
