@@ -1,7 +1,19 @@
-deepctr.layers module
-=====================
+deepctr.layers package
+======================
+
+Submodules
+----------
+
+.. toctree::
+
+   deepctr.layers.core
+   deepctr.layers.interactions
+   deepctr.layers.normalization
+
+Module contents
+---------------
 
 .. automodule:: deepctr.layers
     :members:
-    :no-undoc-members:
-    :no-show-inheritance:
+    :undoc-members:
+    :show-inheritance:

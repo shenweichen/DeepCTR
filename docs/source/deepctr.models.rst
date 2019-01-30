@@ -23,5 +23,5 @@ Module contents
 
 .. automodule:: deepctr.models
     :members:
-    :no-undoc-members:
-    :no-show-inheritance:
+    :undoc-members:
+    :show-inheritance:

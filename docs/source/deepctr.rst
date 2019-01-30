@@ -6,6 +6,7 @@ Subpackages
 
 .. toctree::
 
+    deepctr.layers
     deepctr.models
 
 Submodules
@@ -14,7 +15,7 @@ Submodules
 .. toctree::
 
    deepctr.activations
-   deepctr.layers
+   deepctr.input_embedding
    deepctr.sequence
    deepctr.utils
 
@@ -23,5 +24,5 @@ Module contents
 
 .. automodule:: deepctr
     :members:
-    :no-undoc-members:
-    :no-show-inheritance:
+    :undoc-members:
+    :show-inheritance:

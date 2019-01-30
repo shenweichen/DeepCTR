@@ -57,7 +57,7 @@ News
    :caption: API:
 
    Models API<Models-API>
-   Layers API<deepctr.layers.rst>
+   Layers API<Layers>
    Activations API<deepctr.activations.rst>
    Sequence API<deepctr.sequence.rst>
 

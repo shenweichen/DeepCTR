@@ -41,8 +41,8 @@ class LocalActivationUnit(Layer):
         self.keep_prob = keep_prob
         self.use_bn = use_bn
         self.seed = seed
-        self.supports_masking = True
         super(LocalActivationUnit, self).__init__(**kwargs)
+        self.supports_masking = True
 
     def build(self, input_shape):
 
@@ -71,7 +71,7 @@ class LocalActivationUnit(Layer):
         super(LocalActivationUnit, self).build(
             input_shape)  # Be sure to call this somewhere!
 
-    def call(self, inputs, training=None, **kwargs):
+    def call(self, inputs, **kwargs):
 
         query, keys = inputs
 
