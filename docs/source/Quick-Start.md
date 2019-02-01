@@ -8,7 +8,7 @@ $ pip install deepctr
 ```
 ### GPU version
 If you have a `tensorflow-gpu` on your local machine,make sure its version is
-**`tensorflow-gpu>=1.4.0,!=1.7.*,!=1.8.*`**  
+**`tensorflow-gpu>=1.4.0,!=1.7.*,!=1.8.*,<=1.12.0`**  
 Then,use the following command to install
 ```bash
 $ pip install deepctr --no-deps

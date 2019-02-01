@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 REQUIRED_PACKAGES = [
-    'tensorflow>=1.4.0,!=1.7.*,!=1.8.*',
+    'tensorflow>=1.4.0,!=1.7.*,!=1.8.*,<=1.12.0',
     'h5py'
 ]
 
@@ -22,8 +22,8 @@ setuptools.setup(
     python_requires='>=3.4',  # 3.4.6
     install_requires=REQUIRED_PACKAGES,
     extras_require={
-        "tf": ['tensorflow>=1.4.0,!=1.7.*,!=1.8.*'],
-        "tf_gpu": ['tensorflow-gpu>=1.4.0,!=1.7.*,!=1.8.*'],
+        "tf": ['tensorflow>=1.4.0,!=1.7.*,!=1.8.*,<=1.12.0'],
+        "tf_gpu": ['tensorflow-gpu>=1.4.0,!=1.7.*,!=1.8.*,<=1.12.0'],
     },
     entry_points={
     },

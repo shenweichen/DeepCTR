@@ -6,6 +6,6 @@ DeepCTR Layers API
    :maxdepth: 3
    :caption: API:
 
-   Core<deepctr.layers.core>
-   Interactions<deepctr.layers.interactions>
-   Normalization<deepctr.layers.normalization>
+   Core Layers<deepctr.layers.core>
+   Interactions Layers<deepctr.layers.interactions>
+   Normalization Layers<deepctr.layers.normalization>

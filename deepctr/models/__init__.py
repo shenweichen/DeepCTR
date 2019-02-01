@@ -3,12 +3,14 @@ from .dcn import DCN
 from .mlr import MLR
 from .deepfm import DeepFM
 from .nfm import NFM
-from .din import DIN
+from .din import DIN# as DIN
 from .fnn import FNN
 from .pnn import PNN
 from .wdl import WDL
 from .xdeepfm import xDeepFM
 from .autoint import AutoInt
+#from .new_dsin import DSIN
+#from .new_dien import DIEN
 
 
 __all__ = ["AFM", "DCN", "MLR",  "DeepFM",

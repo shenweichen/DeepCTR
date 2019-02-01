@@ -1,6 +1,6 @@
 import pytest
 from tensorflow.python.keras.utils import CustomObjectScope
-import  tensorflow as tf
+import tensorflow as tf
 from deepctr import sequence
 
 from .utils import layer_test
@@ -15,7 +15,7 @@ SEQ_LENGTH = 10
 
     'weight_normalization',
 
-    [True,False
+    [True, False
      ]
 
 )
@@ -29,25 +29,30 @@ def test_AttentionSequencePoolingLayer(weight_normalization):
 
     'mode,supports_masking,input_shape',
 
-    [ ('sum',False,[(BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE),(BATCH_SIZE,1)]) ,('mean',True,(BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE)),( 'max',True,(BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE))
+    [('sum', False, [(BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE), (BATCH_SIZE, 1)]), ('mean', True, (BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE)), ('max', True, (BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE))
      ]
 
 )
-def test_SequencePoolingLayer(mode,supports_masking,input_shape):
+def test_SequencePoolingLayer(mode, supports_masking, input_shape):
     with CustomObjectScope({'SequencePoolingLayer': sequence.SequencePoolingLayer}):
-        layer_test(sequence.SequencePoolingLayer, kwargs={ 'mode': mode,'supports_masking':supports_masking},
-                   input_shape=input_shape,supports_masking=supports_masking)
+        layer_test(sequence.SequencePoolingLayer, kwargs={'mode': mode, 'supports_masking': supports_masking},
+                   input_shape=input_shape, supports_masking=supports_masking)
 
 
 @pytest.mark.parametrize(
 
     'merge_mode',
-    [ 'concat','ave','fw',
+    ['concat', 'ave', 'fw',
      ]
 
 )
 def test_BiLSTM(merge_mode):
     with CustomObjectScope({'BiLSTM': sequence.BiLSTM}):
-        layer_test(sequence.BiLSTM, kwargs={ 'merge_mode': merge_mode,'units':EMBEDDING_SIZE},
-                   input_shape=(BATCH_SIZE,SEQ_LENGTH,EMBEDDING_SIZE))
+        layer_test(sequence.BiLSTM, kwargs={'merge_mode': merge_mode, 'units': EMBEDDING_SIZE},
+                   input_shape=(BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE))
 
+
+def test_Transformer():
+    with CustomObjectScope({'Transformer': sequence.Transformer}):
+        layer_test(sequence.Transformer, kwargs={'att_embedding_size': 1, 'head_num': 8, 'use_layer_norm': True, 'supports_masking': False},
+                   input_shape=[(BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE), (BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE), (BATCH_SIZE, 1), (BATCH_SIZE, 1)])
