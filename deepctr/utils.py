@@ -30,7 +30,8 @@ custom_objects = {'InnerProductLayer': InnerProductLayer,
                   'CIN': CIN,
                   'InteractingLayer': InteractingLayer,
                   'LayerNormalization': LayerNormalization,
-                  'BiLSTM': BiLSTM}
+                  'BiLSTM': BiLSTM,
+                  'Transformer': Transformer}
 
 
 VarLenFeat = collections.namedtuple(

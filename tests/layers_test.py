@@ -177,5 +177,3 @@ def test_LayerNormalization(axis):
     with CustomObjectScope({'LayerNormalization': layers.LayerNormalization}):
         layer_test(layers.LayerNormalization, kwargs={"axis": axis, }, input_shape=(
             BATCH_SIZE, FIELD_SIZE, EMBEDDING_SIZE))
-
-        'LayerNormalization': LayerNormalization,
