@@ -541,14 +541,14 @@ class InteractingLayer(Layer):
                 "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (len(input_shape)))
         embedding_size = input_shape[-1].value
         self.W_Query = self.add_weight(name='query', shape=[embedding_size, self.att_embedding_size * self.head_num], dtype=tf.float32,
-                                       initializer=tf.keras.initializers.glorot_uniform(seed=self.seed))
+                                       initializer=tf.keras.initializers.TruncatedNormal(seed=self.seed))
         self.W_key = self.add_weight(name='key', shape=[embedding_size, self.att_embedding_size * self.head_num], dtype=tf.float32,
-                                     initializer=tf.keras.initializers.glorot_uniform(seed=self.seed))
+                                     initializer=tf.keras.initializers.TruncatedNormal(seed=self.seed+1))
         self.W_Value = self.add_weight(name='value', shape=[embedding_size, self.att_embedding_size * self.head_num], dtype=tf.float32,
-                                       initializer=tf.keras.initializers.glorot_uniform(seed=self.seed))
+                                       initializer=tf.keras.initializers.TruncatedNormal(seed=self.seed+2))
         if self.use_res:
             self.W_Res = self.add_weight(name='res', shape=[embedding_size, self.att_embedding_size * self.head_num], dtype=tf.float32,
-                                         initializer=tf.keras.initializers.glorot_uniform(seed=self.seed))
+                                         initializer=tf.keras.initializers.TruncatedNormal(seed=self.seed))
 
         # Be sure to call this somewhere!
         super(InteractingLayer, self).build(input_shape)

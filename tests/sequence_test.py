@@ -37,3 +37,17 @@ def test_SequencePoolingLayer(mode,supports_masking,input_shape):
     with CustomObjectScope({'SequencePoolingLayer': sequence.SequencePoolingLayer}):
         layer_test(sequence.SequencePoolingLayer, kwargs={ 'mode': mode,'supports_masking':supports_masking},
                    input_shape=input_shape,supports_masking=supports_masking)
+
+
+@pytest.mark.parametrize(
+
+    'merge_mode',
+    [ 'concat','ave','fw',
+     ]
+
+)
+def test_BiLSTM(merge_mode):
+    with CustomObjectScope({'BiLSTM': sequence.BiLSTM}):
+        layer_test(sequence.BiLSTM, kwargs={ 'merge_mode': merge_mode,'units':EMBEDDING_SIZE},
+                   input_shape=(BATCH_SIZE,SEQ_LENGTH,EMBEDDING_SIZE))
+
