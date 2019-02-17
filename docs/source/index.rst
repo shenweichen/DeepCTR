@@ -36,7 +36,7 @@ You can read the latest code at https://github.com/shenweichen/DeepCTR
 News
 -----
 
-02/17/2010 : Refactor layers ,add ``BiLSTM`` and ``Transformer`` . `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.0>`_
+02/17/2010 : Refactor layers ,add ``BiLSTM`` and ``Transformer`` . `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.1>`_
 
 01/24/2019 : Use a `new feature config generation method <./Examples.html#classification-criteo>`_ and fix bugs. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.2.3>`_
 

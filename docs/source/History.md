@@ -1,5 +1,5 @@
 # History
-- 02/17/2019 : [v0.3.0](https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.0) released.Refactor layers ,add `BiLSTM` and `Transformer`.
+- 02/17/2019 : [v0.3.1](https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.1) released.Refactor layers ,add `BiLSTM` and `Transformer`.
 - 01/24/2019 : [v0.2.3](https://github.com/shenweichen/DeepCTR/releases/tag/v0.2.3) released.Use a new feature config generation method and fix bugs.
 - 01/01/2019 : [v0.2.2](https://github.com/shenweichen/DeepCTR/releases/tag/v0.2.2) released.Add [sequence(multi-value) input support](./Examples.html#multi-value-input-movielens) for `AFM,AutoInt,DCN,DeepFM,FNN,NFM,PNN,xDeepFM` models.
 - 12/27/2018 : [v0.2.1](https://github.com/shenweichen/DeepCTR/releases/tag/v0.2.1) released.Add [AutoInt](./Features.html#autoint-automatic-feature-interactiont) Model.

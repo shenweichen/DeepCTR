@@ -10,7 +10,7 @@ REQUIRED_PACKAGES = [
 
 setuptools.setup(
     name="deepctr",
-    version="0.3.0",
+    version="0.3.1",
     author="Weichen Shen",
     author_email="wcshen1994@163.com",
     description="Easy-to-use,Modular and Extendible package of deep learning based CTR(Click Through Rate) prediction models with tensorflow.",
@@ -18,7 +18,8 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/shenweichen/deepctr",
     download_url='https://github.com/shenweichen/deepctr/tags',
-    packages=setuptools.find_packages(exclude=["tests", "tests.models"]),
+    packages=setuptools.find_packages(
+        exclude=["tests", "tests.models", "tests.layers"]),
     python_requires='>=3.4',  # 3.4.6
     install_requires=REQUIRED_PACKAGES,
     extras_require={
