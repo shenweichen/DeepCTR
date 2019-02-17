@@ -41,7 +41,7 @@ def PNN(feature_dim_dict, embedding_size=8, hidden_size=(128, 128), l2_reg_embed
         raise ValueError("kernel_type must be mat,vec or num")
 
     deep_emb_list, linear_logit, inputs_list = preprocess_input_embedding(feature_dim_dict, embedding_size,
-                                                                          l2_reg_embedding, l2_reg_linear, init_std,
+                                                                          l2_reg_embedding, 0, init_std,
                                                                           seed, True)
 
     inner_product = tf.keras.layers.Flatten()(InnerProductLayer()(deep_emb_list))
