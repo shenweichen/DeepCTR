@@ -7,5 +7,7 @@ DeepCTR Layers API
    :caption: API:
 
    Core Layers<deepctr.layers.core>
-   Interactions Layers<deepctr.layers.interactions>
+   Interaction Layers<deepctr.layers.interaction>
+   Activation Layers<deepctr.layers.activation>
    Normalization Layers<deepctr.layers.normalization>
+   Sequence Layers<deepctr.layers.sequence>

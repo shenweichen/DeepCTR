@@ -8,9 +8,10 @@ Reference:
 """
 import tensorflow as tf
 
-from ..layers import PredictionLayer, MLP
-from ..input_embedding import get_inputs_embedding
-from ..utils import concat_fun, check_feature_config_dict
+from ..layers.core import PredictionLayer, MLP
+from ..input_embedding import preprocess_input_embedding
+from ..utils import check_feature_config_dict
+from ..layers.utils import concat_fun
 
 
 def FNN(feature_dim_dict, embedding_size=8,
@@ -35,8 +36,9 @@ def FNN(feature_dim_dict, embedding_size=8,
     """
     check_feature_config_dict(feature_dim_dict)
 
-    deep_emb_list, linear_logit, inputs_list = get_inputs_embedding(
-        feature_dim_dict, embedding_size, l2_reg_embedding, l2_reg_linear, init_std, seed)
+    deep_emb_list, linear_logit, inputs_list = preprocess_input_embedding(feature_dim_dict, embedding_size,
+                                                                          l2_reg_embedding, l2_reg_linear, init_std,
+                                                                          seed, True)
 
     deep_input = tf.keras.layers.Flatten()(concat_fun(deep_emb_list))
     deep_out = MLP(hidden_size, activation, l2_reg_deep,

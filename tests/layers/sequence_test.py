@@ -1,9 +1,9 @@
 import pytest
 from tensorflow.python.keras.utils import CustomObjectScope
 import tensorflow as tf
-from deepctr import sequence
+from deepctr.layers import sequence
 
-from .utils import layer_test
+from tests.utils import layer_test
 
 tf.keras.backend.set_learning_phase(True)
 BATCH_SIZE = 4

@@ -1,9 +1,18 @@
+# -*- coding:utf-8 -*-
+"""
+
+Author:
+    Weichen Shen,wcshen1994@163.com
+
+"""
+
 import numpy as np
 import tensorflow as tf
 from tensorflow.python.keras import backend as K
 from tensorflow.python.keras.layers import LSTM, Lambda, Layer
 
-from .layers import LayerNormalization, LocalActivationUnit
+from .core import LocalActivationUnit
+from .normalization import LayerNormalization
 
 
 class SequencePoolingLayer(Layer):
@@ -212,7 +221,7 @@ class BiLSTM(Layer):
 
         - **dropout**:  Float between 0 and 1. Fraction of the units to drop for the linear transformation of the inputs.
 
-        - **merge_mode**: merge_mode: Mode by which outputs of the forward and backward RNNs will be combined. One of {``'fw'``,``'bw'``,``'sum'``, ``'mul'``, ``'concat'``, ``'ave'``, ``None``}.. If None, the outputs will not be combined, they will be returned as a list.
+        - **merge_mode**: merge_mode: Mode by which outputs of the forward and backward RNNs will be combined. One of { ``'fw'`` , ``'bw'`` , ``'sum'`` , ``'mul'`` , ``'concat'`` , ``'ave'`` , ``None`` }. If None, the outputs will not be combined, they will be returned as a list.
 
 
     """
@@ -458,7 +467,7 @@ class Transformer(Layer):
     """
 
     def __init__(self, att_embedding_size=1, head_num=8, dropout_rate=0.0, use_positional_encoding=True, use_res=True,
-                 use_feed_forward=True, use_layer_norm=False, seed=1024, supports_masking=False, **kwargs):
+                 use_feed_forward=True, use_layer_norm=False, seed=1024, supports_masking=False, blinding=False, **kwargs):
         if head_num <= 0:
             raise ValueError('head_num must be a int > 0')
         self.att_embedding_size = att_embedding_size
@@ -470,6 +479,7 @@ class Transformer(Layer):
         self.use_positional_encoding = use_positional_encoding
         self.dropout_rate = dropout_rate
         self.use_layer_norm = use_layer_norm
+        self.blinding = blinding
         super(Transformer, self).__init__(**kwargs)
         self.supports_masking = supports_masking
 
@@ -512,9 +522,12 @@ class Transformer(Layer):
         # if K.ndim(inputs) != 3:
         #     raise ValueError(
         #         "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
+
         if self.supports_masking:
             queries, keys = inputs
             query_masks, key_masks = mask
+            query_masks = tf.cast(query_masks, tf.float32)
+            key_masks = tf.cast(key_masks, tf.float32)
         else:
             queries, keys, query_masks, key_masks = inputs
 
@@ -526,12 +539,8 @@ class Transformer(Layer):
             key_masks = tf.squeeze(key_masks, axis=1)
 
         if self.use_positional_encoding:
-            pe_units = keys.get_shape().as_list()[-1]
-            # queries_positional_encoding = self.positional_encoding(query_masks, pe_units,pos_embedding_trainable=True)
-            #queries += queries_positional_encoding
+            #pe_units = keys.get_shape().as_list()[-1]
             queries = self.qpe(queries)
-            # keys_positional_encoding = self.positional_encoding(key_masks, pe_units, pos_embedding_trainable=True)
-            #keys += keys_positional_encoding
             keys = self.kpe(keys)
 
         querys = tf.tensordot(queries, self.W_Query,
@@ -560,6 +569,9 @@ class Transformer(Layer):
         # (h*N, T_q, T_k)
 
         outputs = tf.where(tf.equal(key_masks, 1), outputs, paddings, )
+        if self.blinding:
+            outputs = tf.matrix_set_diag(outputs, tf.ones_like(outputs)[
+                                         :, :, 0] * (-2 ** 32 + 1))
 
         outputs -= tf.reduce_max(outputs, axis=-1, keep_dims=True)
         outputs = tf.nn.softmax(outputs)
@@ -597,6 +609,9 @@ class Transformer(Layer):
 
         return (None, 1, self.att_embedding_size * self.head_num)
 
+    def compute_mask(self, inputs, mask=None):
+        return None
+
     def get_config(self, ):
         config = {'att_embedding_size': self.att_embedding_size, 'head_num': self.head_num,
                   'dropout_rate': self.dropout_rate, 'use_res': self.use_res,
@@ -624,7 +639,7 @@ class Transformer(Layer):
             A 'Tensor' with one more rank than inputs's, with the dimensionality should be 'num_units'
         '''
 
-        N, T = inputs.get_shape().as_list()
+        _, T = inputs.get_shape().as_list()
         # with tf.variable_scope(scope, reuse=reuse):
         position_ind = tf.expand_dims(tf.range(T), 0)
         # First part of the PE function: sin and cos argument
@@ -658,7 +673,7 @@ class Transformer(Layer):
 
 class Position_Embedding(Layer):
 
-    def __init__(self, size=None, scale=True,mode='sum', **kwargs):
+    def __init__(self, size=None, scale=True, mode='sum', **kwargs):
         self.size = size  # must be even
         self.scale = scale
         self.mode = mode
@@ -667,8 +682,7 @@ class Position_Embedding(Layer):
     def call(self, x):
         if (self.size == None) or (self.mode == 'sum'):
             self.size = int(x.shape[-1])
-        batch_size, seq_len = K.shape(x)[0], K.shape(x)[1]
-        num_units = K.shape(x)[-1]
+
         position_j = 1. / \
             K.pow(10000., 2 * K.arange(self.size / 2, dtype='float32') / self.size)
         position_j = K.expand_dims(position_j, 0)

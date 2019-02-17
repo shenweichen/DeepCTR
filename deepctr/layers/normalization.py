@@ -1,3 +1,11 @@
+# -*- coding:utf-8 -*-
+"""
+
+Author:
+    Weichen Shen,wcshen1994@163.com
+
+"""
+
 from tensorflow.python.keras import backend as K
 from tensorflow.python.keras.initializers import Ones, Zeros
 from tensorflow.python.keras.layers import Layer

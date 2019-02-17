@@ -1,6 +1,14 @@
-from tensorflow.python.keras.layers import Layer
-from tensorflow.python.keras.initializers import Zeros
+# -*- coding:utf-8 -*-
+"""
+
+Author:
+    Weichen Shen,wcshen1994@163.com
+
+"""
+
 import tensorflow as tf
+from tensorflow.python.keras.initializers import Zeros
+from tensorflow.python.keras.layers import Layer
 
 
 class Dice(Layer):

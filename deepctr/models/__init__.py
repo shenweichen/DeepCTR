@@ -14,4 +14,4 @@ from .autoint import AutoInt
 
 
 __all__ = ["AFM", "DCN", "MLR",  "DeepFM",
-           "MLR", "NFM", "DIN", "FNN", "PNN", "WDL", "xDeepFM", "AutoInt",]
+           "MLR", "NFM", "DIN", "FNN", "PNN", "WDL", "xDeepFM", "AutoInt",]#"DIEN","DSIN",

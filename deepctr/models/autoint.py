@@ -10,10 +10,11 @@ Reference:
 """
 
 import tensorflow as tf
-from ..input_embedding import get_inputs_embedding
-from ..layers import PredictionLayer, MLP
-from ..layers.interactions import InteractingLayer
-from ..utils import concat_fun, check_feature_config_dict
+from ..input_embedding import preprocess_input_embedding
+from ..layers.core import PredictionLayer, MLP
+from ..layers.interaction import InteractingLayer
+from ..utils import check_feature_config_dict
+from ..layers.utils import concat_fun
 
 
 def AutoInt(feature_dim_dict, embedding_size=8, att_layer_num=3, att_embedding_size=8, att_head_num=2, att_res=True, hidden_size=(256, 256), activation='relu',
@@ -43,9 +44,9 @@ def AutoInt(feature_dim_dict, embedding_size=8, att_layer_num=3, att_embedding_s
         raise ValueError("Either hidden_layer or att_layer_num must > 0")
     check_feature_config_dict(feature_dim_dict)
 
-    deep_emb_list, _, inputs_list = get_inputs_embedding(
-        feature_dim_dict, embedding_size, l2_reg_embedding, 0, init_std, seed, False)
-
+    deep_emb_list, _, inputs_list = preprocess_input_embedding(feature_dim_dict, embedding_size,
+                                                                          l2_reg_embedding, 0, init_std,
+                                                                          seed, False)
     att_input = concat_fun(deep_emb_list, axis=1)
 
     for _ in range(att_layer_num):

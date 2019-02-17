@@ -1,14 +1,20 @@
+# -*- coding:utf-8 -*-
+"""
+
+Author:
+    Weichen Shen,wcshen1994@163.com
+
+"""
+
 import collections
 import json
 import logging
 from threading import Thread
 
 import requests
-from tensorflow.python.keras.layers import Concatenate
 
-from .activations import *
 from .layers import *
-from .sequence import *
+
 
 try:
     from packaging.version import parse
@@ -38,13 +44,6 @@ VarLenFeat = collections.namedtuple(
     'VarLenFeat', ['name', 'dimension', 'maxlen', 'combiner'])
 SingleFeat = collections.namedtuple(
     'SingleFeat', ['name', 'dimension', ])
-
-
-def concat_fun(inputs, axis=-1):
-    if len(inputs) == 1:
-        return inputs[0]
-    else:
-        return Concatenate(axis=axis)(inputs)
 
 
 def check_version(version):

@@ -7,10 +7,11 @@ Reference:
     [1] Lian J, Zhou X, Zhang F, et al. xDeepFM: Combining Explicit and Implicit Feature Interactions for Recommender Systems[J]. arXiv preprint arXiv:1803.05170, 2018.(https://arxiv.org/pdf/1803.05170.pdf)
 """
 import tensorflow as tf
-from ..input_embedding import get_inputs_embedding
-from ..layers import PredictionLayer, MLP
-from ..layers.interactions import CIN
-from ..utils import concat_fun, check_feature_config_dict
+from ..input_embedding import preprocess_input_embedding
+from ..layers.core import PredictionLayer, MLP
+from ..layers.interaction import CIN
+from ..utils import check_feature_config_dict
+from ..layers.utils import concat_fun
 
 
 def xDeepFM(feature_dim_dict, embedding_size=8, hidden_size=(256, 256), cin_layer_size=(128, 128,), cin_split_half=True, cin_activation='relu', l2_reg_linear=0.00001, l2_reg_embedding=0.00001, l2_reg_deep=0, init_std=0.0001, seed=1024, keep_prob=1, activation='relu', final_activation='sigmoid', use_bn=False):
@@ -35,8 +36,9 @@ def xDeepFM(feature_dim_dict, embedding_size=8, hidden_size=(256, 256), cin_laye
     """
     check_feature_config_dict(feature_dim_dict)
 
-    deep_emb_list, linear_logit, inputs_list = get_inputs_embedding(
-        feature_dim_dict, embedding_size, l2_reg_embedding, l2_reg_linear, init_std, seed)
+    deep_emb_list, linear_logit, inputs_list = preprocess_input_embedding(feature_dim_dict, embedding_size,
+                                                                          l2_reg_embedding, l2_reg_linear, init_std,
+                                                                          seed, True)
 
     fm_input = concat_fun(deep_emb_list, axis=1)
 

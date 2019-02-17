@@ -8,10 +8,11 @@ Reference:
 """
 import tensorflow as tf
 
-from ..input_embedding import *
-from ..layers import PredictionLayer, MLP
-from ..layers.interactions import CrossNet
-from ..utils import concat_fun, check_feature_config_dict
+from ..input_embedding import preprocess_input_embedding
+from ..layers.core import PredictionLayer, MLP
+from ..layers.interaction import CrossNet
+from ..utils import check_feature_config_dict
+from ..layers.utils import concat_fun
 
 
 def DCN(feature_dim_dict, embedding_size='auto',
@@ -41,8 +42,9 @@ def DCN(feature_dim_dict, embedding_size='auto',
 
     check_feature_config_dict(feature_dim_dict)
 
-    deep_emb_list, _, inputs_list = get_inputs_embedding(
-        feature_dim_dict, embedding_size, l2_reg_embedding, 0, init_std, seed, False)
+    deep_emb_list, _, inputs_list = preprocess_input_embedding(feature_dim_dict, embedding_size,
+                                                                          l2_reg_embedding, 0, init_std,
+                                                                          seed, False)
 
     deep_input = tf.keras.layers.Flatten()(concat_fun(deep_emb_list))
 
@@ -51,14 +53,14 @@ def DCN(feature_dim_dict, embedding_size='auto',
                        use_bn, seed)(deep_input)
         cross_out = CrossNet(cross_num, l2_reg=l2_reg_cross)(deep_input)
         stack_out = tf.keras.layers.Concatenate()([cross_out, deep_out])
-        final_logit = Dense(1, use_bias=False, activation=None)(stack_out)
+        final_logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(stack_out)
     elif len(hidden_size) > 0:  # Only Deep
         deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
                        use_bn, seed)(deep_input)
-        final_logit = Dense(1, use_bias=False, activation=None)(deep_out)
+        final_logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(deep_out)
     elif cross_num > 0:  # Only Cross
         cross_out = CrossNet(cross_num, l2_reg=l2_reg_cross)(deep_input)
-        final_logit = Dense(1, use_bias=False, activation=None)(cross_out)
+        final_logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(cross_out)
     else:  # Error
         raise NotImplementedError
 

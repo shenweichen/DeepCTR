@@ -1,3 +1,5 @@
 from .core import *
-from .interactions import *
+from .interaction import *
 from .normalization import *
+from .activation import *
+from .sequence import *

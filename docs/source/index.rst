@@ -36,11 +36,11 @@ You can read the latest code at https://github.com/shenweichen/DeepCTR
 News
 -----
 
+02/17/2010 : Add `AutoInt <./Features.html#autoint-automatic-feature-interaction>`_ . `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.0>`_
+
 01/24/2019 : Use a `new feature config generation method <./Examples.html#classification-criteo>`_ and fix bugs. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.2.3>`_
 
 01/01/2019 : Add `sequence(multi-value) input support <./Examples.html#multi-value-input-movielens>`_ for ``AFM,AutoInt,DCN,DeepFM,FNN,NFM,PNN,xDeepFM`` models. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.2.2>`_
-
-12/27/2018 : Add `AutoInt <./Features.html#autoint-automatic-feature-interaction>`_ . `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.2.1>`_
 
 .. toctree::
    :maxdepth: 2
@@ -58,8 +58,6 @@ News
 
    Models API<Models-API>
    Layers API<Layers>
-   Activations API<deepctr.activations.rst>
-   Sequence API<deepctr.sequence.rst>
 
 
 

@@ -67,5 +67,4 @@ Now multi-value input is avaliable for `AFM,AutoInt,DCN,DeepFM,FNN,NFM,PNN,xDeep
 For `DIN` please read the code example in [run_din.py](https://github.com/shenweichen/DeepCTR/blob/master/examples/run_din.py
 ).
 
-You can use layers in [sequence](./sequence.html)to build your own models!
-And it will be supported in a future release
+You can also use layers in [sequence](./deepctr.layers.sequence.html)to build your own models !

@@ -14,9 +14,7 @@ Submodules
 
 .. toctree::
 
-   deepctr.activations
    deepctr.input_embedding
-   deepctr.sequence
    deepctr.utils
 
 Module contents
