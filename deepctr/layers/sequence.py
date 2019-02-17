@@ -328,10 +328,11 @@ class Transformer(Layer):
             - **att_embedding_size**: int.The embedding size in multi-head self-attention network.
             - **head_num**: int.The head number in multi-head  self-attention network.
             - **dropout_rate**: float between 0 and 1. Fraction of the units to drop.
-            - **use_positional_encoding**: bool.Whether or not use positional_encoding
-            - **use_res**: bool.Whether or not use standard residual connections before output.
-            - **use_feed_forward**: bool.Whether or not use pointwise feed foward network.
-            - **use_layer_norm**: bool. Whether or not use Layer  Normalization.
+            - **use_positional_encoding**: bool. Whether or not use positional_encoding
+            - **use_res**: bool. Whether or not use standard residual connections before output.
+            - **use_feed_forward**: bool. Whether or not use pointwise feed foward network.
+            - **use_layer_norm**: bool. Whether or not use Layer Normalization.
+            - **blinding**: bool. Whether or not use blinding.
             - **seed**: A Python integer to use as random seed.
             - **supports_masking**:bool. Whether or not support masking.
 
@@ -340,7 +341,7 @@ class Transformer(Layer):
     """
 
     def __init__(self, att_embedding_size=1, head_num=8, dropout_rate=0.0, use_positional_encoding=True, use_res=True,
-                 use_feed_forward=True, use_layer_norm=False, seed=1024, supports_masking=False, blinding=False, **kwargs):
+                 use_feed_forward=True, use_layer_norm=False, blinding=False, seed=1024, supports_masking=False,  **kwargs):
         if head_num <= 0:
             raise ValueError('head_num must be a int > 0')
         self.att_embedding_size = att_embedding_size
