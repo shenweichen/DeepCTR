@@ -10,9 +10,11 @@ Reference:
 
 """
 import tensorflow as tf
-from ..input_embedding import get_inputs_embedding
-from ..layers import PredictionLayer, AFMLayer, FM
-from ..utils import concat_fun, check_feature_config_dict
+from ..input_embedding import preprocess_input_embedding
+from ..layers.core import PredictionLayer
+from ..layers.interaction import AFMLayer, FM
+from ..utils import check_feature_config_dict
+from ..layers.utils import concat_fun
 
 
 def AFM(feature_dim_dict, embedding_size=8, use_attention=True, attention_factor=8,
@@ -36,8 +38,9 @@ def AFM(feature_dim_dict, embedding_size=8, use_attention=True, attention_factor
 
     check_feature_config_dict(feature_dim_dict)
 
-    deep_emb_list, linear_logit, inputs_list = get_inputs_embedding(
-        feature_dim_dict, embedding_size, l2_reg_embedding, l2_reg_linear, init_std, seed)
+    deep_emb_list, linear_logit, inputs_list = preprocess_input_embedding(feature_dim_dict, embedding_size,
+                                                                          l2_reg_embedding, l2_reg_linear, init_std,
+                                                                          seed, True)
 
     fm_input = concat_fun(deep_emb_list, axis=1)
     if use_attention:

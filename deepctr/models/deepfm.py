@@ -9,9 +9,11 @@ Reference:
 """
 
 import tensorflow as tf
-from ..input_embedding import get_inputs_embedding
-from ..layers import PredictionLayer, MLP, FM
-from ..utils import concat_fun, check_feature_config_dict
+from ..input_embedding import preprocess_input_embedding
+from ..layers.core import PredictionLayer, MLP
+from ..layers.interaction import FM
+from ..utils import check_feature_config_dict
+from ..layers.utils import concat_fun
 
 
 def DeepFM(feature_dim_dict, embedding_size=8,
@@ -36,8 +38,9 @@ def DeepFM(feature_dim_dict, embedding_size=8,
     """
     check_feature_config_dict(feature_dim_dict)
 
-    deep_emb_list, linear_logit, inputs_list = get_inputs_embedding(
-        feature_dim_dict, embedding_size, l2_reg_embedding, l2_reg_linear, init_std, seed)
+    deep_emb_list, linear_logit, inputs_list = preprocess_input_embedding(feature_dim_dict, embedding_size,
+                                                                          l2_reg_embedding, l2_reg_linear, init_std,
+                                                                          seed, True)
 
     fm_input = concat_fun(deep_emb_list, axis=1)
     deep_input = tf.keras.layers.Flatten()(fm_input)

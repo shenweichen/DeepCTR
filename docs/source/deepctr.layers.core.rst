@@ -1,7 +1,7 @@
-deepctr.activations module
+deepctr.layers.core module
 ==========================
 
-.. automodule:: deepctr.activations
+.. automodule:: deepctr.layers.core
     :members:
     :no-undoc-members:
     :no-show-inheritance:

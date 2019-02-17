@@ -1,12 +1,15 @@
 from __future__ import absolute_import, division, print_function
-import sys
+
 import inspect
+import sys
+
 import numpy as np
 from numpy.testing import assert_allclose
 from tensorflow.python.keras import backend as K
-from tensorflow.python.keras.layers import Input
-from tensorflow.python.keras.models import Model, save_model, load_model
-from deepctr.utils import custom_objects,VarLenFeat,SingleFeat
+from tensorflow.python.keras.layers import Input, Masking
+from tensorflow.python.keras.models import Model, load_model, save_model
+
+from deepctr.utils import SingleFeat, VarLenFeat, custom_objects
 
 
 def gen_sequence(dim, max_len, sample_size):
@@ -20,9 +23,9 @@ def get_test_data(sample_size=1000, sparse_feature_num=1, dense_feature_num=1, s
 
     for i in range(sparse_feature_num):
         dim = np.random.randint(1, 10)
-        feature_dim_dict['sparse'].append(SingleFeat('sparse_'+str(i),dim))
+        feature_dim_dict['sparse'].append(SingleFeat('sparse_'+str(i), dim))
     for i in range(dense_feature_num):
-        feature_dim_dict['dense'].append(SingleFeat('sparse_'+str(i),0))
+        feature_dim_dict['dense'].append(SingleFeat('sparse_'+str(i), 0))
     for i, mode in enumerate(sequence_feature):
         dim = np.random.randint(1, 10)
         maxlen = np.random.randint(1, 10)
@@ -30,7 +33,7 @@ def get_test_data(sample_size=1000, sparse_feature_num=1, dense_feature_num=1, s
             VarLenFeat('sequence_' + str(i), dim, maxlen, mode))
 
     sparse_input = [np.random.randint(0, dim, sample_size)
-                    for feat,dim in feature_dim_dict['sparse']]
+                    for feat, dim in feature_dim_dict['sparse']]
     dense_input = [np.random.random(sample_size)
                    for name in feature_dim_dict['dense']]
     sequence_input = []
@@ -56,7 +59,7 @@ def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,
 
                input_data=None, expected_output=None,
 
-               expected_output_dtype=None, fixed_batch_size=False):
+               expected_output_dtype=None, fixed_batch_size=False, supports_masking=False):
     # generate input data
 
     if input_data is None:
@@ -75,18 +78,30 @@ def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,
             if e is None:
 
                 input_data_shape[i] = np.random.randint(1, 4)
-
+        input_mask = []
         if all(isinstance(e, tuple) for e in input_data_shape):
             input_data = []
+
             for e in input_data_shape:
                 input_data.append(
                     (10 * np.random.random(e)).astype(input_dtype))
+                if supports_masking:
+                    a = np.full(e[:2], False)
+                    a[:, :e[1]//2] = True
+                    input_mask.append(a)
 
         else:
 
             input_data = (10 * np.random.random(input_data_shape))
 
             input_data = input_data.astype(input_dtype)
+            if supports_masking:
+                a = np.full(input_data_shape[:2], False)
+                a[:, :input_data_shape[1]//2] = True
+
+                print(a)
+                print(a.shape)
+                input_mask.append(a)
 
     else:
 
@@ -122,29 +137,47 @@ def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,
         if fixed_batch_size:
 
             x = [Input(batch_shape=e, dtype=input_dtype) for e in input_shape]
+            if supports_masking:
+                mask = [Input(batch_shape=e[0:2], dtype=bool)
+                        for e in input_shape]
 
         else:
 
             x = [Input(shape=e[1:], dtype=input_dtype) for e in input_shape]
+            if supports_masking:
+                mask = [Input(shape=(e[1],), dtype=bool) for e in input_shape]
+
     else:
         if fixed_batch_size:
 
             x = Input(batch_shape=input_shape, dtype=input_dtype)
+            if supports_masking:
+                mask = Input(batch_shape=input_shape[0:2], dtype=bool)
 
         else:
 
             x = Input(shape=input_shape[1:], dtype=input_dtype)
+            if supports_masking:
+                mask = Input(shape=(input_shape[1],), dtype=bool)
 
-    y = layer(x)
+    if supports_masking:
+
+        y = layer(Masking()(x), mask=mask)
+    else:
+        y = layer(x)
 
     if not (K.dtype(y) == expected_output_dtype):
         raise AssertionError()
 
     # check with the functional API
+    if supports_masking:
+        model = Model([x, mask], y)
 
-    model = Model(x, y)
+        actual_output = model.predict([input_data, input_mask[0]])
+    else:
+        model = Model(x, y)
 
-    actual_output = model.predict(input_data)
+        actual_output = model.predict(input_data)
 
     actual_output_shape = actual_output.shape
 
@@ -155,6 +188,7 @@ def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,
         if expected_dim is not None:
 
             if not (expected_dim == actual_dim):
+
                 raise AssertionError()
 
     if expected_output is not None:

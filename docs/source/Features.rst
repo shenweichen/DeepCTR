@@ -220,19 +220,4 @@ so you can use different modules to build your own models.
 The module is a class that inherits from ``tf.keras.layers.Layer``,it has
 the same attributes and methods as keras Layers like ``tf.keras.layers.Dense()`` etc
 
-You can see layers API in `layers <./deepctr.layers.html>`_ 
-
-
-Activations
---------------
-
-Some custom activation functions.
-
-You can see activations  API in `activations <./deepctr.activations.html>`_ 
-
-Sequence
-----------
-
-The sequence module aims to process variable-length sequence data.
-
-You can see sequences  API in `sequence <./deepctr.sequence.html>`_ 
+You can see layers API in `layers <./Layers.html>`_ 
