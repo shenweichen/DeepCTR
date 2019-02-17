@@ -357,9 +357,9 @@ class Transformer(Layer):
         self.supports_masking = supports_masking
 
     def build(self, input_shape):
-        # if len(input_shape) != 3:
-        #     raise ValueError(
-        #         "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (len(input_shape)))
+        if len(input_shape) != 3:
+            raise ValueError(
+                "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (len(input_shape)))
 
         embedding_size = input_shape[0][-1].value
         self.seq_len_max = input_shape[0][-2].value
@@ -392,9 +392,9 @@ class Transformer(Layer):
         super(Transformer, self).build(input_shape)
 
     def call(self, inputs, mask=None, **kwargs):
-        # if K.ndim(inputs) != 3:
-        #     raise ValueError(
-        #         "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
+        if K.ndim(inputs) != 3:
+            raise ValueError(
+                "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
 
         if self.supports_masking:
             queries, keys = inputs
@@ -412,7 +412,6 @@ class Transformer(Layer):
             key_masks = tf.squeeze(key_masks, axis=1)
 
         if self.use_positional_encoding:
-            #pe_units = keys.get_shape().as_list()[-1]
             queries = self.qpe(queries)
             keys = self.kpe(keys)
 
@@ -489,7 +488,7 @@ class Transformer(Layer):
         config = {'att_embedding_size': self.att_embedding_size, 'head_num': self.head_num,
                   'dropout_rate': self.dropout_rate, 'use_res': self.use_res,
                   'use_positional_encoding': self.use_positional_encoding, 'use_feed_forward': self.use_feed_forward,
-                  'use_layer_norm': self.use_layer_norm, 'seed': self.seed, 'supports_masking': self.supports_masking,'blinding':self.blinding}
+                  'use_layer_norm': self.use_layer_norm, 'seed': self.seed, 'supports_masking': self.supports_masking, 'blinding': self.blinding}
         base_config = super(Transformer, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
