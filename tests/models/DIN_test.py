@@ -2,13 +2,13 @@ import numpy as np
 import pytest
 from deepctr.models.din import DIN
 from deepctr.layers.activation import Dice
-from deepctr.utils import custom_objects,SingleFeat
+from deepctr.utils import custom_objects, SingleFeat
 from tensorflow.python.keras.models import load_model, save_model
-from ..utils import check_model
 
 
 def get_xy_fd():
-    feature_dim_dict = {"sparse":[SingleFeat('user',4),SingleFeat('gender',2),SingleFeat('item',4),SingleFeat('item_gender',2)], "dense": []}
+    feature_dim_dict = {"sparse": [SingleFeat('user', 4), SingleFeat(
+        'gender', 2), SingleFeat('item', 4), SingleFeat('item_gender', 2)], "dense": []}
     behavior_feature_list = ["item"]
     uid = np.array([1, 2, 3])
     ugender = np.array([0, 1, 0])
@@ -37,7 +37,7 @@ def test_DIN_model_io():
 
     model = DIN(feature_dim_dict, behavior_feature_list, hist_len_max=4, embedding_size=8, att_activation=Dice,
 
-                 hidden_size=[4, 4, 4], keep_prob=0.6,)
+                hidden_size=[4, 4, 4], keep_prob=0.6,)
 
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
@@ -53,7 +53,7 @@ def test_DIN_att():
     x, y, feature_dim_dict, behavior_feature_list = get_xy_fd()
 
     model = DIN(feature_dim_dict, behavior_feature_list, hist_len_max=4, embedding_size=8,
-                 hidden_size=[4, 4, 4], keep_prob=0.6,)
+                hidden_size=[4, 4, 4], keep_prob=0.6,)
 
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
@@ -74,17 +74,5 @@ def test_DIN_att():
     print(model_name + " test pass!")
 
 
-# def test_DIN_sum():
-#
-#     model_name = "DIN_sum"
-#     x, y, feature_dim_dict, behavior_feature_list = get_xy_fd()
-#
-#     model = DIN(feature_dim_dict, behavior_feature_list, hist_len_max=4, embedding_size=8,
-#                 use_din=False, hidden_size=[4, 4, 4], keep_prob=0.6, activation="sigmoid")
-#
-#     check_model(model, model_name, x, y)
-
-
 if __name__ == "__main__":
     test_DIN_att()
-    #test_DIN_sum()
