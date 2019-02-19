@@ -29,14 +29,14 @@ Welcome to DeepCTR's documentation!
 
 DeepCTR is a **Easy-to-use** , **Modular** and **Extendible** package of deep-learning based CTR models along with lots of core components layer  which can be used to build your own custom model easily.It is implemented by tensorflow.You can use any complex model with ``model.fit()`` and ``model.predict()``.
 
-Through  ``pip install deepctr``  get the package and `Get Started! <./Quick-Start.html>`_ (`中文介绍 <https://zhuanlan.zhihu.com/p/53231955>`_)
+Let's `Get Started! <./Quick-Start.html>`_ (`Chinese Introduction <https://zhuanlan.zhihu.com/p/53231955>`_)
 
 You can read the latest code at https://github.com/shenweichen/DeepCTR
 
 News
 -----
 
-02/17/2010 : Refactor layers ,add ``BiLSTM`` and ``Transformer`` . `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.1>`_
+02/17/2019 : Refactor layers ,add ``BiLSTM`` and ``Transformer`` . `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.1>`_
 
 01/24/2019 : Use a `new feature config generation method <./Examples.html#classification-criteo>`_ and fix bugs. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.2.3>`_
 

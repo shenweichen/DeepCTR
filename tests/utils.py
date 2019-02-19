@@ -9,7 +9,8 @@ from tensorflow.python.keras import backend as K
 from tensorflow.python.keras.layers import Input, Masking
 from tensorflow.python.keras.models import Model, load_model, save_model
 
-from deepctr.utils import SingleFeat, VarLenFeat, custom_objects
+from deepctr.utils import SingleFeat, VarLenFeat
+from deepctr.layers import  custom_objects
 
 
 def gen_sequence(dim, max_len, sample_size):

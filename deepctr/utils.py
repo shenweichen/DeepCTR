@@ -13,31 +13,13 @@ from threading import Thread
 
 import requests
 
-from .layers import *
+
 
 
 try:
     from packaging.version import parse
 except ImportError:
     from pip._vendor.packaging.version import parse
-
-custom_objects = {'InnerProductLayer': InnerProductLayer,
-                  'OutterProductLayer': OutterProductLayer,
-                  'MLP': MLP,
-                  'PredictionLayer': PredictionLayer,
-                  'FM': FM,
-                  'AFMLayer': AFMLayer,
-                  'CrossNet': CrossNet,
-                  'BiInteractionPooling': BiInteractionPooling,
-                  'LocalActivationUnit': LocalActivationUnit,
-                  'Dice': Dice,
-                  'SequencePoolingLayer': SequencePoolingLayer,
-                  'AttentionSequencePoolingLayer': AttentionSequencePoolingLayer,
-                  'CIN': CIN,
-                  'InteractingLayer': InteractingLayer,
-                  'LayerNormalization': LayerNormalization,
-                  'BiLSTM': BiLSTM,
-                  'Transformer': Transformer}
 
 
 VarLenFeat = collections.namedtuple(
