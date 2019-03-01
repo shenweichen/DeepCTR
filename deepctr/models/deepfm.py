@@ -18,7 +18,8 @@ from ..layers.utils import concat_fun
 
 def DeepFM(feature_dim_dict, embedding_size=8,
            use_fm=True, hidden_size=(128, 128), l2_reg_linear=0.00001, l2_reg_embedding=0.00001, l2_reg_deep=0,
-           init_std=0.0001, seed=1024, keep_prob=1, activation='relu', final_activation='sigmoid', use_bn=False):
+           init_std=0.0001, seed=1024, keep_prob=1, activation='relu', final_activation='sigmoid', use_bn=False,
+           output_dim=1,):
     """Instantiates the DeepFM Network architecture.
 
     :param feature_dim_dict: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
@@ -44,23 +45,25 @@ def DeepFM(feature_dim_dict, embedding_size=8,
 
     fm_input = concat_fun(deep_emb_list, axis=1)
     deep_input = tf.keras.layers.Flatten()(fm_input)
-    fm_out = FM()(fm_input)
-    deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
-                   use_bn, seed)(deep_input)
-    deep_logit = tf.keras.layers.Dense(
-        1, use_bias=False, activation=None)(deep_out)
-
-    if len(hidden_size) == 0 and use_fm == False:  # only linear
-        final_logit = linear_logit
-    elif len(hidden_size) == 0 and use_fm == True:  # linear + FM
-        final_logit = tf.keras.layers.add([linear_logit, fm_out])
-    elif len(hidden_size) > 0 and use_fm == False:  # linear +　Deep
-        final_logit = tf.keras.layers.add([linear_logit, deep_logit])
-    elif len(hidden_size) > 0 and use_fm == True:  # linear + FM + Deep
-        final_logit = tf.keras.layers.add([linear_logit, fm_out, deep_logit])
-    else:
-        raise NotImplementedError
-
-    output = PredictionLayer(final_activation)(final_logit)
+    output=[]
+    for _ in range(output_dim):
+        fm_out = FM()(fm_input)
+        deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
+                       use_bn, seed)(deep_input)
+        deep_logit = tf.keras.layers.Dense(
+            1, use_bias=False, activation=None)(deep_out)
+    
+        if len(hidden_size) == 0 and use_fm == False:  # only linear
+            final_logit = linear_logit
+        elif len(hidden_size) == 0 and use_fm == True:  # linear + FM
+            final_logit = tf.keras.layers.add([linear_logit, fm_out])
+        elif len(hidden_size) > 0 and use_fm == False:  # linear +　Deep
+            final_logit = tf.keras.layers.add([linear_logit, deep_logit])
+        elif len(hidden_size) > 0 and use_fm == True:  # linear + FM + Deep
+            final_logit = tf.keras.layers.add([linear_logit, fm_out, deep_logit])
+        else:
+            raise NotImplementedError
+        output.append(PredictionLayer(final_activation)(final_logit))
+        
     model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
     return model

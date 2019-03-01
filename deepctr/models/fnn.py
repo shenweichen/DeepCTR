@@ -18,7 +18,8 @@ def FNN(feature_dim_dict, embedding_size=8,
         hidden_size=(128, 128),
         l2_reg_embedding=1e-5, l2_reg_linear=1e-5, l2_reg_deep=0,
         init_std=0.0001, seed=1024, keep_prob=1,
-        activation='relu', final_activation='sigmoid', ):
+        activation='relu', final_activation='sigmoid', 
+        output_dim=1,):
     """Instantiates the Factorization-supported Neural Network architecture.
 
     :param feature_dim_dict: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
@@ -41,12 +42,14 @@ def FNN(feature_dim_dict, embedding_size=8,
                                                                           seed, True)
 
     deep_input = tf.keras.layers.Flatten()(concat_fun(deep_emb_list))
-    deep_out = MLP(hidden_size, activation, l2_reg_deep,
-                   keep_prob, False, seed)(deep_input)
-    deep_logit = tf.keras.layers.Dense(
-        1, use_bias=False, activation=None)(deep_out)
-    final_logit = tf.keras.layers.add([deep_logit, linear_logit])
-    output = PredictionLayer(final_activation)(final_logit)
+    output=[]
+    for _ in range(output_dim):
+        deep_out = MLP(hidden_size, activation, l2_reg_deep,
+                       keep_prob, False, seed)(deep_input)
+        deep_logit = tf.keras.layers.Dense(
+            1, use_bias=False, activation=None)(deep_out)
+        final_logit = tf.keras.layers.add([deep_logit, linear_logit])
+        output.append(PredictionLayer(final_activation)(final_logit))
 
     model = tf.keras.models.Model(inputs=inputs_list,
                                   outputs=output)

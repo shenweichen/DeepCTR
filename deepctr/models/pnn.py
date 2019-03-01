@@ -17,7 +17,7 @@ from ..layers.utils import concat_fun
 
 def PNN(feature_dim_dict, embedding_size=8, hidden_size=(128, 128), l2_reg_embedding=1e-5, l2_reg_deep=0,
         init_std=0.0001, seed=1024, keep_prob=1, activation='relu',
-        final_activation='sigmoid', use_inner=True, use_outter=False, kernel_type='mat', ):
+        final_activation='sigmoid', use_inner=True, use_outter=False, kernel_type='mat',output_dim=1, ):
     """Instantiates the Product-based Neural Network architecture.
 
     :param feature_dim_dict: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
@@ -63,12 +63,14 @@ def PNN(feature_dim_dict, embedding_size=8, hidden_size=(128, 128), l2_reg_embed
     else:
         deep_input = linear_signal
 
-    deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
-                   False, seed)(deep_input)
-    deep_logit = tf.keras.layers.Dense(
-        1, use_bias=False, activation=None)(deep_out)
-
-    output = PredictionLayer(final_activation)(deep_logit)
+    output=[]
+    for _ in range(output_dim):
+        deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
+                       False, seed)(deep_input)
+        deep_logit = tf.keras.layers.Dense(
+            1, use_bias=False, activation=None)(deep_out)
+    
+        output.append(PredictionLayer(final_activation)(deep_logit))
 
     model = tf.keras.models.Model(inputs=inputs_list,
                                   outputs=output)

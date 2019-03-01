@@ -18,7 +18,7 @@ from ..layers.utils import concat_fun
 def DCN(feature_dim_dict, embedding_size='auto',
         cross_num=2, hidden_size=(128, 128, ), l2_reg_embedding=1e-5, l2_reg_cross=1e-5, l2_reg_deep=0,
         init_std=0.0001, seed=1024, keep_prob=1, use_bn=False, activation='relu', final_activation='sigmoid',
-        ):
+        output_dim=1,):
     """Instantiates the Deep&Cross Network architecture.
 
     :param feature_dim_dict: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
@@ -47,24 +47,26 @@ def DCN(feature_dim_dict, embedding_size='auto',
                                                                           seed, False)
 
     deep_input = tf.keras.layers.Flatten()(concat_fun(deep_emb_list))
-
-    if len(hidden_size) > 0 and cross_num > 0:  # Deep & Cross
-        deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
-                       use_bn, seed)(deep_input)
-        cross_out = CrossNet(cross_num, l2_reg=l2_reg_cross)(deep_input)
-        stack_out = tf.keras.layers.Concatenate()([cross_out, deep_out])
-        final_logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(stack_out)
-    elif len(hidden_size) > 0:  # Only Deep
-        deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
-                       use_bn, seed)(deep_input)
-        final_logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(deep_out)
-    elif cross_num > 0:  # Only Cross
-        cross_out = CrossNet(cross_num, l2_reg=l2_reg_cross)(deep_input)
-        final_logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(cross_out)
-    else:  # Error
-        raise NotImplementedError
-
-    output = PredictionLayer(final_activation)(final_logit)
+    output=[]
+    for _ in range(output_dim):
+        
+        if len(hidden_size) > 0 and cross_num > 0:  # Deep & Cross
+            deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
+                           use_bn, seed)(deep_input)
+            cross_out = CrossNet(cross_num, l2_reg=l2_reg_cross)(deep_input)
+            stack_out = tf.keras.layers.Concatenate()([cross_out, deep_out])
+            final_logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(stack_out)
+        elif len(hidden_size) > 0:  # Only Deep
+            deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
+                           use_bn, seed)(deep_input)
+            final_logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(deep_out)
+        elif cross_num > 0:  # Only Cross
+            cross_out = CrossNet(cross_num, l2_reg=l2_reg_cross)(deep_input)
+            final_logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(cross_out)
+        else:  # Error
+            raise NotImplementedError
+    
+        output.append(PredictionLayer(final_activation)(final_logit))
 
     model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
 

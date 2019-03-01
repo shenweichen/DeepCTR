@@ -19,7 +19,8 @@ from ..layers.utils import concat_fun
 
 def AutoInt(feature_dim_dict, embedding_size=8, att_layer_num=3, att_embedding_size=8, att_head_num=2, att_res=True, hidden_size=(256, 256), activation='relu',
             l2_reg_deep=0, l2_reg_embedding=1e-5, use_bn=False, keep_prob=1.0, init_std=0.0001, seed=1024,
-            final_activation='sigmoid',):
+            final_activation='sigmoid',
+            output_dim=1,):
     """Instantiates the AutoInt Network architecture.
 
     :param feature_dim_dict: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
@@ -49,31 +50,34 @@ def AutoInt(feature_dim_dict, embedding_size=8, att_layer_num=3, att_embedding_s
                                                                           seed, False)
     att_input = concat_fun(deep_emb_list, axis=1)
 
-    for _ in range(att_layer_num):
-        att_input = InteractingLayer(
-            att_embedding_size, att_head_num, att_res)(att_input)
-    att_output = tf.keras.layers.Flatten()(att_input)
-
-    deep_input = tf.keras.layers.Flatten()(concat_fun(deep_emb_list))
-
-    if len(hidden_size) > 0 and att_layer_num > 0:  # Deep & Interacting Layer
-        deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
-                       use_bn, seed)(deep_input)
-        stack_out = tf.keras.layers.Concatenate()([att_output, deep_out])
-        final_logit = tf.keras.layers.Dense(
-            1, use_bias=False, activation=None)(stack_out)
-    elif len(hidden_size) > 0:  # Only Deep
-        deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
-                       use_bn, seed)(deep_input)
-        final_logit = tf.keras.layers.Dense(
-            1, use_bias=False, activation=None)(deep_out)
-    elif att_layer_num > 0:  # Only Interacting Layer
-        final_logit = tf.keras.layers.Dense(
-            1, use_bias=False, activation=None)(att_output)
-    else:  # Error
-        raise NotImplementedError
-
-    output = PredictionLayer(final_activation)(final_logit)
+    output=[]
+    for _ in range(output_dim):
+    
+        for _ in range(att_layer_num):
+            att_input = InteractingLayer(
+                att_embedding_size, att_head_num, att_res)(att_input)
+        att_output = tf.keras.layers.Flatten()(att_input)
+    
+        deep_input = tf.keras.layers.Flatten()(concat_fun(deep_emb_list))
+    
+        if len(hidden_size) > 0 and att_layer_num > 0:  # Deep & Interacting Layer
+            deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
+                           use_bn, seed)(deep_input)
+            stack_out = tf.keras.layers.Concatenate()([att_output, deep_out])
+            final_logit = tf.keras.layers.Dense(
+                1, use_bias=False, activation=None)(stack_out)
+        elif len(hidden_size) > 0:  # Only Deep
+            deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
+                           use_bn, seed)(deep_input)
+            final_logit = tf.keras.layers.Dense(
+                1, use_bias=False, activation=None)(deep_out)
+        elif att_layer_num > 0:  # Only Interacting Layer
+            final_logit = tf.keras.layers.Dense(
+                1, use_bias=False, activation=None)(att_output)
+        else:  # Error
+            raise NotImplementedError
+    
+        output.append(PredictionLayer(final_activation)(final_logit))
 
     model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
 

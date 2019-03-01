@@ -14,7 +14,7 @@ from ..utils import check_feature_config_dict
 from ..layers.utils import concat_fun
 
 
-def xDeepFM(feature_dim_dict, embedding_size=8, hidden_size=(256, 256), cin_layer_size=(128, 128,), cin_split_half=True, cin_activation='relu', l2_reg_linear=0.00001, l2_reg_embedding=0.00001, l2_reg_deep=0, init_std=0.0001, seed=1024, keep_prob=1, activation='relu', final_activation='sigmoid', use_bn=False):
+def xDeepFM(feature_dim_dict, embedding_size=8, hidden_size=(256, 256), cin_layer_size=(128, 128,), cin_split_half=True, cin_activation='relu', l2_reg_linear=0.00001, l2_reg_embedding=0.00001, l2_reg_deep=0, init_std=0.0001, seed=1024, keep_prob=1, activation='relu', final_activation='sigmoid', use_bn=False, output_dim=1,):
     """Instantiates the xDeepFM architecture.
 
     :param feature_dim_dict: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
@@ -48,24 +48,28 @@ def xDeepFM(feature_dim_dict, embedding_size=8, hidden_size=(256, 256), cin_laye
         exFM_logit = tf.keras.layers.Dense(1, activation=None,)(exFM_out)
 
     deep_input = tf.keras.layers.Flatten()(fm_input)
-    deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
-                   use_bn, seed)(deep_input)
-    deep_logit = tf.keras.layers.Dense(
-        1, use_bias=False, activation=None)(deep_out)
-
-    if len(hidden_size) == 0 and len(cin_layer_size) == 0:  # only linear
-        final_logit = linear_logit
-    elif len(hidden_size) == 0 and len(cin_layer_size) > 0:  # linear + CIN
-        final_logit = tf.keras.layers.add([linear_logit, exFM_logit])
-    elif len(hidden_size) > 0 and len(cin_layer_size) == 0:  # linear +　Deep
-        final_logit = tf.keras.layers.add([linear_logit, deep_logit])
-    elif len(hidden_size) > 0 and len(cin_layer_size) > 0:  # linear + CIN + Deep
-        final_logit = tf.keras.layers.add(
-            [linear_logit, deep_logit, exFM_logit])
-    else:
-        raise NotImplementedError
-
-    output = PredictionLayer(final_activation)(final_logit)
+    
+    output=[]
+    for _ in range(output_dim):
+        
+        deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
+                       use_bn, seed)(deep_input)
+        deep_logit = tf.keras.layers.Dense(
+            1, use_bias=False, activation=None)(deep_out)
+    
+        if len(hidden_size) == 0 and len(cin_layer_size) == 0:  # only linear
+            final_logit = linear_logit
+        elif len(hidden_size) == 0 and len(cin_layer_size) > 0:  # linear + CIN
+            final_logit = tf.keras.layers.add([linear_logit, exFM_logit])
+        elif len(hidden_size) > 0 and len(cin_layer_size) == 0:  # linear +　Deep
+            final_logit = tf.keras.layers.add([linear_logit, deep_logit])
+        elif len(hidden_size) > 0 and len(cin_layer_size) > 0:  # linear + CIN + Deep
+            final_logit = tf.keras.layers.add(
+                [linear_logit, deep_logit, exFM_logit])
+        else:
+            raise NotImplementedError
+    
+        output.append(PredictionLayer(final_activation)(final_logit))
 
     model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
     return model

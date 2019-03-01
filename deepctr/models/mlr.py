@@ -15,7 +15,8 @@ from tensorflow.python.keras.regularizers import l2
 def MLR(region_feature_dim_dict, base_feature_dim_dict={"sparse": [], "dense": []}, region_num=4,
         l2_reg_linear=1e-5,
         init_std=0.0001, seed=1024, final_activation='sigmoid',
-        bias_feature_dim_dict={"sparse": [], "dense": []}):
+        bias_feature_dim_dict={"sparse": [], "dense": []},
+        output_dim=1,):
     """Instantiates the Mixed Logistic Regression/Piece-wise Linear Model.
 
     :param region_feature_dim_dict: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}

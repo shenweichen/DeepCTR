@@ -17,6 +17,7 @@ from ..layers.utils import concat_fun
 def NFM(feature_dim_dict, embedding_size=8,
         hidden_size=(128, 128), l2_reg_embedding=1e-5, l2_reg_linear=1e-5, l2_reg_deep=0,
         init_std=0.0001, seed=1024, keep_prob=1, activation='relu', final_activation='sigmoid',
+        output_dim=1,
         ):
     """Instantiates the Neural Factorization Machine architecture.
 
@@ -48,11 +49,13 @@ def NFM(feature_dim_dict, embedding_size=8,
         1, use_bias=False, activation=None)(deep_out)
 
     final_logit = linear_logit
-
-    if len(hidden_size) > 0:
-        final_logit = tf.keras.layers.add([final_logit, deep_logit])
-
-    output = PredictionLayer(final_activation)(final_logit)
+    output=[]
+    for _ in range(output_dim):
+    
+        if len(hidden_size) > 0:
+            final_logit = tf.keras.layers.add([final_logit, deep_logit])
+    
+        output.append(PredictionLayer(final_activation)(final_logit))
 
     model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
     return model

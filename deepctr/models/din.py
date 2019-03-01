@@ -37,6 +37,7 @@ def DIN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
          use_bn=False, hidden_size=(200, 80), activation='relu', att_hidden_size=(80, 40),
         att_activation=Dice, att_weight_normalization=False,
         l2_reg_deep=0, l2_reg_embedding=1e-6, final_activation='sigmoid', keep_prob=1, init_std=0.0001, seed=1024,
+        output_dim=1,
        ):
     """Instantiates the Deep Interest Network architecture.
 
@@ -93,12 +94,15 @@ def DIN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
     if len(dense_input) > 0:
         deep_input_emb = Concatenate()([deep_input_emb] + list(dense_input.values()))
 
-    output = MLP(hidden_size, activation, l2_reg_deep,
-                 keep_prob, use_bn, seed)(deep_input_emb)
-    final_logit = Dense(1, use_bias=False)(output)
-
-
-    output = PredictionLayer(final_activation)(final_logit)
+    output=[]
+    for _ in range(output_dim):
+        
+        output = MLP(hidden_size, activation, l2_reg_deep,
+                     keep_prob, use_bn, seed)(deep_input_emb)
+        final_logit = Dense(1, use_bias=False)(output)
+    
+        output.append(PredictionLayer(final_activation)(final_logit))
+        
     model_input_list = get_inputs_list([sparse_input, dense_input, user_behavior_input]) + [user_behavior_length]
 
     model = Model(inputs=model_input_list, outputs=output)
