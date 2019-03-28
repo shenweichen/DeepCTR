@@ -14,4 +14,4 @@ from .nffm import NFFM
 
 
 __all__ = ["AFM", "DCN", "MLR",  "DeepFM",
-           "MLR", "NFM", "DIN","DIEN", "FNN", "PNN", "WDL", "xDeepFM", "AutoInt", "NFFM"]
+           "MLR", "NFM", "DIN", "DIEN", "FNN", "PNN", "WDL", "xDeepFM", "AutoInt", "NFFM"]
