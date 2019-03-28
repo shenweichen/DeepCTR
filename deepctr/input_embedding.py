@@ -35,8 +35,10 @@ def create_singlefeat_dict(feature_dim_dict, prefix=''):
 def create_varlenfeat_dict(feature_dim_dict, mask_zero=True):
 
     sequence_dim_dict = feature_dim_dict.get('sequence', [])
-    sequence_input_dict = {feat.name: Input(shape=(feat.maxlen,), name='seq_' + str(
-        i) + '-' + feat.name) for i, feat in enumerate(sequence_dim_dict)}
+    sequence_input_dict = OrderedDict()
+    for i, feat in enumerate(sequence_dim_dict):
+        sequence_input_dict[feat.name] = Input(shape=(feat.maxlen,), name='seq_' + str(
+            i) + '-' + feat.name)
     sequence_pooling_dict = {feat.name: feat.combiner
                              for i, feat in enumerate(sequence_dim_dict)}
     if mask_zero:
