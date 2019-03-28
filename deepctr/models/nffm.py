@@ -7,9 +7,9 @@ Reference:
     [1] Zhang L, Shen W, Li S, et al. Field-aware Neural Factorization Machine for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1902.09096, 2019.(https://arxiv.org/abs/1902.09096)
 """
 
-from tensorflow.python.keras.layers import Dense, Embedding, Concatenate, Reshape, Dropout, add, multiply, Layer, Lambda
+from tensorflow.python.keras.layers import Dense, Embedding, add, multiply,  Lambda
 from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.initializers import RandomNormal, Ones, RandomUniform
+from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.regularizers import l2
 from tensorflow.python.keras import backend as K
 import tensorflow as tf

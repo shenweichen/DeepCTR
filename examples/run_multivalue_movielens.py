@@ -3,7 +3,7 @@ import numpy as np
 from tensorflow.python.keras.preprocessing.sequence import pad_sequences
 from sklearn.preprocessing import LabelEncoder
 from deepctr.models import DeepFM
-from deepctr import VarLenFeat, SingleFeat
+from deepctr.utils import VarLenFeat, SingleFeat
 
 
 def split(x):

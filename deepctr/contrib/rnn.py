@@ -81,12 +81,23 @@ from tensorflow.python.util import nest
 
 
 
+def _like_rnncell_(cell):
+
+  """Checks that a given object is an RNNCell by using duck typing."""
+
+  conditions = [hasattr(cell, "output_size"), hasattr(cell, "state_size"),
+
+                hasattr(cell, "zero_state"), callable(cell)]
+
+  return all(conditions)
 
 # pylint: disable=protected-access
 
 _concat = rnn_cell_impl._concat
-
-_like_rnncell = rnn_cell_impl._like_rnncell
+try:
+    _like_rnncell = rnn_cell_impl._like_rnncell
+except:
+    _like_rnncell = _like_rnncell_
 
 # pylint: enable=protected-access
 

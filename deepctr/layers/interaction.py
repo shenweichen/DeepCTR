@@ -206,13 +206,14 @@ class CIN(Layer):
         - [Lian J, Zhou X, Zhang F, et al. xDeepFM: Combining Explicit and Implicit Feature Interactions for Recommender Systems[J]. arXiv preprint arXiv:1803.05170, 2018.] (https://arxiv.org/pdf/1803.05170.pdf)
     """
 
-    def __init__(self, layer_size=(128, 128), activation='relu',  split_half=True, seed=1024, **kwargs):
+    def __init__(self, layer_size=(128, 128), activation='relu',split_half=True,  l2_reg=1e-5,seed=1024, **kwargs):
         if len(layer_size) == 0:
             raise ValueError(
                 "layer_size must be a list(tuple) of length greater than 1")
         self.layer_size = layer_size
         self.split_half = split_half
         self.activation = activation
+        self.l2_reg = l2_reg
         self.seed = seed
         super(CIN, self).__init__(**kwargs)
 
@@ -229,7 +230,7 @@ class CIN(Layer):
             self.filters.append(self.add_weight(name='filter' + str(i),
                                                 shape=[1, self.field_nums[-1]
                                                        * self.field_nums[0], size],
-                                                dtype=tf.float32, initializer=glorot_uniform(seed=self.seed + i)))
+                                                dtype=tf.float32, initializer=glorot_uniform(seed=self.seed + i), regularizer=l2(l2_reg)))
 
             self.bias.append(self.add_weight(name='bias' + str(i), shape=[size], dtype=tf.float32,
                                              initializer=tf.keras.initializers.Zeros()))

@@ -3,7 +3,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 from deepctr.models import DeepFM
-from deepctr import SingleFeat
+from deepctr.utils import SingleFeat
 
 if __name__ == "__main__":
 

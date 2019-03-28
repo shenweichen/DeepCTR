@@ -3,7 +3,7 @@ from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import log_loss, roc_auc_score
 from deepctr.models import DeepFM
-from deepctr import SingleFeat
+from deepctr.utils import SingleFeat
 
 if __name__ == "__main__":
     data = pd.read_csv('./criteo_sample.txt')

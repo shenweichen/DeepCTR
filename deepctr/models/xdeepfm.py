@@ -14,7 +14,7 @@ from ..utils import check_feature_config_dict
 from ..layers.utils import concat_fun
 
 
-def xDeepFM(feature_dim_dict, embedding_size=8, hidden_size=(256, 256), cin_layer_size=(128, 128,), cin_split_half=True, cin_activation='relu', l2_reg_linear=0.00001, l2_reg_embedding=0.00001, l2_reg_deep=0, init_std=0.0001, seed=1024, keep_prob=1, activation='relu', final_activation='sigmoid', use_bn=False):
+def xDeepFM(feature_dim_dict, embedding_size=8, hidden_size=(256, 256), cin_layer_size=(128, 128,), cin_split_half=True, cin_activation='relu', l2_reg_linear=0.00001, l2_reg_embedding=0.00001, l2_reg_deep=0,l2_reg_cin=0, init_std=0.0001, seed=1024, keep_prob=1, activation='relu', final_activation='sigmoid', use_bn=False):
     """Instantiates the xDeepFM architecture.
 
     :param feature_dim_dict: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
@@ -26,6 +26,7 @@ def xDeepFM(feature_dim_dict, embedding_size=8, hidden_size=(256, 256), cin_laye
     :param l2_reg_linear: float. L2 regularizer strength applied to linear part
     :param l2_reg_embedding: L2 regularizer strength applied to embedding vector
     :param l2_reg_deep: L2 regularizer strength applied to deep net
+    :param l2_reg_cin: L2 regularizer strength applied to CIN.
     :param init_std: float,to use as the initialize std of embedding vector
     :param seed: integer ,to use as random seed.
     :param keep_prob: float in (0,1]. keep_prob used in deep net
@@ -44,7 +45,7 @@ def xDeepFM(feature_dim_dict, embedding_size=8, hidden_size=(256, 256), cin_laye
 
     if len(cin_layer_size) > 0:
         exFM_out = CIN(cin_layer_size, cin_activation,
-                       cin_split_half, seed)(fm_input)
+                       cin_split_half, l2_reg_cin,seed)(fm_input)
         exFM_logit = tf.keras.layers.Dense(1, activation=None,)(exFM_out)
 
     deep_input = tf.keras.layers.Flatten()(fm_input)

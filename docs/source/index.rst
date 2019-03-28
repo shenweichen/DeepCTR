@@ -56,8 +56,8 @@ News
    :maxdepth: 3
    :caption: API:
 
-   Models API<Models-API>
-   Layers API<Layers>
+   Models<Models>
+   Layers<Layers>
 
 
 

@@ -95,7 +95,7 @@ def auxiliary_loss( h_states, click_seq, noclick_seq, mask, stag = None):
     :param stag:
     :return:
     """
-    hist_len, hist_hidden_size = click_seq.get_shape().as_list()[1:]
+    hist_len, _ = click_seq.get_shape().as_list()[1:]
     mask = tf.sequence_mask(mask, hist_len)
     mask = mask[:,0,:]
 
@@ -135,7 +135,7 @@ def auxiliary_net(in_, stag='auxiliary_net'):
     return y_hat
 
 def interest_evolution(concat_behavior, deep_input_item, user_behavior_length, gru_type="GRU", use_neg=False,
-                       neg_concat_behavior=None,embedding_size=8,att_hidden_size=[64,16],att_activation='sigmoid',att_weight_normalization=False,):
+                       neg_concat_behavior=None,embedding_size=8,att_hidden_size=(64,16),att_activation='sigmoid',att_weight_normalization=False,):
     if gru_type not in ["GRU", "AIGRU", "AGRU", "AUGRU"]:
         raise ValueError("gru_type error ")
     aux_loss_1 = None
@@ -169,7 +169,7 @@ def interest_evolution(concat_behavior, deep_input_item, user_behavior_length, g
     else:
 
         scores = AttentionSequencePoolingLayer(hidden_size=att_hidden_size,activation=att_activation,weight_normalization=att_weight_normalization,return_score=True)([deep_input_item,rnn_outputs,user_behavior_length])
-        
+
         if gru_type == "AIGRU":# or gru_type == "AIGRUv2":
             #print(rnn_outputs,scores,Permute([2,1])(scores))
             if gru_type == "AIGRU":
@@ -195,7 +195,7 @@ def interest_evolution(concat_behavior, deep_input_item, user_behavior_length, g
 
 
 def DIEN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
-         gru_type="GRU",use_negsampling=False,alpha=1, use_bn=False, hidden_size=[200, 80], activation='sigmoid', att_hidden_size=[64, 16], att_activation=Dice, att_weight_normalization=True,
+         gru_type="GRU",use_negsampling=False,alpha=1, use_bn=False, hidden_size=(200, 80), activation='sigmoid', att_hidden_size=[64, 16], att_activation=Dice, att_weight_normalization=True,
         l2_reg_deep=0, l2_reg_embedding=1e-5, final_activation='sigmoid', keep_prob=1, init_std=0.0001, seed=1024, ):
     """Instantiates the Deep Interest Network architecture.
 
