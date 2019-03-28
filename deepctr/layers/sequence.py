@@ -35,7 +35,7 @@ class SequencePoolingLayer(Layer):
         - **supports_masking**:If True,the input need to support masking.
     """
 
-    def __init__(self, mode='mean', supports_masking=False, **kwargs):
+    def __init__(self, mode='mean', supports_masking=False,**kwargs):
 
         if mode not in ['sum', 'mean', 'max']:
             raise ValueError("mode must be sum or mean")
@@ -128,12 +128,12 @@ class AttentionSequencePoolingLayer(Layer):
         - [Zhou G, Zhu X, Song C, et al. Deep interest network for click-through rate prediction[C]//Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. ACM, 2018: 1059-1068.](https://arxiv.org/pdf/1706.06978.pdf)
     """
 
-    def __init__(self, hidden_size=(80, 40), activation='sigmoid', weight_normalization=False, supports_masking=False, **kwargs):
+    def __init__(self, hidden_size=(80, 40), activation='sigmoid', weight_normalization=False, return_score=False,supports_masking=False, **kwargs):
 
         self.hidden_size = hidden_size
         self.activation = activation
         self.weight_normalization = weight_normalization
-
+        self.return_score = return_score
         super(AttentionSequencePoolingLayer, self).__init__(**kwargs)
         self.supports_masking = supports_masking
 
@@ -186,12 +186,18 @@ class AttentionSequencePoolingLayer(Layer):
         if self.weight_normalization:
             outputs = tf.nn.softmax(outputs)
 
-        outputs = tf.matmul(outputs, keys)
+        if self.return_score:
+            return outputs
+        else:
+            outputs = tf.matmul(outputs, keys)
 
-        return outputs
+            return outputs
 
     def compute_output_shape(self, input_shape):
-        return (None, 1, input_shape[0][-1])
+        if self.return_score:
+            return (None, 1, input_shape[1][1])
+        else:
+            return (None, 1, input_shape[0][-1])
 
     def compute_mask(self, inputs, mask):
         return None

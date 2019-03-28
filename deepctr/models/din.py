@@ -18,12 +18,12 @@ from ..layers.core import MLP, PredictionLayer
 from ..layers.sequence import AttentionSequencePoolingLayer
 from ..layers.activation import Dice
 from ..layers.utils import concat_fun,NoMask
-from ..input_embedding import get_inputs_list,create_singlefeat_dict
+from ..input_embedding import get_inputs_list,create_singlefeat_inputdict
 from ..utils import check_feature_config_dict
 
 
 def get_input(feature_dim_dict, seq_feature_list, seq_max_len):
-    sparse_input,dense_input = create_singlefeat_dict(feature_dim_dict)
+    sparse_input,dense_input = create_singlefeat_inputdict(feature_dim_dict)
     user_behavior_input = OrderedDict()
     for i,feat in enumerate(seq_feature_list):
         user_behavior_input[feat] = Input(shape=(seq_max_len,), name='seq_' + str(i) + '-' + feat)
