@@ -35,12 +35,11 @@ You can read the latest code at https://github.com/shenweichen/DeepCTR
 
 News
 -----
+03/29/2019 : Add `sequence(multi-value) input support <./Examples.html#multi-value-input-movielens>`_ for ``AFM,AutoInt,DCN,DeepFM,FNN,NFM,PNN,xDeepFM`` models. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.2>`_
 
 02/17/2019 : Refactor layers ,add ``BiLSTM`` and ``Transformer`` . `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.1>`_
 
 01/24/2019 : Use a `new feature config generation method <./Examples.html#classification-criteo>`_ and fix bugs. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.2.3>`_
-
-01/01/2019 : Add `sequence(multi-value) input support <./Examples.html#multi-value-input-movielens>`_ for ``AFM,AutoInt,DCN,DeepFM,FNN,NFM,PNN,xDeepFM`` models. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.2.2>`_
 
 .. toctree::
    :maxdepth: 2

@@ -12,11 +12,11 @@ from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.regularizers import l2
 import  tensorflow as tf
-from deepctr.contrib.utils import QAAttGRUCell, VecAttGRUCell
-from deepctr.contrib.rnn import dynamic_rnn
-from ..layers.core import MLP  #,NaiveActivationUnit
+from ..contrib.utils import QAAttGRUCell, VecAttGRUCell
+from ..contrib.rnn import dynamic_rnn
+from ..layers.core import MLP,PredictionLayer
 from ..layers.sequence import AttentionSequencePoolingLayer
-from ..input_embedding import create_singlefeat_inputdict
+from ..input_embedding import create_singlefeat_inputdict,get_inputs_list
 from ..layers.activation import Dice
 from ..utils import check_feature_config_dict
 
@@ -264,10 +264,11 @@ def DIEN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
 
     output = MLP(hidden_size, activation, l2_reg_deep,
                  keep_prob, use_bn, seed)(deep_input_emb)
-    output = Dense(1, final_activation)(output)
-    output = Reshape([1])(output)
-    model_input_list = list(sparse_input.values(
-    ))+list(dense_input.values())+list(user_behavior_input.values())
+    final_logit = Dense(1, use_bias=False)(output)
+    output = PredictionLayer(final_activation)(final_logit)
+
+    model_input_list = get_inputs_list([sparse_input, dense_input, user_behavior_input])
+
     if use_negsampling:
         model_input_list += list(neg_user_behavior_input.values())
 

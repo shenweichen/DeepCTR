@@ -175,11 +175,7 @@ user's interest vector and other embedding vectors are concatenated and fed into
 DIEN (Deep Interest Evolution Network)
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-DIN introduce a attention method to learn from sequence(multi-valued) feature.
-Tradional method usually use sum/mean pooling on sequence feature.
-DIN use a local activation unit to get the activation score between candidate item and history items.
-User's interest are represented by weighted sum of user behaviors.
-user's interest vector and other embedding vectors are concatenated and fed into a MLP to get the prediction. 
+Deep Interest Evolution Network (DIEN) uses interest extractor layer to capture temporal interests from history behavior sequence. At this layer,  an auxiliary loss is proposed to supervise interest extracting at each step. As user interests are diverse, especially in the e-commerce system, interest evolving layer is proposed to capture interest evolving process that is relative to the target item. At interest evolving layer, attention mechanism is embedded into the sequential structure novelly, and the effects of relative interests are strengthened during interest evolution.
 
 **DIEN api** `link <./deepctr.models.dien.html>`_ **DIEN demo** `link <https://github.com/shenweichen/DeepCTR/tree/master/examples
 /run_din.py>`_
@@ -233,9 +229,7 @@ By stacking multiple interacting layers,AutoInt is able to model different order
 NFFM(Field-aware Neural Factorization Machine)
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-AutoInt use a interacting layer to model the interactions between different features.
-Within each interacting layer, each feature is allowed to interact with all the other features and is able to automatically identify relevant features to form meaningful higher-order features via the multi-head attention mechanism.
-By stacking multiple interacting layers,AutoInt is able to model different orders of feature interactions. 
+This model can have strong secondorder feature interactive learning ability like FFM. Further more, deep neural network is used to learn higher-ordered feature combinations. 
 
 **NFFM api** `link <./deepctr.models.nffm.html>`_
 

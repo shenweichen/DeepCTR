@@ -30,8 +30,8 @@ import itertools
 #     return multi_input + offset_c
 
 def NFFM(feature_dim_dict, embedding_size=4, hidden_size=(128, 128),
-         l2_reg_embedding=1e-5, l2_reg_linear=1e-5,
-         init_std=0.0001, seed=1024, final_activation='sigmoid', include_linear=True, bn=True, reduce_sum=False,
+         l2_reg_embedding=1e-5, l2_reg_linear=1e-5,l2_reg_deep=0,
+         init_std=0.0001, seed=1024, final_activation='sigmoid', include_linear=True, use_bn=True, reduce_sum=False,
          ):
     """Instantiates the Field-aware Neural Factorization Machine architecture.
 
@@ -44,8 +44,10 @@ def NFFM(feature_dim_dict, embedding_size=4, hidden_size=(128, 128),
     :param init_std: float,to use as the initialize std of embedding vector
     :param seed: integer ,to use as random seed.
     :param keep_prob: float in (0,1]. keep_prob used in deep net
-    :param activation: Activation function to use in deep net
     :param final_activation: str,output activation,usually ``'sigmoid'`` or ``'linear'``
+    :param include_linear:bool,whether include linear term or not
+    :param use_bn:bool,whether use bn after ffm out or not
+    :param reduce_sum:bool,whether apply reduce_sum on cross vector
     :return: A Keras model instance.
     """
     check_feature_config_dict(feature_dim_dict)
@@ -65,7 +67,6 @@ def NFFM(feature_dim_dict, embedding_size=4, hidden_size=(128, 128),
     for i,j in itertools.combinations(feature_dim_dict['dense'],2):
         element_wise_prod = multiply([dense_embedding[i.name][j.name](dense_input_dict[i.name]),dense_embedding[j.name][i.name](dense_input_dict[j.name])])
         if reduce_sum:
-            #K.expand_dims()
             element_wise_prod = Lambda(lambda element_wise_prod:K.sum(element_wise_prod,axis=-1))(element_wise_prod)
         embed_list.append(Lambda(lambda x: K.expand_dims(x,axis=1))(element_wise_prod))
 
@@ -81,11 +82,9 @@ def NFFM(feature_dim_dict, embedding_size=4, hidden_size=(128, 128),
 
 
     ffm_out = tf.keras.layers.Flatten()(concat_fun(embed_list,axis=1))
-
-    if bn:
+    if use_bn:
         ffm_out = tf.keras.layers.BatchNormalization()(ffm_out)
-
-    ffm_out = MLP(hidden_size)(ffm_out)
+    ffm_out = MLP(hidden_size,l2_reg=l2_reg_deep)(ffm_out)
     final_logit = Dense(1,use_bias=False)(ffm_out)
 
     linear_emb_list = get_embedding_vec_list(

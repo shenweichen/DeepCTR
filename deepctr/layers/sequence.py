@@ -205,7 +205,7 @@ class AttentionSequencePoolingLayer(Layer):
     def get_config(self,):
 
         config = {'hidden_size': self.hidden_size, 'activation': self.activation,
-                  'weight_normalization': self.weight_normalization, 'supports_masking': self.supports_masking}
+                  'weight_normalization': self.weight_normalization, 'return_score':self.return_score,'supports_masking': self.supports_masking}
         base_config = super(AttentionSequencePoolingLayer, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 

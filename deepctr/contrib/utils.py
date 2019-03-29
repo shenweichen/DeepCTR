@@ -3,12 +3,14 @@ from tensorflow.python.ops.rnn_cell import *
 #from tensorflow.python.ops.rnn_cell_impl import  _Linear
 
 from tensorflow.python.ops import math_ops
-
+from tensorflow.python.ops import nn_ops
 from tensorflow.python.ops import init_ops
 
 from tensorflow.python.ops import array_ops
 
 from tensorflow.python.ops import variable_scope as vs
+
+from tensorflow.python.util import nest
 
 _BIAS_VARIABLE_NAME = "bias"
 

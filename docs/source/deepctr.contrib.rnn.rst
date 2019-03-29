@@ -1,7 +1,7 @@
-deepctr.layers.core module
+deepctr.contrib.rnn module
 ==========================
 
-.. automodule:: deepctr.layers.core
+.. automodule:: deepctr.contrib.rnn
     :members:
     :undoc-members:
     :show-inheritance:
