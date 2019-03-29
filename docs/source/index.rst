@@ -35,7 +35,7 @@ You can read the latest code at https://github.com/shenweichen/DeepCTR
 
 News
 -----
-03/29/2019 : Add `sequence(multi-value) input support <./Examples.html#multi-value-input-movielens>`_ for ``AFM,AutoInt,DCN,DeepFM,FNN,NFM,PNN,xDeepFM`` models. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.2>`_
+03/29/2019 : Add `DIEN <./Features.html#dien-deep-interest-evolution-network>`_ and `NFFM <./Features.html#nffm-field-aware-neural-factorization-machine>`_ models. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.2>`_
 
 02/17/2019 : Refactor layers ,add ``BiLSTM`` and ``Transformer`` . `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.1>`_
 

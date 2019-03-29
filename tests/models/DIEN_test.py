@@ -7,7 +7,7 @@ from deepctr.layers import custom_objects
 from tensorflow.python.keras.models import load_model, save_model
 
 
-def get_xy_fd():
+def get_xy_fd(use_neg=False):
     feature_dim_dict = {"sparse": [SingleFeat('user', 3), SingleFeat(
         'gender', 2), SingleFeat('item', 3+1), SingleFeat('item_gender', 2+1)], "dense": [SingleFeat('score', 0)]}
     behavior_feature_list = ["item","item_gender"]
@@ -20,13 +20,21 @@ def get_xy_fd():
     hist_iid = np.array([[ 1, 2, 3,0], [ 1, 2, 3,0], [ 1, 2, 0,0]])
     hist_igender = np.array([[1, 1, 2,0 ], [2, 1, 1, 0], [2, 1, 0, 0]])
 
+    if use_neg:
+        neg_hist_iid = np.array([[1, 2, 3, 0], [1, 2, 3, 0], [1, 2, 0, 0]])
+        neg_hist_igender = np.array([[1, 1, 2, 0], [2, 1, 1, 0], [2, 1, 0, 0]])
+
     behavior_length = np.array([3,3,2])
 
 
     feature_dict = {'user': uid, 'gender': ugender, 'item': iid, 'item_gender': igender,
-                    'hist_item': hist_iid, 'hist_item_gender': hist_igender, 'score': score}
+                    'hist_item': hist_iid, 'hist_item_gender': hist_igender,
+                    'neg_hist_item': neg_hist_iid, 'neg_hist_item_gender':  neg_hist_igender,
+                    'score': score}
 
     x = [feature_dict[feat.name] for feat in feature_dim_dict["sparse"]] + [feature_dict[feat.name] for feat in feature_dim_dict["dense"]] + [feature_dict['hist_'+feat] for feat in behavior_feature_list]
+    if use_neg:
+        x += [feature_dict['neg_hist_'+feat] for feat in behavior_feature_list]
     x += [behavior_length]
     y = [1, 0, 1]
     return x, y, feature_dim_dict, behavior_feature_list
@@ -50,14 +58,18 @@ def test_DIEN_model_io():
     model = load_model(model_name + '.h5', custom_objects)
     print(model_name + " test save load model pass!")
 
-
-def test_DIEN_att():
+@pytest.mark.parametrize(
+    'gru_type',
+    ['GRU','AGRU','AIGRU','AUGRU',
+     ]
+)
+def test_DIEN(gru_type):
     model_name = "DIEN"
 
     x, y, feature_dim_dict, behavior_feature_list = get_xy_fd()
 
     model = DIEN(feature_dim_dict, behavior_feature_list, hist_len_max=4, embedding_size=8,
-                hidden_size=[4, 4, 4], keep_prob=0.6,)
+                hidden_size=[4, 4, 4], keep_prob=0.6,gru_type=gru_type)
 
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
@@ -78,5 +90,31 @@ def test_DIEN_att():
     print(model_name + " test pass!")
 
 
+def test_DIEN_neg():
+    model_name = "DIEN_neg"
+
+    x, y, feature_dim_dict, behavior_feature_list = get_xy_fd(use_neg=True)
+
+    model = DIEN(feature_dim_dict, behavior_feature_list, hist_len_max=4, embedding_size=8,
+                hidden_size=[4, 4, 4], keep_prob=0.6,gru_type="AUGRU",use_negsampling=True)
+
+    model.compile('adam', 'binary_crossentropy',
+                  metrics=['binary_crossentropy'])
+    model.fit(x, y, verbose=1, validation_split=0.5)
+
+    print(model_name+" test train valid pass!")
+    model.save_weights(model_name + '_weights.h5')
+    model.load_weights(model_name + '_weights.h5')
+    print(model_name+" test save load weight pass!")
+
+    # try:
+    #     save_model(model,  name + '.h5')
+    #     model = load_model(name + '.h5', custom_objects)
+    #     print(name + " test save load model pass!")
+    # except:
+    #     print("【Error】There is a bug when save model use Dice---------------------------------------------------")
+
+    print(model_name + " test pass!")
+
 if __name__ == "__main__":
-    test_DIEN_att()
+    test_DIEN()
