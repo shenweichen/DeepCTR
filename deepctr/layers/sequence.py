@@ -655,6 +655,12 @@ class DynamicGRU(Layer):
         input_seq_shape = input_shape[0]
         if self.num_units is None:
             self.num_units = input_seq_shape.as_list()[-1]
+        if self.type == "AGRU":
+            self.gru_cell = QAAttGRUCell(self.num_units)
+        elif self.type == "AUGRU":
+            self.gru_cell = VecAttGRUCell(self.num_units)
+        else:
+            self.gru_cell = tf.nn.rnn_cell.GRUCell(self.num_units)
 
         # Be sure to call this somewhere!
         super(DynamicGRU, self).build(input_shape)
@@ -670,14 +676,7 @@ class DynamicGRU(Layer):
         else:
             rnn_input, sequence_length, att_score = input_list
 
-        if self.type == "AGRU":
-            gru_cell = QAAttGRUCell(self.num_units)
-        elif self.type == "AUGRU":
-            gru_cell = VecAttGRUCell(self.num_units)
-        else:
-            gru_cell = tf.nn.rnn_cell.GRUCell(self.num_units)
-
-        rnn_output, hidden_state = dynamic_rnn(gru_cell, inputs=rnn_input, att_scores=att_score,
+        rnn_output, hidden_state = dynamic_rnn(self.gru_cell, inputs=rnn_input, att_scores=att_score,
                                                sequence_length=tf.squeeze(sequence_length,
                                                                           ), dtype=tf.float32, scope=self.name)
         if self.return_sequence:

@@ -33,15 +33,12 @@ def get_input(feature_dim_dict, seq_feature_list, seq_max_len):
 
 
 def auxiliary_loss(h_states, click_seq, noclick_seq, mask, stag=None):
-    """
-
-    :param h_states:
-    :param click_seq:
-    :param noclick_seq: #[B,T-1,E]
-    :param mask:#[B,1]
-    :param stag:
-    :return:
-    """
+    #:param h_states:
+    #:param click_seq:
+    #:param noclick_seq: #[B,T-1,E]
+    #:param mask:#[B,1]
+    #:param stag:
+    #:return:
     hist_len, _ = click_seq.get_shape().as_list()[1:]
     mask = tf.sequence_mask(mask, hist_len)
     mask = mask[:, 0, :]
@@ -144,9 +141,9 @@ def DIEN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
     :param seq_feature_list: list,to indicate  sequence sparse field (**now only support sparse feature**),must be a subset of ``feature_dim_dict["sparse"]``
     :param embedding_size: positive integer,sparse feature embedding_size.
     :param hist_len_max: positive int, to indicate the max length of seq input
-    :param gru_type:str,can be GRU AIGRU AUGRU AGRU
-    :param use_negsampling:bool, whether or not use negtive sampling
-    :param alpha:float ,weight of auxiliary_loss
+    :param gru_type: str,can be GRU AIGRU AUGRU AGRU
+    :param use_negsampling: bool, whether or not use negtive sampling
+    :param alpha: float ,weight of auxiliary_loss
     :param use_bn: bool. Whether use BatchNormalization before activation or not in deep net
     :param hidden_size: list,list of positive integer or empty list, the layer number and units in each layer of deep net
     :param activation: Activation function to use in deep net
@@ -223,5 +220,4 @@ def DIEN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
 
     if use_negsampling:
         model.add_loss(alpha * aux_loss_1)
-    tf.keras.backend.get_session().run(tf.global_variables_initializer())
     return model

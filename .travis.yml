@@ -3,8 +3,8 @@
 language: python
 
 python:
-  - "3.4"
-  - "3.5"
+#  - "3.4"
+#  - "3.5"
   - "3.6"
   - "3.7"
 
@@ -30,6 +30,8 @@ matrix:
     - env: TF_VERSION=1.7.0
     - env: TF_VERSION=1.7.1
     - env: TF_VERSION=1.8.0
+    - env: TF_VERSION=1.12.0 # too slow
+    - env: TF_VERSION=1.13.1 # too slow
   fast_finish: true
 
 cache: pip

@@ -15,4 +15,4 @@ DeepCTR Models API
    DIEN<deepctr.models.dien>
    xDeepFM<deepctr.models.xdeepfm>
    AutoInt<deepctr.models.autoint>
-   AutoInt<deepctr.models.nffm>
+   NFFM<deepctr.models.nffm>

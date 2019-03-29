@@ -40,9 +40,9 @@ def NFFM(feature_dim_dict, embedding_size=4, hidden_size=(128, 128),
     :param seed: integer ,to use as random seed.
     :param keep_prob: float in (0,1]. keep_prob used in deep net
     :param final_activation: str,output activation,usually ``'sigmoid'`` or ``'linear'``
-    :param include_linear:bool,whether include linear term or not
-    :param use_bn:bool,whether use bn after ffm out or not
-    :param reduce_sum:bool,whether apply reduce_sum on cross vector
+    :param include_linear: bool,whether include linear term or not
+    :param use_bn: bool,whether use bn after ffm out or not
+    :param reduce_sum: bool,whether apply reduce_sum on cross vector
     :return: A Keras model instance.
     """
 
