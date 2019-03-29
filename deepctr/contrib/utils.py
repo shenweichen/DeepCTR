@@ -1,6 +1,6 @@
 from tensorflow.python.ops.rnn_cell import *
 
-#from tensorflow.python.ops.rnn_cell_impl import  _Linear
+
 
 from tensorflow.python.ops import math_ops
 from tensorflow.python.ops import nn_ops
@@ -16,7 +16,7 @@ _BIAS_VARIABLE_NAME = "bias"
 
 _WEIGHTS_VARIABLE_NAME = "kernel"
 
-class _Linear(object):
+class _Linear_(object):
 
   """Linear map: sum_i(args[i] * W[i]), where W[i] is a variable.
 
@@ -163,8 +163,10 @@ class _Linear(object):
     return res
 
 
-
-
+try:
+    from tensorflow.python.ops.rnn_cell_impl import _Linear
+except:
+    _Linear = _Linear_
 
 
 class QAAttGRUCell(RNNCell):

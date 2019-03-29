@@ -5,6 +5,7 @@ from deepctr.layers.activation import Dice
 from deepctr.utils import SingleFeat
 from deepctr.layers import custom_objects
 from tensorflow.python.keras.models import load_model, save_model
+import tensorflow as tf
 
 
 def get_xy_fd(use_neg=False):
@@ -20,21 +21,20 @@ def get_xy_fd(use_neg=False):
     hist_iid = np.array([[ 1, 2, 3,0], [ 1, 2, 3,0], [ 1, 2, 0,0]])
     hist_igender = np.array([[1, 1, 2,0 ], [2, 1, 1, 0], [2, 1, 0, 0]])
 
-    if use_neg:
-        neg_hist_iid = np.array([[1, 2, 3, 0], [1, 2, 3, 0], [1, 2, 0, 0]])
-        neg_hist_igender = np.array([[1, 1, 2, 0], [2, 1, 1, 0], [2, 1, 0, 0]])
-
     behavior_length = np.array([3,3,2])
-
 
     feature_dict = {'user': uid, 'gender': ugender, 'item': iid, 'item_gender': igender,
                     'hist_item': hist_iid, 'hist_item_gender': hist_igender,
-                    'neg_hist_item': neg_hist_iid, 'neg_hist_item_gender':  neg_hist_igender,
                     'score': score}
 
-    x = [feature_dict[feat.name] for feat in feature_dim_dict["sparse"]] + [feature_dict[feat.name] for feat in feature_dim_dict["dense"]] + [feature_dict['hist_'+feat] for feat in behavior_feature_list]
+    x = [feature_dict[feat.name] for feat in feature_dim_dict["sparse"]] + [feature_dict[feat.name] for feat in
+                                                                            feature_dim_dict["dense"]] + [
+            feature_dict['hist_' + feat] for feat in behavior_feature_list]
     if use_neg:
+        feature_dict['neg_hist_item'] = np.array([[1, 2, 3, 0], [1, 2, 3, 0], [1, 2, 0, 0]])
+        feature_dict['neg_hist_item_gender'] = np.array([[1, 1, 2, 0], [2, 1, 1, 0], [2, 1, 0, 0]])
         x += [feature_dict['neg_hist_'+feat] for feat in behavior_feature_list]
+
     x += [behavior_length]
     y = [1, 0, 1]
     return x, y, feature_dim_dict, behavior_feature_list
@@ -60,7 +60,7 @@ def test_DIEN_model_io():
 
 @pytest.mark.parametrize(
     'gru_type',
-    ['GRU','AGRU','AIGRU','AUGRU',
+    ['GRU','AIGRU','AGRU','AUGRU',
      ]
 )
 def test_DIEN(gru_type):
@@ -73,6 +73,8 @@ def test_DIEN(gru_type):
 
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
+
+    tf.keras.backend.get_session().run(tf.global_variables_initializer())
     model.fit(x, y, verbose=1, validation_split=0.5)
 
     print(model_name+" test train valid pass!")
@@ -100,6 +102,7 @@ def test_DIEN_neg():
 
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
+    tf.keras.backend.get_session().run(tf.global_variables_initializer())
     model.fit(x, y, verbose=1, validation_split=0.5)
 
     print(model_name+" test train valid pass!")
