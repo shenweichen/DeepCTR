@@ -230,7 +230,7 @@ class CIN(Layer):
             self.filters.append(self.add_weight(name='filter' + str(i),
                                                 shape=[1, self.field_nums[-1]
                                                        * self.field_nums[0], size],
-                                                dtype=tf.float32, initializer=glorot_uniform(seed=self.seed + i), regularizer=l2(l2_reg)))
+                                                dtype=tf.float32, initializer=glorot_uniform(seed=self.seed + i), regularizer=l2(self.l2_reg)))
 
             self.bias.append(self.add_weight(name='bias' + str(i), shape=[size], dtype=tf.float32,
                                              initializer=tf.keras.initializers.Zeros()))
