@@ -12,8 +12,8 @@ from tensorflow.python.keras import backend as K
 from tensorflow.python.keras.initializers import TruncatedNormal
 from tensorflow.python.keras.layers import LSTM, Lambda, Layer
 
-from deepctr.contrib.rnn import dynamic_rnn
-from deepctr.contrib.utils import QAAttGRUCell, VecAttGRUCell
+from ..contrib.rnn import dynamic_rnn
+from ..contrib.utils import QAAttGRUCell, VecAttGRUCell
 
 from .core import LocalActivationUnit
 from .normalization import LayerNormalization

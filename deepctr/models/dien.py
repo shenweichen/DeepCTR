@@ -10,7 +10,7 @@ Reference:
 import tensorflow as tf
 from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.layers import (Concatenate, Dense, Embedding,
-                                            Input, Lambda, Permute, multiply)
+                                            Input, Permute, multiply)
 from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.regularizers import l2
 
@@ -97,17 +97,10 @@ def interest_evolution(concat_behavior, deep_input_item, user_behavior_length, g
     if gru_type not in ["GRU", "AIGRU", "AGRU", "AUGRU"]:
         raise ValueError("gru_type error ")
     aux_loss_1 = None
-    # if gru_type == "GRUv2":
-    #     return DynamicGRU(embedding_size*2, return_sequence=False, name="gru1") \
-    #     ([concat_behavior, user_behavior_length]),aux_loss_1
 
     rnn_outputs = DynamicGRU(embedding_size * 2, return_sequence=True,
                              name="gru1")([concat_behavior, user_behavior_length])
-    #rnn_outputs = concat_behavior
-    #hist_len = concat_behavior.get_shape()[1]
 
-    #key_masks = Lambda(lambda x:tf.sequence_mask(x,hist_len))(user_behavior_length)
-    #print(user_behavior_length, hist_len,key_masks)
     if gru_type == "AUGRU" and use_neg:
         aux_loss_1 = auxiliary_loss(rnn_outputs[:, :-1, :], concat_behavior[:, 1:, :],
 
@@ -118,39 +111,26 @@ def interest_evolution(concat_behavior, deep_input_item, user_behavior_length, g
     if gru_type == "GRU":
         rnn_outputs2 = DynamicGRU(embedding_size * 2, return_sequence=True,
                                   name="gru2")([rnn_outputs, user_behavior_length])
-        #rnn_outputs2 = rnn_outputs
-        attention_score = AttentionSequencePoolingLayer(hidden_size=att_hidden_size, activation=att_activation, weight_normalization=att_weight_normalization, return_score=True)([
+        # attention_score = AttentionSequencePoolingLayer(hidden_size=att_hidden_size, activation=att_activation, weight_normalization=att_weight_normalization, return_score=True)([
+        #     deep_input_item, rnn_outputs2, user_behavior_length])
+        # outputs = Lambda(lambda x: tf.matmul(x[0], x[1]))(
+        #     [attention_score, rnn_outputs2])
+        # hist = outputs
+        hist = AttentionSequencePoolingLayer(hidden_size=att_hidden_size, activation=att_activation, weight_normalization=att_weight_normalization, return_score=False)([
             deep_input_item, rnn_outputs2, user_behavior_length])
-        outputs = Lambda(lambda x: tf.matmul(x[0], x[1]))(
-            [attention_score, rnn_outputs2])
-        hist = outputs
-        #hist = SequencePoolingLayer(300)([rnn_outputs,user_behavior_length])
 
-    else:
+    else:#AIGRU AGRU AUGRU
 
         scores = AttentionSequencePoolingLayer(hidden_size=att_hidden_size, activation=att_activation, weight_normalization=att_weight_normalization, return_score=True)([
             deep_input_item, rnn_outputs, user_behavior_length])
 
-        if gru_type == "AIGRU":  # or gru_type == "AIGRUv2":
-            # print(rnn_outputs,scores,Permute([2,1])(scores))
-            if gru_type == "AIGRU":
-                hist = multiply([rnn_outputs, Permute([2, 1])(scores)])
-            else:
-                scores = AttentionSequencePoolingLayer(hidden_size=att_hidden_size, activation=att_activation, weight_normalization=att_weight_normalization,
-                                                       return_score=True)(
-                    [deep_input_item, concat_behavior, user_behavior_length])
-                hist = multiply([concat_behavior, Permute([2, 1])(scores)])
-
+        if gru_type == "AIGRU":
+            hist = multiply([rnn_outputs, Permute([2, 1])(scores)])
             final_state2 = DynamicGRU(embedding_size * 2, type="GRU", return_sequence=False, name='gru2')(
                 [hist, user_behavior_length])
-        else:
+        else:#AGRU AUGRU
             final_state2 = DynamicGRU(embedding_size * 2, type=gru_type, return_sequence=False,
                                       name='gru2')([rnn_outputs, user_behavior_length, Permute([2, 1])(scores)])
-
-        # rnn_outputs2, final_state2 = GRU(self.embedding_size * 2, return_sequences=False, return_state=True,
-        #                                 name="gru2",
-        #                                 kernel_initializer="he_normal")(hist)
-        # hist = Lambda(lambda x: tf.expand_dims(x, axis=1))(final_state2)
         hist = final_state2
     return hist, aux_loss_1
 
@@ -158,7 +138,7 @@ def interest_evolution(concat_behavior, deep_input_item, user_behavior_length, g
 def DIEN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
          gru_type="GRU", use_negsampling=False, alpha=1.0, use_bn=False, hidden_size=(200, 80), activation='sigmoid', att_hidden_size=[64, 16], att_activation=Dice, att_weight_normalization=True,
          l2_reg_deep=0, l2_reg_embedding=1e-5, final_activation='sigmoid', keep_prob=1, init_std=0.0001, seed=1024, ):
-    """Instantiates the Deep Interest Network architecture.
+    """Instantiates the Deep Interest Evolution Network architecture.
 
     :param feature_dim_dict: dict,to indicate sparse field (**now only support sparse feature**)like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':[]}
     :param seq_feature_list: list,to indicate  sequence sparse field (**now only support sparse feature**),must be a subset of ``feature_dim_dict["sparse"]``
@@ -243,4 +223,5 @@ def DIEN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
 
     if use_negsampling:
         model.add_loss(alpha * aux_loss_1)
+    tf.keras.backend.get_session().run(tf.global_variables_initializer())
     return model

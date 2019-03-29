@@ -178,7 +178,7 @@ DIEN (Deep Interest Evolution Network)
 Deep Interest Evolution Network (DIEN) uses interest extractor layer to capture temporal interests from history behavior sequence. At this layer,  an auxiliary loss is proposed to supervise interest extracting at each step. As user interests are diverse, especially in the e-commerce system, interest evolving layer is proposed to capture interest evolving process that is relative to the target item. At interest evolving layer, attention mechanism is embedded into the sequential structure novelly, and the effects of relative interests are strengthened during interest evolution.
 
 **DIEN api** `link <./deepctr.models.dien.html>`_ **DIEN demo** `link <https://github.com/shenweichen/DeepCTR/tree/master/examples
-/run_din.py>`_
+/run_dien.py>`_
 
 .. image:: ../pics/DIEN.png
    :align: center
@@ -229,7 +229,7 @@ By stacking multiple interacting layers,AutoInt is able to model different order
 NFFM(Field-aware Neural Factorization Machine)
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-This model can have strong secondorder feature interactive learning ability like FFM. Further more, deep neural network is used to learn higher-ordered feature combinations. 
+NFFM models second order feature interactions like like FFM and preserves second-order interaction information  as much as possible.Further more,deep neural network is used to learn higher-ordered feature interactions. 
 
 **NFFM api** `link <./deepctr.models.nffm.html>`_
 

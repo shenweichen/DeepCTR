@@ -68,3 +68,9 @@ For `DIN` please read the code example in [run_din.py](https://github.com/shenwe
 ).
 
 You can also use layers in [sequence](./deepctr.layers.sequence.html)to build your own models !
+
+## 5. How to run the demo with GPU ?
+please refer https://github.com/shenweichen/DeepCTR/issues/40
+
+## 6. Could not find a version that satisfies the requirement deepctr (from versions)
+please  install with `pip3 install`
