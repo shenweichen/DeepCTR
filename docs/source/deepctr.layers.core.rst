@@ -3,5 +3,5 @@ deepctr.layers.core module
 
 .. automodule:: deepctr.layers.core
     :members:
-    :undoc-members:
-    :show-inheritance:
+    :no-undoc-members:
+    :no-show-inheritance:

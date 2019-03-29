@@ -24,15 +24,6 @@ from ..layers.core import MLP, PredictionLayer
 from ..layers.utils import concat_fun
 from ..utils import check_feature_config_dict
 
-# def get_embedding_idx(sp_input, field_num, feat):
-#     # sp_input,sparse_embedding = inputs
-#     multi_input = K.repeat_elements(sp_input, field_num, 1)
-#     offset = K.cast(K.arange(0, field_num * feat.dimension, feat.dimension, dtype=tf.int32), tf.int32)
-#     offset_c = K.constant(np.arange(0, field_num * feat.dimension, feat.dimension), tf.int32)
-#
-#     return multi_input + offset_c
-
-
 def NFFM(feature_dim_dict, embedding_size=4, hidden_size=(128, 128),
          l2_reg_embedding=1e-5, l2_reg_linear=1e-5, l2_reg_deep=0,
          init_std=0.0001, seed=1024, final_activation='sigmoid', include_linear=True, use_bn=True, reduce_sum=False,
@@ -54,7 +45,10 @@ def NFFM(feature_dim_dict, embedding_size=4, hidden_size=(128, 128),
     :param reduce_sum:bool,whether apply reduce_sum on cross vector
     :return: A Keras model instance.
     """
+
     check_feature_config_dict(feature_dim_dict)
+    if 'sequence' in feature_dim_dict:
+        raise ValueError("now sequence input is not supported in NFFM")
 
     sparse_input_dict, dense_input_dict = create_singlefeat_inputdict(
         feature_dim_dict)

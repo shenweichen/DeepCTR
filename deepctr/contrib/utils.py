@@ -1,7 +1,6 @@
 from tensorflow.python.ops.rnn_cell import *
 
 
-
 from tensorflow.python.ops import math_ops
 from tensorflow.python.ops import nn_ops
 from tensorflow.python.ops import init_ops
@@ -16,151 +15,140 @@ _BIAS_VARIABLE_NAME = "bias"
 
 _WEIGHTS_VARIABLE_NAME = "kernel"
 
+
 class _Linear_(object):
 
-  """Linear map: sum_i(args[i] * W[i]), where W[i] is a variable.
+    """Linear map: sum_i(args[i] * W[i]), where W[i] is a variable.
 
 
 
-  Args:
+    Args:
 
-    args: a 2D Tensor or a list of 2D, batch x n, Tensors.
+      args: a 2D Tensor or a list of 2D, batch x n, Tensors.
 
-    output_size: int, second dimension of weight variable.
+      output_size: int, second dimension of weight variable.
 
-    dtype: data type for variables.
+      dtype: data type for variables.
 
-    build_bias: boolean, whether to build a bias variable.
+      build_bias: boolean, whether to build a bias variable.
 
-    bias_initializer: starting value to initialize the bias
+      bias_initializer: starting value to initialize the bias
 
-      (default is all zeros).
+        (default is all zeros).
 
-    kernel_initializer: starting value to initialize the weight.
+      kernel_initializer: starting value to initialize the weight.
 
 
 
-  Raises:
+    Raises:
 
-    ValueError: if inputs_shape is wrong.
+      ValueError: if inputs_shape is wrong.
 
-  """
+    """
 
+    def __init__(self,
 
+                 args,
 
-  def __init__(self,
+                 output_size,
 
-               args,
+                 build_bias,
 
-               output_size,
+                 bias_initializer=None,
 
-               build_bias,
+                 kernel_initializer=None):
 
-               bias_initializer=None,
+        self._build_bias = build_bias
 
-               kernel_initializer=None):
+        if args is None or (nest.is_sequence(args) and not args):
 
-    self._build_bias = build_bias
+            raise ValueError("`args` must be specified")
 
+        if not nest.is_sequence(args):
 
+            args = [args]
 
-    if args is None or (nest.is_sequence(args) and not args):
+            self._is_sequence = False
 
-      raise ValueError("`args` must be specified")
+        else:
 
-    if not nest.is_sequence(args):
+            self._is_sequence = True
 
-      args = [args]
+        # Calculate the total size of arguments on dimension 1.
 
-      self._is_sequence = False
+        total_arg_size = 0
 
-    else:
+        shapes = [a.get_shape() for a in args]
 
-      self._is_sequence = True
+        for shape in shapes:
 
+            if shape.ndims != 2:
 
+                raise ValueError(
+                    "linear is expecting 2D arguments: %s" % shapes)
 
-    # Calculate the total size of arguments on dimension 1.
+            if shape[1].value is None:
 
-    total_arg_size = 0
+                raise ValueError("linear expects shape[1] to be provided for shape %s, "
 
-    shapes = [a.get_shape() for a in args]
+                                 "but saw %s" % (shape, shape[1]))
 
-    for shape in shapes:
+            else:
 
-      if shape.ndims != 2:
+                total_arg_size += shape[1].value
 
-        raise ValueError("linear is expecting 2D arguments: %s" % shapes)
+        dtype = [a.dtype for a in args][0]
 
-      if shape[1].value is None:
+        scope = vs.get_variable_scope()
 
-        raise ValueError("linear expects shape[1] to be provided for shape %s, "
+        with vs.variable_scope(scope) as outer_scope:
 
-                         "but saw %s" % (shape, shape[1]))
+            self._weights = vs.get_variable(
 
-      else:
+                _WEIGHTS_VARIABLE_NAME, [total_arg_size, output_size],
 
-        total_arg_size += shape[1].value
+                dtype=dtype,
 
+                initializer=kernel_initializer)
 
+            if build_bias:
 
-    dtype = [a.dtype for a in args][0]
+                with vs.variable_scope(outer_scope) as inner_scope:
 
+                    inner_scope.set_partitioner(None)
 
+                    if bias_initializer is None:
 
-    scope = vs.get_variable_scope()
+                        bias_initializer = init_ops.constant_initializer(
+                            0.0, dtype=dtype)
 
-    with vs.variable_scope(scope) as outer_scope:
+                    self._biases = vs.get_variable(
 
-      self._weights = vs.get_variable(
+                        _BIAS_VARIABLE_NAME, [output_size],
 
-          _WEIGHTS_VARIABLE_NAME, [total_arg_size, output_size],
+                        dtype=dtype,
 
-          dtype=dtype,
+                        initializer=bias_initializer)
 
-          initializer=kernel_initializer)
+    def __call__(self, args):
 
-      if build_bias:
+        if not self._is_sequence:
 
-        with vs.variable_scope(outer_scope) as inner_scope:
+            args = [args]
 
-          inner_scope.set_partitioner(None)
+        if len(args) == 1:
 
-          if bias_initializer is None:
+            res = math_ops.matmul(args[0], self._weights)
 
-            bias_initializer = init_ops.constant_initializer(0.0, dtype=dtype)
+        else:
 
-          self._biases = vs.get_variable(
+            res = math_ops.matmul(array_ops.concat(args, 1), self._weights)
 
-              _BIAS_VARIABLE_NAME, [output_size],
+        if self._build_bias:
 
-              dtype=dtype,
+            res = nn_ops.bias_add(res, self._biases)
 
-              initializer=bias_initializer)
-
-
-
-  def __call__(self, args):
-
-    if not self._is_sequence:
-
-      args = [args]
-
-
-
-    if len(args) == 1:
-
-      res = math_ops.matmul(args[0], self._weights)
-
-    else:
-
-      res = math_ops.matmul(array_ops.concat(args, 1), self._weights)
-
-    if self._build_bias:
-
-      res = nn_ops.bias_add(res, self._biases)
-
-    return res
+        return res
 
 
 try:
@@ -171,271 +159,242 @@ except:
 
 class QAAttGRUCell(RNNCell):
 
-  """Gated Recurrent Unit cell (cf. http://arxiv.org/abs/1406.1078).
+    """Gated Recurrent Unit cell (cf. http://arxiv.org/abs/1406.1078).
 
-  Args:
+    Args:
 
-    num_units: int, The number of units in the GRU cell.
+      num_units: int, The number of units in the GRU cell.
 
-    activation: Nonlinearity to use.  Default: `tanh`.
+      activation: Nonlinearity to use.  Default: `tanh`.
 
-    reuse: (optional) Python boolean describing whether to reuse variables
+      reuse: (optional) Python boolean describing whether to reuse variables
 
-     in an existing scope.  If not `True`, and the existing scope already has
+       in an existing scope.  If not `True`, and the existing scope already has
 
-     the given variables, an error is raised.
+       the given variables, an error is raised.
 
-    kernel_initializer: (optional) The initializer to use for the weight and
+      kernel_initializer: (optional) The initializer to use for the weight and
 
-    projection matrices.
+      projection matrices.
 
-    bias_initializer: (optional) The initializer to use for the bias.
+      bias_initializer: (optional) The initializer to use for the bias.
 
-  """
+    """
 
+    def __init__(self,
 
+                 num_units,
 
-  def __init__(self,
+                 activation=None,
 
-               num_units,
+                 reuse=None,
 
-               activation=None,
+                 kernel_initializer=None,
 
-               reuse=None,
+                 bias_initializer=None):
 
-               kernel_initializer=None,
+        super(QAAttGRUCell, self).__init__(_reuse=reuse)
 
-               bias_initializer=None):
+        self._num_units = num_units
 
-    super(QAAttGRUCell, self).__init__(_reuse=reuse)
+        self._activation = activation or math_ops.tanh
 
-    self._num_units = num_units
+        self._kernel_initializer = kernel_initializer
 
-    self._activation = activation or math_ops.tanh
+        self._bias_initializer = bias_initializer
 
-    self._kernel_initializer = kernel_initializer
+        self._gate_linear = None
 
-    self._bias_initializer = bias_initializer
+        self._candidate_linear = None
 
-    self._gate_linear = None
+    @property
+    def state_size(self):
 
-    self._candidate_linear = None
+        return self._num_units
 
+    @property
+    def output_size(self):
 
+        return self._num_units
 
-  @property
+    def __call__(self, inputs, state, att_score):
 
-  def state_size(self):
+        return self.call(inputs, state, att_score)
 
-    return self._num_units
+    def call(self, inputs, state, att_score=None):
+        """Gated recurrent unit (GRU) with nunits cells."""
 
+        if self._gate_linear is None:
 
+            bias_ones = self._bias_initializer
 
-  @property
+            if self._bias_initializer is None:
 
-  def output_size(self):
+                bias_ones = init_ops.constant_initializer(
+                    1.0, dtype=inputs.dtype)
 
-    return self._num_units
+            with vs.variable_scope("gates"):  # Reset gate and update gate.
 
+                self._gate_linear = _Linear(
 
+                    [inputs, state],
 
-  def __call__(self, inputs, state, att_score):
+                    2 * self._num_units,
 
-      return self.call(inputs, state, att_score)
+                    True,
 
+                    bias_initializer=bias_ones,
 
+                    kernel_initializer=self._kernel_initializer)
 
-  def call(self, inputs, state, att_score=None):
+        value = math_ops.sigmoid(self._gate_linear([inputs, state]))
 
-    """Gated recurrent unit (GRU) with nunits cells."""
+        r, u = array_ops.split(value=value, num_or_size_splits=2, axis=1)
 
-    if self._gate_linear is None:
+        r_state = r * state
 
-      bias_ones = self._bias_initializer
+        if self._candidate_linear is None:
 
-      if self._bias_initializer is None:
+            with vs.variable_scope("candidate"):
 
-        bias_ones = init_ops.constant_initializer(1.0, dtype=inputs.dtype)
+                self._candidate_linear = _Linear(
 
-      with vs.variable_scope("gates"):  # Reset gate and update gate.
+                    [inputs, r_state],
 
-        self._gate_linear = _Linear(
+                    self._num_units,
 
-            [inputs, state],
+                    True,
 
-            2 * self._num_units,
+                    bias_initializer=self._bias_initializer,
 
-            True,
+                    kernel_initializer=self._kernel_initializer)
 
-            bias_initializer=bias_ones,
+        c = self._activation(self._candidate_linear([inputs, r_state]))
 
-            kernel_initializer=self._kernel_initializer)
+        new_h = (1. - att_score) * state + att_score * c
 
-
-
-    value = math_ops.sigmoid(self._gate_linear([inputs, state]))
-
-    r, u = array_ops.split(value=value, num_or_size_splits=2, axis=1)
-
-
-
-    r_state = r * state
-
-    if self._candidate_linear is None:
-
-      with vs.variable_scope("candidate"):
-
-        self._candidate_linear = _Linear(
-
-            [inputs, r_state],
-
-            self._num_units,
-
-            True,
-
-            bias_initializer=self._bias_initializer,
-
-            kernel_initializer=self._kernel_initializer)
-
-    c = self._activation(self._candidate_linear([inputs, r_state]))
-
-    new_h = (1. - att_score) * state + att_score * c
-
-    return new_h, new_h
-
+        return new_h, new_h
 
 
 class VecAttGRUCell(RNNCell):
 
-  """Gated Recurrent Unit cell (cf. http://arxiv.org/abs/1406.1078).
+    """Gated Recurrent Unit cell (cf. http://arxiv.org/abs/1406.1078).
 
-  Args:
+    Args:
 
-    num_units: int, The number of units in the GRU cell.
+      num_units: int, The number of units in the GRU cell.
 
-    activation: Nonlinearity to use.  Default: `tanh`.
+      activation: Nonlinearity to use.  Default: `tanh`.
 
-    reuse: (optional) Python boolean describing whether to reuse variables
+      reuse: (optional) Python boolean describing whether to reuse variables
 
-     in an existing scope.  If not `True`, and the existing scope already has
+       in an existing scope.  If not `True`, and the existing scope already has
 
-     the given variables, an error is raised.
+       the given variables, an error is raised.
 
-    kernel_initializer: (optional) The initializer to use for the weight and
+      kernel_initializer: (optional) The initializer to use for the weight and
 
-    projection matrices.
+      projection matrices.
 
-    bias_initializer: (optional) The initializer to use for the bias.
+      bias_initializer: (optional) The initializer to use for the bias.
 
-  """
+    """
 
+    def __init__(self,
 
+                 num_units,
 
-  def __init__(self,
+                 activation=None,
 
-               num_units,
+                 reuse=None,
 
-               activation=None,
+                 kernel_initializer=None,
 
-               reuse=None,
+                 bias_initializer=None):
 
-               kernel_initializer=None,
+        super(VecAttGRUCell, self).__init__(_reuse=reuse)
 
-               bias_initializer=None):
+        self._num_units = num_units
 
-    super(VecAttGRUCell, self).__init__(_reuse=reuse)
+        self._activation = activation or math_ops.tanh
 
-    self._num_units = num_units
+        self._kernel_initializer = kernel_initializer
 
-    self._activation = activation or math_ops.tanh
+        self._bias_initializer = bias_initializer
 
-    self._kernel_initializer = kernel_initializer
+        self._gate_linear = None
 
-    self._bias_initializer = bias_initializer
+        self._candidate_linear = None
 
-    self._gate_linear = None
+    @property
+    def state_size(self):
 
-    self._candidate_linear = None
+        return self._num_units
 
+    @property
+    def output_size(self):
 
+        return self._num_units
 
-  @property
+    def __call__(self, inputs, state, att_score):
 
-  def state_size(self):
+        return self.call(inputs, state, att_score)
 
-    return self._num_units
+    def call(self, inputs, state, att_score=None):
+        """Gated recurrent unit (GRU) with nunits cells."""
 
+        if self._gate_linear is None:
 
+            bias_ones = self._bias_initializer
 
-  @property
+            if self._bias_initializer is None:
 
-  def output_size(self):
+                bias_ones = init_ops.constant_initializer(
+                    1.0, dtype=inputs.dtype)
 
-    return self._num_units
+            with vs.variable_scope("gates"):  # Reset gate and update gate.
 
-  def __call__(self, inputs, state, att_score):
+                self._gate_linear = _Linear(
 
-      return self.call(inputs, state, att_score)
+                    [inputs, state],
 
-  def call(self, inputs, state, att_score=None):
+                    2 * self._num_units,
 
-    """Gated recurrent unit (GRU) with nunits cells."""
+                    True,
 
-    if self._gate_linear is None:
+                    bias_initializer=bias_ones,
 
-      bias_ones = self._bias_initializer
+                    kernel_initializer=self._kernel_initializer)
 
-      if self._bias_initializer is None:
+        value = math_ops.sigmoid(self._gate_linear([inputs, state]))
 
-        bias_ones = init_ops.constant_initializer(1.0, dtype=inputs.dtype)
+        r, u = array_ops.split(value=value, num_or_size_splits=2, axis=1)
 
-      with vs.variable_scope("gates"):  # Reset gate and update gate.
+        r_state = r * state
 
-        self._gate_linear = _Linear(
+        if self._candidate_linear is None:
 
-            [inputs, state],
+            with vs.variable_scope("candidate"):
 
-            2 * self._num_units,
+                self._candidate_linear = _Linear(
 
-            True,
+                    [inputs, r_state],
 
-            bias_initializer=bias_ones,
+                    self._num_units,
 
-            kernel_initializer=self._kernel_initializer)
+                    True,
 
+                    bias_initializer=self._bias_initializer,
 
+                    kernel_initializer=self._kernel_initializer)
 
-    value = math_ops.sigmoid(self._gate_linear([inputs, state]))
+        c = self._activation(self._candidate_linear([inputs, r_state]))
 
-    r, u = array_ops.split(value=value, num_or_size_splits=2, axis=1)
+        u = (1.0 - att_score) * u
 
+        new_h = u * state + (1 - u) * c
 
-
-    r_state = r * state
-
-    if self._candidate_linear is None:
-
-      with vs.variable_scope("candidate"):
-
-        self._candidate_linear = _Linear(
-
-            [inputs, r_state],
-
-            self._num_units,
-
-            True,
-
-            bias_initializer=self._bias_initializer,
-
-            kernel_initializer=self._kernel_initializer)
-
-    c = self._activation(self._candidate_linear([inputs, r_state]))
-
-    u = (1.0 - att_score) * u
-
-    new_h = u * state + (1 - u) * c
-
-    return new_h, new_h
+        return new_h, new_h
 
 
 #
