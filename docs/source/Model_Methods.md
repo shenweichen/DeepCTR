@@ -31,7 +31,7 @@ Trains the model for a given number of epochs (iterations on a dataset).
 - **batch_size**: Integer or `None`. Number of samples per gradient update. If unspecified, `batch_size` will default to 32.
 - **epochs**: Integer. Number of epochs to train the model. An epoch is an iteration over the entire `x` and `y` data provided. Note that in conjunction with `initial_epoch`, `epochs` is to be understood as "final epoch". The model is not trained for a number of iterations given by `epochs`, but merely until the epoch of index `epochs` is reached.
 - **verbose**: Integer. 0, 1, or 2. Verbosity mode. 0 = silent, 1 = progress bar, 2 = one line per epoch.
-- **callbacks**: List of `keras.callbacks.Callback` instances. List of callbacks to apply during training and validation (if ). See [callbacks](https://www.tensorflow.org/versions/r1.12/api_docs/python/tf/keras/callbacks).
+- **callbacks**: List of `tf.keras.callbacks.Callback` instances. List of callbacks to apply during training and validation (if ). See [callbacks](https://www.tensorflow.org/versions/r1.12/api_docs/python/tf/keras/callbacks).
 - **validation_split**: Float between 0 and 1. Fraction of the training data to be used as validation data. The model will set apart this fraction of the training data, will not train on it, and will evaluate the loss and any model metrics on this data at the end of each epoch. The validation data is selected from the last samples in the `x` and `y` data provided, before shuffling.
 validation_data: tuple `(x_val, y_val)` or tuple `(x_val, y_val, val_sample_weights)` on which to evaluate the loss and any model metrics at the end of each epoch. The model will not be trained on this data. `validation_data` will override `validation_split`.
 - **shuffle**: Boolean (whether to shuffle the training data before each epoch) or str (for 'batch'). 'batch' is a special option for dealing with the limitations of HDF5 data; it shuffles in batch-sized chunks. Has no effect when `steps_per_epoch` is not `None`.
@@ -65,7 +65,7 @@ Computation is done in batches.
 - **verbose**: 0 or 1. Verbosity mode. 0 = silent, 1 = progress bar.
 - **sample_weight**: Optional Numpy array of weights for the test samples, used for weighting the loss function. You can either pass a flat (1D) Numpy array with the same length as the input samples (1:1 mapping between weights and samples), or in the case of temporal data, you can pass a 2D array with shape `(samples, sequence_length)`, to apply a different weight to every timestep of every sample. In this case you should make sure to specify `sample_weight_mode="temporal"` in `compile()`.
 - **steps**: Integer or `None`. Total number of steps (batches of samples) before declaring the evaluation round finished. Ignored with the default value of `None`.
-- **callbacks**: List of `keras.callbacks.Callback` instances. List of callbacks to apply during evaluation. See [callbacks](https://www.tensorflow.org/versions/r1.12/api_docs/python/tf/keras/callbacks).
+- **callbacks**: List of `tf.keras.callbacks.Callback` instances. List of callbacks to apply during evaluation. See [callbacks](https://www.tensorflow.org/versions/r1.12/api_docs/python/tf/keras/callbacks).
 
 **Returns**  
 
@@ -85,7 +85,7 @@ Computation is done in batches.
 batch_size: Integer. If unspecified, it will default to 32.
 - **verbose**: Verbosity mode, 0 or 1.
 - **steps**: Total number of steps (batches of samples) before declaring the prediction round finished. Ignored with the default value of None.
-- **callbacks**: List of `keras.callbacks.Callback` instances. List of callbacks to apply during prediction. See [callbacks](https://www.tensorflow.org/versions/r1.12/api_docs/python/tf/keras/callbacks).
+- **callbacks**: List of `tf.keras.callbacks.Callback` instances. List of callbacks to apply during prediction. See [callbacks](https://www.tensorflow.org/versions/r1.12/api_docs/python/tf/keras/callbacks).
 
 **Returns**
 

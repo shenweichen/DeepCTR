@@ -2,7 +2,7 @@ DeepCTR Models API
 ======================
 
 .. toctree::
-   About Model<About_model.md>
+   Model Methods<Model_Methods.md>
    FNN<deepctr.models.fnn>
    PNN<deepctr.models.pnn>
    WDL<deepctr.models.wdl>
