@@ -10,14 +10,13 @@ from collections import OrderedDict
 from itertools import chain
 
 from tensorflow.python.keras.initializers import RandomNormal
-from tensorflow.python.keras.layers import (Concatenate, Dense, Embedding,
-                                            Input, Reshape, add)
+from tensorflow.python.keras.layers import Concatenate, Dense, Embedding,Input, Reshape, add
 from tensorflow.python.keras.regularizers import l2
 
 from .layers.sequence import SequencePoolingLayer
 
 
-def create_singlefeat_dict(feature_dim_dict, prefix=''):
+def create_singlefeat_inputdict(feature_dim_dict, prefix=''):
     sparse_input = OrderedDict()
     for i, feat in enumerate(feature_dim_dict["sparse"]):
         sparse_input[feat.name] = Input(
@@ -26,13 +25,13 @@ def create_singlefeat_dict(feature_dim_dict, prefix=''):
     dense_input = OrderedDict()
 
     for i, feat in enumerate(feature_dim_dict["dense"]):
-        dense_input[feat] = Input(
+        dense_input[feat.name] = Input(
             shape=(1,), name=prefix+'dense_' + str(i) + '-' + feat.name)
 
     return sparse_input, dense_input
 
 
-def create_varlenfeat_dict(feature_dim_dict, mask_zero=True):
+def create_varlenfeat_inputdict(feature_dim_dict, mask_zero=True):
 
     sequence_dim_dict = feature_dim_dict.get('sequence', [])
     sequence_input_dict = OrderedDict()
@@ -209,9 +208,9 @@ def get_linear_logit(linear_emb_list, dense_input_dict, l2_reg):
 
 def preprocess_input_embedding(feature_dim_dict, embedding_size, l2_reg_embedding, l2_reg_linear, init_std, seed,
                                return_linear_logit=True):
-    sparse_input_dict, dense_input_dict = create_singlefeat_dict(
+    sparse_input_dict, dense_input_dict = create_singlefeat_inputdict(
         feature_dim_dict)
-    sequence_input_dict, sequence_pooling_dict, sequence_input_len_dict, sequence_max_len_dict = create_varlenfeat_dict(
+    sequence_input_dict, sequence_pooling_dict, sequence_input_len_dict, sequence_max_len_dict = create_varlenfeat_inputdict(
         feature_dim_dict)
     inputs_list, deep_emb_list, linear_emb_list = get_inputs_embedding(feature_dim_dict, embedding_size,
                                                                        l2_reg_embedding, l2_reg_linear, init_std, seed,

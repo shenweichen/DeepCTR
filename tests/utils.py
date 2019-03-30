@@ -9,7 +9,8 @@ from tensorflow.python.keras import backend as K
 from tensorflow.python.keras.layers import Input, Masking
 from tensorflow.python.keras.models import Model, load_model, save_model
 
-from deepctr.utils import SingleFeat, VarLenFeat, custom_objects
+from deepctr.utils import SingleFeat, VarLenFeat
+from deepctr.layers import  custom_objects
 
 
 def gen_sequence(dim, max_len, sample_size):
@@ -25,7 +26,7 @@ def get_test_data(sample_size=1000, sparse_feature_num=1, dense_feature_num=1, s
         dim = np.random.randint(1, 10)
         feature_dim_dict['sparse'].append(SingleFeat('sparse_'+str(i), dim))
     for i in range(dense_feature_num):
-        feature_dim_dict['dense'].append(SingleFeat('sparse_'+str(i), 0))
+        feature_dim_dict['dense'].append(SingleFeat('dense_'+str(i), 0))
     for i, mode in enumerate(sequence_feature):
         dim = np.random.randint(1, 10)
         maxlen = np.random.randint(1, 10)

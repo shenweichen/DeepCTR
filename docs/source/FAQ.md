@@ -67,4 +67,16 @@ Now multi-value input is avaliable for `AFM,AutoInt,DCN,DeepFM,FNN,NFM,PNN,xDeep
 For `DIN` please read the code example in [run_din.py](https://github.com/shenweichen/DeepCTR/blob/master/examples/run_din.py
 ).
 
+For `DIEN` please read the code example in [run_dien.py](https://github.com/shenweichen/DeepCTR/blob/master/examples/run_dien.py
+).
+
 You can also use layers in [sequence](./deepctr.layers.sequence.html)to build your own models !
+
+## 5. How to add a long feature vector as a feature to the model?
+please refer [this](https://github.com/shenweichen/DeepCTR/issues/42)
+
+## 6. How to run the demo with GPU ?
+please refer [this](https://github.com/shenweichen/DeepCTR/issues/40)
+
+## 7. Could not find a version that satisfies the requirement deepctr (from versions)
+please install with `pip3 install` instead of `pip install`

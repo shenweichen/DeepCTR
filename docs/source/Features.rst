@@ -172,6 +172,21 @@ user's interest vector and other embedding vectors are concatenated and fed into
 
 `Zhou G, Zhu X, Song C, et al. Deep interest network for click-through rate prediction[C]//Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. ACM, 2018: 1059-1068. <https://arxiv.org/pdf/1706.06978.pdf>`_ 
 
+DIEN (Deep Interest Evolution Network)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+Deep Interest Evolution Network (DIEN) uses interest extractor layer to capture temporal interests from history behavior sequence. At this layer,  an auxiliary loss is proposed to supervise interest extracting at each step. As user interests are diverse, especially in the e-commerce system, interest evolving layer is proposed to capture interest evolving process that is relative to the target item. At interest evolving layer, attention mechanism is embedded into the sequential structure novelly, and the effects of relative interests are strengthened during interest evolution.
+
+**DIEN api** `link <./deepctr.models.dien.html>`_ **DIEN demo** `link <https://github.com/shenweichen/DeepCTR/tree/master/examples
+/run_dien.py>`_
+
+.. image:: ../pics/DIEN.png
+   :align: center
+   :scale: 70 %
+
+`Zhou G, Mou N, Fan Y, et al. Deep Interest Evolution Network for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1809.03672, 2018. <https://arxiv.org/pdf/1809.03672.pdf>`_ 
+
+
 xDeepFM
 >>>>>>>>>>
 
@@ -210,6 +225,20 @@ By stacking multiple interacting layers,AutoInt is able to model different order
    :scale: 70 %
 
 `Song W, Shi C, Xiao Z, et al. AutoInt: Automatic Feature Interaction Learning via Self-Attentive Neural Networks[J]. arXiv preprint arXiv:1810.11921, 2018. <https://arxiv.org/abs/1810.11921>`_ 
+
+NFFM(Field-aware Neural Factorization Machine)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+NFFM models second order feature interactions like like FFM and preserves second-order interaction information  as much as possible.Further more,deep neural network is used to learn higher-ordered feature interactions. 
+
+**NFFM api** `link <./deepctr.models.nffm.html>`_
+
+.. image:: ../pics/NFFM.png
+   :align: center
+   :scale: 70 %
+
+`Zhang L, Shen W, Li S, et al. Field-aware Neural Factorization Machine for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1902.09096, 2019. <https://arxiv.org/pdf/1902.09096.pdf>`_ 
+
 
 Layers
 --------

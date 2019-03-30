@@ -3,5 +3,5 @@ deepctr.models.mlr module
 
 .. automodule:: deepctr.models.mlr
     :members:
-    :undoc-members:
-    :show-inheritance:
+    :no-undoc-members:
+    :no-show-inheritance:

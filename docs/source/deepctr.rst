@@ -6,6 +6,7 @@ Subpackages
 
 .. toctree::
 
+    deepctr.contrib
     deepctr.layers
     deepctr.models
 

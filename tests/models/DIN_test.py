@@ -2,35 +2,37 @@ import numpy as np
 import pytest
 from deepctr.models.din import DIN
 from deepctr.layers.activation import Dice
-from deepctr.utils import custom_objects, SingleFeat
+from deepctr.utils import SingleFeat
+from deepctr.layers import custom_objects
 from tensorflow.python.keras.models import load_model, save_model
 
 
 def get_xy_fd():
-    feature_dim_dict = {"sparse": [SingleFeat('user', 4), SingleFeat(
-        'gender', 2), SingleFeat('item', 4), SingleFeat('item_gender', 2)], "dense": []}
-    behavior_feature_list = ["item"]
-    uid = np.array([1, 2, 3])
+    feature_dim_dict = {"sparse": [SingleFeat('user', 3), SingleFeat(
+        'gender', 2), SingleFeat('item', 3+1), SingleFeat('item_gender', 2+1)], "dense": [SingleFeat('score', 0)]}
+    behavior_feature_list = ["item","item_gender"]
+    uid = np.array([0, 1, 2])
     ugender = np.array([0, 1, 0])
-    iid = np.array([0, 1, 2])
-    igender = np.array([0, 1, 0])
+    iid = np.array([1, 2, 3])#0 is mask value
+    igender = np.array([1, 2, 1])# 0 is mask value
+    score = np.array([0.1, 0.2, 0.3])
 
-    hist_iid = np.array([[0, 1, 2, 3], [0, 1, 2, 3], [0, 1, 2, 3]])
-    hist_igender = np.array([[0, 1, 0, 1], [0, 1, 1, 1], [0, 0, 1, 0]])
-    hist_length = np.array([4, 4, 4])
+    hist_iid = np.array([[ 1, 2, 3,0], [ 1, 2, 3,0], [ 1, 2, 0,0]])
+    hist_igender = np.array([[1, 1, 2,0 ], [2, 1, 1, 0], [2, 1, 0, 0]])
+
 
     feature_dict = {'user': uid, 'gender': ugender, 'item': iid, 'item_gender': igender,
-                    'hist_item': hist_iid, 'hist_item_gender': hist_igender, }
-    x = [feature_dict[feat.name] for feat in feature_dim_dict["sparse"]] \
-        + [feature_dict['hist_'+feat] for feat in behavior_feature_list]\
-        + [hist_length]
+                    'hist_item': hist_iid, 'hist_item_gender': hist_igender, 'score': score}
+
+    x = [feature_dict[feat.name] for feat in feature_dim_dict["sparse"]] + [feature_dict[feat.name] for feat in feature_dim_dict["dense"]] + [feature_dict['hist_'+feat] for feat in behavior_feature_list]
+
     y = [1, 0, 1]
     return x, y, feature_dim_dict, behavior_feature_list
 
 
 @pytest.mark.xfail(reason="There is a bug when save model use Dice")
 # @pytest.mark.skip(reason="misunderstood the API")
-def test_DIN_model_io():
+def xtest_DIN_model_io():
 
     model_name = "DIN_att"
     _, _, feature_dim_dict, behavior_feature_list = get_xy_fd()
@@ -63,13 +65,6 @@ def test_DIN_att():
     model.save_weights(model_name + '_weights.h5')
     model.load_weights(model_name + '_weights.h5')
     print(model_name+" test save load weight pass!")
-
-    # try:
-    #     save_model(model,  name + '.h5')
-    #     model = load_model(name + '.h5', custom_objects)
-    #     print(name + " test save load model pass!")
-    # except:
-    #     print("【Error】There is a bug when save model use Dice---------------------------------------------------")
 
     print(model_name + " test pass!")
 

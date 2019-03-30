@@ -8,7 +8,7 @@ $ pip install deepctr
 ```
 ### GPU version
 If you have a `tensorflow-gpu` on your local machine,make sure its version is
-**`tensorflow-gpu>=1.4.0,!=1.7.*,!=1.8.*,<=1.12.0`**  
+**`tensorflow-gpu>=1.4.0,!=1.7.*,!=1.8.*,<=1.13.1`**  
 Then,use the following command to install
 ```bash
 $ pip install deepctr --no-deps
@@ -24,7 +24,7 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 from sklearn.model_selection import train_test_split
 from deepctr.models import DeepFM
-from deepctr import SingleFeat
+from deepctr.utils import SingleFeat
 
 data = pd.read_csv('./criteo_sample.txt')
 

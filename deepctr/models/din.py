@@ -18,19 +18,17 @@ from ..layers.core import MLP, PredictionLayer
 from ..layers.sequence import AttentionSequencePoolingLayer
 from ..layers.activation import Dice
 from ..layers.utils import concat_fun,NoMask
-from ..input_embedding import get_inputs_list,create_singlefeat_dict
+from ..input_embedding import get_inputs_list,create_singlefeat_inputdict
 from ..utils import check_feature_config_dict
 
 
 def get_input(feature_dim_dict, seq_feature_list, seq_max_len):
-    sparse_input,dense_input = create_singlefeat_dict(feature_dim_dict)
+    sparse_input,dense_input = create_singlefeat_inputdict(feature_dim_dict)
     user_behavior_input = OrderedDict()
     for i,feat in enumerate(seq_feature_list):
         user_behavior_input[feat] = Input(shape=(seq_max_len,), name='seq_' + str(i) + '-' + feat)
 
-    user_behavior_length = Input(shape=(1,), name='seq_length')
-
-    return sparse_input, dense_input, user_behavior_input, user_behavior_length
+    return sparse_input, dense_input, user_behavior_input
 
 
 def DIN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
@@ -61,7 +59,7 @@ def DIN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
     """
     check_feature_config_dict(feature_dim_dict)
 
-    sparse_input, dense_input, user_behavior_input, user_behavior_length = get_input(
+    sparse_input, dense_input, user_behavior_input = get_input(
         feature_dim_dict, seq_feature_list, hist_len_max)
 
     sparse_embedding_dict = {feat.name: Embedding(feat.dimension, embedding_size,
@@ -99,7 +97,7 @@ def DIN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
 
 
     output = PredictionLayer(final_activation)(final_logit)
-    model_input_list = get_inputs_list([sparse_input, dense_input, user_behavior_input]) + [user_behavior_length]
+    model_input_list = get_inputs_list([sparse_input, dense_input, user_behavior_input])
 
     model = Model(inputs=model_input_list, outputs=output)
     return model

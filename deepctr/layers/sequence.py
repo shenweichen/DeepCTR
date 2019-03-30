@@ -6,9 +6,14 @@ Author:
 
 """
 
+import numpy as np
 import tensorflow as tf
 from tensorflow.python.keras import backend as K
+from tensorflow.python.keras.initializers import TruncatedNormal
 from tensorflow.python.keras.layers import LSTM, Lambda, Layer
+
+from ..contrib.rnn import dynamic_rnn
+from ..contrib.utils import QAAttGRUCell, VecAttGRUCell
 
 from .core import LocalActivationUnit
 from .normalization import LayerNormalization
@@ -126,12 +131,12 @@ class AttentionSequencePoolingLayer(Layer):
         - [Zhou G, Zhu X, Song C, et al. Deep interest network for click-through rate prediction[C]//Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. ACM, 2018: 1059-1068.](https://arxiv.org/pdf/1706.06978.pdf)
     """
 
-    def __init__(self, hidden_size=(80, 40), activation='sigmoid', weight_normalization=False, supports_masking=False, **kwargs):
+    def __init__(self, hidden_size=(80, 40), activation='sigmoid', weight_normalization=False, return_score=False, supports_masking=False, **kwargs):
 
         self.hidden_size = hidden_size
         self.activation = activation
         self.weight_normalization = weight_normalization
-
+        self.return_score = return_score
         super(AttentionSequencePoolingLayer, self).__init__(**kwargs)
         self.supports_masking = supports_masking
 
@@ -184,12 +189,18 @@ class AttentionSequencePoolingLayer(Layer):
         if self.weight_normalization:
             outputs = tf.nn.softmax(outputs)
 
-        outputs = tf.matmul(outputs, keys)
+        if self.return_score:
+            return outputs
+        else:
+            outputs = tf.matmul(outputs, keys)
 
-        return outputs
+            return outputs
 
     def compute_output_shape(self, input_shape):
-        return (None, 1, input_shape[0][-1])
+        if self.return_score:
+            return (None, 1, input_shape[1][1])
+        else:
+            return (None, 1, input_shape[0][-1])
 
     def compute_mask(self, inputs, mask):
         return None
@@ -197,7 +208,7 @@ class AttentionSequencePoolingLayer(Layer):
     def get_config(self,):
 
         config = {'hidden_size': self.hidden_size, 'activation': self.activation,
-                  'weight_normalization': self.weight_normalization, 'supports_masking': self.supports_masking}
+                  'weight_normalization': self.weight_normalization, 'return_score': self.return_score, 'supports_masking': self.supports_masking}
         base_config = super(AttentionSequencePoolingLayer, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
@@ -314,7 +325,7 @@ class BiLSTM(Layer):
 
 
 class Transformer(Layer):
-    """Transformer  proposed in 《Attention is all you need》
+    """  Simplified version of Transformer  proposed in 《Attention is all you need》
 
       Input shape
         - a list of two 3D tensor with shape ``(batch_size, timesteps, input_dim)`` if supports_masking=True.
@@ -342,7 +353,7 @@ class Transformer(Layer):
     """
 
     def __init__(self, att_embedding_size=1, head_num=8, dropout_rate=0.0, use_positional_encoding=True, use_res=True,
-                 use_feed_forward=True, use_layer_norm=False, blinding=False, seed=1024, supports_masking=False,  **kwargs):
+                 use_feed_forward=True, use_layer_norm=False, blinding=True, seed=1024, supports_masking=False,  **kwargs):
         if head_num <= 0:
             raise ValueError('head_num must be a int > 0')
         self.att_embedding_size = att_embedding_size
@@ -380,10 +391,10 @@ class Transformer(Layer):
             self.fw2 = self.add_weight('fw2', shape=[4 * self.num_units, self.num_units], dtype=tf.float32,
                                        initializer=tf.keras.initializers.glorot_uniform(seed=self.seed))
 
-        if self.use_positional_encoding:
-
-            self.kpe = Position_Embedding(input_shape[0][-1].value)
-            self.qpe = Position_Embedding(input_shape[1][-1].value)
+        # if self.use_positional_encoding:
+        #
+        #     self.kpe = Position_Embedding(input_shape[0][-1].value)
+        #     self.qpe = Position_Embedding(input_shape[1][-1].value)
         self.dropout = tf.keras.layers.Dropout(
             self.dropout_rate, seed=self.seed)
         self.ln = LayerNormalization()
@@ -408,8 +419,8 @@ class Transformer(Layer):
             key_masks = tf.squeeze(key_masks, axis=1)
 
         if self.use_positional_encoding:
-            queries = self.qpe(queries)
-            keys = self.kpe(keys)
+            queries = positional_encoding(queries)
+            keys = positional_encoding(queries)
 
         querys = tf.tensordot(queries, self.W_Query,
                               axes=(-1, 0))  # None T_q D*head_num
@@ -491,13 +502,14 @@ class Transformer(Layer):
 
 class Position_Embedding(Layer):
 
-    def __init__(self, size=None, scale=True, mode='sum', **kwargs):
+    def __init__(self, size=None, scale=False, mode='sum', **kwargs):
         self.size = size  # must be even
         self.scale = scale
         self.mode = mode
         super(Position_Embedding, self).__init__(**kwargs)
+        self.supports_masking = True
 
-    def call(self, x):
+    def call(self, x, mask=None):
         if (self.size == None) or (self.mode == 'sum'):
             self.size = int(x.shape[-1])
 
@@ -513,13 +525,168 @@ class Position_Embedding(Layer):
 
         if self.mode == 'sum':
             if self.scale:
-                outputs = outputs * outputs ** 0.5
+                outputs = outputs * self.size ** 0.5
             return x + outputs
         elif self.mode == 'concat':
             return K.concatenate([outputs, x], 2)
+
+    def compute_mask(self, inputs, mask=None):
+        return None
 
     def compute_output_shape(self, input_shape):
         if self.mode == 'sum':
             return input_shape
         elif self.mode == 'concat':
             return (input_shape[0], input_shape[1], input_shape[2] + self.size)
+
+
+def positional_encoding(inputs,
+                        pos_embedding_trainable=True,
+                        zero_pad=False,
+                        scale=True,
+                        ):
+    '''Sinusoidal Positional_Encoding.
+    Args:
+      inputs: A 2d Tensor with shape of (N, T).
+      num_units: Output dimensionality
+      zero_pad: Boolean. If True, all the values of the first row (id = 0) should be constant zero
+      scale: Boolean. If True, the output will be multiplied by sqrt num_units(check details from paper)
+      scope: Optional scope for `variable_scope`.
+      reuse: Boolean, whether to reuse the weights of a previous layer
+        by the same name.
+    Returns:
+        A 'Tensor' with one more rank than inputs's, with the dimensionality should be 'num_units'
+    '''
+
+    _, T, num_units = inputs.get_shape().as_list()
+    # with tf.variable_scope(scope, reuse=reuse):
+    position_ind = tf.expand_dims(tf.range(T), 0)
+    # First part of the PE function: sin and cos argument
+    position_enc = np.array([
+        [pos / np.power(10000, 2. * i / num_units)
+         for i in range(num_units)]
+        for pos in range(T)])
+
+    # Second part, apply the cosine to even columns and sin to odds.
+    position_enc[:, 0::2] = np.sin(position_enc[:, 0::2])  # dim 2i
+    position_enc[:, 1::2] = np.cos(position_enc[:, 1::2])  # dim 2i+1
+
+    # Convert to a tensor
+
+    if pos_embedding_trainable:
+
+        lookup_table = K.variable(position_enc, dtype=tf.float32)
+
+    if zero_pad:
+        lookup_table = tf.concat((tf.zeros(shape=[1, num_units]),
+                                  lookup_table[1:, :]), 0)
+
+    outputs = tf.nn.embedding_lookup(lookup_table, position_ind)
+
+    if scale:
+        outputs = outputs * num_units ** 0.5
+    return outputs+inputs
+
+
+class BiasEncoding(Layer):
+    def __init__(self, sess_max_count, seed=1024, **kwargs):
+        self.sess_max_count = sess_max_count
+        self.seed = seed
+        super(BiasEncoding, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+        # Create a trainable weight variable for this layer.
+
+        if self.sess_max_count == 1:
+            embed_size = input_shape[2].value
+            seq_len_max = input_shape[1].value
+        else:
+            embed_size = input_shape[0][2].value
+            seq_len_max = input_shape[0][1].value
+
+        self.sess_bias_embedding = self.add_weight('sess_bias_embedding', shape=(self.sess_max_count, 1, 1), initializer=TruncatedNormal(
+            mean=0.0, stddev=0.0001, seed=self.seed))
+        self.seq_bias_embedding = self.add_weight('seq_bias_embedding', shape=(1, seq_len_max, 1),
+                                                  initializer=TruncatedNormal(
+            mean=0.0, stddev=0.0001, seed=self.seed))
+        self.item_bias_embedding = self.add_weight('item_bias_embedding', shape=(1, 1, embed_size),
+                                                   initializer=TruncatedNormal(
+            mean=0.0, stddev=0.0001, seed=self.seed))
+
+        # Be sure to call this somewhere!
+        super(BiasEncoding, self).build(input_shape)
+
+    def call(self, inputs, mask=None):
+        """
+        :param concated_embeds_value: None * field_size * embedding_size
+        :return: None*1
+        """
+        transformer_out = []
+        for i in range(self.sess_max_count):
+            transformer_out.append(
+                inputs[i] + self.item_bias_embedding + self.seq_bias_embedding + self.sess_bias_embedding[i])
+        return transformer_out
+
+    def compute_output_shape(self, input_shape):
+
+        return input_shape
+
+    def compute_mask(self, inputs, mask=None):
+        return mask
+
+    def get_config(self,):
+
+        config = {'sess_max_count': self.sess_max_count, 'seed': self.seed, }
+        base_config = super(BiasEncoding, self).get_config()
+        return dict(list(base_config.items()) + list(config.items()))
+
+
+class DynamicGRU(Layer):
+    def __init__(self, num_units=None, gru_type='GRU', return_sequence=True, name="gru", **kwargs):
+
+        self.num_units = num_units
+        self.return_sequence = return_sequence
+        #self.name = name
+        self.type = gru_type
+        super(DynamicGRU, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+        # Create a trainable weight variable for this layer.
+        input_seq_shape = input_shape[0]
+        if self.num_units is None:
+            self.num_units = input_seq_shape.as_list()[-1]
+        if self.type == "AGRU":
+            self.gru_cell = QAAttGRUCell(self.num_units)
+        elif self.type == "AUGRU":
+            self.gru_cell = VecAttGRUCell(self.num_units)
+        else:
+            self.gru_cell = tf.nn.rnn_cell.GRUCell(self.num_units)
+
+        # Be sure to call this somewhere!
+        super(DynamicGRU, self).build(input_shape)
+
+    def call(self, input_list):
+        """
+        :param concated_embeds_value: None * field_size * embedding_size
+        :return: None*1
+        """
+        if self.type == "GRU" or self.type == "AIGRU":
+            rnn_input, sequence_length = input_list
+            att_score = None
+        else:
+            rnn_input, sequence_length, att_score = input_list
+
+        rnn_output, hidden_state = dynamic_rnn(self.gru_cell, inputs=rnn_input, att_scores=att_score,
+                                               sequence_length=tf.squeeze(sequence_length,
+                                                                          ), dtype=tf.float32, scope=self.name)
+        if self.return_sequence:
+            return rnn_output
+        else:
+            return tf.expand_dims(hidden_state, axis=1)
+
+    def compute_output_shape(self, input_shape):
+        rnn_input_shape = input_shape[0]
+        if self.return_sequence:
+            return rnn_input_shape
+        else:
+            return (None, 1, rnn_input_shape[2])
