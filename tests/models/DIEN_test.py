@@ -106,4 +106,4 @@ def test_DIEN_neg():
     print(model_name + " test pass!")
 
 if __name__ == "__main__":
-    test_DIEN()
+    test_DIEN(gru_type='GRU')

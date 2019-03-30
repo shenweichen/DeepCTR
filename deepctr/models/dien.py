@@ -123,17 +123,17 @@ def interest_evolution(concat_behavior, deep_input_item, user_behavior_length, g
 
         if gru_type == "AIGRU":
             hist = multiply([rnn_outputs, Permute([2, 1])(scores)])
-            final_state2 = DynamicGRU(embedding_size * 2, type="GRU", return_sequence=False, name='gru2')(
+            final_state2 = DynamicGRU(embedding_size * 2, gru_type="GRU", return_sequence=False, name='gru2')(
                 [hist, user_behavior_length])
         else:#AGRU AUGRU
-            final_state2 = DynamicGRU(embedding_size * 2, type=gru_type, return_sequence=False,
+            final_state2 = DynamicGRU(embedding_size * 2, gru_type=gru_type, return_sequence=False,
                                       name='gru2')([rnn_outputs, user_behavior_length, Permute([2, 1])(scores)])
         hist = final_state2
     return hist, aux_loss_1
 
 
 def DIEN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
-         gru_type="GRU", use_negsampling=False, alpha=1.0, use_bn=False, hidden_size=(200, 80), activation='sigmoid', att_hidden_size=[64, 16], att_activation=Dice, att_weight_normalization=True,
+         gru_type="GRU", use_negsampling=False, alpha=1.0, use_bn=False, hidden_size=(200, 80), activation='sigmoid', att_hidden_size=(64, 16), att_activation=Dice, att_weight_normalization=True,
          l2_reg_deep=0, l2_reg_embedding=1e-5, final_activation='sigmoid', keep_prob=1, init_std=0.0001, seed=1024, ):
     """Instantiates the Deep Interest Evolution Network architecture.
 

@@ -642,12 +642,12 @@ class BiasEncoding(Layer):
 
 
 class DynamicGRU(Layer):
-    def __init__(self, num_units=None, type='GRU', return_sequence=True, name="gru", **kwargs):
+    def __init__(self, num_units=None, gru_type='GRU', return_sequence=True, name="gru", **kwargs):
 
         self.num_units = num_units
         self.return_sequence = return_sequence
         #self.name = name
-        self.type = type
+        self.type = gru_type
         super(DynamicGRU, self).__init__(**kwargs)
 
     def build(self, input_shape):
