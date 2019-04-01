@@ -35,7 +35,7 @@ Let's [**Get Started!**](https://deepctr-doc.readthedocs.io/en/latest/Quick-Star
 |    Deep Interest Evolution Network     | [arxiv 2018][Deep Interest Evolution Network for Click-Through Rate Prediction](https://arxiv.org/pdf/1809.03672.pdf)                                           |
 |                xDeepFM                 | [KDD 2018][xDeepFM: Combining Explicit and Implicit Feature Interactions for Recommender Systems](https://arxiv.org/pdf/1803.05170.pdf)                         |
 |                AutoInt                 | [arxiv 2018][AutoInt: Automatic Feature Interaction Learning via Self-Attentive Neural Networks](https://arxiv.org/abs/1810.11921)                              |
-|                  NFFM                  | [arxiv 2019][Field-aware Neural Factorization Machine for Click-Through Rate Prediction ](https://arxiv.org/pdf/1902.09096.pdf)                                 |
+|                  NFFM                  | [arxiv 2019][Field-aware Neural Factorization Machine for Click-Through Rate Prediction ](https://arxiv.org/pdf/1902.09096.pdf)(The original NFFM was first used by Yi Yang(yangyi868@gmail.com) in TSA competition in 2017.)                                 |
 
 
 
