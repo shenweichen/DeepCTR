@@ -25,7 +25,7 @@ from ..layers.utils import concat_fun
 from ..utils import check_feature_config_dict
 
 def NFFM(feature_dim_dict, embedding_size=4, hidden_size=(128, 128),
-         l2_reg_embedding=1e-5, l2_reg_linear=1e-5, l2_reg_deep=0,
+         l2_reg_embedding=1e-5, l2_reg_linear=1e-5, l2_reg_deep=0, keep_prob=1.0,
          init_std=0.0001, seed=1024, final_activation='sigmoid', include_linear=True, use_bn=True, reduce_sum=False,
          ):
     """Instantiates the Field-aware Neural Factorization Machine architecture.
@@ -86,7 +86,7 @@ def NFFM(feature_dim_dict, embedding_size=4, hidden_size=(128, 128),
     ffm_out = tf.keras.layers.Flatten()(concat_fun(embed_list, axis=1))
     if use_bn:
         ffm_out = tf.keras.layers.BatchNormalization()(ffm_out)
-    ffm_out = MLP(hidden_size, l2_reg=l2_reg_deep)(ffm_out)
+    ffm_out = MLP(hidden_size, l2_reg=l2_reg_deep, keep_prob=keep_prob)(ffm_out)
     final_logit = Dense(1, use_bias=False)(ffm_out)
 
     linear_emb_list = get_embedding_vec_list(
