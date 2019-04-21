@@ -10,8 +10,9 @@ Reference:
 
 """
 import tensorflow as tf
+
 from ..input_embedding import preprocess_input_embedding
-from ..layers.core import PredictionLayer, MLP
+from ..layers.core import MLP, PredictionLayer
 from ..layers.sequence import KMaxPooling
 from ..layers.utils import concat_fun
 from ..utils import check_feature_config_dict
@@ -46,7 +47,8 @@ def CCPM(feature_dim_dict, embedding_size=8, conv_kernel_width=(6, 5), conv_filt
     l = len(conv_filters)
 
     conv_input = concat_fun(deep_emb_list, axis=1)
-    pooling_result = tf.keras.layers.Lambda(lambda x: tf.expand_dims(x, axis=3))(conv_input)
+    pooling_result = tf.keras.layers.Lambda(
+        lambda x: tf.expand_dims(x, axis=3))(conv_input)
 
     for i in range(1, l + 1):
         filters = conv_filters[i - 1]
@@ -55,10 +57,12 @@ def CCPM(feature_dim_dict, embedding_size=8, conv_kernel_width=(6, 5), conv_filt
 
         conv_result = tf.keras.layers.Conv2D(filters=filters, kernel_size=(width, 1), strides=(1, 1), padding='same',
                                              activation='tanh', use_bias=True, )(pooling_result)
-        pooling_result = KMaxPooling(k=min(k, conv_result.shape[1].value), axis=1)(conv_result)
+        pooling_result = KMaxPooling(
+            k=min(k, conv_result.shape[1].value), axis=1)(conv_result)
 
     flatten_result = tf.keras.layers.Flatten()(pooling_result)
-    final_logit = MLP(hidden_size, l2_reg=l2_reg_deep, keep_prob=keep_prob)(flatten_result)
+    final_logit = MLP(hidden_size, l2_reg=l2_reg_deep,
+                      keep_prob=keep_prob)(flatten_result)
     final_logit = tf.keras.layers.Dense(1, use_bias=False)(final_logit)
 
     final_logit = tf.keras.layers.add([final_logit, linear_logit])

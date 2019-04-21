@@ -14,7 +14,6 @@ from tensorflow.python.keras.layers import LSTM, Lambda, Layer
 
 from ..contrib.rnn import dynamic_rnn
 from ..contrib.utils import QAAttGRUCell, VecAttGRUCell
-
 from .core import LocalActivationUnit
 from .normalization import LayerNormalization
 
@@ -696,7 +695,7 @@ class KMaxPooling(Layer):
     """K Max pooling that selects the k biggest value along the specific axis.
 
       Input shape
-        -  nD tensor with shape: ``(batch_size, ..., input_dim)``. The most common situation would be a 2D input with shape ``(batch_size, input_dim)``.
+        -  nD tensor with shape: ``(batch_size, ..., input_dim)``.
 
       Output shape
         - nD tensor with shape: ``(batch_size, ..., output_dim)``.
@@ -708,22 +707,21 @@ class KMaxPooling(Layer):
 
      """
 
-    def __init__(self, k=1,axis=-1, **kwargs):
+    def __init__(self, k=1, axis=-1, **kwargs):
 
         self.k = k
         self.axis = axis
         super(KMaxPooling, self).__init__(**kwargs)
 
-
     def build(self, input_shape):
-        # Create a trainable weight variable for this layer.
 
         if self.axis < 1 or self.axis > len(input_shape):
-            raise ValueError("axis must be 1~%d,now is %d"%(len(input_shape),len(input_shape)))
-
+            raise ValueError("axis must be 1~%d,now is %d" %
+                             (len(input_shape), len(input_shape)))
 
         if self.k < 1 or self.k > input_shape[self.axis]:
-            raise ValueError("k must be in 1 ~ %d,now k is %d"%(input_shape[self.axis],self.k))
+            raise ValueError("k must be in 1 ~ %d,now k is %d" %
+                             (input_shape[self.axis], self.k))
         self.dims = len(input_shape)
         # Be sure to call this somewhere!
         super(KMaxPooling, self).build(input_shape)
@@ -732,7 +730,7 @@ class KMaxPooling(Layer):
 
         # swap the last and the axis dimensions since top_k will be applied along the last dimension
         perm = list(range(self.dims))
-        perm[-1],perm[self.axis] = perm[self.axis],perm[-1]
+        perm[-1], perm[self.axis] = perm[self.axis], perm[-1]
         shifted_input = tf.transpose(inputs, perm)
 
         # extract top_k, returns two tensors [values, indices]
@@ -747,7 +745,6 @@ class KMaxPooling(Layer):
         return tuple(output_shape)
 
     def get_config(self,):
-
-        config = {'k': self.k,'axis':self.axis}
+        config = {'k': self.k, 'axis': self.axis}
         base_config = super(KMaxPooling, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
