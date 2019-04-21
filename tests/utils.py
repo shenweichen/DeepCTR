@@ -12,6 +12,7 @@ from tensorflow.python.keras.models import Model, load_model, save_model
 from deepctr.utils import SingleFeat, VarLenFeat
 from deepctr.layers import  custom_objects
 
+SAMPLE_SIZE=32
 
 def gen_sequence(dim, max_len, sample_size):
     return np.array([np.random.randint(0, dim, max_len) for _ in range(sample_size)]), np.random.randint(1, max_len + 1, sample_size)
@@ -181,7 +182,6 @@ def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,
         actual_output = model.predict(input_data)
 
     actual_output_shape = actual_output.shape
-
     for expected_dim, actual_dim in zip(expected_output_shape,
 
                                         actual_output_shape):
@@ -189,7 +189,6 @@ def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,
         if expected_dim is not None:
 
             if not (expected_dim == actual_dim):
-
                 raise AssertionError()
 
     if expected_output is not None:

@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from deepctr.models import WDL
-from ..utils import check_model,SingleFeat
+from ..utils import check_model,SingleFeat,SAMPLE_SIZE
 
 
 @pytest.mark.parametrize(
@@ -12,7 +12,7 @@ from ..utils import check_model,SingleFeat
 )
 def test_WDL(sparse_feature_num, wide_feature_num):
     model_name = "WDL"
-    sample_size = 64
+    sample_size = SAMPLE_SIZE
     feature_dim_dict = {"sparse": [], 'dense': []}
     wide_feature_dim_dict = {"sparse": [], 'dense': []}
     for name, num in zip(["sparse", "dense"], [sparse_feature_num, sparse_feature_num]):

@@ -5,6 +5,7 @@ Author:
 
 Reference:
     [1] Zhang L, Shen W, Li S, et al. Field-aware Neural Factorization Machine for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1902.09096, 2019.(https://arxiv.org/abs/1902.09096)
+    (The original NFFM was first used by Yi Yang(yangyi868@gmail.com) in TSA competition in 2017.)
 """
 
 import itertools

@@ -1,6 +1,6 @@
 import pytest
 from deepctr.models import xDeepFM
-from ..utils import check_model, get_test_data
+from ..utils import check_model, get_test_data,SAMPLE_SIZE
 
 
 @pytest.mark.parametrize(
@@ -11,7 +11,7 @@ from ..utils import check_model, get_test_data
 def test_xDeepFM(hidden_size, cin_layer_size, cin_split_half, cin_activation, sparse_feature_num, dense_feature_dim):
     model_name = "xDeepFM"
 
-    sample_size = 64
+    sample_size = SAMPLE_SIZE
     x, y, feature_dim_dict = get_test_data(
         sample_size, sparse_feature_num, sparse_feature_num)
 
