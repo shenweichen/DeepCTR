@@ -25,8 +25,8 @@ def CCPM(feature_dim_dict, embedding_size=8, filter_width=(6, 5), feature_maps=(
 
     :param feature_dim_dict: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
     :param embedding_size: positive integer,sparse feature embedding_size
-    :param filter_width:list,list of positive integer or empty list,the width of filter in each conv layer.
-    :param feature_maps:list,list of positive integer or empty list,the number of filters in each conv layer.
+    :param filter_width: list,list of positive integer or empty list,the width of filter in each conv layer.
+    :param feature_maps: list,list of positive integer or empty list,the number of filters in each conv layer.
     :param hidden_size: list,list of positive integer or empty list, the layer number and units in each layer of deep net.
     :param l2_reg_linear: float. L2 regularizer strength applied to linear part
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector

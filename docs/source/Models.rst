@@ -3,6 +3,7 @@ DeepCTR Models API
 
 .. toctree::
    Model Methods<Model_Methods.md>
+   CCPM<deepctr.models.ccpm>
    FNN<deepctr.models.fnn>
    PNN<deepctr.models.pnn>
    WDL<deepctr.models.wdl>
