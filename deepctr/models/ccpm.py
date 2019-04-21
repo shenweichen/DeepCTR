@@ -12,20 +12,20 @@ Reference:
 import tensorflow as tf
 from ..input_embedding import preprocess_input_embedding
 from ..layers.core import PredictionLayer, MLP
-from ..layers.sequence import KMaxPooling2D
+from ..layers.sequence import KMaxPooling
 from ..layers.utils import concat_fun
 from ..utils import check_feature_config_dict
 
 
-def CCPM(feature_dim_dict, embedding_size=8, filter_width=(6, 5), feature_maps=(4, 4), hidden_size=(256,),
+def CCPM(feature_dim_dict, embedding_size=8, conv_kernel_width=(6, 5), conv_filters=(4, 4), hidden_size=(256,),
          l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_deep=0, keep_prob=1.0, init_std=0.0001, seed=1024,
          final_activation='sigmoid', ):
     """Instantiates the Convolutional Click Prediction Model architecture.
 
     :param feature_dim_dict: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
     :param embedding_size: positive integer,sparse feature embedding_size
-    :param filter_width: list,list of positive integer or empty list,the width of filter in each conv layer.
-    :param feature_maps: list,list of positive integer or empty list,the number of filters in each conv layer.
+    :param conv_kernel_width: list,list of positive integer or empty list,the width of filter in each conv layer.
+    :param conv_filters: list,list of positive integer or empty list,the number of filters in each conv layer.
     :param hidden_size: list,list of positive integer or empty list, the layer number and units in each layer of deep net.
     :param l2_reg_linear: float. L2 regularizer strength applied to linear part
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
@@ -43,19 +43,19 @@ def CCPM(feature_dim_dict, embedding_size=8, filter_width=(6, 5), feature_maps=(
                                                                           l2_reg_embedding, l2_reg_linear, init_std,
                                                                           seed, True)
     n = len(deep_emb_list)
-    l = len(feature_maps)
+    l = len(conv_filters)
 
     conv_input = concat_fun(deep_emb_list, axis=1)
     pooling_result = tf.keras.layers.Lambda(lambda x: tf.expand_dims(x, axis=3))(conv_input)
 
     for i in range(1, l + 1):
-        filters = feature_maps[i - 1]
-        width = filter_width[i - 1]
+        filters = conv_filters[i - 1]
+        width = conv_kernel_width[i - 1]
         k = max(1, int((1 - pow(i / l, l - i)) * n)) if i < l else 3
 
         conv_result = tf.keras.layers.Conv2D(filters=filters, kernel_size=(width, 1), strides=(1, 1), padding='same',
                                              activation='tanh', use_bias=True, )(pooling_result)
-        pooling_result = KMaxPooling2D(k=min(k, conv_result.shape[1].value), axis=1)(conv_result)
+        pooling_result = KMaxPooling(k=min(k, conv_result.shape[1].value), axis=1)(conv_result)
 
     flatten_result = tf.keras.layers.Flatten()(pooling_result)
     final_logit = MLP(hidden_size, l2_reg=l2_reg_deep, keep_prob=keep_prob)(flatten_result)

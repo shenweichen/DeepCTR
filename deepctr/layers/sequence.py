@@ -692,17 +692,17 @@ class DynamicGRU(Layer):
             return (None, 1, rnn_input_shape[2])
 
 
-class KMaxPooling2D(Layer):
-    """The Attentional sequence pooling operation used in DIN.
+class KMaxPooling(Layer):
+    """K Max pooling that selects the k biggest value along the specific axis.
 
       Input shape
-        -  a 4D tensor with shape:  ``(batch_size, rows, cols, channels)``
+        -  nD tensor with shape: ``(batch_size, ..., input_dim)``. The most common situation would be a 2D input with shape ``(batch_size, input_dim)``.
 
       Output shape
-        - 4D tensor with shape: ``(batch_size, pooled_rows, pooled_cols, pooled_channels)``.
+        - nD tensor with shape: ``(batch_size, ..., output_dim)``.
 
       Arguments
-        - **k**:positive integer, number of top elements to look for along the ``axis`` dimension.
+        - **k**: positive integer, number of top elements to look for along the ``axis`` dimension.
 
         - **axis**: positive integer, the dimension to look for elements.
 
@@ -712,30 +712,26 @@ class KMaxPooling2D(Layer):
 
         self.k = k
         self.axis = axis
-        super(KMaxPooling2D, self).__init__(**kwargs)
+        super(KMaxPooling, self).__init__(**kwargs)
 
 
     def build(self, input_shape):
         # Create a trainable weight variable for this layer.
-        if len(input_shape) != 4:
-            raise ValueError(
-                "Unexpected inputs dimensions %d, expect to be 4 dimensions" % (len(input_shape)))
 
-        if self.axis not in [1,2,3]:
-            raise ValueError("axis must be 1,2 or 3")
+        if self.axis < 1 or self.axis > len(input_shape):
+            raise ValueError("axis must be 1~%d,now is %d"%(len(input_shape),len(input_shape)))
 
 
         if self.k < 1 or self.k > input_shape[self.axis]:
-
             raise ValueError("k must be in 1 ~ %d,now k is %d"%(input_shape[self.axis],self.k))
-
+        self.dims = len(input_shape)
         # Be sure to call this somewhere!
-        super(KMaxPooling2D, self).build(input_shape)
+        super(KMaxPooling, self).build(input_shape)
 
     def call(self, inputs):
 
         # swap the last and the axis dimensions since top_k will be applied along the last dimension
-        perm = [0,1,2,3]
+        perm = list(range(self.dims))
         perm[-1],perm[self.axis] = perm[self.axis],perm[-1]
         shifted_input = tf.transpose(inputs, perm)
 
@@ -753,5 +749,5 @@ class KMaxPooling2D(Layer):
     def get_config(self,):
 
         config = {'k': self.k,'axis':self.axis}
-        base_config = super(KMaxPooling2D, self).get_config()
+        base_config = super(KMaxPooling, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))

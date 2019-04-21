@@ -52,7 +52,7 @@ def create_varlenfeat_inputdict(feature_dim_dict, mask_zero=True):
 
 def create_embedding_dict(feature_dim_dict, embedding_size, init_std, seed, l2_reg, prefix='sparse', seq_mask_zero=True):
     if embedding_size == 'auto':
-
+        print("Notice:Do not use auto embedding in models other than DCN")
         sparse_embedding = {feat.name: Embedding(feat.dimension, 6 * int(pow(feat.dimension, 0.25)),
                                                  embeddings_initializer=RandomNormal(
             mean=0.0, stddev=init_std, seed=seed),
@@ -99,6 +99,7 @@ def merge_dense_input(dense_input_, embed_list, embedding_size, l2_reg):
     dense_input = list(dense_input_.values())
     if len(dense_input) > 0:
         if embedding_size == "auto":
+            print("Notice:Do not use auto embedding in models other than DCN")
             if len(dense_input) == 1:
                 continuous_embedding_list = dense_input[0]
             else:

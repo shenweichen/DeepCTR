@@ -58,6 +58,6 @@ def test_Transformer():
                    input_shape=[(BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE), (BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE), (BATCH_SIZE, 1), (BATCH_SIZE, 1)])
 
 
-def test_KMaxPooling2D():
-    with CustomObjectScope({'KMaxPooling2D':sequence.KMaxPooling2D}):
-        layer_test(sequence.KMaxPooling2D,kwargs={'k':3,'axis':1},input_shape=(BATCH_SIZE,SEQ_LENGTH,EMBEDDING_SIZE,2))
+def test_KMaxPooling():
+    with CustomObjectScope({'KMaxPooling':sequence.KMaxPooling}):
+        layer_test(sequence.KMaxPooling,kwargs={'k':3,'axis':1},input_shape=(BATCH_SIZE,SEQ_LENGTH,EMBEDDING_SIZE,2))

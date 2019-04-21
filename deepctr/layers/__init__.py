@@ -7,7 +7,7 @@ from .interaction import (CIN, FM, AFMLayer, BiInteractionPooling, CrossNet,
                           OutterProductLayer)
 from .normalization import LayerNormalization
 from .sequence import (AttentionSequencePoolingLayer, BiasEncoding, BiLSTM,
-                       KMaxPooling2D, Position_Embedding, SequencePoolingLayer,
+                       KMaxPooling, Position_Embedding, SequencePoolingLayer,
                        Transformer)
 from .utils import NoMask
 
@@ -31,4 +31,4 @@ custom_objects = {'tf': tf,
                   'Transformer': Transformer,
                   'NoMask': NoMask,
                   'BiasEncoding': BiasEncoding,
-                  'KMaxPooling2D': KMaxPooling2D}
+                  'KMaxPooling': KMaxPooling}
