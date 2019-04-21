@@ -11,12 +11,12 @@ import tensorflow as tf
 from ..input_embedding import preprocess_input_embedding
 from ..layers.core import PredictionLayer, MLP
 from ..layers.interaction import CrossNet
-from ..utils import check_feature_config_dict
 from ..layers.utils import concat_fun
+from ..utils import check_feature_config_dict
 
 
 def DCN(feature_dim_dict, embedding_size='auto',
-        cross_num=2, hidden_size=(128, 128, ), l2_reg_embedding=1e-5, l2_reg_cross=1e-5, l2_reg_deep=0,
+        cross_num=2, hidden_size=(128, 128,), l2_reg_embedding=1e-5, l2_reg_cross=1e-5, l2_reg_deep=0,
         init_std=0.0001, seed=1024, keep_prob=1, use_bn=False, activation='relu', final_activation='sigmoid',
         ):
     """Instantiates the Deep&Cross Network architecture.
@@ -43,8 +43,8 @@ def DCN(feature_dim_dict, embedding_size='auto',
     check_feature_config_dict(feature_dim_dict)
 
     deep_emb_list, _, inputs_list = preprocess_input_embedding(feature_dim_dict, embedding_size,
-                                                                          l2_reg_embedding, 0, init_std,
-                                                                          seed, False)
+                                                               l2_reg_embedding, 0, init_std,
+                                                               seed, False)
 
     deep_input = tf.keras.layers.Flatten()(concat_fun(deep_emb_list))
 

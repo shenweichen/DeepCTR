@@ -690,3 +690,68 @@ class DynamicGRU(Layer):
             return rnn_input_shape
         else:
             return (None, 1, rnn_input_shape[2])
+
+
+class KMaxPooling2D(Layer):
+    """The Attentional sequence pooling operation used in DIN.
+
+      Input shape
+        -  a 4D tensor with shape:  ``(batch_size, rows, cols, channels)``
+
+      Output shape
+        - 4D tensor with shape: ``(batch_size, pooled_rows, pooled_cols, pooled_channels)``.
+
+      Arguments
+        - **k**:positive integer, number of top elements to look for along the ``axis`` dimension.
+
+        - **axis**: positive integer, the dimension to look for elements.
+
+     """
+
+    def __init__(self, k=1,axis=-1, **kwargs):
+
+        self.k = k
+        self.axis = axis
+        super(KMaxPooling2D, self).__init__(**kwargs)
+
+
+    def build(self, input_shape):
+        # Create a trainable weight variable for this layer.
+        if len(input_shape) != 4:
+            raise ValueError(
+                "Unexpected inputs dimensions %d, expect to be 4 dimensions" % (len(input_shape)))
+
+        if self.axis not in [1,2,3]:
+            raise ValueError("axis must be 1,2 or 3")
+
+
+        if self.k < 1 or self.k > input_shape[self.axis]:
+
+            raise ValueError("k must be in 1 ~ %d,now k is %d"%(input_shape[self.axis],self.k))
+
+        # Be sure to call this somewhere!
+        super(KMaxPooling2D, self).build(input_shape)
+
+    def call(self, inputs):
+
+        # swap the last and the axis dimensions since top_k will be applied along the last dimension
+        perm = [0,1,2,3]
+        perm[-1],perm[self.axis] = perm[self.axis],perm[-1]
+        shifted_input = tf.transpose(inputs, perm)
+
+        # extract top_k, returns two tensors [values, indices]
+        top_k = tf.nn.top_k(shifted_input, k=self.k, sorted=True, name=None)[0]
+        output = tf.transpose(top_k, perm)
+
+        return output
+
+    def compute_output_shape(self, input_shape):
+        output_shape = list(input_shape)
+        output_shape[self.axis] = self.k
+        return tuple(output_shape)
+
+    def get_config(self,):
+
+        config = {'k': self.k,'axis':self.axis}
+        base_config = super(KMaxPooling2D, self).get_config()
+        return dict(list(base_config.items()) + list(config.items()))

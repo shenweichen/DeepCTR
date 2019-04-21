@@ -181,7 +181,6 @@ def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,
         actual_output = model.predict(input_data)
 
     actual_output_shape = actual_output.shape
-
     for expected_dim, actual_dim in zip(expected_output_shape,
 
                                         actual_output_shape):
@@ -189,7 +188,6 @@ def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,
         if expected_dim is not None:
 
             if not (expected_dim == actual_dim):
-
                 raise AssertionError()
 
     if expected_output is not None:
