@@ -1,6 +1,6 @@
 import pytest
 from deepctr.models import NFFM
-from ..utils import check_model, get_test_data
+from ..utils import check_model, get_test_data,SAMPLE_SIZE
 
 
 @pytest.mark.parametrize(
@@ -11,7 +11,7 @@ def test_NFFM(hidden_size, sparse_feature_num):
 
     model_name = "NFFM"
 
-    sample_size = 64
+    sample_size = SAMPLE_SIZE
     x, y, feature_dim_dict = get_test_data(
         sample_size, sparse_feature_num, sparse_feature_num,sequence_feature=())
 

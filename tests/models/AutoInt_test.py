@@ -1,6 +1,6 @@
 import pytest
 from deepctr.models import AutoInt
-from ..utils import check_model, get_test_data
+from ..utils import check_model, get_test_data,SAMPLE_SIZE
 
 
 @pytest.mark.parametrize(
@@ -9,7 +9,7 @@ from ..utils import check_model, get_test_data
 )
 def test_AutoInt(att_layer_num, hidden_size, sparse_feature_num):
     model_name = "AutoInt"
-    sample_size = 64
+    sample_size = SAMPLE_SIZE
     x, y, feature_dim_dict = get_test_data(
         sample_size, sparse_feature_num, sparse_feature_num)
 

@@ -1,11 +1,18 @@
-from .core import LocalActivationUnit,MLP,PredictionLayer
-from .interaction import AFMLayer,BiInteractionPooling,CIN,CrossNet,FM,InnerProductLayer,InteractingLayer,OutterProductLayer
-from .normalization import LayerNormalization
+import tensorflow as tf
+
 from .activation import Dice
-from .sequence import SequencePoolingLayer,AttentionSequencePoolingLayer,BiLSTM,Transformer,Position_Embedding,BiasEncoding,KMaxPooling2D
+from .core import MLP, LocalActivationUnit, PredictionLayer
+from .interaction import (CIN, FM, AFMLayer, BiInteractionPooling, CrossNet,
+                          InnerProductLayer, InteractingLayer,
+                          OutterProductLayer)
+from .normalization import LayerNormalization
+from .sequence import (AttentionSequencePoolingLayer, BiasEncoding, BiLSTM,
+                       KMaxPooling2D, Position_Embedding, SequencePoolingLayer,
+                       Transformer)
 from .utils import NoMask
 
-custom_objects = {'InnerProductLayer': InnerProductLayer,
+custom_objects = {'tf': tf,
+                  'InnerProductLayer': InnerProductLayer,
                   'OutterProductLayer': OutterProductLayer,
                   'MLP': MLP,
                   'PredictionLayer': PredictionLayer,
@@ -22,6 +29,6 @@ custom_objects = {'InnerProductLayer': InnerProductLayer,
                   'LayerNormalization': LayerNormalization,
                   'BiLSTM': BiLSTM,
                   'Transformer': Transformer,
-                  'NoMask':NoMask,
-                  'BiasEncoding':BiasEncoding,
-                  'KMaxPooling2D':KMaxPooling2D}
+                  'NoMask': NoMask,
+                  'BiasEncoding': BiasEncoding,
+                  'KMaxPooling2D': KMaxPooling2D}

@@ -1,7 +1,7 @@
 import pytest
 from deepctr.models import FNN
 
-from ..utils import check_model, get_test_data
+from ..utils import check_model, get_test_data,SAMPLE_SIZE
 
 
 @pytest.mark.parametrize(
@@ -12,7 +12,7 @@ from ..utils import check_model, get_test_data
 def test_FNN(sparse_feature_num, dense_feature_num):
     model_name = "FNN"
 
-    sample_size = 64
+    sample_size = SAMPLE_SIZE
     x, y, feature_dim_dict = get_test_data(
         sample_size, sparse_feature_num, dense_feature_num)
 
@@ -28,7 +28,7 @@ def test_FNN(sparse_feature_num, dense_feature_num):
 def test_FNN_without_seq(sparse_feature_num, dense_feature_num):
     model_name = "FNN"
 
-    sample_size = 64
+    sample_size = SAMPLE_SIZE
     x, y, feature_dim_dict = get_test_data(
         sample_size, sparse_feature_num, dense_feature_num, sequence_feature=())
 

@@ -44,10 +44,10 @@ validation_steps: Only relevant if `steps_per_epoch` is specified. Total number 
 
 **Returns**  
 
-A `History` object. Its `History.history` attribute is a record of training loss values and metrics values at successive epochs, as well as validation loss values and validation metrics values (if applicable).  
-**Raises**  
+- A `History` object. Its `History.history` attribute is a record of training loss values and metrics values at successive epochs, as well as validation loss values and validation metrics values (if applicable).  
 
-RuntimeError: If the model was never compiled.
+**Raises**  
+- **RuntimeError**: If the model was never compiled.
 ValueError: In case of mismatch between the provided input data and what the model expects.
 
 ## evaluate
@@ -68,8 +68,7 @@ Computation is done in batches.
 - **callbacks**: List of `tf.keras.callbacks.Callback` instances. List of callbacks to apply during evaluation. See [callbacks](https://www.tensorflow.org/versions/r1.12/api_docs/python/tf/keras/callbacks).
 
 **Returns**  
-
-Scalar test loss (if the model has a single output and no metrics) or list of scalars (if the model has multiple outputs and/or metrics). The attribute `model.metrics_names` will give you the display labels for the scalar outputs.
+- Scalar test loss (if the model has a single output and no metrics) or list of scalars (if the model has multiple outputs and/or metrics). The attribute `model.metrics_names` will give you the display labels for the scalar outputs.
 
 ## predict
 ```python
@@ -89,7 +88,7 @@ batch_size: Integer. If unspecified, it will default to 32.
 
 **Returns**
 
-Numpy array(s) of predictions.
+- Numpy array(s) of predictions.
 
 **Raises**
 
@@ -110,7 +109,7 @@ Runs a single gradient update on a single batch of data.
 
 **Returns**  
 
-Scalar training loss (if the model has a single output and no metrics) or list of scalars (if the model has multiple outputs and/or metrics). The attribute `model.metrics_names` will give you the display labels for the scalar outputs.
+- Scalar training loss (if the model has a single output and no metrics) or list of scalars (if the model has multiple outputs and/or metrics). The attribute `model.metrics_names` will give you the display labels for the scalar outputs.
 
 ## test_on_batch
 ```python
@@ -126,7 +125,7 @@ Test the model on a single batch of samples.
 - 
 **Returns**  
 
-Scalar test loss (if the model has a single output and no metrics) or list of scalars (if the model has multiple outputs and/or metrics). The attribute `model.metrics_names` will give you the display labels for the scalar outputs.
+- Scalar test loss (if the model has a single output and no metrics) or list of scalars (if the model has multiple outputs and/or metrics). The attribute `model.metrics_names` will give you the display labels for the scalar outputs.
 
 ## predict_on_batch
 ```python
@@ -138,7 +137,7 @@ Returns predictions for a single batch of samples.
 - **x**: Input samples, as a Numpy array.
 
 **Returns**  
-Numpy array(s) of predictions.
+- Numpy array(s) of predictions.
 
 ## fit_generator
 ```python
@@ -174,7 +173,7 @@ on which to evaluate the loss and any model metrics at the end of each epoch. Th
 initial_epoch: Integer. Epoch at which to start training (useful for resuming a previous training run).
 
 **Returns**  
-A `History` object. Its `History.history` attribute is a record of training loss values and metrics values at successive epochs, as well as validation loss values and validation metrics values (if applicable).
+- A `History` object. Its `History.history` attribute is a record of training loss values and metrics values at successive epochs, as well as validation loss values and validation metrics values (if applicable).
 
 **Raises**  
 - **ValueError**: In case the generator yields data in an invalid format.
@@ -212,7 +211,7 @@ The generator should return the same kind of data as accepted by `test_on_batch`
 
 **Returns**  
 
-Scalar test loss (if the model has a single output and no metrics) or list of scalars (if the model has multiple outputs and/or metrics). The attribute `model.metrics_names` will give you the display labels for the scalar outputs.
+- Scalar test loss (if the model has a single output and no metrics) or list of scalars (if the model has multiple outputs and/or metrics). The attribute `model.metrics_names` will give you the display labels for the scalar outputs.
 
 **Raises**
 
@@ -236,11 +235,11 @@ The generator should return the same kind of data as accepted by `predict_on_bat
 
 **Returns**  
 
-Numpy array(s) of predictions.
+- Numpy array(s) of predictions.
 
 **Raises**  
 
-ValueError: In case the generator yields data in an invalid format.
+- **ValueError**: In case the generator yields data in an invalid format.
 
 ## get_layer
 ```python
@@ -255,7 +254,7 @@ Indices are based on order of horizontal graph traversal (bottom-up).
 - **index**: Integer, index of layer.
 
 **Returns**  
-A layer instance.
+- A layer instance.
 
 **Raises**  
-ValueError: In case of invalid layer name or index.
+- **ValueError**: In case of invalid layer name or index.

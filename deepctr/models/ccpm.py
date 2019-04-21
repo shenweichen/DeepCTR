@@ -10,7 +10,6 @@ Reference:
 
 """
 import tensorflow as tf
-from tensorflow.python.keras.layers import Lambda
 from ..input_embedding import preprocess_input_embedding
 from ..layers.core import PredictionLayer, MLP
 from ..layers.sequence import KMaxPooling2D
