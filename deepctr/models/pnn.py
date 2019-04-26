@@ -44,7 +44,7 @@ def PNN(feature_dim_dict, embedding_size=8, hidden_size=(128, 128), l2_reg_embed
                                                                l2_reg_embedding, 0, init_std,
                                                                seed, True)
 
-    inner_product = tf.keras.layers.Flatten()(InnerProductLayer()(deep_emb_list))
+    inner_product = tf.keras.layers.Flatten()(InnerProductLayer()(concat_fun(deep_emb_list,axis=1)))
     outter_product = OutterProductLayer(kernel_type)(deep_emb_list)
 
     # ipnn deep input

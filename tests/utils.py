@@ -189,7 +189,7 @@ def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,
         if expected_dim is not None:
 
             if not (expected_dim == actual_dim):
-                raise AssertionError()
+                raise AssertionError("expected_shape",expected_output_shape,"actual_shape",actual_output_shape)
 
     if expected_output is not None:
 

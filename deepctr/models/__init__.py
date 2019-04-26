@@ -12,6 +12,7 @@ from .nfm import NFM
 from .pnn import PNN
 from .wdl import WDL
 from .xdeepfm import xDeepFM
+from .fgcnn import FGCNN
 
 __all__ = ["AFM", "CCPM","DCN", "MLR",  "DeepFM",
-           "MLR", "NFM", "DIN", "DIEN", "FNN", "PNN", "WDL", "xDeepFM", "AutoInt", "NFFM"]
+           "MLR", "NFM", "DIN", "DIEN", "FNN", "PNN", "WDL", "xDeepFM", "AutoInt", "NFFM","FGCNN"]
