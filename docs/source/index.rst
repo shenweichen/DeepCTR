@@ -35,11 +35,11 @@ You can read the latest code at https://github.com/shenweichen/DeepCTR
 
 News
 -----
+04/27/2019 : Add `FGCNN <./Features.html#ccpm-convolutional-click-prediction-model>`_ . `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.4>`_
+
 04/21/2019 : Add `CCPM <./Features.html#ccpm-convolutional-click-prediction-model>`_ . `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.3>`_
 
 03/30/2019 : Add `DIEN <./Features.html#dien-deep-interest-evolution-network>`_ and `NFFM <./Features.html#nffm-field-aware-neural-factorization-machine>`_ models. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.2>`_
-
-02/17/2019 : Refactor layers ,add ``BiLSTM`` and ``Transformer`` . `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.1>`_
 
 .. toctree::
    :maxdepth: 2
