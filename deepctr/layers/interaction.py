@@ -437,7 +437,7 @@ class InnerProductLayer(Layer):
     product or inner product between feature vectors.
 
       Input shape
-        - 3D tensor with shape: ``(batch_size,field_size,embedding_size)``.
+        - a list of 3D tensor with shape: ``(batch_size,1,embedding_size)``.
 
       Output shape
         - 3D tensor with shape: ``(batch_size, N*(N-1)/2 ,1)`` if use reduce_sum. or 3D tensor with shape: ``(batch_size, N*(N-1)/2, embedding_size )`` if not use reduce_sum.
@@ -455,45 +455,45 @@ class InnerProductLayer(Layer):
 
     def build(self, input_shape):
 
-        # if not isinstance(input_shape, list) or len(input_shape) < 2:
-        #    raise ValueError('A `InnerProductLayer` layer should be called '
-        #                     'on a list of at least 2 inputs')
+        if not isinstance(input_shape, list) or len(input_shape) < 2:
+            raise ValueError('A `InnerProductLayer` layer should be called '
+                             'on a list of at least 2 inputs')
 
-        # reduced_inputs_shapes = [shape.as_list() for shape in input_shape]
-        # shape_set = set()
-        #
-        # for i in range(len(input_shape)):
-        #     shape_set.add(tuple(reduced_inputs_shapes[i]))
+        reduced_inputs_shapes = [shape.as_list() for shape in input_shape]
+        shape_set = set()
 
-        # if len(shape_set) > 1:
-        #     raise ValueError('A `InnerProductLayer` layer requires '
-        #                      'inputs with same shapes '
-        #                      'Got different shapes: %s' % (shape_set))
-        #
-        # if len(input_shape[0]) != 3 or input_shape[0][1] != 1:
-        #     raise ValueError('A `InnerProductLayer` layer requires '
-        #                      'inputs of a list with same shape tensor like (None,1,embedding_size)'
-        #                      'Got different shapes: %s' % (input_shape[0]))
+        for i in range(len(input_shape)):
+            shape_set.add(tuple(reduced_inputs_shapes[i]))
+
+        if len(shape_set) > 1:
+            raise ValueError('A `InnerProductLayer` layer requires '
+                             'inputs with same shapes '
+                             'Got different shapes: %s' % (shape_set))
+
+        if len(input_shape[0]) != 3 or input_shape[0][1] != 1:
+            raise ValueError('A `InnerProductLayer` layer requires '
+                             'inputs of a list with same shape tensor like (None,1,embedding_size)'
+                             'Got different shapes: %s' % (input_shape[0]))
         super(InnerProductLayer, self).build(
             input_shape)  # Be sure to call this somewhere!
 
     def call(self, inputs, **kwargs):
-        # if K.ndim(inputs[0]) != 3:
-        #     raise ValueError(
-        #         "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
+        if K.ndim(inputs[0]) != 3:
+            raise ValueError(
+                "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
 
         embed_list = inputs
         row = []
         col = []
-        num_inputs = embed_list.shape[1].value  # len(embed_list)
+        num_inputs = len(embed_list)
 
         for i in range(num_inputs - 1):
             for j in range(i + 1, num_inputs):
                 row.append(i)
                 col.append(j)
-        p = tf.concat([embed_list[:, idx:idx + 1, :]
+        p = tf.concat([embed_list[idx]
                        for idx in row], axis=1)  # batch num_pairs k
-        q = tf.concat([embed_list[:, idx:idx + 1, :]
+        q = tf.concat([embed_list[idx]
                        for idx in col], axis=1)
 
         inner_product = p * q
@@ -503,15 +503,14 @@ class InnerProductLayer(Layer):
         return inner_product
 
     def compute_output_shape(self, input_shape):
-
-        num_inputs = input_shape[1]
+        num_inputs = len(input_shape)
         num_pairs = int(num_inputs * (num_inputs - 1) / 2)
-        batch_size = input_shape[0]
+        input_shape = input_shape[0]
         embed_size = input_shape[-1]
         if self.reduce_sum:
-            return (batch_size, num_pairs, 1)
+            return (input_shape[0], num_pairs, 1)
         else:
-            return (batch_size, num_pairs, embed_size)
+            return (input_shape[0], num_pairs, embed_size)
 
     def get_config(self, ):
         config = {'reduce_sum': self.reduce_sum, }

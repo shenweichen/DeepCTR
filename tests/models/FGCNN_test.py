@@ -17,7 +17,7 @@ def test_FGCNN(sparse_feature_num, dense_feature_num):
         sample_size, sparse_feature_num, dense_feature_num)
 
     model = FGCNN(feature_dim_dict, conv_kernel_width=(3, 2), conv_filters=(2, 1), hidden_size=[32, ], keep_prob=0.5, )
-    check_model(model, model_name, x, y)
+    check_model(model, model_name, x, y,check_model_io=False)
 
 
 @pytest.mark.parametrize(
@@ -32,8 +32,8 @@ def test_CCPM_without_seq(sparse_feature_num, dense_feature_num):
     x, y, feature_dim_dict = get_test_data(
         sample_size, sparse_feature_num, dense_feature_num, sequence_feature=())
 
-    model = FGCNN(feature_dim_dict, conv_kernel_width=(3, ), conv_filters=(2, ), hidden_size=[32, ], keep_prob=0.5, )
-    check_model(model, model_name, x, y)
+    model = FGCNN(feature_dim_dict, conv_kernel_width=(3, ), conv_filters=(2, ),new_maps=(3,), hidden_size=(32, ), keep_prob=0.5,)
+    check_model(model, model_name, x, y,check_model_io=False)
 
 
 if __name__ == "__main__":

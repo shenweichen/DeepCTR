@@ -44,9 +44,14 @@ def preprocess_input_embedding(feature_dim_dict, embedding_size, l2_reg_embeddin
     return deep_emb_list, fg_deep_emb_list, linear_logit, inputs_list
 
 
+def unstack(input):
+    input_ = tf.expand_dims(input, axis=2)
+    return tf.unstack(input_, input_.shape[1], 1)
+
+
 def FGCNN(feature_dim_dict, embedding_size=8, conv_kernel_width=(6, 5), conv_filters=(4, 4), new_maps=(3, 3),
-          pooling_width=2, hidden_size=(128,),
-          l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_deep=0, keep_prob=1.0, init_std=0.0001, seed=1024,
+          pooling_width=2, hidden_size=(128,)
+          , l2_reg_embedding=1e-5, l2_reg_deep=0, keep_prob=1.0, init_std=0.0001, seed=1024,
           final_activation='sigmoid', ):
     """Instantiates the Feature Generation by Convolutional Neural Network architecture.
 
@@ -57,7 +62,6 @@ def FGCNN(feature_dim_dict, embedding_size=8, conv_kernel_width=(6, 5), conv_fil
     :param new_maps: list, list of positive integer or empty list, the feature maps of generated features.
     :param pooling_width: the width of pooling layer.
     :param hidden_size: list,list of positive integer or empty list, the layer number and units in each layer of deep net.
-    :param l2_reg_linear: float. L2 regularizer strength applied to linear part
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
     :param l2_reg_deep: float. L2 regularizer strength applied to deep net
     :param keep_prob: float in (0,1]. keep_prob after attention net
@@ -68,13 +72,13 @@ def FGCNN(feature_dim_dict, embedding_size=8, conv_kernel_width=(6, 5), conv_fil
     """
 
     check_feature_config_dict(feature_dim_dict)
-    if not (len(conv_kernel_width)==len(conv_filters)==len(new_maps)):
+    if not (len(conv_kernel_width) == len(conv_filters) == len(new_maps)):
         raise ValueError("conv_kernel_width,conv_filters and new_maps must have same length")
 
     deep_emb_list, fg_deep_emb_list, linear_logit, inputs_list = preprocess_input_embedding(feature_dim_dict,
                                                                                             embedding_size,
                                                                                             l2_reg_embedding,
-                                                                                            l2_reg_linear, init_std,
+                                                                                            0, init_std,
                                                                                             seed, True)
     l = len(conv_filters)
     fg_input = concat_fun(fg_deep_emb_list, axis=1)
@@ -98,7 +102,8 @@ def FGCNN(feature_dim_dict, embedding_size=8, conv_kernel_width=(6, 5), conv_fil
     new_features = concat_fun(new_feature_list, axis=1)
     combined_input = concat_fun([origin_input, new_features], axis=1)
 
-    inner_product = tf.keras.layers.Flatten()(InnerProductLayer()(combined_input))
+    inner_product = tf.keras.layers.Flatten()(InnerProductLayer()(
+        tf.keras.layers.Lambda(unstack, mask=[None] * combined_input.shape[1].value)(combined_input)))
     linear_signal = tf.keras.layers.Flatten()(combined_input)
     dnn_input = tf.keras.layers.Concatenate()([linear_signal, inner_product])
     dnn_input = tf.keras.layers.Flatten()(dnn_input)

@@ -46,7 +46,7 @@ def test_CrossNet_invalid():
 def test_InnerProductLayer(reduce_sum):
     with CustomObjectScope({'InnerProductLayer': layers.InnerProductLayer}):
         layer_test(layers.InnerProductLayer, kwargs={
-            'reduce_sum': reduce_sum}, input_shape=(BATCH_SIZE, FIELD_SIZE, EMBEDDING_SIZE))
+            'reduce_sum': reduce_sum}, input_shape=[(BATCH_SIZE, 1, EMBEDDING_SIZE)]*FIELD_SIZE)
 
 
 @pytest.mark.parametrize(
