@@ -16,6 +16,7 @@ from tensorflow.python.keras.layers import Layer
 from tensorflow.python.keras.regularizers import l2
 
 from .activation import activation_fun
+from .utils import concat_fun
 
 
 class AFMLayer(Layer):
@@ -749,4 +750,85 @@ class OutterProductLayer(Layer):
     def get_config(self, ):
         config = {'kernel_type': self.kernel_type, 'seed': self.seed}
         base_config = super(OutterProductLayer, self).get_config()
+        return dict(list(base_config.items()) + list(config.items()))
+
+
+class FGCNNLayer(Layer):
+    """Feature Generation Layer used in FGCNN.
+
+      Input shape
+        - A 3D tensor with shape:``(batch_size,field_size,embedding_size)``.
+
+      Output shape
+        - 3D tensor with shape: ``(batch_size,new_feture_num,embedding_size)``.
+
+      References
+        - [Liu B, Tang R, Chen Y, et al. Feature Generation by Convolutional Neural Network for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1904.04447, 2019.](https://arxiv.org/pdf/1904.04447)
+
+    """
+
+    def __init__(self, filters=(14, 16,), kernel_width=(7, 7,), new_maps=(3, 3,), pooling_width=(2, 2),
+                 **kwargs):
+        if not (len(filters) == len(kernel_width) == len(new_maps) == len(pooling_width)):
+            raise ValueError("length of argument must be equal")
+        self.filters = filters
+        self.kernel_width = kernel_width
+        self.new_maps = new_maps
+        self.pooling_width = pooling_width
+
+        super(FGCNNLayer, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+
+        if len(input_shape) != 3:
+            raise ValueError(
+                "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (len(input_shape)))
+
+        super(FGCNNLayer, self).build(
+            input_shape)  # Be sure to call this somewhere!
+
+    def call(self, inputs, **kwargs):
+
+        if K.ndim(inputs) != 3:
+            raise ValueError(
+                "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
+
+        embedding_size = inputs.shape[-1].value
+        pooling_result = tf.keras.layers.Lambda(lambda x: tf.expand_dims(x, axis=3))(inputs)
+
+        new_feature_list = []
+
+        for i in range(1, len(self.filters) + 1):
+            filters = self.filters[i - 1]
+            width = self.kernel_width[i - 1]
+            new_filters = self.new_maps[i - 1]
+            pooling_width = self.pooling_width[i - 1]
+            conv_result = tf.keras.layers.Conv2D(filters=filters, kernel_size=(width, 1), strides=(1, 1),
+                                                 padding='same',
+                                                 activation='tanh', use_bias=True, )(pooling_result)
+            pooling_result = tf.keras.layers.MaxPooling2D(pool_size=(pooling_width, 1))(conv_result)
+            flatten_result = tf.keras.layers.Flatten()(pooling_result)
+            new_result = tf.keras.layers.Dense(pooling_result.shape[1].value * embedding_size * new_filters,
+                                               activation='tanh', use_bias=True)(flatten_result)
+            new_feature_list.append(
+                tf.keras.layers.Reshape((pooling_result.shape[1].value * new_filters, embedding_size))(new_result))
+        new_features = concat_fun(new_feature_list, axis=1)
+        return new_features
+
+    def compute_output_shape(self, input_shape):
+
+        new_features_num = 0
+        features_num = input_shape[1]
+
+        for i in range(0, len(self.kernel_width)):
+            pooled_features_num = features_num // self.pooling_width
+            new_features_num += self.new_maps[i] * pooled_features_num
+            features_num = pooled_features_num
+
+        return (None, new_features_num, input_shape[-1])
+
+    def get_config(self, ):
+        config = {'kernel_width': self.kernel_width, 'filters': self.filters, 'new_maps': self.new_maps,
+                  'pooling_width': self.pooling_width}
+        base_config = super(FGCNNLayer, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
