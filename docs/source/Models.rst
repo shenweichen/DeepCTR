@@ -17,3 +17,4 @@ DeepCTR Models API
    xDeepFM<deepctr.models.xdeepfm>
    AutoInt<deepctr.models.autoint>
    NFFM<deepctr.models.nffm>
+   FGCNN<deepctr.models.fgcnn>

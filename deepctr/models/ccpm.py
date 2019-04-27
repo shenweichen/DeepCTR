@@ -39,6 +39,8 @@ def CCPM(feature_dim_dict, embedding_size=8, conv_kernel_width=(6, 5), conv_filt
     """
 
     check_feature_config_dict(feature_dim_dict)
+    if len(conv_kernel_width)!=len(conv_filters):
+        raise ValueError("conv_kernel_width must have same element with conv_filters")
 
     deep_emb_list, linear_logit, inputs_list = preprocess_input_embedding(feature_dim_dict, embedding_size,
                                                                           l2_reg_embedding, l2_reg_linear, init_std,
