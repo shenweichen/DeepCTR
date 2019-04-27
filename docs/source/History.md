@@ -1,5 +1,5 @@
 # History
-- 04/27/2019 : [v0.3.4](https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.4) released.Add [FGCNN](./Features.html#fgcnn-feature-generation-by-convolutional-neural-network).
+- 04/27/2019 : [v0.3.4](https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.4) released.Add [FGCNN](./Features.html#fgcnn-feature-generation-by-convolutional-neural-network) and `FGCNNLayer`.
 - 04/21/2019 : [v0.3.3](https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.3) released.Add [CCPM](./Features.html#ccpm-convolutional-click-prediction-model).
 - 03/30/2019 : [v0.3.2](https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.2) released.Add [DIEN](./Features.html#dien-deep-interest-evolution-network) and [NFFM](./Features.html#nffm-field-aware-neural-factorization-machine)  Model.
 - 02/17/2019 : [v0.3.1](https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.1) released.Refactor layers ,add `BiLSTM` and `Transformer`.
