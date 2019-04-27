@@ -6,9 +6,9 @@ from deepctr import layers
 
 from tests.utils import layer_test
 
-BATCH_SIZE = 4
-FIELD_SIZE = 3
-EMBEDDING_SIZE = 8
+BATCH_SIZE = 5
+FIELD_SIZE = 4
+EMBEDDING_SIZE = 3
 SEQ_LENGTH = 10
 
 
@@ -118,5 +118,11 @@ def test_InteractingLayer(head_num, use_res,):
         layer_test(layers.InteractingLayer, kwargs={"head_num": head_num, "use_res":
                                                     use_res, }, input_shape=(
             BATCH_SIZE, FIELD_SIZE, EMBEDDING_SIZE))
+
+def test_FGCNNLayer():
+    with CustomObjectScope({'FGCNNLayer': layers.FGCNNLayer}):
+        layer_test(layers.FGCNNLayer, kwargs={'filters':(4, 6,),'kernel_width':(7, 7,)}, input_shape=(
+            BATCH_SIZE, FIELD_SIZE, EMBEDDING_SIZE))
+
 
 

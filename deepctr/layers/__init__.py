@@ -4,7 +4,7 @@ from .activation import Dice
 from .core import MLP, LocalActivationUnit, PredictionLayer
 from .interaction import (CIN, FM, AFMLayer, BiInteractionPooling, CrossNet,
                           InnerProductLayer, InteractingLayer,
-                          OutterProductLayer)
+                          OutterProductLayer,FGCNNLayer)
 from .normalization import LayerNormalization
 from .sequence import (AttentionSequencePoolingLayer, BiasEncoding, BiLSTM,
                        KMaxPooling, Position_Embedding, SequencePoolingLayer,
@@ -31,4 +31,5 @@ custom_objects = {'tf': tf,
                   'Transformer': Transformer,
                   'NoMask': NoMask,
                   'BiasEncoding': BiasEncoding,
-                  'KMaxPooling': KMaxPooling}
+                  'KMaxPooling': KMaxPooling,
+                  'FGCNNLayer':FGCNNLayer}
