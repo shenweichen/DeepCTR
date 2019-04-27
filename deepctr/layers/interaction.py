@@ -754,7 +754,7 @@ class OutterProductLayer(Layer):
 
 
 class FGCNNLayer(Layer):
-    """Feature Generation Layer used in FGCNN.
+    """Feature Generation Layer used in FGCNN,including Convolution,MaxPooling and Recombination.
 
       Input shape
         - A 3D tensor with shape:``(batch_size,field_size,embedding_size)``.
