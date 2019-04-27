@@ -254,6 +254,17 @@ NFFM models second order feature interactions like like FFM and preserves second
 
 `Zhang L, Shen W, Li S, et al. Field-aware Neural Factorization Machine for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1902.09096, 2019. <https://arxiv.org/pdf/1902.09096.pdf>`_ 
 
+FGCNN(Feature Generation by Convolutional Neural Network)
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+FGCNN models with two components: Feature Generation and Deep Classifier. Feature Generation leverages the strength of CNN to generate local patterns and recombine them to generate new features. Deep Classifier adopts the structure of IPNN to learn interactions from the augmented feature space.
+**FGCNN api** `link <./deepctr.models.fgcnn.html>`_
+
+.. image:: ../pics/FGCNN.png
+   :align: center
+   :scale: 70 %
+
+`Liu B, Tang R, Chen Y, et al. Feature Generation by Convolutional Neural Network for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1904.04447, 2019. <https://arxiv.org/pdf/1904.04447>`_
 
 Layers
 --------
