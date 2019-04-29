@@ -61,7 +61,8 @@ class Dice(Layer):
 
 def activation_fun(activation, fc):
 
-    if isinstance(activation, str):
+
+    if isinstance(activation,( str,unicode)):
         fc = tf.keras.layers.Activation(activation)(fc)
     elif issubclass(activation, Layer):
         fc = activation()(fc)
