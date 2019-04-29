@@ -155,10 +155,10 @@ def get_inputs_list(inputs):
 
 def get_inputs_embedding(feature_dim_dict, embedding_size, l2_reg_embedding, l2_reg_linear, init_std, seed,
                          sparse_input_dict, dense_input_dict, sequence_input_dict, sequence_input_len_dict,
-                         sequence_max_len_dict, sequence_pooling_dict, include_linear):
+                         sequence_max_len_dict, sequence_pooling_dict, include_linear,prefix=""):
 
     deep_sparse_emb_dict = create_embedding_dict(
-        feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding)
+        feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding,prefix=prefix+'sparse')
 
     deep_emb_list = get_embedding_vec_list(
         deep_sparse_emb_dict, sparse_input_dict)
@@ -171,7 +171,7 @@ def get_inputs_embedding(feature_dim_dict, embedding_size, l2_reg_embedding, l2_
 
     if include_linear:
         linear_sparse_emb_dict = create_embedding_dict(
-            feature_dim_dict, 1, init_std, seed, l2_reg_linear, 'linear')
+            feature_dim_dict, 1, init_std, seed, l2_reg_linear,prefix+ 'linear')
         linear_emb_list = get_embedding_vec_list(
             linear_sparse_emb_dict, sparse_input_dict)
         linear_emb_list = merge_sequence_input(linear_sparse_emb_dict, linear_emb_list, sequence_input_dict,

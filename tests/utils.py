@@ -189,7 +189,7 @@ def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,
         if expected_dim is not None:
 
             if not (expected_dim == actual_dim):
-                raise AssertionError()
+                raise AssertionError("expected_shape",expected_output_shape,"actual_shape",actual_output_shape)
 
     if expected_output is not None:
 
@@ -314,7 +314,7 @@ def has_arg(fn, name, accept_all=False):
                                    inspect.Parameter.KEYWORD_ONLY))
 
 
-def check_model(model, model_name, x, y):
+def check_model(model, model_name, x, y,check_model_io=True):
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
     model.fit(x, y, batch_size=100, epochs=1, validation_split=0.5)
@@ -323,8 +323,9 @@ def check_model(model, model_name, x, y):
     model.save_weights(model_name + '_weights.h5')
     model.load_weights(model_name + '_weights.h5')
     print(model_name+" test save load weight pass!")
-    save_model(model, model_name + '.h5')
-    model = load_model(model_name + '.h5', custom_objects)
-    print(model_name + " test save load model pass!")
+    if check_model_io:
+        save_model(model, model_name + '.h5')
+        model = load_model(model_name + '.h5', custom_objects)
+        print(model_name + " test save load model pass!")
 
     print(model_name + " test pass!")
