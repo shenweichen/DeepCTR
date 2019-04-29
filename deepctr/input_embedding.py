@@ -20,13 +20,13 @@ def create_singlefeat_inputdict(feature_dim_dict, prefix=''):
     sparse_input = OrderedDict()
     for i, feat in enumerate(feature_dim_dict["sparse"]):
         sparse_input[feat.name] = Input(
-            shape=(1,), name=prefix+'sparse_' + str(i) + '-' + feat.name)
+            shape=(1,), name=feat.name)#prefix+'sparse_' + str(i) + '-' + feat.name)
 
     dense_input = OrderedDict()
 
     for i, feat in enumerate(feature_dim_dict["dense"]):
         dense_input[feat.name] = Input(
-            shape=(1,), name=prefix+'dense_' + str(i) + '-' + feat.name)
+            shape=(1,), name=feat.name)#prefix+'dense_' + str(i) + '-' + feat.name)
 
     return sparse_input, dense_input
 
