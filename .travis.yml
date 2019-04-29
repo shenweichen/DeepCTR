@@ -3,10 +3,11 @@
 language: python
 
 python:
-  - "3.4"
-  - "3.5"
+  - "2.7"
+  #- "3.4"
+  #- "3.5"
   - "3.6"
-#  - "3.7"
+  - "3.7"
 
 env:
 #  - TF_VERSION=1.13.1
@@ -15,7 +16,7 @@ env:
   #Not Support- TF_VERSION=1.7.0
   #Not Support- TF_VERSION=1.7.1
   #Not Support- TF_VERSION=1.8.0
-  - TF_VERSION=1.9.0
+  #- TF_VERSION=1.9.0
   - TF_VERSION=1.10.0 #- TF_VERSION=1.10.1
   #    - TF_VERSION=1.11.0
   #- TF_VERSION=1.5.1 #- TF_VERSION=1.5.0
