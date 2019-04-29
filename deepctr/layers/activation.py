@@ -6,6 +6,8 @@ Author:
 
 """
 
+import sys
+
 import tensorflow as tf
 from tensorflow.python.keras.initializers import Zeros
 from tensorflow.python.keras.layers import Layer
@@ -60,9 +62,7 @@ class Dice(Layer):
 
 
 def activation_fun(activation, fc):
-
-
-    if isinstance(activation,( str,unicode)):
+    if (isinstance(activation,str)) or(sys.version_info.major==2 and isinstance(activation,(str,unicode))):
         fc = tf.keras.layers.Activation(activation)(fc)
     elif issubclass(activation, Layer):
         fc = activation()(fc)
