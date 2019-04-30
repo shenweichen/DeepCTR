@@ -400,7 +400,7 @@ class Transformer(Layer):
         # Be sure to call this somewhere!
         super(Transformer, self).build(input_shape)
 
-    def call(self, inputs, mask=None, **kwargs):
+    def call(self, inputs, mask=None,training=None, **kwargs):
 
         if self.supports_masking:
             queries, keys = inputs
@@ -460,7 +460,7 @@ class Transformer(Layer):
 
         outputs *= query_masks
 
-        outputs = self.dropout(outputs)
+        outputs = self.dropout(outputs,training=training)
         # Weighted sum
         # ( h*N, T_q, C/h)
         result = tf.matmul(outputs, values)
@@ -474,7 +474,7 @@ class Transformer(Layer):
 
         if self.use_feed_forward:
             fw1 = tf.nn.relu(tf.tensordot(result, self.fw1, axes=[-1, 0]))
-            fw1 = self.dropout(fw1)
+            fw1 = self.dropout(fw1,training=training)
             fw2 = tf.tensordot(fw1, self.fw2, axes=[-1, 0])
             if self.use_res:
                 result += fw2

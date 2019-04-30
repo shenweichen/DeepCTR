@@ -41,7 +41,7 @@ def NFM(feature_dim_dict, embedding_size=8,
 
     fm_input = concat_fun(deep_emb_list, axis=1)
     bi_out = BiInteractionPooling()(fm_input)
-    bi_out = tf.keras.layers.Dropout(1 - keep_prob)(bi_out)
+    bi_out = tf.keras.layers.Dropout(1 - keep_prob)(bi_out,training=None)
     deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
                    False, seed)(bi_out)
     deep_logit = tf.keras.layers.Dense(

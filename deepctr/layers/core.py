@@ -169,10 +169,10 @@ class MLP(Layer):
             #           kernel_initializer=glorot_normal(seed=self.seed), \
             #           kernel_regularizer=l2(self.l2_reg))(deep_input)
             if self.use_bn:
-                fc = tf.keras.layers.BatchNormalization()(fc)
+                fc = tf.keras.layers.BatchNormalization()(fc,training=training)
             fc = activation_fun(self.activation, fc)
             #fc = tf.nn.dropout(fc, self.keep_prob)
-            fc = tf.keras.layers.Dropout(1 - self.keep_prob)(fc,)
+            fc = tf.keras.layers.Dropout(1 - self.keep_prob)(fc,training=training)
             deep_input = fc
 
         return deep_input
