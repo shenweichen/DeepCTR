@@ -7,7 +7,7 @@ Reference:
     [1] Lian J, Zhou X, Zhang F, et al. xDeepFM: Combining Explicit and Implicit Feature Interactions for Recommender Systems[J]. arXiv preprint arXiv:1803.05170, 2018.(https://arxiv.org/pdf/1803.05170.pdf)
 """
 import tensorflow as tf
-from ..input_embedding import preprocess_input_embedding
+from ..input_embedding import preprocess_input_embedding,get_linear_logit
 from ..layers.core import PredictionLayer, MLP
 from ..layers.interaction import CIN
 from ..utils import check_feature_config_dict
@@ -37,9 +37,15 @@ def xDeepFM(feature_dim_dict, embedding_size=8, hidden_size=(256, 256), cin_laye
     """
     check_feature_config_dict(feature_dim_dict)
 
-    deep_emb_list, linear_logit, inputs_list = preprocess_input_embedding(feature_dim_dict, embedding_size,
-                                                                          l2_reg_embedding, l2_reg_linear, init_std,
-                                                                          seed, True)
+    deep_emb_list, linear_emb_list, dense_input_dict, inputs_list = preprocess_input_embedding(feature_dim_dict,
+                                                                                               embedding_size,
+                                                                                               l2_reg_embedding,
+                                                                                               l2_reg_linear, init_std,
+                                                                                               seed,
+                                                                                               create_linear_weight=True)
+
+    linear_logit = get_linear_logit(linear_emb_list, dense_input_dict, l2_reg_linear)
+
 
     fm_input = concat_fun(deep_emb_list, axis=1)
 

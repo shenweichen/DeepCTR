@@ -208,7 +208,7 @@ def get_linear_logit(linear_emb_list, dense_input_dict, l2_reg):
 
 
 def preprocess_input_embedding(feature_dim_dict, embedding_size, l2_reg_embedding, l2_reg_linear, init_std, seed,
-                               return_linear_logit=True):
+                               create_linear_weight=True):
     sparse_input_dict, dense_input_dict = create_singlefeat_inputdict(
         feature_dim_dict)
     sequence_input_dict, sequence_pooling_dict, sequence_input_len_dict, sequence_max_len_dict = create_varlenfeat_inputdict(
@@ -217,10 +217,6 @@ def preprocess_input_embedding(feature_dim_dict, embedding_size, l2_reg_embeddin
                                                                        l2_reg_embedding, l2_reg_linear, init_std, seed,
                                                                        sparse_input_dict, dense_input_dict,
                                                                        sequence_input_dict, sequence_input_len_dict,
-                                                                       sequence_max_len_dict, sequence_pooling_dict, return_linear_logit)
-    if return_linear_logit:
-        linear_logit = get_linear_logit(
-            linear_emb_list, dense_input_dict, l2_reg_linear)
-    else:
-        linear_logit = None
-    return deep_emb_list, linear_logit, inputs_list
+                                                                       sequence_max_len_dict, sequence_pooling_dict, create_linear_weight)
+
+    return deep_emb_list, linear_emb_list,dense_input_dict, inputs_list
