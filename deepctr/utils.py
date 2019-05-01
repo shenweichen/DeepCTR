@@ -6,7 +6,7 @@ Author:
 
 """
 
-import collections
+from collections import namedtuple
 import json
 import logging
 from threading import Thread
@@ -22,11 +22,24 @@ except ImportError:
     from pip._vendor.packaging.version import parse
 
 
-VarLenFeat = collections.namedtuple(
-    'VarLenFeat', ['name', 'dimension', 'maxlen', 'combiner'])
-SingleFeat = collections.namedtuple(
-    'SingleFeat', ['name', 'dimension', ])
 
+
+class SingleFeat(namedtuple('SingleFeat',['name','dimension','hash_flag','dtype'])):
+    __slots__ = ()
+    def __new__(cls,name,dimension,hash_flag=False,dtype="float32"):
+        return super(SingleFeat,cls).__new__(cls,name,dimension,hash_flag,dtype)
+
+
+class VarLenFeat(namedtuple('VarLenFeat',['name','dimension','maxlen','combiner','hash_flag','dtype'])):
+    __slots__ = ()
+    def __new__(cls,name,dimension,maxlen,combiner="mean",hash_flag=False,dtype="float32"):
+        return super(VarLenFeat,cls).__new__(cls,name,dimension,maxlen,combiner,hash_flag,dtype)
+
+# VarLenFeat = collections.namedtuple(
+#     'VarLenFeat', ['name', 'dimension', 'maxlen', 'combiner'])
+# SingleFeat = collections.namedtuple(
+#     'SingleFeat', ['name', 'dimension','hash_flag','dtype'])
+#
 
 def check_version(version):
     """Return version of package on pypi.python.org using json."""
@@ -60,6 +73,9 @@ def check_feature_config_dict(feature_dim_dict):
         feature_dim_dict['sparse'] = []
     if "dense" not in feature_dim_dict:
         feature_dim_dict['dense'] = []
+    if "sequence" not in feature_dim_dict:
+        feature_dim_dict["sequence"] = []#TODO:这里会出问题吗
+
     if not isinstance(feature_dim_dict["sparse"], list):
         raise ValueError("feature_dim_dict['sparse'] must be a list,cur is", type(
             feature_dim_dict['sparse']))

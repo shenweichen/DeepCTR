@@ -31,4 +31,4 @@ def test_DCN_invalid(embedding_size=8, cross_num=0, hidden_size=()):
 
 
 if __name__ == "__main__":
-    test_DCN(8, 2, [32, 32], 2)
+    pass

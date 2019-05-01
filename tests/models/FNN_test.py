@@ -37,4 +37,4 @@ def test_FNN_without_seq(sparse_feature_num, dense_feature_num):
 
 
 if __name__ == "__main__":
-    test_FNN(2, 2)
+    pass

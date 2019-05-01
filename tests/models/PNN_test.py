@@ -20,4 +20,4 @@ def test_PNN(use_inner, use_outter, sparse_feature_num):
 
 
 if __name__ == "__main__":
-    test_PNN(use_inner=True, use_outter=False, sparse_feature_num=1)
+    pass

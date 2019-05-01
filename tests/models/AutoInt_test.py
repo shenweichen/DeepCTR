@@ -19,4 +19,4 @@ def test_AutoInt(att_layer_num, hidden_size, sparse_feature_num):
 
 
 if __name__ == "__main__":
-    test_AutoInt(2, (32, 32), 2)
+    pass

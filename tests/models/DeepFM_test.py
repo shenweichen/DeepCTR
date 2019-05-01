@@ -20,4 +20,4 @@ def test_DeepFM(use_fm, hidden_size, sparse_feature_num):
 
 
 if __name__ == "__main__":
-    test_DeepFM(True, (32, 32), 2)
+    pass

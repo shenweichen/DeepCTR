@@ -19,4 +19,4 @@ def test_AFM(use_attention, sparse_feature_num, dense_feature_num):
 
 
 if __name__ == "__main__":
-    test_AFM(use_attention=True, sparse_feature_num=2, dense_feature_num=2)
+    pass

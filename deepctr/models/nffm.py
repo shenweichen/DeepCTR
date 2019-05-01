@@ -91,7 +91,7 @@ def NFFM(feature_dim_dict, embedding_size=4, hidden_size=(128, 128),
     final_logit = Dense(1, use_bias=False)(ffm_out)
 
     linear_emb_list = get_embedding_vec_list(
-        linear_embedding, sparse_input_dict)
+        linear_embedding, sparse_input_dict,feature_dim_dict['sparse'])
 
     linear_logit = get_linear_logit(
         linear_emb_list, dense_input_dict, l2_reg_linear)

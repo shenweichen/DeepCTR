@@ -70,4 +70,4 @@ def test_DIN_att():
 
 
 if __name__ == "__main__":
-    test_DIN_att()
+    pass

@@ -44,7 +44,7 @@ def WDL(deep_feature_dim_dict, wide_feature_dim_dict, embedding_size=8, hidden_s
     wide_linear_embedding = create_embedding_dict(
         wide_feature_dim_dict, 1, init_std, seed, l2_reg_linear, 'linear')
 
-    embed_list = get_embedding_vec_list(sparse_embedding, sparse_input)
+    embed_list = get_embedding_vec_list(sparse_embedding, sparse_input,deep_feature_dim_dict['sparse'])
 
     deep_input = Concatenate()(embed_list) if len(
         embed_list) > 1 else embed_list[0]
@@ -59,7 +59,7 @@ def WDL(deep_feature_dim_dict, wide_feature_dim_dict, embedding_size=8, hidden_s
     if len(wide_feature_dim_dict['dense']) + len(wide_feature_dim_dict['sparse']) > 0:
         if len(wide_feature_dim_dict['sparse']) > 0:
             bias_embed_list = get_embedding_vec_list(
-                wide_linear_embedding, bias_sparse_input)
+                wide_linear_embedding, bias_sparse_input,wide_feature_dim_dict['sparse'])
             linear_term = add(bias_embed_list) if len(
                 bias_embed_list) > 1 else bias_embed_list[0]
             final_logit = add([final_logit, linear_term])

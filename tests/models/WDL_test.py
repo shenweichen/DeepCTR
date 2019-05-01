@@ -30,12 +30,12 @@ def test_WDL(sparse_feature_num, wide_feature_num):
             for i in range(num):
                 wide_feature_dim_dict[name].append(SingleFeat(name + 'wide_' + str(i),0))
 
-    sparse_input = [np.random.randint(0, dim, sample_size)
-                    for feat,dim in feature_dim_dict['sparse']]
+    sparse_input = [np.random.randint(0, feat.dimension, sample_size)
+                    for feat in feature_dim_dict['sparse']]
     dense_input = [np.random.random(sample_size)
                    for _ in feature_dim_dict['dense']]
-    wide_sparse_input = [np.random.randint(0, dim, sample_size)
-                         for feat,dim in wide_feature_dim_dict['sparse']]
+    wide_sparse_input = [np.random.randint(0, feat.dimension, sample_size)
+                         for feat in wide_feature_dim_dict['sparse']]
     wide_dense_input = [np.random.random(sample_size)
                         for _ in wide_feature_dim_dict['dense']]
     y = np.random.randint(0, 2, sample_size)
@@ -48,4 +48,4 @@ def test_WDL(sparse_feature_num, wide_feature_num):
 
 
 if __name__ == "__main__":
-    test_WDL(1, 1)
+    pass

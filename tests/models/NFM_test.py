@@ -21,4 +21,4 @@ def test_NFM(hidden_size, sparse_feature_num):
 
 
 if __name__ == "__main__":
-    test_NFM((8, 8), 1)
+    pass
