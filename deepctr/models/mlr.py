@@ -6,9 +6,9 @@ Author:
 Reference:
     [1] Gai K, Zhu X, Li H, et al. Learning Piece-wise Linear Models from Large Scale Data for Ad Click Prediction[J]. arXiv preprint arXiv:1704.05194, 2017.(https://arxiv.org/abs/1704.05194)
 """
-from tensorflow.python.keras.layers import Input, Dense, Embedding, Concatenate, Activation,  Reshape,  add, dot
-from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.initializers import TruncatedNormal
+from tensorflow.python.keras.layers import Input, Dense, Embedding, Concatenate, Activation, Reshape, add, dot
+from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.regularizers import l2
 
 
@@ -44,7 +44,8 @@ def MLR(region_feature_dim_dict, base_feature_dim_dict={"sparse": [], "dense": [
     region_sparse_input, region_dense_input, base_sparse_input, base_dense_input, bias_sparse_input, bias_dense_input = get_input(
         region_feature_dim_dict, base_feature_dim_dict, bias_feature_dim_dict, same_flag)
     region_embeddings, base_embeddings, bias_embedding = get_embedding(
-        region_num, region_feature_dim_dict, base_feature_dim_dict, bias_feature_dim_dict, init_std, seed, l2_reg_linear)
+        region_num, region_feature_dim_dict, base_feature_dim_dict, bias_feature_dim_dict, init_std, seed,
+        l2_reg_linear)
 
     if same_flag:
 
@@ -73,10 +74,10 @@ def MLR(region_feature_dim_dict, base_feature_dim_dict={"sparse": [], "dense": [
                                 range(region_num)]
 
     if base_dense_feature_num > 1:
-        base_dense_logits = [Dense(1, )(Concatenate()(base_dense_input_))for _ in
+        base_dense_logits = [Dense(1, )(Concatenate()(base_dense_input_)) for _ in
                              range(region_num)]
     elif base_dense_feature_num == 1:
-        base_dense_logits = [Dense(1, )(base_dense_input_[0])for _ in
+        base_dense_logits = [Dense(1, )(base_dense_input_[0]) for _ in
                              range(region_num)]
 
     if region_dense_feature_num > 0 and region_sparse_feature_num == 0:
@@ -101,13 +102,17 @@ def MLR(region_feature_dim_dict, base_feature_dim_dict={"sparse": [], "dense": [
         base_logits = base_dense_logits
     elif base_dense_feature_num == 0 and base_sparse_feature_num > 0:
         base_sparse_logits = [add(
-            [base_embeddings[j][i](base_sparse_input_[i]) for i in range(base_sparse_feature_num)]) if base_sparse_feature_num > 1 else base_embeddings[j][0](base_sparse_input_[0])
-            for j in range(region_num)]
+            [base_embeddings[j][i](base_sparse_input_[i]) for i in
+             range(base_sparse_feature_num)]) if base_sparse_feature_num > 1 else base_embeddings[j][0](
+            base_sparse_input_[0])
+                              for j in range(region_num)]
         base_logits = base_sparse_logits
     else:
         base_sparse_logits = [add(
-            [base_embeddings[j][i](base_sparse_input_[i]) for i in range(base_sparse_feature_num)]) if base_sparse_feature_num > 1 else base_embeddings[j][0](base_sparse_input_[0])
-            for j in range(region_num)]
+            [base_embeddings[j][i](base_sparse_input_[i]) for i in
+             range(base_sparse_feature_num)]) if base_sparse_feature_num > 1 else base_embeddings[j][0](
+            base_sparse_input_[0])
+                              for j in range(region_num)]
         base_logits = [add([base_sparse_logits[i], base_dense_logits[i]])
                        for i in range(region_num)]
 
@@ -120,9 +125,9 @@ def MLR(region_feature_dim_dict, base_feature_dim_dict={"sparse": [], "dense": [
     if bias_dense_feature_num + bias_sparse_feature_num > 0:
 
         if bias_dense_feature_num > 1:
-            bias_dense_logits = Dense(1,)(Concatenate()(bias_dense_input))
+            bias_dense_logits = Dense(1, )(Concatenate()(bias_dense_input))
         elif bias_dense_feature_num == 1:
-            bias_dense_logits = Dense(1,)(bias_dense_input[0])
+            bias_dense_logits = Dense(1, )(bias_dense_input[0])
         else:
             pass
 
@@ -145,15 +150,15 @@ def MLR(region_feature_dim_dict, base_feature_dim_dict={"sparse": [], "dense": [
         final_logit = dot([final_logit, bias_prob], axes=-1)
 
     output = Reshape([1])(final_logit)
-    model = Model(inputs=region_sparse_input + region_dense_input+base_sparse_input +
-                  base_dense_input+bias_sparse_input+bias_dense_input, outputs=output)
+    model = Model(inputs=region_sparse_input + region_dense_input + base_sparse_input +
+                         base_dense_input + bias_sparse_input + bias_dense_input, outputs=output)
     return model
 
 
 def get_input(region_feature_dim_dict, base_feature_dim_dict, bias_feature_dim_dict, same_flag):
-    region_sparse_input = [Input(shape=(1,), name='region_sparse_' + str(i)+"-"+feat.name)
+    region_sparse_input = [Input(shape=(1,), name='region_sparse_' + str(i) + "-" + feat.name)
                            for i, feat in enumerate(region_feature_dim_dict["sparse"])]
-    region_dense_input = [Input(shape=(1,), name='region_dense_' + str(i)+"-"+feat.name)
+    region_dense_input = [Input(shape=(1,), name='region_dense_' + str(i) + "-" + feat.name)
                           for i, feat in enumerate(region_feature_dim_dict["dense"])]
     if same_flag == True:
         base_sparse_input = []
@@ -171,16 +176,20 @@ def get_input(region_feature_dim_dict, base_feature_dim_dict, bias_feature_dim_d
     return region_sparse_input, region_dense_input, base_sparse_input, base_dense_input, bias_sparse_input, bias_dense_input
 
 
-def get_embedding(region_num, region_feature_dim_dict, base_feature_dim_dict, bias_feature_dim_dict, init_std, seed, l2_reg_linear):
-
-    region_embeddings = [[Embedding(feat.dimension, 1, embeddings_initializer=TruncatedNormal(stddev=init_std, seed=seed+j), embeddings_regularizer=l2(l2_reg_linear),
-                                    name='region_emb_' + str(j)+'_' + str(i)) for
+def get_embedding(region_num, region_feature_dim_dict, base_feature_dim_dict, bias_feature_dim_dict, init_std, seed,
+                  l2_reg_linear):
+    region_embeddings = [[Embedding(feat.dimension, 1,
+                                    embeddings_initializer=TruncatedNormal(stddev=init_std, seed=seed + j),
+                                    embeddings_regularizer=l2(l2_reg_linear),
+                                    name='region_emb_' + str(j) + '_' + str(i)) for
                           i, feat in enumerate(region_feature_dim_dict['sparse'])] for j in range(region_num)]
     base_embeddings = [[Embedding(feat.dimension, 1,
-                                  embeddings_initializer=TruncatedNormal(stddev=init_std, seed=seed + j), embeddings_regularizer=l2(l2_reg_linear),
+                                  embeddings_initializer=TruncatedNormal(stddev=init_std, seed=seed + j),
+                                  embeddings_regularizer=l2(l2_reg_linear),
                                   name='base_emb_' + str(j) + '_' + str(i)) for
                         i, feat in enumerate(base_feature_dim_dict['sparse'])] for j in range(region_num)]
-    bias_embedding = [Embedding(feat.dimension, 1, embeddings_initializer=TruncatedNormal(stddev=init_std, seed=seed), embeddings_regularizer=l2(l2_reg_linear),
+    bias_embedding = [Embedding(feat.dimension, 1, embeddings_initializer=TruncatedNormal(stddev=init_std, seed=seed),
+                                embeddings_regularizer=l2(l2_reg_linear),
                                 name='embed_bias' + '_' + str(i)) for
                       i, feat in enumerate(bias_feature_dim_dict['sparse'])]
 

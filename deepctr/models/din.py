@@ -8,34 +8,35 @@ Reference:
 """
 
 from collections import OrderedDict
+
+import tensorflow as tf
+from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.layers import Input, Dense, Embedding, Concatenate, Flatten
 from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.regularizers import l2
-import  tensorflow as tf
 
+from ..input_embedding import get_inputs_list, create_singlefeat_inputdict
+from ..layers.activation import Dice
 from ..layers.core import MLP, PredictionLayer
 from ..layers.sequence import AttentionSequencePoolingLayer
-from ..layers.activation import Dice
-from ..layers.utils import concat_fun,NoMask
-from ..input_embedding import get_inputs_list,create_singlefeat_inputdict
+from ..layers.utils import concat_fun, NoMask
 from ..utils import check_feature_config_dict
 
 
 def get_input(feature_dim_dict, seq_feature_list, seq_max_len):
-    sparse_input,dense_input = create_singlefeat_inputdict(feature_dim_dict)
+    sparse_input, dense_input = create_singlefeat_inputdict(feature_dim_dict)
     user_behavior_input = OrderedDict()
-    for i,feat in enumerate(seq_feature_list):
+    for i, feat in enumerate(seq_feature_list):
         user_behavior_input[feat] = Input(shape=(seq_max_len,), name='seq_' + str(i) + '-' + feat)
 
     return sparse_input, dense_input, user_behavior_input
 
 
 def DIN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
-         use_bn=False, hidden_size=(200, 80), activation='relu', att_hidden_size=(80, 40),
+        use_bn=False, hidden_size=(200, 80), activation='relu', att_hidden_size=(80, 40),
         att_activation=Dice, att_weight_normalization=False,
         l2_reg_deep=0, l2_reg_embedding=1e-6, final_activation='sigmoid', keep_prob=1, init_std=0.0001, seed=1024,
-       ):
+        ):
     """Instantiates the Deep Interest Network architecture.
 
     :param feature_dim_dict: dict,to indicate sparse field (**now only support sparse feature**)like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':[]}
@@ -63,11 +64,12 @@ def DIN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
         feature_dim_dict, seq_feature_list, hist_len_max)
 
     sparse_embedding_dict = {feat.name: Embedding(feat.dimension, embedding_size,
-                                             embeddings_initializer=RandomNormal(
-                                                 mean=0.0, stddev=init_std, seed=seed),
-                                             embeddings_regularizer=l2(
-                                                 l2_reg_embedding),
-                                             name='sparse_emb_' + str(i) + '-' + feat.name,mask_zero=(feat.name in seq_feature_list)) for i, feat in
+                                                  embeddings_initializer=RandomNormal(
+                                                      mean=0.0, stddev=init_std, seed=seed),
+                                                  embeddings_regularizer=l2(
+                                                      l2_reg_embedding),
+                                                  name='sparse_emb_' + str(i) + '-' + feat.name,
+                                                  mask_zero=(feat.name in seq_feature_list)) for i, feat in
                              enumerate(feature_dim_dict["sparse"])}
 
     query_emb_list = [sparse_embedding_dict[feat](
@@ -83,10 +85,10 @@ def DIN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
     query_emb = concat_fun(query_emb_list)
 
     hist = AttentionSequencePoolingLayer(att_hidden_size, att_activation,
-                                         weight_normalization=att_weight_normalization,supports_masking=True)([
-        query_emb, keys_emb ])
+                                         weight_normalization=att_weight_normalization, supports_masking=True)([
+        query_emb, keys_emb])
 
-    deep_input_emb = tf.keras.layers.Concatenate()([NoMask()(deep_input_emb),hist])
+    deep_input_emb = tf.keras.layers.Concatenate()([NoMask()(deep_input_emb), hist])
     deep_input_emb = Flatten()(deep_input_emb)
     if len(dense_input) > 0:
         deep_input_emb = Concatenate()([deep_input_emb] + list(dense_input.values()))
@@ -94,7 +96,6 @@ def DIN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
     output = MLP(hidden_size, activation, l2_reg_deep,
                  keep_prob, use_bn, seed)(deep_input_emb)
     final_logit = Dense(1, use_bias=False)(output)
-
 
     output = PredictionLayer(final_activation)(final_logit)
     model_input_list = get_inputs_list([sparse_input, dense_input, user_behavior_input])

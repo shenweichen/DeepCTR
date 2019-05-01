@@ -37,7 +37,7 @@ def create_varlenfeat_inputdict(feature_dim_dict, mask_zero=True):
     sequence_input_dict = OrderedDict()
     for i, feat in enumerate(sequence_dim_dict):
         sequence_input_dict[feat.name] = Input(shape=(feat.maxlen,), name='seq_' + str(
-            i) + '-' + feat.name,dtype=feat.dtype)
+            i) + '-' + feat.name, dtype=feat.dtype)
 
     if mask_zero:
         sequence_len_dict, sequence_max_len_dict = None, None
@@ -150,13 +150,11 @@ def get_varlen_embedding_vec_dict(embedding_dict, sequence_input_dict, sequence_
     for fg in sequence_fg_list:
         feat_name = fg.name
         if fg.hash_flag:
-            lookup_idx = Hash(fg.dimension,mask_zero=True)(sequence_input_dict[feat_name])
+            lookup_idx = Hash(fg.dimension, mask_zero=True)(sequence_input_dict[feat_name])
         else:
             lookup_idx = sequence_input_dict[feat_name]
         varlen_embedding_vec_dict[feat_name] = embedding_dict[feat_name](lookup_idx)
     return varlen_embedding_vec_dict
-    # return {feat: embedding_dict[feat](v)
-    #         for feat, v in sequence_input_dict.items()}
 
 
 def get_pooling_vec_list(sequence_embed_dict, sequence_len_dict, sequence_max_len_dict, sequence_fd_list):

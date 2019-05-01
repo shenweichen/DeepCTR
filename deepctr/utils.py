@@ -6,15 +6,12 @@ Author:
 
 """
 
-from collections import namedtuple
 import json
 import logging
+from collections import namedtuple
 from threading import Thread
 
 import requests
-
-
-
 
 try:
     from packaging.version import parse
@@ -22,24 +19,19 @@ except ImportError:
     from pip._vendor.packaging.version import parse
 
 
-
-
-class SingleFeat(namedtuple('SingleFeat',['name','dimension','hash_flag','dtype'])):
+class SingleFeat(namedtuple('SingleFeat', ['name', 'dimension', 'hash_flag', 'dtype'])):
     __slots__ = ()
-    def __new__(cls,name,dimension,hash_flag=False,dtype="float32"):
-        return super(SingleFeat,cls).__new__(cls,name,dimension,hash_flag,dtype)
+
+    def __new__(cls, name, dimension, hash_flag=False, dtype="float32"):
+        return super(SingleFeat, cls).__new__(cls, name, dimension, hash_flag, dtype)
 
 
-class VarLenFeat(namedtuple('VarLenFeat',['name','dimension','maxlen','combiner','hash_flag','dtype'])):
+class VarLenFeat(namedtuple('VarLenFeat', ['name', 'dimension', 'maxlen', 'combiner', 'hash_flag', 'dtype'])):
     __slots__ = ()
-    def __new__(cls,name,dimension,maxlen,combiner="mean",hash_flag=False,dtype="float32"):
-        return super(VarLenFeat,cls).__new__(cls,name,dimension,maxlen,combiner,hash_flag,dtype)
 
-# VarLenFeat = collections.namedtuple(
-#     'VarLenFeat', ['name', 'dimension', 'maxlen', 'combiner'])
-# SingleFeat = collections.namedtuple(
-#     'SingleFeat', ['name', 'dimension','hash_flag','dtype'])
-#
+    def __new__(cls, name, dimension, maxlen, combiner="mean", hash_flag=False, dtype="float32"):
+        return super(VarLenFeat, cls).__new__(cls, name, dimension, maxlen, combiner, hash_flag, dtype)
+
 
 def check_version(version):
     """Return version of package on pypi.python.org using json."""
@@ -58,10 +50,12 @@ def check_version(version):
                     if not ver.is_prerelease:
                         latest_version = max(latest_version, ver)
                 if latest_version > version:
-                    logging.warning('\nDeepCTR version {0} detected. Your version is {1}.\nUse `pip install -U deepctr` to upgrade.Changelog: https://github.com/shenweichen/DeepCTR/releases/tag/v{0}'.format(
-                        latest_version, version))
+                    logging.warning(
+                        '\nDeepCTR version {0} detected. Your version is {1}.\nUse `pip install -U deepctr` to upgrade.Changelog: https://github.com/shenweichen/DeepCTR/releases/tag/v{0}'.format(
+                            latest_version, version))
         except Exception:
             return
+
     Thread(target=check, args=(version,)).start()
 
 
@@ -74,7 +68,7 @@ def check_feature_config_dict(feature_dim_dict):
     if "dense" not in feature_dim_dict:
         feature_dim_dict['dense'] = []
     if "sequence" not in feature_dim_dict:
-        feature_dim_dict["sequence"] = []#TODO:这里会出问题吗
+        feature_dim_dict["sequence"] = []  # TODO:这里会出问题吗
 
     if not isinstance(feature_dim_dict["sparse"], list):
         raise ValueError("feature_dim_dict['sparse'] must be a list,cur is", type(

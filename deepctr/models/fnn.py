@@ -8,10 +8,10 @@ Reference:
 """
 import tensorflow as tf
 
+from ..input_embedding import preprocess_input_embedding, get_linear_logit
 from ..layers.core import PredictionLayer, MLP
-from ..input_embedding import preprocess_input_embedding,get_linear_logit
-from ..utils import check_feature_config_dict
 from ..layers.utils import concat_fun
+from ..utils import check_feature_config_dict
 
 
 def FNN(feature_dim_dict, embedding_size=8,

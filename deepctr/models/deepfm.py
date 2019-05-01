@@ -9,11 +9,12 @@ Reference:
 """
 
 import tensorflow as tf
-from ..input_embedding import preprocess_input_embedding,get_linear_logit
+
+from ..input_embedding import preprocess_input_embedding, get_linear_logit
 from ..layers.core import PredictionLayer, MLP
 from ..layers.interaction import FM
-from ..utils import check_feature_config_dict
 from ..layers.utils import concat_fun
+from ..utils import check_feature_config_dict
 
 
 def DeepFM(feature_dim_dict, embedding_size=8,

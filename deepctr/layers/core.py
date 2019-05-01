@@ -42,7 +42,8 @@ class LocalActivationUnit(Layer):
         - [Zhou G, Zhu X, Song C, et al. Deep interest network for click-through rate prediction[C]//Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. ACM, 2018: 1059-1068.](https://arxiv.org/pdf/1706.06978.pdf)
     """
 
-    def __init__(self, hidden_size=(64, 32), activation='sigmoid', l2_reg=0, keep_prob=1, use_bn=False, seed=1024, **kwargs):
+    def __init__(self, hidden_size=(64, 32), activation='sigmoid', l2_reg=0, keep_prob=1, use_bn=False, seed=1024,
+                 **kwargs):
         self.hidden_size = hidden_size
         self.activation = activation
         self.l2_reg = l2_reg
@@ -63,13 +64,12 @@ class LocalActivationUnit(Layer):
                 len(input_shape[0]), len(input_shape[1])))
 
         if input_shape[0][-1] != input_shape[1][-1] or input_shape[0][1] != 1:
-
             raise ValueError('A `LocalActivationUnit` layer requires '
                              'inputs of a two inputs with shape (None,1,embedding_size) and (None,T,embedding_size)'
                              'Got different shapes: %s,%s' % (input_shape))
         size = 4 * \
-            int(input_shape[0][-1]
-                ) if len(self.hidden_size) == 0 else self.hidden_size[-1]
+               int(input_shape[0][-1]
+                   ) if len(self.hidden_size) == 0 else self.hidden_size[-1]
         self.kernel = self.add_weight(shape=(size, 1),
                                       initializer=glorot_normal(
                                           seed=self.seed),
@@ -102,7 +102,7 @@ class LocalActivationUnit(Layer):
     def compute_mask(self, inputs, mask):
         return mask
 
-    def get_config(self,):
+    def get_config(self, ):
         config = {'activation': self.activation, 'hidden_size': self.hidden_size,
                   'l2_reg': self.l2_reg, 'keep_prob': self.keep_prob, 'use_bn': self.use_bn, 'seed': self.seed}
         base_config = super(LocalActivationUnit, self).get_config()
@@ -132,7 +132,7 @@ class MLP(Layer):
         - **seed**: A Python integer to use as random seed.
     """
 
-    def __init__(self,  hidden_size, activation='relu', l2_reg=0, keep_prob=1, use_bn=False, seed=1024, **kwargs):
+    def __init__(self, hidden_size, activation='relu', l2_reg=0, keep_prob=1, use_bn=False, seed=1024, **kwargs):
         self.hidden_size = hidden_size
         self.activation = activation
         self.keep_prob = keep_prob
@@ -146,7 +146,7 @@ class MLP(Layer):
         hidden_units = [int(input_size)] + list(self.hidden_size)
         self.kernels = [self.add_weight(name='kernel' + str(i),
                                         shape=(
-                                            hidden_units[i], hidden_units[i+1]),
+                                            hidden_units[i], hidden_units[i + 1]),
                                         initializer=glorot_normal(
                                             seed=self.seed),
                                         regularizer=l2(self.l2_reg),
@@ -169,10 +169,10 @@ class MLP(Layer):
             #           kernel_initializer=glorot_normal(seed=self.seed), \
             #           kernel_regularizer=l2(self.l2_reg))(deep_input)
             if self.use_bn:
-                fc = tf.keras.layers.BatchNormalization()(fc,training=training)
+                fc = tf.keras.layers.BatchNormalization()(fc, training=training)
             fc = activation_fun(self.activation, fc)
-            #fc = tf.nn.dropout(fc, self.keep_prob)
-            fc = tf.keras.layers.Dropout(1 - self.keep_prob)(fc,training=training)
+            # fc = tf.nn.dropout(fc, self.keep_prob)
+            fc = tf.keras.layers.Dropout(1 - self.keep_prob)(fc, training=training)
             deep_input = fc
 
         return deep_input
@@ -185,7 +185,7 @@ class MLP(Layer):
 
         return tuple(shape)
 
-    def get_config(self,):
+    def get_config(self, ):
         config = {'activation': self.activation, 'hidden_size': self.hidden_size,
                   'l2_reg': self.l2_reg, 'use_bn': self.use_bn, 'keep_prob': self.keep_prob, 'seed': self.seed}
         base_config = super(MLP, self).get_config()
@@ -226,7 +226,7 @@ class PredictionLayer(Layer):
     def compute_output_shape(self, input_shape):
         return (None, 1)
 
-    def get_config(self,):
+    def get_config(self, ):
         config = {'activation': self.activation, 'use_bias': self.use_bias}
         base_config = super(PredictionLayer, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))

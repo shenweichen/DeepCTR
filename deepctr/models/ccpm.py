@@ -11,7 +11,7 @@ Reference:
 """
 import tensorflow as tf
 
-from ..input_embedding import preprocess_input_embedding,get_linear_logit
+from ..input_embedding import preprocess_input_embedding, get_linear_logit
 from ..layers.core import MLP, PredictionLayer
 from ..layers.sequence import KMaxPooling
 from ..layers.utils import concat_fun
@@ -39,7 +39,7 @@ def CCPM(feature_dim_dict, embedding_size=8, conv_kernel_width=(6, 5), conv_filt
     """
 
     check_feature_config_dict(feature_dim_dict)
-    if len(conv_kernel_width)!=len(conv_filters):
+    if len(conv_kernel_width) != len(conv_filters):
         raise ValueError("conv_kernel_width must have same element with conv_filters")
 
     deep_emb_list, linear_emb_list, dense_input_dict, inputs_list = preprocess_input_embedding(feature_dim_dict,

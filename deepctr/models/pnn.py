@@ -8,11 +8,12 @@ Reference:
 """
 
 import tensorflow as tf
+
+from ..input_embedding import preprocess_input_embedding
 from ..layers.core import PredictionLayer, MLP
 from ..layers.interaction import InnerProductLayer, OutterProductLayer
-from ..input_embedding import preprocess_input_embedding
-from ..utils import check_feature_config_dict
 from ..layers.utils import concat_fun
+from ..utils import check_feature_config_dict
 
 
 def PNN(feature_dim_dict, embedding_size=8, hidden_size=(128, 128), l2_reg_embedding=1e-5, l2_reg_deep=0,
@@ -41,18 +42,18 @@ def PNN(feature_dim_dict, embedding_size=8, hidden_size=(128, 128), l2_reg_embed
         raise ValueError("kernel_type must be mat,vec or num")
 
     deep_emb_list, _, _, inputs_list = preprocess_input_embedding(feature_dim_dict,
-                                                                                 embedding_size,
-                                                                                 l2_reg_embedding,
-                                                                                 0, init_std,
-                                                                                 seed,
-                                                                                 create_linear_weight=False)
+                                                                  embedding_size,
+                                                                  l2_reg_embedding,
+                                                                  0, init_std,
+                                                                  seed,
+                                                                  create_linear_weight=False)
 
     inner_product = tf.keras.layers.Flatten()(InnerProductLayer()(deep_emb_list))
     outter_product = OutterProductLayer(kernel_type)(deep_emb_list)
 
     # ipnn deep input
     linear_signal = tf.keras.layers.Reshape(
-        [len(deep_emb_list)*embedding_size])(concat_fun(deep_emb_list))
+        [len(deep_emb_list) * embedding_size])(concat_fun(deep_emb_list))
 
     if use_inner and use_outter:
         deep_input = tf.keras.layers.Concatenate()(

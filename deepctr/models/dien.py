@@ -22,7 +22,6 @@ from ..utils import check_feature_config_dict
 
 
 def get_input(feature_dim_dict, seq_feature_list, seq_max_len):
-
     sparse_input, dense_input = create_singlefeat_inputdict(feature_dim_dict)
     user_behavior_input = {feat: Input(shape=(seq_max_len,), name='seq_' + str(i) + '-' + feat) for i, feat in
                            enumerate(seq_feature_list)}
@@ -52,14 +51,14 @@ def auxiliary_loss(h_states, click_seq, noclick_seq, mask, stag=None):
     click_prop_ = auxiliary_net(click_input_, stag=stag)[:, :, 0]
 
     noclick_prop_ = auxiliary_net(noclick_input_, stag=stag)[
-        :, :, 0]  # [B,T-1]
+                    :, :, 0]  # [B,T-1]
 
     click_loss_ = - tf.reshape(tf.log(click_prop_),
                                [-1, tf.shape(click_seq)[1]]) * mask
 
     noclick_loss_ = - \
-        tf.reshape(tf.log(1.0 - noclick_prop_),
-                   [-1, tf.shape(noclick_seq)[1]]) * mask
+                        tf.reshape(tf.log(1.0 - noclick_prop_),
+                                   [-1, tf.shape(noclick_seq)[1]]) * mask
 
     loss_ = tf.reduce_mean(click_loss_ + noclick_loss_)
 
@@ -67,7 +66,6 @@ def auxiliary_loss(h_states, click_seq, noclick_seq, mask, stag=None):
 
 
 def auxiliary_net(in_, stag='auxiliary_net'):
-
     bn1 = tf.layers.batch_normalization(
         inputs=in_, name='bn1' + stag, reuse=tf.AUTO_REUSE)
 
@@ -90,7 +88,8 @@ def auxiliary_net(in_, stag='auxiliary_net'):
 
 
 def interest_evolution(concat_behavior, deep_input_item, user_behavior_length, gru_type="GRU", use_neg=False,
-                       neg_concat_behavior=None, embedding_size=8, att_hidden_size=(64, 16), att_activation='sigmoid', att_weight_normalization=False,):
+                       neg_concat_behavior=None, embedding_size=8, att_hidden_size=(64, 16), att_activation='sigmoid',
+                       att_weight_normalization=False, ):
     if gru_type not in ["GRU", "AIGRU", "AGRU", "AUGRU"]:
         raise ValueError("gru_type error ")
     aux_loss_1 = None
@@ -113,12 +112,14 @@ def interest_evolution(concat_behavior, deep_input_item, user_behavior_length, g
         # outputs = Lambda(lambda x: tf.matmul(x[0], x[1]))(
         #     [attention_score, rnn_outputs2])
         # hist = outputs
-        hist = AttentionSequencePoolingLayer(hidden_size=att_hidden_size, activation=att_activation, weight_normalization=att_weight_normalization, return_score=False)([
+        hist = AttentionSequencePoolingLayer(hidden_size=att_hidden_size, activation=att_activation,
+                                             weight_normalization=att_weight_normalization, return_score=False)([
             deep_input_item, rnn_outputs2, user_behavior_length])
 
     else:  # AIGRU AGRU AUGRU
 
-        scores = AttentionSequencePoolingLayer(hidden_size=att_hidden_size, activation=att_activation, weight_normalization=att_weight_normalization, return_score=True)([
+        scores = AttentionSequencePoolingLayer(hidden_size=att_hidden_size, activation=att_activation,
+                                               weight_normalization=att_weight_normalization, return_score=True)([
             deep_input_item, rnn_outputs, user_behavior_length])
 
         if gru_type == "AIGRU":
@@ -133,7 +134,8 @@ def interest_evolution(concat_behavior, deep_input_item, user_behavior_length, g
 
 
 def DIEN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
-         gru_type="GRU", use_negsampling=False, alpha=1.0, use_bn=False, hidden_size=(200, 80), activation='sigmoid', att_hidden_size=(64, 16), att_activation=Dice, att_weight_normalization=True,
+         gru_type="GRU", use_negsampling=False, alpha=1.0, use_bn=False, hidden_size=(200, 80), activation='sigmoid',
+         att_hidden_size=(64, 16), att_activation=Dice, att_weight_normalization=True,
          l2_reg_deep=0, l2_reg_embedding=1e-5, final_activation='sigmoid', keep_prob=1, init_std=0.0001, seed=1024, ):
     """Instantiates the Deep Interest Evolution Network architecture.
 
@@ -184,7 +186,8 @@ def DIEN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
         deep_input_emb_list) > 1 else deep_input_emb_list[0]
 
     if use_negsampling:
-        neg_user_behavior_input = {feat: Input(shape=(hist_len_max,), name='neg_seq_' + str(i) + '-' + feat) for i, feat in
+        neg_user_behavior_input = {feat: Input(shape=(hist_len_max,), name='neg_seq_' + str(i) + '-' + feat) for i, feat
+                                   in
                                    enumerate(seq_feature_list)}
         neg_uiseq_embed_list = [sparse_embedding_dict[feat](
             neg_user_behavior_input[feat]) for feat in seq_feature_list]
@@ -194,14 +197,17 @@ def DIEN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
         neg_concat_behavior = None
 
     hist, aux_loss_1 = interest_evolution(keys_emb, query_emb, user_behavior_length, gru_type=gru_type,
-                                          use_neg=use_negsampling, neg_concat_behavior=neg_concat_behavior, embedding_size=embedding_size, att_hidden_size=att_hidden_size, att_activation=att_activation, att_weight_normalization=att_weight_normalization,)
+                                          use_neg=use_negsampling, neg_concat_behavior=neg_concat_behavior,
+                                          embedding_size=embedding_size, att_hidden_size=att_hidden_size,
+                                          att_activation=att_activation,
+                                          att_weight_normalization=att_weight_normalization, )
 
     deep_input_emb = Concatenate()([deep_input_emb, hist])
 
     deep_input_emb = tf.keras.layers.Flatten()(deep_input_emb)
     if len(dense_input) > 0:
         deep_input_emb = Concatenate()(
-            [deep_input_emb]+list(dense_input.values()))
+            [deep_input_emb] + list(dense_input.values()))
 
     output = MLP(hidden_size, activation, l2_reg_deep,
                  keep_prob, use_bn, seed)(deep_input_emb)

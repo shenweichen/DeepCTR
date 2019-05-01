@@ -7,11 +7,12 @@ Reference:
     [1] He X, Chua T S. Neural factorization machines for sparse predictive analytics[C]//Proceedings of the 40th International ACM SIGIR conference on Research and Development in Information Retrieval. ACM, 2017: 355-364. (https://arxiv.org/abs/1708.05027)
 """
 import tensorflow as tf
+
+from ..input_embedding import preprocess_input_embedding, get_linear_logit
 from ..layers.core import PredictionLayer, MLP
 from ..layers.interaction import BiInteractionPooling
-from ..input_embedding import preprocess_input_embedding,get_linear_logit
-from ..utils import check_feature_config_dict
 from ..layers.utils import concat_fun
+from ..utils import check_feature_config_dict
 
 
 def NFM(feature_dim_dict, embedding_size=8,
@@ -46,7 +47,7 @@ def NFM(feature_dim_dict, embedding_size=8,
 
     fm_input = concat_fun(deep_emb_list, axis=1)
     bi_out = BiInteractionPooling()(fm_input)
-    bi_out = tf.keras.layers.Dropout(1 - keep_prob)(bi_out,training=None)
+    bi_out = tf.keras.layers.Dropout(1 - keep_prob)(bi_out, training=None)
     deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
                    False, seed)(bi_out)
     deep_logit = tf.keras.layers.Dense(

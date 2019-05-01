@@ -10,16 +10,17 @@ Reference:
 
 """
 import tensorflow as tf
-from ..input_embedding import preprocess_input_embedding,get_linear_logit
+
+from ..input_embedding import preprocess_input_embedding, get_linear_logit
 from ..layers.core import PredictionLayer
 from ..layers.interaction import AFMLayer, FM
-from ..utils import check_feature_config_dict
 from ..layers.utils import concat_fun
+from ..utils import check_feature_config_dict
 
 
 def AFM(feature_dim_dict, embedding_size=8, use_attention=True, attention_factor=8,
         l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_att=1e-5, keep_prob=1.0, init_std=0.0001, seed=1024,
-        final_activation='sigmoid',):
+        final_activation='sigmoid', ):
     """Instantiates the Attentonal Factorization Machine architecture.
 
     :param feature_dim_dict: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
@@ -38,14 +39,14 @@ def AFM(feature_dim_dict, embedding_size=8, use_attention=True, attention_factor
 
     check_feature_config_dict(feature_dim_dict)
 
-    deep_emb_list, linear_emb_list,dense_input_dict, inputs_list = preprocess_input_embedding(feature_dim_dict,
-                                                                                              embedding_size,
-                                                                                              l2_reg_embedding,
-                                                                                              l2_reg_linear, init_std,
-                                                                                              seed,
-                                                                                              create_linear_weight=True)
+    deep_emb_list, linear_emb_list, dense_input_dict, inputs_list = preprocess_input_embedding(feature_dim_dict,
+                                                                                               embedding_size,
+                                                                                               l2_reg_embedding,
+                                                                                               l2_reg_linear, init_std,
+                                                                                               seed,
+                                                                                               create_linear_weight=True)
 
-    linear_logit = get_linear_logit(linear_emb_list,dense_input_dict,l2_reg_linear)
+    linear_logit = get_linear_logit(linear_emb_list, dense_input_dict, l2_reg_linear)
 
     fm_input = concat_fun(deep_emb_list, axis=1)
     if use_attention:

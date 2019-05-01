@@ -7,14 +7,17 @@ Reference:
     [1] Lian J, Zhou X, Zhang F, et al. xDeepFM: Combining Explicit and Implicit Feature Interactions for Recommender Systems[J]. arXiv preprint arXiv:1803.05170, 2018.(https://arxiv.org/pdf/1803.05170.pdf)
 """
 import tensorflow as tf
-from ..input_embedding import preprocess_input_embedding,get_linear_logit
+
+from ..input_embedding import preprocess_input_embedding, get_linear_logit
 from ..layers.core import PredictionLayer, MLP
 from ..layers.interaction import CIN
-from ..utils import check_feature_config_dict
 from ..layers.utils import concat_fun
+from ..utils import check_feature_config_dict
 
 
-def xDeepFM(feature_dim_dict, embedding_size=8, hidden_size=(256, 256), cin_layer_size=(128, 128,), cin_split_half=True, cin_activation='relu', l2_reg_linear=0.00001, l2_reg_embedding=0.00001, l2_reg_deep=0,l2_reg_cin=0, init_std=0.0001, seed=1024, keep_prob=1, activation='relu', final_activation='sigmoid', use_bn=False):
+def xDeepFM(feature_dim_dict, embedding_size=8, hidden_size=(256, 256), cin_layer_size=(128, 128,), cin_split_half=True,
+            cin_activation='relu', l2_reg_linear=0.00001, l2_reg_embedding=0.00001, l2_reg_deep=0, l2_reg_cin=0,
+            init_std=0.0001, seed=1024, keep_prob=1, activation='relu', final_activation='sigmoid', use_bn=False):
     """Instantiates the xDeepFM architecture.
 
     :param feature_dim_dict: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
@@ -46,13 +49,12 @@ def xDeepFM(feature_dim_dict, embedding_size=8, hidden_size=(256, 256), cin_laye
 
     linear_logit = get_linear_logit(linear_emb_list, dense_input_dict, l2_reg_linear)
 
-
     fm_input = concat_fun(deep_emb_list, axis=1)
 
     if len(cin_layer_size) > 0:
         exFM_out = CIN(cin_layer_size, cin_activation,
-                       cin_split_half, l2_reg_cin,seed)(fm_input)
-        exFM_logit = tf.keras.layers.Dense(1, activation=None,)(exFM_out)
+                       cin_split_half, l2_reg_cin, seed)(fm_input)
+        exFM_logit = tf.keras.layers.Dense(1, activation=None, )(exFM_out)
 
     deep_input = tf.keras.layers.Flatten()(fm_input)
     deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
