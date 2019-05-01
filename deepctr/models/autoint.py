@@ -44,7 +44,7 @@ def AutoInt(feature_dim_dict, embedding_size=8, att_layer_num=3, att_embedding_s
         raise ValueError("Either hidden_layer or att_layer_num must > 0")
     check_feature_config_dict(feature_dim_dict)
 
-    deep_emb_list, _, dense_input_dict, inputs_list = preprocess_input_embedding(feature_dim_dict,
+    deep_emb_list, _, _, inputs_list = preprocess_input_embedding(feature_dim_dict,
                                                                                                embedding_size,
                                                                                                l2_reg_embedding,
                                                                                                0, init_std,

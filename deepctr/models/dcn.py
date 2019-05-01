@@ -42,7 +42,7 @@ def DCN(feature_dim_dict, embedding_size='auto',
 
     check_feature_config_dict(feature_dim_dict)
 
-    deep_emb_list, _, dense_input_dict, inputs_list = preprocess_input_embedding(feature_dim_dict,
+    deep_emb_list, _, _, inputs_list = preprocess_input_embedding(feature_dim_dict,
                                                                                                embedding_size,
                                                                                                l2_reg_embedding,
                                                                                                0, init_std,
