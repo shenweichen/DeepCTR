@@ -19,8 +19,8 @@ from ..utils import check_feature_config_dict
 
 
 def AFM(feature_dim_dict, embedding_size=8, use_attention=True, attention_factor=8,
-        l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_att=1e-5, keep_prob=1.0, init_std=0.0001, seed=1024,
-        final_activation='sigmoid', ):
+        l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_att=1e-5, init_std=0.0001, seed=1024,
+        task='binary', ):
     """Instantiates the Attentonal Factorization Machine architecture.
 
     :param feature_dim_dict: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
@@ -30,10 +30,9 @@ def AFM(feature_dim_dict, embedding_size=8, use_attention=True, attention_factor
     :param l2_reg_linear: float. L2 regularizer strength applied to linear part
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
     :param l2_reg_att: float. L2 regularizer strength applied to attention net
-    :param keep_prob: float in (0,1]. keep_prob after attention net
     :param init_std: float,to use as the initialize std of embedding vector
     :param seed: integer ,to use as random seed.
-    :param final_activation: str,output activation,usually ``'sigmoid'`` or ``'linear'``
+    :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
     :return: A Keras model instance.
     """
 
@@ -51,12 +50,12 @@ def AFM(feature_dim_dict, embedding_size=8, use_attention=True, attention_factor
     fm_input = concat_fun(deep_emb_list, axis=1)
     if use_attention:
         fm_logit = AFMLayer(attention_factor, l2_reg_att,
-                            keep_prob, seed)(deep_emb_list)
+                             seed)(deep_emb_list,)
     else:
         fm_logit = FM()(fm_input)
 
     final_logit = tf.keras.layers.add([linear_logit, fm_logit])
-    output = PredictionLayer(final_activation)(final_logit)
+    output = PredictionLayer(task)(final_logit)
 
     model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
     return model

@@ -12,26 +12,26 @@ from tensorflow.python.keras.models import Model
 
 from ..input_embedding import create_singlefeat_inputdict, create_embedding_dict, get_embedding_vec_list, \
     get_inputs_list
-from ..layers.core import PredictionLayer, MLP
+from ..layers.core import PredictionLayer, DNN
 
 
-def WDL(deep_feature_dim_dict, wide_feature_dim_dict, embedding_size=8, hidden_size=(128, 128), l2_reg_linear=1e-5,
-        l2_reg_embedding=1e-5, l2_reg_deep=0, init_std=0.0001, seed=1024, keep_prob=1, activation='relu',
-        final_activation='sigmoid', ):
+def WDL(deep_feature_dim_dict, wide_feature_dim_dict, embedding_size=8, dnn_hidden_units=(128, 128), l2_reg_linear=1e-5,
+        l2_reg_embedding=1e-5, l2_reg_dnn=0, init_std=0.0001, seed=1024, dnn_dropout=0, dnn_activation='relu',
+        task='binary', ):
     """Instantiates the Wide&Deep Learning architecture.
 
     :param deep_feature_dim_dict: dict,to indicate sparse field and dense field in deep part like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
     :param wide_feature_dim_dict: dict,to indicate sparse field and dense field in wide part like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
     :param embedding_size: positive integer,sparse feature embedding_size
-    :param hidden_size: list,list of positive integer or empty list, the layer number and units in each layer of deep net
+    :param dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of DNN
     :param l2_reg_linear: float. L2 regularizer strength applied to wide part
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
-    :param l2_reg_deep: float. L2 regularizer strength applied to deep net
+    :param l2_reg_dnn: float. L2 regularizer strength applied to DNN
     :param init_std: float,to use as the initialize std of embedding vector
     :param seed: integer ,to use as random seed.
-    :param keep_prob: float in (0,1]. keep_prob used in deep net
-    :param activation: Activation function to use in deep net
-    :param final_activation: str,output activation,usually ``'sigmoid'`` or ``'linear'``
+    :param dnn_dropout: When not ``None``, the probability we will drop out a given DNN coordinate.
+    :param dnn_activation: Activation function to use in DNN
+    :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
     :return: A Keras model instance.
     """
     if not isinstance(deep_feature_dim_dict,
@@ -56,7 +56,7 @@ def WDL(deep_feature_dim_dict, wide_feature_dim_dict, embedding_size=8, hidden_s
     if len(dense_input) > 0:
         deep_input = Concatenate()([deep_input] + list(dense_input.values()))
 
-    deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
+    deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
                    False, seed)(deep_input)
     deep_logit = Dense(1, use_bias=False, activation=None)(deep_out)
     final_logit = deep_logit
@@ -72,7 +72,7 @@ def WDL(deep_feature_dim_dict, wide_feature_dim_dict, embedding_size=8, hidden_s
                 list(bias_dense_input.values())) if len(bias_dense_input) > 1 else list(bias_dense_input.values())[0])
             final_logit = add([final_logit, wide_dense_term])
 
-    output = PredictionLayer(final_activation)(final_logit)
+    output = PredictionLayer(task)(final_logit)
 
     inputs_list = get_inputs_list(
         [sparse_input, dense_input, bias_sparse_input, bias_dense_input])

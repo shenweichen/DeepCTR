@@ -32,7 +32,7 @@ class LocalActivationUnit(Layer):
 
         - **l2_reg**: float between 0 and 1. L2 regularizer strength applied to the kernel weights matrix of attention net.
 
-        - **keep_prob**: float between 0 and 1. Fraction of the units to keep of attention net.
+        - **dropout_rate**: float between 0 and 1. Fraction of the units to dropout in attention net.
 
         - **use_bn**: bool. Whether use BatchNormalization before activation or not in attention net.
 
@@ -42,12 +42,12 @@ class LocalActivationUnit(Layer):
         - [Zhou G, Zhu X, Song C, et al. Deep interest network for click-through rate prediction[C]//Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. ACM, 2018: 1059-1068.](https://arxiv.org/pdf/1706.06978.pdf)
     """
 
-    def __init__(self, hidden_size=(64, 32), activation='sigmoid', l2_reg=0, keep_prob=1, use_bn=False, seed=1024,
+    def __init__(self, hidden_size=(64, 32), activation='sigmoid', l2_reg=0, dropout_rate=0, use_bn=False, seed=1024,
                  **kwargs):
         self.hidden_size = hidden_size
         self.activation = activation
         self.l2_reg = l2_reg
-        self.keep_prob = keep_prob
+        self.dropout_rate = dropout_rate
         self.use_bn = use_bn
         self.seed = seed
         super(LocalActivationUnit, self).__init__(**kwargs)
@@ -89,8 +89,8 @@ class LocalActivationUnit(Layer):
         att_input = tf.concat(
             [queries, keys, queries - keys, queries * keys], axis=-1)
 
-        att_out = MLP(self.hidden_size, self.activation, self.l2_reg,
-                      self.keep_prob, self.use_bn, seed=self.seed)(att_input)
+        att_out = DNN(self.hidden_size, self.activation, self.l2_reg,
+                      self.dropout_rate, self.use_bn, seed=self.seed)(att_input)
         attention_score = tf.nn.bias_add(tf.tensordot(
             att_out, self.kernel, axes=(-1, 0)), self.bias)
 
@@ -104,12 +104,12 @@ class LocalActivationUnit(Layer):
 
     def get_config(self, ):
         config = {'activation': self.activation, 'hidden_size': self.hidden_size,
-                  'l2_reg': self.l2_reg, 'keep_prob': self.keep_prob, 'use_bn': self.use_bn, 'seed': self.seed}
+                  'l2_reg': self.l2_reg, 'keep_prob': self.dropout_rate, 'use_bn': self.use_bn, 'seed': self.seed}
         base_config = super(LocalActivationUnit, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
 
-class MLP(Layer):
+class DNN(Layer):
     """The Multi Layer Percetron
 
       Input shape
@@ -119,50 +119,50 @@ class MLP(Layer):
         - nD tensor with shape: ``(batch_size, ..., hidden_size[-1])``. For instance, for a 2D input with shape ``(batch_size, input_dim)``, the output would have shape ``(batch_size, hidden_size[-1])``.
 
       Arguments
-        - **hidden_size**:list of positive integer, the layer number and units in each layer.
+        - **hidden_units**:list of positive integer, the layer number and units in each layer.
 
         - **activation**: Activation function to use.
 
         - **l2_reg**: float between 0 and 1. L2 regularizer strength applied to the kernel weights matrix.
 
-        - **keep_prob**: float between 0 and 1. Fraction of the units to keep.
+        - **dropout_rate**: float between 0 and 1. Fraction of the units to dropout.
 
         - **use_bn**: bool. Whether use BatchNormalization before activation or not.
 
         - **seed**: A Python integer to use as random seed.
     """
 
-    def __init__(self, hidden_size, activation='relu', l2_reg=0, keep_prob=1, use_bn=False, seed=1024, **kwargs):
-        self.hidden_size = hidden_size
+    def __init__(self, hidden_units, activation='relu', l2_reg=0, dropout_rate=0, use_bn=False, seed=1024, **kwargs):
+        self.hidden_units = hidden_units
         self.activation = activation
-        self.keep_prob = keep_prob
+        self.dropout_rate = dropout_rate
         self.seed = seed
         self.l2_reg = l2_reg
         self.use_bn = use_bn
-        super(MLP, self).__init__(**kwargs)
+        super(DNN, self).__init__(**kwargs)
 
     def build(self, input_shape):
         input_size = input_shape[-1]
-        hidden_units = [int(input_size)] + list(self.hidden_size)
+        hidden_units = [int(input_size)] + list(self.hidden_units)
         self.kernels = [self.add_weight(name='kernel' + str(i),
                                         shape=(
                                             hidden_units[i], hidden_units[i + 1]),
                                         initializer=glorot_normal(
                                             seed=self.seed),
                                         regularizer=l2(self.l2_reg),
-                                        trainable=True) for i in range(len(self.hidden_size))]
+                                        trainable=True) for i in range(len(self.hidden_units))]
         self.bias = [self.add_weight(name='bias' + str(i),
-                                     shape=(self.hidden_size[i],),
+                                     shape=(self.hidden_units[i],),
                                      initializer=Zeros(),
-                                     trainable=True) for i in range(len(self.hidden_size))]
+                                     trainable=True) for i in range(len(self.hidden_units))]
 
-        super(MLP, self).build(input_shape)  # Be sure to call this somewhere!
+        super(DNN, self).build(input_shape)  # Be sure to call this somewhere!
 
     def call(self, inputs, training=None, **kwargs):
 
         deep_input = inputs
 
-        for i in range(len(self.hidden_size)):
+        for i in range(len(self.hidden_units)):
             fc = tf.nn.bias_add(tf.tensordot(
                 deep_input, self.kernels[i], axes=(-1, 0)), self.bias[i])
             # fc = Dense(self.hidden_size[i], activation=None, \
@@ -171,37 +171,39 @@ class MLP(Layer):
             if self.use_bn:
                 fc = tf.keras.layers.BatchNormalization()(fc, training=training)
             fc = activation_fun(self.activation, fc)
-            # fc = tf.nn.dropout(fc, self.keep_prob)
-            fc = tf.keras.layers.Dropout(1 - self.keep_prob)(fc, training=training)
+
+            fc = tf.keras.layers.Dropout(self.dropout_rate)(fc, training=training)
             deep_input = fc
 
         return deep_input
 
     def compute_output_shape(self, input_shape):
-        if len(self.hidden_size) > 0:
-            shape = input_shape[:-1] + (self.hidden_size[-1],)
+        if len(self.hidden_units) > 0:
+            shape = input_shape[:-1] + (self.hidden_units[-1],)
         else:
             shape = input_shape
 
         return tuple(shape)
 
     def get_config(self, ):
-        config = {'activation': self.activation, 'hidden_size': self.hidden_size,
-                  'l2_reg': self.l2_reg, 'use_bn': self.use_bn, 'keep_prob': self.keep_prob, 'seed': self.seed}
-        base_config = super(MLP, self).get_config()
+        config = {'activation': self.activation, 'hidden_units': self.hidden_units,
+                  'l2_reg': self.l2_reg, 'use_bn': self.use_bn, 'dropout_rate': self.dropout_rate, 'seed': self.seed}
+        base_config = super(DNN, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
 
 class PredictionLayer(Layer):
     """
       Arguments
-         - **activation**: Activation function to use.
+         - **task**: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
 
          - **use_bias**: bool.Whether add bias term or not.
     """
 
-    def __init__(self, activation='sigmoid', use_bias=True, **kwargs):
-        self.activation = activation
+    def __init__(self, task='binary', use_bias=True, **kwargs):
+        if task not in ["binary","regression"]:
+            raise ValueError("task must be binary or regression")
+        self.task = task
         self.use_bias = use_bias
         super(PredictionLayer, self).__init__(**kwargs)
 
@@ -218,8 +220,10 @@ class PredictionLayer(Layer):
         x = inputs
         if self.use_bias:
             x = tf.nn.bias_add(x, self.global_bias, data_format='NHWC')
-        output = activation_fun(self.activation, x)
-        output = tf.reshape(output, (-1, 1))
+        if self.task == "binary":
+            x = tf.sigmoid(x)
+
+        output = tf.reshape(x, (-1, 1))
 
         return output
 
@@ -227,6 +231,6 @@ class PredictionLayer(Layer):
         return (None, 1)
 
     def get_config(self, ):
-        config = {'activation': self.activation, 'use_bias': self.use_bias}
+        config = {'task': self.task, 'use_bias': self.use_bias}
         base_config = super(PredictionLayer, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))

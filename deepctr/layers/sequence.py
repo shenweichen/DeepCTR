@@ -176,7 +176,7 @@ class AttentionSequencePoolingLayer(Layer):
             key_masks = tf.sequence_mask(keys_length, hist_len)
 
         attention_score = LocalActivationUnit(
-            self.hidden_size, self.activation, 0, 1, False, 1024, )([queries, keys])
+            self.hidden_size, self.activation, 0, 0, False, 1024, )([queries, keys])
 
         outputs = tf.transpose(attention_score, (0, 2, 1))
 

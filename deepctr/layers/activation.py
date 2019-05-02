@@ -43,8 +43,8 @@ class Dice(Layer):
         ), dtype=tf.float32, name=self.name + 'dice_alpha')  # name='alpha_'+self.name
         super(Dice, self).build(input_shape)  # Be sure to call this somewhere!
 
-    def call(self, inputs, **kwargs):
-        inputs_normed = self.bn(inputs)
+    def call(self, inputs,training=None,**kwargs):
+        inputs_normed = self.bn(inputs,training=training)
         # tf.layers.batch_normalization(
         # inputs, axis=self.axis, epsilon=self.epsilon, center=False, scale=False)
         x_p = tf.sigmoid(inputs_normed)

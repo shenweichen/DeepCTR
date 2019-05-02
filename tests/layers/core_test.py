@@ -22,28 +22,28 @@ def test_LocalActivationUnit(hidden_size, activation):
 
 
 @pytest.mark.parametrize(
-    'hidden_size,use_bn',
-    [(hidden_size, use_bn)
-     for hidden_size in [(), (10,)]
+    'hidden_units,use_bn',
+    [(hidden_units, use_bn)
+     for hidden_units in [(), (10,)]
      for use_bn in [True, False]
      ]
 )
-def test_MLP(hidden_size, use_bn):
-    with CustomObjectScope({'MLP': layers.MLP}):
-        layer_test(layers.MLP, kwargs={'hidden_size': hidden_size, 'use_bn': use_bn}, input_shape=(
+def test_DNN(hidden_units, use_bn):
+    with CustomObjectScope({'DNN': layers.DNN}):
+        layer_test(layers.DNN, kwargs={'hidden_units': hidden_units, 'use_bn': use_bn}, input_shape=(
             BATCH_SIZE, EMBEDDING_SIZE))
 
 
 @pytest.mark.parametrize(
-    'activation,use_bias',
-    [(activation, use_bias)
-     for activation in ['sigmoid', PReLU]
+    'task,use_bias',
+    [(task, use_bias)
+     for task in ['binary', 'regression']
      for use_bias in [True, False]
      ]
 )
-def test_PredictionLayer(activation, use_bias):
+def test_PredictionLayer(task, use_bias):
     with CustomObjectScope({'PredictionLayer': layers.PredictionLayer}):
-        layer_test(layers.PredictionLayer, kwargs={'activation': activation, 'use_bias': use_bias
+        layer_test(layers.PredictionLayer, kwargs={'task': task, 'use_bias': use_bias
                                                    }, input_shape=(BATCH_SIZE, 1))
 
 

@@ -50,7 +50,7 @@ model_input = sparse_input + dense_input + \
 
 # 4.Define Model,compile and train
 model = DeepFM({"sparse": sparse_feat_list,
-                "sequence": sequence_feature}, final_activation='linear')
+                "sequence": sequence_feature}, task='regression')
 
 model.compile("adam", "mse", metrics=['mse'], )
 history = model.fit(model_input, data[target].values,

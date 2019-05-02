@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 from .activation import Dice
-from .core import MLP, LocalActivationUnit, PredictionLayer
+from .core import DNN, LocalActivationUnit, PredictionLayer
 from .interaction import (CIN, FM, AFMLayer, BiInteractionPooling, CrossNet,
                           InnerProductLayer, InteractingLayer,
                           OutterProductLayer, FGCNNLayer)
@@ -14,7 +14,7 @@ from .utils import NoMask, Hash
 custom_objects = {'tf': tf,
                   'InnerProductLayer': InnerProductLayer,
                   'OutterProductLayer': OutterProductLayer,
-                  'MLP': MLP,
+                  'DNN': DNN,
                   'PredictionLayer': PredictionLayer,
                   'FM': FM,
                   'AFMLayer': AFMLayer,

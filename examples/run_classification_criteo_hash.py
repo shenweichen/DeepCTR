@@ -37,7 +37,7 @@ if __name__ == "__main__":
 
     # 4.Define Model,train,predict and evaluate
     model = DeepFM({"sparse": sparse_feature_list,
-                    "dense": dense_feature_list}, final_activation='sigmoid')
+                    "dense": dense_feature_list}, task='binary')
     model.compile("adam", "binary_crossentropy",
                   metrics=['binary_crossentropy'], )
 

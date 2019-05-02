@@ -39,7 +39,7 @@ def xtest_DIN_model_io():
 
     model = DIN(feature_dim_dict, behavior_feature_list, hist_len_max=4, embedding_size=8, att_activation=Dice,
 
-                hidden_size=[4, 4, 4], keep_prob=0.6,)
+                dnn_hidden_units=[4, 4, 4], dnn_dropout=0.6, )
 
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
@@ -55,7 +55,7 @@ def test_DIN_att():
     x, y, feature_dim_dict, behavior_feature_list = get_xy_fd()
 
     model = DIN(feature_dim_dict, behavior_feature_list, hist_len_max=4, embedding_size=8,
-                hidden_size=[4, 4, 4], keep_prob=0.6,)
+                dnn_hidden_units=[4, 4, 4], dnn_dropout=0.6, )
 
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])

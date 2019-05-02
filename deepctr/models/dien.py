@@ -16,7 +16,7 @@ from tensorflow.python.keras.regularizers import l2
 
 from ..input_embedding import create_singlefeat_inputdict, get_inputs_list
 from ..layers.activation import Dice
-from ..layers.core import MLP, PredictionLayer
+from ..layers.core import DNN, PredictionLayer
 from ..layers.sequence import AttentionSequencePoolingLayer, DynamicGRU
 from ..utils import check_feature_config_dict
 
@@ -134,9 +134,10 @@ def interest_evolution(concat_behavior, deep_input_item, user_behavior_length, g
 
 
 def DIEN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
-         gru_type="GRU", use_negsampling=False, alpha=1.0, use_bn=False, hidden_size=(200, 80), activation='sigmoid',
-         att_hidden_size=(64, 16), att_activation=Dice, att_weight_normalization=True,
-         l2_reg_deep=0, l2_reg_embedding=1e-5, final_activation='sigmoid', keep_prob=1, init_std=0.0001, seed=1024, ):
+         gru_type="GRU", use_negsampling=False, alpha=1.0, use_bn=False, dnn_hidden_units=(200, 80),
+         dnn_activation='relu',
+         att_hidden_units=(64, 16), att_activation=Dice, att_weight_normalization=True,
+         l2_reg_dnn=0, l2_reg_embedding=1e-5, dnn_dropout=0, init_std=0.0001, seed=1024, task='binary'):
     """Instantiates the Deep Interest Evolution Network architecture.
 
     :param feature_dim_dict: dict,to indicate sparse field (**now only support sparse feature**)like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':[]}
@@ -147,17 +148,17 @@ def DIEN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
     :param use_negsampling: bool, whether or not use negtive sampling
     :param alpha: float ,weight of auxiliary_loss
     :param use_bn: bool. Whether use BatchNormalization before activation or not in deep net
-    :param hidden_size: list,list of positive integer or empty list, the layer number and units in each layer of deep net
-    :param activation: Activation function to use in deep net
-    :param att_hidden_size: list,list of positive integer , the layer number and units in each layer of attention net
+    :param dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of DNN
+    :param dnn_activation: Activation function to use in DNN
+    :param att_hidden_units: list,list of positive integer , the layer number and units in each layer of attention net
     :param att_activation: Activation function to use in attention net
     :param att_weight_normalization: bool.Whether normalize the attention score of local activation unit.
-    :param l2_reg_deep: float. L2 regularizer strength applied to deep net
+    :param l2_reg_dnn: float. L2 regularizer strength applied to DNN
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
-    :param final_activation: str,output activation,usually ``'sigmoid'`` or ``'linear'``
-    :param keep_prob: float in (0,1]. keep_prob used in deep net
+    :param dnn_dropout: When not ``None``, the probability we will drop out a given DNN coordinate.
     :param init_std: float,to use as the initialize std of embedding vector
     :param seed: integer ,to use as random seed.
+    :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
     :return: A Keras model instance.
 
     """
@@ -198,7 +199,7 @@ def DIEN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
 
     hist, aux_loss_1 = interest_evolution(keys_emb, query_emb, user_behavior_length, gru_type=gru_type,
                                           use_neg=use_negsampling, neg_concat_behavior=neg_concat_behavior,
-                                          embedding_size=embedding_size, att_hidden_size=att_hidden_size,
+                                          embedding_size=embedding_size, att_hidden_size=att_hidden_units,
                                           att_activation=att_activation,
                                           att_weight_normalization=att_weight_normalization, )
 
@@ -209,10 +210,10 @@ def DIEN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
         deep_input_emb = Concatenate()(
             [deep_input_emb] + list(dense_input.values()))
 
-    output = MLP(hidden_size, activation, l2_reg_deep,
-                 keep_prob, use_bn, seed)(deep_input_emb)
+    output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn,
+                 dnn_dropout, use_bn, seed)(deep_input_emb)
     final_logit = Dense(1, use_bias=False)(output)
-    output = PredictionLayer(final_activation)(final_logit)
+    output = PredictionLayer(task)(final_logit)
 
     model_input_list = get_inputs_list(
         [sparse_input, dense_input, user_behavior_input])

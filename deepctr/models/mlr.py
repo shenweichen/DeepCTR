@@ -11,10 +11,12 @@ from tensorflow.python.keras.layers import Input, Dense, Embedding, Concatenate,
 from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.regularizers import l2
 
+from ..layers.core import PredictionLayer
+
 
 def MLR(region_feature_dim_dict, base_feature_dim_dict={"sparse": [], "dense": []}, region_num=4,
         l2_reg_linear=1e-5,
-        init_std=0.0001, seed=1024, final_activation='sigmoid',
+        init_std=0.0001, seed=1024, task='binary',
         bias_feature_dim_dict={"sparse": [], "dense": []}):
     """Instantiates the Mixed Logistic Regression/Piece-wise Linear Model.
 
@@ -24,7 +26,7 @@ def MLR(region_feature_dim_dict, base_feature_dim_dict={"sparse": [], "dense": [
     :param l2_reg_linear: float. L2 regularizer strength applied to weight
     :param init_std: float,to use as the initialize std of embedding vector
     :param seed: integer ,to use as random seed.
-    :param final_activation: str,output activation,usually ``'sigmoid'`` or ``'linear'``
+    :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
     :param bias_feature_dim_dict: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
     :return: A Keras model instance.
     """
@@ -119,7 +121,7 @@ def MLR(region_feature_dim_dict, base_feature_dim_dict={"sparse": [], "dense": [
     # Dense(self.region_num, activation='softmax')(final_logit)
     region_weights = Activation("softmax")(region_logits)
     learner_score = Concatenate()(
-        [Activation(final_activation, name='learner' + str(i))(base_logits[i]) for i in range(region_num)])
+        [PredictionLayer(task, name='learner' + str(i))(base_logits[i]) for i in range(region_num)])
     final_logit = dot([region_weights, learner_score], axes=-1)
 
     if bias_dense_feature_num + bias_sparse_feature_num > 0:

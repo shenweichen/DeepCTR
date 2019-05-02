@@ -39,7 +39,7 @@ def get_xy_fd(use_neg=False):
 if __name__ == "__main__":
     x, y, feature_dim_dict, behavior_feature_list = get_xy_fd(use_neg=True)
     model = DIEN(feature_dim_dict, behavior_feature_list, hist_len_max=4, embedding_size=8,
-                 hidden_size=[4, 4, 4], keep_prob=0.6, gru_type="AUGRU", use_negsampling=True)
+                 dnn_hidden_units=[4, 4, 4], dnn_dropout=0.6, gru_type="AUGRU", use_negsampling=True)
 
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])

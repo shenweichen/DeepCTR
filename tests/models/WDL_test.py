@@ -43,7 +43,7 @@ def test_WDL(sparse_feature_num, wide_feature_num):
     x_wide = wide_sparse_input + wide_dense_input
 
     model = WDL(feature_dim_dict, wide_feature_dim_dict,
-                hidden_size=[32, 32], keep_prob=0.5)
+                dnn_hidden_units=[32, 32], dnn_dropout=0.5)
     check_model(model, model_name, x+x_wide, y)
 
 

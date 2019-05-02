@@ -27,7 +27,7 @@ if __name__ == "__main__":
     test_model_input = [test[feat.name].values for feat in sparse_feat_list]
     # 4.Define Model,train,predict and evaluate
     model = DeepFM({"sparse": sparse_feat_list},
-                   final_activation='linear')
+                   task='regression')
     model.compile("adam", "mse", metrics=['mse'], )
 
     history = model.fit(train_model_input, train[target].values,
