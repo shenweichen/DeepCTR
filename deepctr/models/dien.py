@@ -112,13 +112,13 @@ def interest_evolution(concat_behavior, deep_input_item, user_behavior_length, g
         # outputs = Lambda(lambda x: tf.matmul(x[0], x[1]))(
         #     [attention_score, rnn_outputs2])
         # hist = outputs
-        hist = AttentionSequencePoolingLayer(hidden_size=att_hidden_size, activation=att_activation,
+        hist = AttentionSequencePoolingLayer(att_hidden_units=att_hidden_size, att_activation=att_activation,
                                              weight_normalization=att_weight_normalization, return_score=False)([
             deep_input_item, rnn_outputs2, user_behavior_length])
 
     else:  # AIGRU AGRU AUGRU
 
-        scores = AttentionSequencePoolingLayer(hidden_size=att_hidden_size, activation=att_activation,
+        scores = AttentionSequencePoolingLayer(att_hidden_units=att_hidden_size, att_activation=att_activation,
                                                weight_normalization=att_weight_normalization, return_score=True)([
             deep_input_item, rnn_outputs, user_behavior_length])
 
@@ -155,7 +155,7 @@ def DIEN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
     :param att_weight_normalization: bool.Whether normalize the attention score of local activation unit.
     :param l2_reg_dnn: float. L2 regularizer strength applied to DNN
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
-    :param dnn_dropout: When not ``None``, the probability we will drop out a given DNN coordinate.
+    :param dnn_dropout: float in [0,1), the probability we will drop out a given DNN coordinate.
     :param init_std: float,to use as the initialize std of embedding vector
     :param seed: integer ,to use as random seed.
     :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss

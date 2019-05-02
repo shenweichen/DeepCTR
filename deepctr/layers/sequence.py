@@ -130,11 +130,12 @@ class AttentionSequencePoolingLayer(Layer):
         - [Zhou G, Zhu X, Song C, et al. Deep interest network for click-through rate prediction[C]//Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. ACM, 2018: 1059-1068.](https://arxiv.org/pdf/1706.06978.pdf)
     """
 
-    def __init__(self, hidden_size=(80, 40), activation='sigmoid', weight_normalization=False, return_score=False,
+    def __init__(self, att_hidden_units=(80, 40), att_activation='sigmoid', weight_normalization=False,
+                 return_score=False,
                  supports_masking=False, **kwargs):
 
-        self.hidden_size = hidden_size
-        self.activation = activation
+        self.att_hidden_units = att_hidden_units
+        self.att_activation = att_activation
         self.weight_normalization = weight_normalization
         self.return_score = return_score
         super(AttentionSequencePoolingLayer, self).__init__(**kwargs)
@@ -157,10 +158,12 @@ class AttentionSequencePoolingLayer(Layer):
                                  'Got different shapes: %s,%s and %s' % (input_shape))
         else:
             pass
+        self.local_att = LocalActivationUnit(
+            self.att_hidden_units, self.att_activation, l2_reg=0, dropout_rate=0, use_bn=False, seed=1024, )
         super(AttentionSequencePoolingLayer, self).build(
             input_shape)  # Be sure to call this somewhere!
 
-    def call(self, inputs, mask=None, **kwargs):
+    def call(self, inputs, mask=None,training=None, **kwargs):
 
         if self.supports_masking:
             if mask is None:
@@ -175,10 +178,10 @@ class AttentionSequencePoolingLayer(Layer):
             hist_len = keys.get_shape()[1]
             key_masks = tf.sequence_mask(keys_length, hist_len)
 
-        attention_score = LocalActivationUnit(
-            self.hidden_size, self.activation, 0, 0, False, 1024, )([queries, keys])
+        attention_score = self.local_att([queries, keys],training=training)
 
         outputs = tf.transpose(attention_score, (0, 2, 1))
+
 
         if self.weight_normalization:
             paddings = tf.ones_like(outputs) * (-2 ** 32 + 1)
@@ -187,15 +190,18 @@ class AttentionSequencePoolingLayer(Layer):
 
         outputs = tf.where(key_masks, outputs, paddings)
 
+
+
+
         if self.weight_normalization:
             outputs = tf.nn.softmax(outputs)
 
-        if self.return_score:
-            return outputs
-        else:
+        if not self.return_score:
             outputs = tf.matmul(outputs, keys)
 
-            return outputs
+        outputs._uses_learning_phase = attention_score._uses_learning_phase
+
+        return outputs
 
     def compute_output_shape(self, input_shape):
         if self.return_score:
@@ -208,7 +214,7 @@ class AttentionSequencePoolingLayer(Layer):
 
     def get_config(self, ):
 
-        config = {'hidden_size': self.hidden_size, 'activation': self.activation,
+        config = {'att_hidden_units': self.att_hidden_units, 'att_activation': self.att_activation,
                   'weight_normalization': self.weight_normalization, 'return_score': self.return_score,
                   'supports_masking': self.supports_masking}
         base_config = super(AttentionSequencePoolingLayer, self).get_config()

@@ -40,8 +40,9 @@ class Dice(Layer):
         self.bn = tf.keras.layers.BatchNormalization(
             axis=self.axis, epsilon=self.epsilon, center=False, scale=False)
         self.alphas = self.add_weight(shape=(input_shape[-1],), initializer=Zeros(
-        ), dtype=tf.float32, name=self.name + 'dice_alpha')  # name='alpha_'+self.name
+        ), dtype=tf.float32, name= 'dice_alpha')  # name='alpha_'+self.name
         super(Dice, self).build(input_shape)  # Be sure to call this somewhere!
+        self.uses_learning_phase = True
 
     def call(self, inputs,training=None,**kwargs):
         inputs_normed = self.bn(inputs,training=training)

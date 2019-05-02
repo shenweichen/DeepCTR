@@ -30,7 +30,7 @@ def NFM(feature_dim_dict, embedding_size=8,
     :param init_std: float,to use as the initialize std of embedding vector
     :param seed: integer ,to use as random seed.
     :param biout_dropout: When not ``None``, the probability we will drop out the output of BiInteractionPooling Layer.
-    :param dnn_dropout: When not ``None``, the probability we will drop out a given DNN coordinate.
+    :param dnn_dropout: float in [0,1), the probability we will drop out a given DNN coordinate.
     :param dnn_activation: Activation function to use in deep net
     :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
     :return: A Keras model instance.

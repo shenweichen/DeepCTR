@@ -68,7 +68,7 @@ def check_feature_config_dict(feature_dim_dict):
     if "dense" not in feature_dim_dict:
         feature_dim_dict['dense'] = []
     if "sequence" not in feature_dim_dict:
-        feature_dim_dict["sequence"] = []  # TODO:这里会出问题吗
+        feature_dim_dict["sequence"] = []  # TODO:check if it's ok
 
     if not isinstance(feature_dim_dict["sparse"], list):
         raise ValueError("feature_dim_dict['sparse'] must be a list,cur is", type(

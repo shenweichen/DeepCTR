@@ -65,7 +65,7 @@ def FGCNN(feature_dim_dict, embedding_size=8, conv_kernel_width=(7, 7, 7, 7), co
     :param dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of deep net.
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
     :param l2_reg_dnn: float. L2 regularizer strength applied to DNN
-    :param dnn_dropout: When not ``None``, the probability we will drop out a given DNN coordinate.
+    :param dnn_dropout: float in [0,1), the probability we will drop out a given DNN coordinate.
     :param init_std: float,to use as the initialize std of embedding vector
     :param seed: integer ,to use as random seed.
     :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss

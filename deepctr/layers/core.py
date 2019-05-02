@@ -32,7 +32,7 @@ class LocalActivationUnit(Layer):
 
         - **l2_reg**: float between 0 and 1. L2 regularizer strength applied to the kernel weights matrix of attention net.
 
-        - **dropout_rate**: float between 0 and 1. Fraction of the units to dropout in attention net.
+        - **dropout_rate**: float in [0,1). Fraction of the units to dropout in attention net.
 
         - **use_bn**: bool. Whether use BatchNormalization before activation or not in attention net.
 
@@ -93,8 +93,8 @@ class LocalActivationUnit(Layer):
 
         att_out = DNN(self.hidden_units, self.activation, self.l2_reg,
                        self.dropout_rate, self.use_bn, seed=self.seed)(att_input, training=training)
-        attention_score = tf.nn.bias_add(tf.tensordot(
-            att_out, self.kernel, axes=(-1, 0)), self.bias)
+        attention_score = tf.keras.layers.Lambda(lambda x:tf.nn.bias_add(tf.tensordot(
+            x[0], x[1], axes=(-1, 0)), x[2]))([att_out,self.kernel,self.bias])
 
         return attention_score
 
@@ -127,7 +127,7 @@ class DNN(Layer):
 
         - **l2_reg**: float between 0 and 1. L2 regularizer strength applied to the kernel weights matrix.
 
-        - **dropout_rate**: float between 0 and 1. Fraction of the units to dropout.
+        - **dropout_rate**: float in [0,1). Fraction of the units to dropout.
 
         - **use_bn**: bool. Whether use BatchNormalization before activation or not.
 

@@ -31,7 +31,7 @@ def DeepFM(feature_dim_dict, embedding_size=8,
     :param l2_reg_dnn: float. L2 regularizer strength applied to DNN
     :param init_std: float,to use as the initialize std of embedding vector
     :param seed: integer ,to use as random seed.
-    :param dnn_dropout: When not ``None``, the probability we will drop out a given DNN coordinate.
+    :param dnn_dropout: float in [0,1), the probability we will drop out a given DNN coordinate.
     :param dnn_activation: Activation function to use in DNN
     :param dnn_use_bn: bool. Whether use BatchNormalization before activation or not in DNN
     :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
