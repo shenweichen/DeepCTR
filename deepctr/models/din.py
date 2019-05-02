@@ -15,7 +15,7 @@ from tensorflow.python.keras.layers import Input, Dense, Embedding, Concatenate,
 from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.regularizers import l2
 
-from ..input_embedding import get_inputs_list, create_singlefeat_inputdict
+from ..input_embedding import get_inputs_list, create_singlefeat_inputdict, get_embedding_vec_list
 from ..layers.activation import Dice
 from ..layers.core import DNN, PredictionLayer
 from ..layers.sequence import AttentionSequencePoolingLayer
@@ -59,6 +59,11 @@ def DIN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
     """
     check_feature_config_dict(feature_dim_dict)
 
+    for feat in feature_dim_dict["sparse"]:
+        if feat.hash_flag:
+            raise ValueError(
+                "feature hashing on the fly is not supported in DIN")  # TODO:support feature hashing on the DIN
+
     sparse_input, dense_input, user_behavior_input = get_input(
         feature_dim_dict, seq_feature_list, hist_len_max)
 
@@ -75,8 +80,9 @@ def DIN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
         sparse_input[feat]) for feat in seq_feature_list]
     keys_emb_list = [sparse_embedding_dict[feat](
         user_behavior_input[feat]) for feat in seq_feature_list]
-    deep_input_emb_list = [sparse_embedding_dict[feat.name](
-        sparse_input[feat.name]) for feat in feature_dim_dict["sparse"]]
+
+    deep_input_emb_list = get_embedding_vec_list(sparse_embedding_dict, sparse_input, feature_dim_dict['sparse'])
+    # [sparse_embedding_dict[feat.name](sparse_input[feat.name]) for feat in feature_dim_dict["sparse"]]
 
     keys_emb = concat_fun(keys_emb_list)
     deep_input_emb = concat_fun(deep_input_emb_list)

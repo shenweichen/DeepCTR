@@ -42,6 +42,9 @@ def MLR(region_feature_dim_dict, base_feature_dim_dict={"sparse": [], "dense": [
     if base_feature_dim_dict == {"sparse": [], "dense": []}:
         base_feature_dim_dict = region_feature_dim_dict
         same_flag = True
+    for feat in region_feature_dim_dict['sparse'] + base_feature_dim_dict['sparse'] + bias_feature_dim_dict['sparse']:
+        if feat.hash_flag:
+            raise ValueError("Feature Hashing on the fly is no supported in MLR") #TODO:support feature hashing on the MLR
 
     region_sparse_input, region_dense_input, base_sparse_input, base_dense_input, bias_sparse_input, bias_dense_input = get_input(
         region_feature_dim_dict, base_feature_dim_dict, bias_feature_dim_dict, same_flag)

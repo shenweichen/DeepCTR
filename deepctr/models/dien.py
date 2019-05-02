@@ -14,7 +14,7 @@ from tensorflow.python.keras.layers import (Concatenate, Dense, Embedding,
 from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.regularizers import l2
 
-from ..input_embedding import create_singlefeat_inputdict, get_inputs_list
+from ..input_embedding import create_singlefeat_inputdict, get_inputs_list,get_embedding_vec_list
 from ..layers.activation import Dice
 from ..layers.core import DNN, PredictionLayer
 from ..layers.sequence import AttentionSequencePoolingLayer, DynamicGRU
@@ -163,6 +163,11 @@ def DIEN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
 
     """
     check_feature_config_dict(feature_dim_dict)
+    for feat in feature_dim_dict["sparse"]:
+        if feat.hash_flag:
+            raise ValueError(
+                "feature hashing on the fly is not supported in DIEN")  # TODO:support feature hashing on the DIEN
+
     sparse_input, dense_input, user_behavior_input, user_behavior_length = get_input(
         feature_dim_dict, seq_feature_list, hist_len_max)
     sparse_embedding_dict = {feat.name: Embedding(feat.dimension, embedding_size,
@@ -176,8 +181,8 @@ def DIEN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
         sparse_input[feat]) for feat in seq_feature_list]
     keys_emb_list = [sparse_embedding_dict[feat](
         user_behavior_input[feat]) for feat in seq_feature_list]
-    deep_input_emb_list = [sparse_embedding_dict[feat.name](
-        sparse_input[feat.name]) for feat in feature_dim_dict["sparse"]]
+    deep_input_emb_list = get_embedding_vec_list(sparse_embedding_dict, sparse_input, feature_dim_dict['sparse'])
+    #[sparse_embedding_dict[feat.name](sparse_input[feat.name]) for feat in feature_dim_dict["sparse"]]
 
     query_emb = Concatenate()(query_emb_list) if len(
         query_emb_list) > 1 else query_emb_list[0]

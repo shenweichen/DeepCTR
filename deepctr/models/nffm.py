@@ -22,7 +22,7 @@ from ..input_embedding import (create_singlefeat_inputdict,
                                get_embedding_vec_list, get_inputs_list,
                                get_linear_logit)
 from ..layers.core import DNN, PredictionLayer
-from ..layers.utils import concat_fun
+from ..layers.utils import concat_fun,Hash
 from ..utils import check_feature_config_dict
 
 
@@ -50,18 +50,24 @@ def NFFM(feature_dim_dict, embedding_size=4, dnn_hidden_units=(128, 128),
 
     check_feature_config_dict(feature_dim_dict)
     if 'sequence' in feature_dim_dict and len(feature_dim_dict['sequence']) > 0:
-        raise ValueError("now sequence input is not supported in NFFM")
+        raise ValueError("now sequence input is not supported in NFFM")#TODO:support feature hashing on the fly
 
     sparse_input_dict, dense_input_dict = create_singlefeat_inputdict(
         feature_dim_dict)
 
-    sparse_embedding, dense_embedding, linear_embedding = get_embeddings(
+    sparse_embedding, dense_embedding, linear_embedding = create_embedding_dict(
         feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding, l2_reg_linear, )
 
     embed_list = []
     for i, j in itertools.combinations(feature_dim_dict['sparse'], 2):
-        element_wise_prod = multiply([sparse_embedding[i.name][j.name](
-            sparse_input_dict[i.name]), sparse_embedding[j.name][i.name](sparse_input_dict[j.name])])
+        i_input = sparse_input_dict[i.name]
+        if i.hash_flag:
+            i_input = Hash(i.dimension)(i_input)
+        j_input = sparse_input_dict[j.name]
+        if j.hash_flag:
+            j_input = Hash(j.dimension)(j_input)
+
+        element_wise_prod = multiply([sparse_embedding[i.name][j.name](i_input), sparse_embedding[j.name][i.name](j_input)])
         if reduce_sum:
             element_wise_prod = Lambda(lambda element_wise_prod: K.sum(
                 element_wise_prod, axis=-1))(element_wise_prod)
@@ -76,8 +82,11 @@ def NFFM(feature_dim_dict, embedding_size=4, dnn_hidden_units=(128, 128),
             Lambda(lambda x: K.expand_dims(x, axis=1))(element_wise_prod))
 
     for i in feature_dim_dict['sparse']:
+        i_input = sparse_input_dict[i.name]
+        if i.hash_flag:
+            i_input = Hash(i.dimension)(i_input)
         for j in feature_dim_dict['dense']:
-            element_wise_prod = multiply([sparse_embedding[i.name][j.name](sparse_input_dict[i.name]),
+            element_wise_prod = multiply([sparse_embedding[i.name][j.name](i_input),
                                           dense_embedding[j.name][i.name](dense_input_dict[j.name])])
 
             if reduce_sum:
@@ -108,7 +117,7 @@ def NFFM(feature_dim_dict, embedding_size=4, dnn_hidden_units=(128, 128),
     return model
 
 
-def get_embeddings(feature_dim_dict, embedding_size, init_std, seed, l2_rev_V, l2_reg_w, ):
+def create_embedding_dict(feature_dim_dict, embedding_size, init_std, seed, l2_rev_V, l2_reg_w, ):
     sparse_embedding = {j.name: {feat.name: Embedding(j.dimension, embedding_size,
                                                       embeddings_initializer=RandomNormal(
                                                           mean=0.0, stddev=0.0001, seed=seed),
