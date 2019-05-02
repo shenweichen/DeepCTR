@@ -1,6 +1,7 @@
 import pytest
 from tensorflow.python.keras.layers import PReLU
 from tensorflow.python.keras.utils import CustomObjectScope
+from tensorflow.python.keras import backend as K
 
 from deepctr import layers
 from deepctr.layers import Dice
@@ -9,15 +10,17 @@ from tests.utils import layer_test
 
 
 @pytest.mark.parametrize(
-    'hidden_size,activation',
-    [(hidden_size, activation)
-     for hidden_size in [(), (10,)]
+    'hidden_units,activation',
+    [(hidden_units, activation)
+     for hidden_units in [(), (10,)]
      for activation in ['sigmoid', Dice, PReLU]
      ]
 )
-def test_LocalActivationUnit(hidden_size, activation):
+def test_LocalActivationUnit(hidden_units, activation):
+    #if activation == Dice:
+    #    K.set_learning_phase(True)
     with CustomObjectScope({'LocalActivationUnit': layers.LocalActivationUnit}):
-        layer_test(layers.LocalActivationUnit, kwargs={'hidden_size': hidden_size, 'activation': activation},
+        layer_test(layers.LocalActivationUnit, kwargs={'hidden_units': hidden_units, 'activation': activation},
                    input_shape=[(BATCH_SIZE, 1, EMBEDDING_SIZE), (BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE)])
 
 

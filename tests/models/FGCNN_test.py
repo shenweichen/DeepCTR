@@ -33,7 +33,7 @@ def test_FGCNN_without_seq(sparse_feature_num, dense_feature_num):
         sample_size, sparse_feature_num, dense_feature_num, sequence_feature=())
 
     model = FGCNN(feature_dim_dict, conv_kernel_width=( ), conv_filters=(), new_maps=(), pooling_width=(), dnn_hidden_units=(32,), dnn_dropout=0.5, )
-    check_model(model, model_name, x, y,check_model_io=False)
+    check_model(model, model_name, x, y,check_model_io=False)#TODO: add model_io check
 
 
 if __name__ == "__main__":

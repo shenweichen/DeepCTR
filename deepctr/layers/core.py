@@ -26,7 +26,7 @@ class LocalActivationUnit(Layer):
         - 3D tensor with shape: ``(batch_size, T, 1)``.
 
       Arguments
-        - **hidden_size**:list of positive integer, the attention net layer number and units in each layer.
+        - **hidden_units**:list of positive integer, the attention net layer number and units in each layer.
 
         - **activation**: Activation function to use in attention net.
 
@@ -42,9 +42,9 @@ class LocalActivationUnit(Layer):
         - [Zhou G, Zhu X, Song C, et al. Deep interest network for click-through rate prediction[C]//Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. ACM, 2018: 1059-1068.](https://arxiv.org/pdf/1706.06978.pdf)
     """
 
-    def __init__(self, hidden_size=(64, 32), activation='sigmoid', l2_reg=0, dropout_rate=0, use_bn=False, seed=1024,
+    def __init__(self, hidden_units=(64, 32), activation='sigmoid', l2_reg=0, dropout_rate=0, use_bn=False, seed=1024,
                  **kwargs):
-        self.hidden_size = hidden_size
+        self.hidden_units = hidden_units
         self.activation = activation
         self.l2_reg = l2_reg
         self.dropout_rate = dropout_rate
@@ -69,17 +69,19 @@ class LocalActivationUnit(Layer):
                              'Got different shapes: %s,%s' % (input_shape))
         size = 4 * \
                int(input_shape[0][-1]
-                   ) if len(self.hidden_size) == 0 else self.hidden_size[-1]
+                   ) if len(self.hidden_units) == 0 else self.hidden_units[-1]
         self.kernel = self.add_weight(shape=(size, 1),
                                       initializer=glorot_normal(
                                           seed=self.seed),
                                       name="kernel")
         self.bias = self.add_weight(
             shape=(1,), initializer=Zeros(), name="bias")
+        #self.dnn = DNN(self.hidden_units, self.activation, self.l2_reg,
+        #               self.dropout_rate, self.use_bn, seed=self.seed)
         super(LocalActivationUnit, self).build(
             input_shape)  # Be sure to call this somewhere!
 
-    def call(self, inputs, **kwargs):
+    def call(self, inputs, training=None, **kwargs):
 
         query, keys = inputs
 
@@ -89,8 +91,8 @@ class LocalActivationUnit(Layer):
         att_input = tf.concat(
             [queries, keys, queries - keys, queries * keys], axis=-1)
 
-        att_out = DNN(self.hidden_size, self.activation, self.l2_reg,
-                      self.dropout_rate, self.use_bn, seed=self.seed)(att_input)
+        att_out = DNN(self.hidden_units, self.activation, self.l2_reg,
+                       self.dropout_rate, self.use_bn, seed=self.seed)(att_input, training=training)
         attention_score = tf.nn.bias_add(tf.tensordot(
             att_out, self.kernel, axes=(-1, 0)), self.bias)
 
@@ -103,8 +105,8 @@ class LocalActivationUnit(Layer):
         return mask
 
     def get_config(self, ):
-        config = {'activation': self.activation, 'hidden_size': self.hidden_size,
-                  'l2_reg': self.l2_reg, 'keep_prob': self.dropout_rate, 'use_bn': self.use_bn, 'seed': self.seed}
+        config = {'activation': self.activation, 'hidden_units': self.hidden_units,
+                  'l2_reg': self.l2_reg, 'dropout_rate': self.dropout_rate, 'use_bn': self.use_bn, 'seed': self.seed}
         base_config = super(LocalActivationUnit, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
@@ -171,8 +173,8 @@ class DNN(Layer):
             if self.use_bn:
                 fc = tf.keras.layers.BatchNormalization()(fc, training=training)
             fc = activation_fun(self.activation, fc)
-
-            fc = tf.keras.layers.Dropout(self.dropout_rate)(fc, training=training)
+            if self.dropout_rate > 0:
+                fc = tf.keras.layers.Dropout(self.dropout_rate)(fc, training=training)
             deep_input = fc
 
         return deep_input
@@ -201,7 +203,7 @@ class PredictionLayer(Layer):
     """
 
     def __init__(self, task='binary', use_bias=True, **kwargs):
-        if task not in ["binary","regression"]:
+        if task not in ["binary", "regression"]:
             raise ValueError("task must be binary or regression")
         self.task = task
         self.use_bias = use_bias
