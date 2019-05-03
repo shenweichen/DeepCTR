@@ -118,7 +118,7 @@ class AttentionSequencePoolingLayer(Layer):
         - 3D tensor with shape: ``(batch_size, 1, embedding_size)``.
 
       Arguments
-        - **hidden_size**:list of positive integer, the attention net layer number and units in each layer.
+        - **att_hidden_units**:list of positive integer, the attention net layer number and units in each layer.
 
         - **activation**: Activation function to use in attention net.
 
@@ -237,14 +237,14 @@ class BiLSTM(Layer):
 
         - **res_layers**: Positive integer, number of residual connection to used in last ``res_layers``.
 
-        - **dropout**:  Float between 0 and 1. Fraction of the units to drop for the linear transformation of the inputs.
+        - **dropout_rate**:  Float between 0 and 1. Fraction of the units to drop for the linear transformation of the inputs.
 
         - **merge_mode**: merge_mode: Mode by which outputs of the forward and backward RNNs will be combined. One of { ``'fw'`` , ``'bw'`` , ``'sum'`` , ``'mul'`` , ``'concat'`` , ``'ave'`` , ``None`` }. If None, the outputs will not be combined, they will be returned as a list.
 
 
     """
 
-    def __init__(self, units, layers=2, res_layers=0, dropout=0.2, merge_mode='ave', **kwargs):
+    def __init__(self, units, layers=2, res_layers=0, dropout_rate=0.2, merge_mode='ave', **kwargs):
 
         if merge_mode not in ['fw', 'bw', 'sum', 'mul', 'ave', 'concat', None]:
             raise ValueError('Invalid merge mode. '
@@ -254,7 +254,7 @@ class BiLSTM(Layer):
         self.units = units
         self.layers = layers
         self.res_layers = res_layers
-        self.dropout = dropout
+        self.dropout_rate = dropout_rate
         self.merge_mode = merge_mode
 
         super(BiLSTM, self).__init__(**kwargs)
@@ -268,9 +268,9 @@ class BiLSTM(Layer):
         self.fw_lstm = []
         self.bw_lstm = []
         for _ in range(self.layers):
-            self.fw_lstm.append(LSTM(self.units, dropout=self.dropout, bias_initializer='ones', return_sequences=True,
+            self.fw_lstm.append(LSTM(self.units, dropout=self.dropout_rate, bias_initializer='ones', return_sequences=True,
                                      unroll=True))
-            self.bw_lstm.append(LSTM(self.units, dropout=self.dropout, bias_initializer='ones', return_sequences=True,
+            self.bw_lstm.append(LSTM(self.units, dropout=self.dropout_rate, bias_initializer='ones', return_sequences=True,
                                      go_backwards=True, unroll=True))
 
         super(BiLSTM, self).build(
@@ -327,7 +327,7 @@ class BiLSTM(Layer):
     def get_config(self, ):
 
         config = {'units': self.units, 'layers': self.layers,
-                  'res_layers': self.res_layers, 'dropout': self.dropout, 'merge_mode': self.merge_mode}
+                  'res_layers': self.res_layers, 'dropout_rate': self.dropout_rate, 'merge_mode': self.merge_mode}
         base_config = super(BiLSTM, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 

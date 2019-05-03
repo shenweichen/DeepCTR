@@ -75,7 +75,7 @@ def test_FM():
 
 def test_AFMLayer():
     with CustomObjectScope({'AFMLayer': layers.AFMLayer}):
-        layer_test(layers.AFMLayer, kwargs={}, input_shape=[(
+        layer_test(layers.AFMLayer, kwargs={'dropout_rate':0.5}, input_shape=[(
             BATCH_SIZE, 1, EMBEDDING_SIZE)]*FIELD_SIZE)
 
 

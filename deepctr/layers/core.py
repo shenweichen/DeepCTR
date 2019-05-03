@@ -173,8 +173,8 @@ class DNN(Layer):
             if self.use_bn:
                 fc = tf.keras.layers.BatchNormalization()(fc, training=training)
             fc = activation_fun(self.activation, fc)
-            if self.dropout_rate > 0:
-                fc = tf.keras.layers.Dropout(self.dropout_rate)(fc, training=training)
+
+            fc = tf.keras.layers.Dropout(self.dropout_rate,seed=self.seed)(fc, training=training)
             deep_input = fc
 
         return deep_input

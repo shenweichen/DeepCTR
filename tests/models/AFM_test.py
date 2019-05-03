@@ -14,7 +14,7 @@ def test_AFM(use_attention, sparse_feature_num, dense_feature_num):
     x, y, feature_dim_dict = get_test_data(
         sample_size, sparse_feature_num, dense_feature_num)
 
-    model = AFM(feature_dim_dict, use_attention=use_attention, )
+    model = AFM(feature_dim_dict, use_attention=use_attention,afm_dropout=0.5)
     check_model(model, model_name, x, y)
 
 

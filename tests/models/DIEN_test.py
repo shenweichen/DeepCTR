@@ -69,7 +69,7 @@ def test_DIEN(gru_type):
     x, y, feature_dim_dict, behavior_feature_list = get_xy_fd()
 
     model = DIEN(feature_dim_dict, behavior_feature_list, hist_len_max=4, embedding_size=8,
-                 dnn_hidden_units=[4, 4, 4], dnn_dropout=0.6, gru_type=gru_type)
+                 dnn_hidden_units=[4, 4, 4], dnn_dropout=0.5, gru_type=gru_type)
 
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
@@ -91,7 +91,7 @@ def test_DIEN_neg():
     x, y, feature_dim_dict, behavior_feature_list = get_xy_fd(use_neg=True)
 
     model = DIEN(feature_dim_dict, behavior_feature_list, hist_len_max=4, embedding_size=8,
-                 dnn_hidden_units=[4, 4, 4], dnn_dropout=0.6, gru_type="AUGRU", use_negsampling=True)
+                 dnn_hidden_units=[4, 4, 4], dnn_dropout=0.5, gru_type="AUGRU", use_negsampling=True)
 
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
