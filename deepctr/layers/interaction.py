@@ -36,7 +36,7 @@ class AFMLayer(Layer):
         - **l2_reg_w** : float between 0 and 1. L2 regularizer strength
          applied to attention network.
 
-        - **keep_prob** : float between 0 and 1. Fraction of the attention net output units to keep.
+        - **dropout_rate** : float between in [0,1). Fraction of the attention net output units to dropout.
 
         - **seed** : A Python integer to use as random seed.
 
@@ -45,10 +45,10 @@ class AFMLayer(Layer):
         Interactions via Attention Networks](https://arxiv.org/pdf/1708.04617.pdf)
     """
 
-    def __init__(self, attention_factor=4, l2_reg_w=0, keep_prob=1.0, seed=1024, **kwargs):
+    def __init__(self, attention_factor=4, l2_reg_w=0, dropout_rate=0, seed=1024, **kwargs):
         self.attention_factor = attention_factor
         self.l2_reg_w = l2_reg_w
-        self.keep_prob = keep_prob
+        self.dropout_rate = dropout_rate
         self.seed = seed
         super(AFMLayer, self).__init__(**kwargs)
 
@@ -85,11 +85,12 @@ class AFMLayer(Layer):
                                             initializer=glorot_normal(seed=self.seed), name="projection_h")
         self.projection_p = self.add_weight(shape=(
             embedding_size, 1), initializer=glorot_normal(seed=self.seed), name="projection_p")
+        self.dropout = tf.keras.layers.Dropout(self.dropout_rate, seed=self.seed)
 
         # Be sure to call this somewhere!
         super(AFMLayer, self).build(input_shape)
 
-    def call(self, inputs, **kwargs):
+    def call(self, inputs, training=None, **kwargs):
 
         if K.ndim(inputs[0]) != 3:
             raise ValueError(
@@ -116,11 +117,10 @@ class AFMLayer(Layer):
         attention_output = tf.reduce_sum(
             self.normalized_att_score * bi_interaction, axis=1)
 
-        attention_output = tf.nn.dropout(
-            attention_output, self.keep_prob, seed=1024)
-        # Dropout(1-self.keep_prob)(attention_output)
-        afm_out = tf.tensordot(
-            attention_output, self.projection_p, axes=(-1, 0))
+        attention_output = self.dropout(attention_output)  # training
+
+        afm_out = tf.keras.layers.Lambda(lambda x: tf.tensordot(x[0], x[1]
+                                                                , axes=(-1, 0)))([attention_output, self.projection_p])
 
         return afm_out
 
@@ -133,7 +133,7 @@ class AFMLayer(Layer):
 
     def get_config(self, ):
         config = {'attention_factor': self.attention_factor,
-                  'l2_reg_w': self.l2_reg_w, 'keep_prob': self.keep_prob, 'seed': self.seed}
+                  'l2_reg_w': self.l2_reg_w, 'dropout_rate': self.dropout_rate, 'seed': self.seed}
         base_config = super(AFMLayer, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
@@ -822,7 +822,7 @@ class FGCNNLayer(Layer):
 
         for i in range(0, len(self.kernel_width)):
             pooled_features_num = features_num // self.pooling_width[i]
-            
+
             new_features_num += self.new_maps[i] * pooled_features_num
             features_num = pooled_features_num
 

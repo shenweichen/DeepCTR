@@ -6,6 +6,8 @@ Author:
 
 """
 
+import sys
+
 import tensorflow as tf
 from tensorflow.python.keras.initializers import Zeros
 from tensorflow.python.keras.layers import Layer
@@ -38,19 +40,18 @@ class Dice(Layer):
         self.bn = tf.keras.layers.BatchNormalization(
             axis=self.axis, epsilon=self.epsilon, center=False, scale=False)
         self.alphas = self.add_weight(shape=(input_shape[-1],), initializer=Zeros(
-        ), dtype=tf.float32, name=self.name+'dice_alpha')  # name='alpha_'+self.name
+        ), dtype=tf.float32, name= 'dice_alpha')  # name='alpha_'+self.name
         super(Dice, self).build(input_shape)  # Be sure to call this somewhere!
+        self.uses_learning_phase = True
 
-    def call(self, inputs, **kwargs):
-
-        inputs_normed = self.bn(inputs)
+    def call(self, inputs,training=None,**kwargs):
+        inputs_normed = self.bn(inputs,training=training)
         # tf.layers.batch_normalization(
         # inputs, axis=self.axis, epsilon=self.epsilon, center=False, scale=False)
         x_p = tf.sigmoid(inputs_normed)
         return self.alphas * (1.0 - x_p) * inputs + x_p * inputs
 
-    def get_config(self,):
-
+    def get_config(self, ):
         config = {'axis': self.axis, 'epsilon': self.epsilon}
         base_config = super(Dice, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
@@ -60,9 +61,7 @@ class Dice(Layer):
 
 
 def activation_fun(activation, fc):
-
-
-    if isinstance(activation,( str,unicode)):
+    if (isinstance(activation, str)) or (sys.version_info.major == 2 and isinstance(activation, (str, unicode))):
         fc = tf.keras.layers.Activation(activation)(fc)
     elif issubclass(activation, Layer):
         fc = activation()(fc)

@@ -18,7 +18,7 @@ def test_DCN(embedding_size, cross_num, hidden_size, sparse_feature_num):
         sample_size, sparse_feature_num, sparse_feature_num)
 
     model = DCN(feature_dim_dict, embedding_size=embedding_size, cross_num=cross_num,
-                hidden_size=hidden_size, keep_prob=0.5, )
+                dnn_hidden_units=hidden_size, dnn_dropout=0.5, )
     check_model(model, model_name, x, y)
 
 
@@ -27,8 +27,8 @@ def test_DCN_invalid(embedding_size=8, cross_num=0, hidden_size=()):
                         'dense': [SingleFeat('dense_1', 1), SingleFeat('dense_1', 1), SingleFeat('dense_1', 1)]}
     with pytest.raises(ValueError):
         _ = DCN(feature_dim_dict, embedding_size=embedding_size, cross_num=cross_num,
-                hidden_size=hidden_size, keep_prob=0.5, )
+                dnn_hidden_units=hidden_size, dnn_dropout=0.5, )
 
 
 if __name__ == "__main__":
-    test_DCN(8, 2, [32, 32], 2)
+    pass

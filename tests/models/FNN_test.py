@@ -16,7 +16,7 @@ def test_FNN(sparse_feature_num, dense_feature_num):
     x, y, feature_dim_dict = get_test_data(
         sample_size, sparse_feature_num, dense_feature_num)
 
-    model = FNN(feature_dim_dict,  hidden_size=[32, 32], keep_prob=0.5, )
+    model = FNN(feature_dim_dict, dnn_hidden_units=[32, 32], dnn_dropout=0.5, )
     check_model(model, model_name, x, y)
 
 
@@ -32,9 +32,9 @@ def test_FNN_without_seq(sparse_feature_num, dense_feature_num):
     x, y, feature_dim_dict = get_test_data(
         sample_size, sparse_feature_num, dense_feature_num, sequence_feature=())
 
-    model = FNN(feature_dim_dict,  hidden_size=[32, 32], keep_prob=0.5, )
+    model = FNN(feature_dim_dict, dnn_hidden_units=[32, 32], dnn_dropout=0.5, )
     check_model(model, model_name, x, y)
 
 
 if __name__ == "__main__":
-    test_FNN(2, 2)
+    pass

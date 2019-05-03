@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.metrics import log_loss, roc_auc_score
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder, MinMaxScaler
+from sklearn.preprocessing import MinMaxScaler
 
 from deepctr.models import DeepFM
 from deepctr.utils import SingleFeat
@@ -16,18 +16,15 @@ if __name__ == "__main__":
     data[dense_features] = data[dense_features].fillna(0, )
     target = ['label']
 
-    # 1.Label Encoding for sparse features,and do simple Transformation for dense features
-    for feat in sparse_features:
-        lbe = LabelEncoder()
-        data[feat] = lbe.fit_transform(data[feat])
+    # 1.do simple Transformation for dense features
     mms = MinMaxScaler(feature_range=(0, 1))
     data[dense_features] = mms.fit_transform(data[dense_features])
 
-    # 2.count #unique features for each sparse field,and record dense feature field name
+    # 2.set hashing space for each sparse field,and record dense feature field name
 
-    sparse_feature_list = [SingleFeat(feat, data[feat].nunique())
+    sparse_feature_list = [SingleFeat(feat, 1000, True, 'string')  # since the input is string
                            for feat in sparse_features]
-    dense_feature_list = [SingleFeat(feat, 0, False)
+    dense_feature_list = [SingleFeat(feat, 0, )
                           for feat in dense_features]
 
     # 3.generate input data for model

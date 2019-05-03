@@ -49,7 +49,7 @@ def xtest_DIEN_model_io():
 
     model = DIEN(feature_dim_dict, behavior_feature_list, hist_len_max=4, embedding_size=8, att_activation=Dice,
 
-                hidden_size=[4, 4, 4], keep_prob=0.6,use_negsampling=False)
+                 dnn_hidden_units=[4, 4, 4], dnn_dropout=0.6, use_negsampling=False)
 
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
@@ -69,7 +69,7 @@ def test_DIEN(gru_type):
     x, y, feature_dim_dict, behavior_feature_list = get_xy_fd()
 
     model = DIEN(feature_dim_dict, behavior_feature_list, hist_len_max=4, embedding_size=8,
-                hidden_size=[4, 4, 4], keep_prob=0.6,gru_type=gru_type)
+                 dnn_hidden_units=[4, 4, 4], dnn_dropout=0.5, gru_type=gru_type)
 
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
@@ -91,7 +91,7 @@ def test_DIEN_neg():
     x, y, feature_dim_dict, behavior_feature_list = get_xy_fd(use_neg=True)
 
     model = DIEN(feature_dim_dict, behavior_feature_list, hist_len_max=4, embedding_size=8,
-                hidden_size=[4, 4, 4], keep_prob=0.6,gru_type="AUGRU",use_negsampling=True)
+                 dnn_hidden_units=[4, 4, 4], dnn_dropout=0.5, gru_type="AUGRU", use_negsampling=True)
 
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
@@ -106,4 +106,4 @@ def test_DIEN_neg():
     print(model_name + " test pass!")
 
 if __name__ == "__main__":
-    test_DIEN(gru_type='GRU')
+    pass

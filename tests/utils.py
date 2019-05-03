@@ -4,6 +4,7 @@ import inspect
 import sys
 
 import numpy as np
+import  tensorflow as tf
 from numpy.testing import assert_allclose
 from tensorflow.python.keras import backend as K
 from tensorflow.python.keras.layers import Input, Masking
@@ -25,9 +26,9 @@ def get_test_data(sample_size=1000, sparse_feature_num=1, dense_feature_num=1, s
 
     for i in range(sparse_feature_num):
         dim = np.random.randint(1, 10)
-        feature_dim_dict['sparse'].append(SingleFeat('sparse_'+str(i), dim))
+        feature_dim_dict['sparse'].append(SingleFeat('sparse_'+str(i), dim,False,tf.int32))
     for i in range(dense_feature_num):
-        feature_dim_dict['dense'].append(SingleFeat('dense_'+str(i), 0))
+        feature_dim_dict['dense'].append(SingleFeat('dense_'+str(i), 0,False,tf.float32))
     for i, mode in enumerate(sequence_feature):
         dim = np.random.randint(1, 10)
         maxlen = np.random.randint(1, 10)
@@ -35,9 +36,9 @@ def get_test_data(sample_size=1000, sparse_feature_num=1, dense_feature_num=1, s
             VarLenFeat('sequence_' + str(i), dim, maxlen, mode))
 
     sparse_input = [np.random.randint(0, dim, sample_size)
-                    for feat, dim in feature_dim_dict['sparse']]
+                    for feat, dim,_,_ in feature_dim_dict['sparse']]
     dense_input = [np.random.random(sample_size)
-                   for name in feature_dim_dict['dense']]
+                   for _ in feature_dim_dict['dense']]
     sequence_input = []
     sequence_len_input = []
     for var in feature_dim_dict['sequence']:
@@ -315,6 +316,7 @@ def has_arg(fn, name, accept_all=False):
 
 
 def check_model(model, model_name, x, y,check_model_io=True):
+
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
     model.fit(x, y, batch_size=100, epochs=1, validation_split=0.5)

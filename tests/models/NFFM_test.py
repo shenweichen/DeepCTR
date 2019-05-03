@@ -16,9 +16,9 @@ def test_NFFM(hidden_size, sparse_feature_num):
         sample_size, sparse_feature_num, sparse_feature_num,sequence_feature=())
 
     model = NFFM(feature_dim_dict, embedding_size=8,
-                hidden_size=[32, 32],)
+                 dnn_hidden_units=[32, 32], dnn_dropout=0.5)
     check_model(model, model_name, x, y)
 
 
 if __name__ == "__main__":
-    test_NFFM((8, 8), 1)
+    pass
