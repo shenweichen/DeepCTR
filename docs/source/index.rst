@@ -35,7 +35,7 @@ You can read the latest code at https://github.com/shenweichen/DeepCTR
 
 News
 -----
-05/XX/2019 : Support `feature hashing on the fly <./Examples.html#classification-criteo-with-feature-hashing-on-the-fly>`_ and python2.7. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.4.0>`_
+05/06/2019 : Support `feature hashing on the fly <./Examples.html#classification-criteo-with-feature-hashing-on-the-fly>`_ and python2.7. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.4.0>`_
 
 04/27/2019 : Add `FGCNN <./Features.html#fgcnn-feature-generation-by-convolutional-neural-network>`_  and ``FGCNNLayer``. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.4>`_
 

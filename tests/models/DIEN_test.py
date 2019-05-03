@@ -5,7 +5,6 @@ from deepctr.layers.activation import Dice
 from deepctr.utils import SingleFeat
 from deepctr.layers import custom_objects
 from tensorflow.python.keras.models import load_model, save_model
-import tensorflow as tf
 
 
 def get_xy_fd(use_neg=False):

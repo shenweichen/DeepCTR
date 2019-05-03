@@ -1,7 +1,6 @@
 import pytest
 from tensorflow.python.keras.layers import PReLU
 from tensorflow.python.keras.utils import CustomObjectScope
-from tensorflow.python.keras import backend as K
 
 from deepctr import layers
 from deepctr.layers import Dice
