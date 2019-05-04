@@ -8,7 +8,7 @@ from .interaction import (CIN, FM, AFMLayer, BiInteractionPooling, CrossNet,
 from .normalization import LayerNormalization
 from .sequence import (AttentionSequencePoolingLayer, BiasEncoding, BiLSTM,
                        KMaxPooling, Position_Embedding, SequencePoolingLayer,
-                       Transformer)
+                       Transformer,DynamicGRU)
 from .utils import NoMask, Hash
 
 custom_objects = {'tf': tf,
@@ -33,4 +33,5 @@ custom_objects = {'tf': tf,
                   'BiasEncoding': BiasEncoding,
                   'KMaxPooling': KMaxPooling,
                   'FGCNNLayer': FGCNNLayer,
-                  'Hash': Hash}
+                  'Hash': Hash,
+                  'DynamicGRU':DynamicGRU}

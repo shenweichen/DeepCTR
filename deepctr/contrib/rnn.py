@@ -61,6 +61,7 @@ from tensorflow.python.ops import rnn_cell_impl
 from tensorflow.python.ops import tensor_array_ops
 from tensorflow.python.ops import variable_scope as vs
 from tensorflow.python.util import nest
+import tensorflow as tf
 
 
 def _like_rnncell_(cell):
@@ -1064,7 +1065,7 @@ def dynamic_rnn(cell, inputs, att_scores=None, sequence_length=None, initial_sta
 
     # Variable using the same placement as for the rest of the RNN.
 
-    with vs.variable_scope(scope or "rnn") as varscope:
+    with vs.variable_scope(scope or "rnn",reuse=tf.AUTO_REUSE) as varscope:#TODO:user defined reuse
 
         if varscope.caching_device is None:
             varscope.set_caching_device(lambda op: op.device)

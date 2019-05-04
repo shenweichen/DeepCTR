@@ -13,6 +13,7 @@ from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.layers import Concatenate, Dense, Embedding, Input, Reshape, add
 from tensorflow.python.keras.regularizers import l2
 
+from deepctr.layers import Hash
 from .layers.sequence import SequencePoolingLayer
 from .layers.utils import Hash
 
@@ -133,17 +134,19 @@ def merge_sequence_input(embedding_dict, embed_list, sequence_input_dict, sequen
     return embed_list
 
 
-def get_embedding_vec_list(embedding_dict, input_dict, sparse_fg_list):
+def get_embedding_vec_list(embedding_dict, input_dict, sparse_fg_list,return_feat_list=(),mask_feat_list=()):
     embedding_vec_list = []
     for fg in sparse_fg_list:
         feat_name = fg.name
-        if fg.hash_flag:
-            lookup_idx = Hash(fg.dimension)(input_dict[feat_name])
-        else:
-            lookup_idx = input_dict[feat_name]
-        embedding_vec_list.append(embedding_dict[feat_name](lookup_idx))
-    return embedding_vec_list
+        if len(return_feat_list) == 0  or feat_name in return_feat_list:
+            if fg.hash_flag:
+                lookup_idx = Hash(fg.dimension,mask_zero=(feat_name in mask_feat_list))(input_dict[feat_name])
+            else:
+                lookup_idx = input_dict[feat_name]
 
+            embedding_vec_list.append(embedding_dict[feat_name](lookup_idx))
+
+    return embedding_vec_list
 
 def get_varlen_embedding_vec_dict(embedding_dict, sequence_input_dict, sequence_fg_list):
     varlen_embedding_vec_dict = {}
@@ -236,3 +239,6 @@ def preprocess_input_embedding(feature_dim_dict, embedding_size, l2_reg_embeddin
                                                                        sequence_max_len_dict, create_linear_weight)
 
     return deep_emb_list, linear_emb_list, dense_input_dict, inputs_list
+
+
+
