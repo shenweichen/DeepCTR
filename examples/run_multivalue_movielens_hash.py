@@ -9,7 +9,7 @@ data = pd.read_csv("./movielens_sample.txt")
 sparse_features = ["movie_id", "user_id",
                    "gender", "age", "occupation", "zip", ]
 
-data[sparse_features] = data[sparse_features].astype('string')
+data[sparse_features] = data[sparse_features].astype(str)
 target = ['rating']
 
 # 1.Use hashing encoding on the fly for sparse features,and process sequence features
@@ -19,7 +19,7 @@ genres_length = np.array(list(map(len, genres_list)))
 max_len = max(genres_length)
 
 # Notice : padding=`post`
-genres_list = pad_sequences(genres_list, maxlen=max_len, padding='post', dtype='string', value=0)
+genres_list = pad_sequences(genres_list, maxlen=max_len, padding='post', dtype=str, value=0)
 
 # 2.set hashing space for each sparse field and generate feature config for sequence feature
 

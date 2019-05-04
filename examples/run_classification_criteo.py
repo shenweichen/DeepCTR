@@ -27,7 +27,7 @@ if __name__ == "__main__":
 
     sparse_feature_list = [SingleFeat(feat, data[feat].nunique())
                            for feat in sparse_features]
-    dense_feature_list = [SingleFeat(feat, 0, False)
+    dense_feature_list = [SingleFeat(feat, 0,)
                           for feat in dense_features]
 
     # 3.generate input data for model
