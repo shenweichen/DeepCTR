@@ -20,13 +20,13 @@ def gen_sequence(dim, max_len, sample_size):
 
 
 def get_test_data(sample_size=1000, sparse_feature_num=1, dense_feature_num=1, sequence_feature=('max', 'mean', 'sum'),
-                  classification=True, include_length=False):
+                  classification=True, include_length=False, hash_flag=False):
 
     feature_dim_dict = {"sparse": [], 'dense': [], 'sequence': []}
 
     for i in range(sparse_feature_num):
         dim = np.random.randint(1, 10)
-        feature_dim_dict['sparse'].append(SingleFeat('sparse_'+str(i), dim,False,tf.int32))
+        feature_dim_dict['sparse'].append(SingleFeat('sparse_'+str(i), dim,hash_flag,tf.int32))
     for i in range(dense_feature_num):
         feature_dim_dict['dense'].append(SingleFeat('dense_'+str(i), 0,False,tf.float32))
     for i, mode in enumerate(sequence_feature):
@@ -316,6 +316,15 @@ def has_arg(fn, name, accept_all=False):
 
 
 def check_model(model, model_name, x, y,check_model_io=True):
+    """
+    compile model,train and evaluate it,then save/load weight and model file.
+    :param model:
+    :param model_name:
+    :param x:
+    :param y:
+    :param check_model_io: test save/load model file or not
+    :return:
+    """
 
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])

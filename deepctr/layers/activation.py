@@ -51,17 +51,18 @@ class Dice(Layer):
         x_p = tf.sigmoid(inputs_normed)
         return self.alphas * (1.0 - x_p) * inputs + x_p * inputs
 
+    def compute_output_shape(self, input_shape):
+        return input_shape
+
     def get_config(self, ):
         config = {'axis': self.axis, 'epsilon': self.epsilon}
         base_config = super(Dice, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
-    def compute_output_shape(self, input_shape):
-        return input_shape
-
-
 def activation_fun(activation, fc):
-    if (isinstance(activation, str)) or (sys.version_info.major == 2 and isinstance(activation, (str, unicode))):
+    if activation == "dice" or activation == "Dice":
+        fc = Dice()(fc)
+    elif (isinstance(activation, str)) or (sys.version_info.major == 2 and isinstance(activation, (str, unicode))):
         fc = tf.keras.layers.Activation(activation)(fc)
     elif issubclass(activation, Layer):
         fc = activation()(fc)

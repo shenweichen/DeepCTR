@@ -7,24 +7,26 @@ Reference:
     [1] Zhou G, Mou N, Fan Y, et al. Deep Interest Evolution Network for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1809.03672, 2018. (https://arxiv.org/pdf/1809.03672.pdf)
 """
 
+from collections import OrderedDict
+
 import tensorflow as tf
 from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.layers import (Concatenate, Dense, Embedding,
                                             Input, Permute, multiply)
-from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.regularizers import l2
 
 from ..input_embedding import create_singlefeat_inputdict, get_inputs_list,get_embedding_vec_list
-from ..layers.activation import Dice
 from ..layers.core import DNN, PredictionLayer
 from ..layers.sequence import AttentionSequencePoolingLayer, DynamicGRU
+from ..layers.utils import concat_fun
 from ..utils import check_feature_config_dict
 
 
 def get_input(feature_dim_dict, seq_feature_list, seq_max_len):
     sparse_input, dense_input = create_singlefeat_inputdict(feature_dim_dict)
-    user_behavior_input = {feat: Input(shape=(seq_max_len,), name='seq_' + str(i) + '-' + feat) for i, feat in
-                           enumerate(seq_feature_list)}
+    user_behavior_input = OrderedDict()
+    for i, feat in enumerate(seq_feature_list):
+        user_behavior_input[feat] = Input(shape=(seq_max_len,), name='seq_' + str(i) + '-' + feat)
 
     user_behavior_length = Input(shape=(1,), name='seq_length')
 
@@ -82,7 +84,7 @@ def auxiliary_net(in_, stag='auxiliary_net'):
     dnn3 = tf.layers.dense(dnn2, 1, activation=None,
                            name='f3' + stag, reuse=tf.AUTO_REUSE)
 
-    y_hat = tf.nn.sigmoid(dnn3)  # tf.nn.softmax(dnn3) + 0.00000001
+    y_hat = tf.nn.sigmoid(dnn3)
 
     return y_hat
 
@@ -136,7 +138,7 @@ def interest_evolution(concat_behavior, deep_input_item, user_behavior_length, g
 def DIEN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
          gru_type="GRU", use_negsampling=False, alpha=1.0, use_bn=False, dnn_hidden_units=(200, 80),
          dnn_activation='relu',
-         att_hidden_units=(64, 16), att_activation=Dice, att_weight_normalization=True,
+         att_hidden_units=(64, 16), att_activation="dice", att_weight_normalization=True,
          l2_reg_dnn=0, l2_reg_embedding=1e-5, dnn_dropout=0, init_std=0.0001, seed=1024, task='binary'):
     """Instantiates the Deep Interest Evolution Network architecture.
 
@@ -163,10 +165,6 @@ def DIEN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
 
     """
     check_feature_config_dict(feature_dim_dict)
-    for feat in feature_dim_dict["sparse"]:
-        if feat.hash_flag:
-            raise ValueError(
-                "feature hashing on the fly is not supported in DIEN")  # TODO:support feature hashing on the DIEN
 
     sparse_input, dense_input, user_behavior_input, user_behavior_length = get_input(
         feature_dim_dict, seq_feature_list, hist_len_max)
@@ -177,28 +175,26 @@ def DIEN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
                                                       l2_reg_embedding),
                                                   name='sparse_emb_' + str(i) + '-' + feat.name) for i, feat in
                              enumerate(feature_dim_dict["sparse"])}
-    query_emb_list = [sparse_embedding_dict[feat](
-        sparse_input[feat]) for feat in seq_feature_list]
-    keys_emb_list = [sparse_embedding_dict[feat](
-        user_behavior_input[feat]) for feat in seq_feature_list]
-    deep_input_emb_list = get_embedding_vec_list(sparse_embedding_dict, sparse_input, feature_dim_dict['sparse'])
-    #[sparse_embedding_dict[feat.name](sparse_input[feat.name]) for feat in feature_dim_dict["sparse"]]
 
-    query_emb = Concatenate()(query_emb_list) if len(
-        query_emb_list) > 1 else query_emb_list[0]
-    keys_emb = Concatenate()(keys_emb_list) if len(
-        keys_emb_list) > 1 else keys_emb_list[0]
-    deep_input_emb = Concatenate()(deep_input_emb_list) if len(
-        deep_input_emb_list) > 1 else deep_input_emb_list[0]
+    query_emb_list = get_embedding_vec_list(sparse_embedding_dict,sparse_input,feature_dim_dict["sparse"],return_feat_list=seq_feature_list)
+    keys_emb_list = get_embedding_vec_list(sparse_embedding_dict,user_behavior_input,feature_dim_dict['sparse'],return_feat_list=seq_feature_list)
+    deep_input_emb_list = get_embedding_vec_list(sparse_embedding_dict, sparse_input, feature_dim_dict['sparse'])
+
+    query_emb = concat_fun(query_emb_list)
+    keys_emb = concat_fun(keys_emb_list)
+    deep_input_emb = concat_fun(deep_input_emb_list)
+
 
     if use_negsampling:
-        neg_user_behavior_input = {feat: Input(shape=(hist_len_max,), name='neg_seq_' + str(i) + '-' + feat) for i, feat
-                                   in
-                                   enumerate(seq_feature_list)}
-        neg_uiseq_embed_list = [sparse_embedding_dict[feat](
-            neg_user_behavior_input[feat]) for feat in seq_feature_list]
-        neg_concat_behavior = Concatenate()(neg_uiseq_embed_list) if len(neg_uiseq_embed_list) > 1 else \
-            neg_uiseq_embed_list[0]
+        neg_user_behavior_input = OrderedDict()
+        for i, feat in enumerate(seq_feature_list):
+            neg_user_behavior_input[feat] = Input(shape=(hist_len_max,), name='neg_seq_' + str(i) + '-' + feat)
+
+        neg_uiseq_embed_list = get_embedding_vec_list(sparse_embedding_dict,neg_user_behavior_input,feature_dim_dict["sparse"],seq_feature_list,)
+           # [sparse_embedding_dict[feat](
+           # neg_user_behavior_input[feat]) for feat in seq_feature_list]
+        neg_concat_behavior = concat_fun(neg_uiseq_embed_list)
+
     else:
         neg_concat_behavior = None
 
@@ -228,7 +224,7 @@ def DIEN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
 
     model_input_list += [user_behavior_length]
 
-    model = Model(inputs=model_input_list, outputs=output)
+    model = tf.keras.models.Model(inputs=model_input_list, outputs=output)
 
     if use_negsampling:
         model.add_loss(alpha * aux_loss_1)

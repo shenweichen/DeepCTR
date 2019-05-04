@@ -5,11 +5,12 @@ from deepctr.layers.activation import Dice
 from deepctr.utils import SingleFeat
 from deepctr.layers import custom_objects
 from tensorflow.python.keras.models import load_model, save_model
+from ..utils import check_model
 
 
-def get_xy_fd(use_neg=False):
-    feature_dim_dict = {"sparse": [SingleFeat('user', 3), SingleFeat(
-        'gender', 2), SingleFeat('item', 3+1), SingleFeat('item_gender', 2+1)], "dense": [SingleFeat('score', 0)]}
+def get_xy_fd(use_neg=False, hash_flag=False):
+    feature_dim_dict = {"sparse": [SingleFeat('user', 3,hash_flag), SingleFeat(
+        'gender', 2,hash_flag), SingleFeat('item', 3+1,hash_flag), SingleFeat('item_gender', 2+1,hash_flag)], "dense": [SingleFeat('score', 0)]}
     behavior_feature_list = ["item","item_gender"]
     uid = np.array([0, 1, 2])
     ugender = np.array([0, 1, 0])
@@ -39,23 +40,8 @@ def get_xy_fd(use_neg=False):
     return x, y, feature_dim_dict, behavior_feature_list
 
 
-@pytest.mark.xfail(reason="There is a bug when save model use Dice")
+#@pytest.mark.xfail(reason="There is a bug when save model use Dice")
 # @pytest.mark.skip(reason="misunderstood the API")
-def xtest_DIEN_model_io():
-
-    model_name = "DIEN"
-    _, _, feature_dim_dict, behavior_feature_list = get_xy_fd()
-
-    model = DIEN(feature_dim_dict, behavior_feature_list, hist_len_max=4, embedding_size=8, att_activation=Dice,
-
-                 dnn_hidden_units=[4, 4, 4], dnn_dropout=0.6, use_negsampling=False)
-
-    model.compile('adam', 'binary_crossentropy',
-                  metrics=['binary_crossentropy'])
-   #model.fit(x, y, verbose=1, validation_split=0.5)
-    save_model(model,  model_name + '.h5')
-    model = load_model(model_name + '.h5', custom_objects)
-    print(model_name + " test save load model pass!")
 
 @pytest.mark.parametrize(
     'gru_type',
@@ -63,25 +49,14 @@ def xtest_DIEN_model_io():
      ]
 )
 def test_DIEN(gru_type):
-    model_name = "DIEN"
+    model_name = "DIEN_"+gru_type
 
-    x, y, feature_dim_dict, behavior_feature_list = get_xy_fd()
+    x, y, feature_dim_dict, behavior_feature_list = get_xy_fd(hash_flag=True)
 
     model = DIEN(feature_dim_dict, behavior_feature_list, hist_len_max=4, embedding_size=8,
                  dnn_hidden_units=[4, 4, 4], dnn_dropout=0.5, gru_type=gru_type)
 
-    model.compile('adam', 'binary_crossentropy',
-                  metrics=['binary_crossentropy'])
-
-    #tf.keras.backend.get_session().run(tf.global_variables_initializer())
-    model.fit(x, y, verbose=1, validation_split=0.5)
-
-    print(model_name+" test train valid pass!")
-    model.save_weights(model_name + '_weights.h5')
-    model.load_weights(model_name + '_weights.h5')
-    print(model_name+" test save load weight pass!")
-
-    print(model_name + " test pass!")
+    check_model(model,model_name,x,y,check_model_io=(gru_type=="GRU"))#TODO:fix bugs when load model in other type
 
 
 def test_DIEN_neg():
@@ -92,17 +67,7 @@ def test_DIEN_neg():
     model = DIEN(feature_dim_dict, behavior_feature_list, hist_len_max=4, embedding_size=8,
                  dnn_hidden_units=[4, 4, 4], dnn_dropout=0.5, gru_type="AUGRU", use_negsampling=True)
 
-    model.compile('adam', 'binary_crossentropy',
-                  metrics=['binary_crossentropy'])
-    #tf.keras.backend.get_session().run(tf.global_variables_initializer())
-    model.fit(x, y, verbose=1, validation_split=0.5)
-
-    print(model_name+" test train valid pass!")
-    model.save_weights(model_name + '_weights.h5')
-    model.load_weights(model_name + '_weights.h5')
-    print(model_name+" test save load weight pass!")
-
-    print(model_name + " test pass!")
+    check_model(model,model_name,x,y)
 
 if __name__ == "__main__":
     pass

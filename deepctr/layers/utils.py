@@ -8,7 +8,7 @@ Author:
 import tensorflow as tf
 
 
-class NoMask(tf.layers.Layer):
+class NoMask(tf.keras.layers.Layer):
     def __init__(self, **kwargs):
         super(NoMask, self).__init__(**kwargs)
 
@@ -23,7 +23,8 @@ class NoMask(tf.layers.Layer):
         return None
 
 
-class Hash(tf.layers.Layer):
+
+class Hash(tf.keras.layers.Layer):
     """
     hash the input to [0,num_buckets)
     if mask_zero = True,0 or 0.0 will be set to 0,other value will be set in range[1,num_buckets)
@@ -42,7 +43,7 @@ class Hash(tf.layers.Layer):
         if x.dtype != tf.string:
             x = tf.as_string(x, )
         hash_x = tf.string_to_hash_bucket_fast(x, self.num_buckets if not self.mask_zero else self.num_buckets - 1,
-                                               name=None)
+                                               name=None)#weak hash
         if self.mask_zero:
             mask_1 = tf.cast(tf.not_equal(x, "0"), 'int64')
             mask_2 = tf.cast(tf.not_equal(x, "0.0"), 'int64')

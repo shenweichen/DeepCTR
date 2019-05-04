@@ -14,8 +14,7 @@ def test_DCN(embedding_size, cross_num, hidden_size, sparse_feature_num):
     model_name = "DCN"
 
     sample_size = SAMPLE_SIZE
-    x, y, feature_dim_dict = get_test_data(
-        sample_size, sparse_feature_num, sparse_feature_num)
+    x, y, feature_dim_dict = get_test_data(sample_size, sparse_feature_num, sparse_feature_num)
 
     model = DCN(feature_dim_dict, embedding_size=embedding_size, cross_num=cross_num,
                 dnn_hidden_units=hidden_size, dnn_dropout=0.5, )
