@@ -46,7 +46,7 @@ News
    :caption: Home:
 
    Quick-Start<Quick-Start.md>
-   Features
+   Features<Features.md>
    Examples<Examples.md>
    FAQ<FAQ.md>
    History<History.md>

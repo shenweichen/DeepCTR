@@ -1,10 +1,7 @@
 import numpy as np
 import pytest
-from deepctr.models.dien import DIEN
-from deepctr.layers.activation import Dice
+from deepctr.models import DIEN
 from deepctr.utils import SingleFeat
-from deepctr.layers import custom_objects
-from tensorflow.python.keras.models import load_model, save_model
 from ..utils import check_model
 
 

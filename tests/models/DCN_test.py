@@ -1,6 +1,6 @@
 import pytest
 
-from deepctr import SingleFeat
+from deepctr.utils import SingleFeat
 from deepctr.models import DCN
 from ..utils import check_model, get_test_data,SAMPLE_SIZE
 
