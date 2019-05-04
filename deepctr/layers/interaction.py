@@ -822,7 +822,6 @@ class FGCNNLayer(Layer):
 
         for i in range(0, len(self.kernel_width)):
             pooled_features_num = features_num // self.pooling_width[i]
-
             new_features_num += self.new_maps[i] * pooled_features_num
             features_num = pooled_features_num
 

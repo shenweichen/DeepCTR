@@ -51,8 +51,7 @@ def unstack(input_tensor):
 
 def FGCNN(feature_dim_dict, embedding_size=8, conv_kernel_width=(7, 7, 7, 7), conv_filters=(14, 16, 18, 20),
           new_maps=(3, 3, 3, 3),
-          pooling_width=(2, 2, 2, 2), dnn_hidden_units=(128,)
-          , l2_reg_embedding=1e-5, l2_reg_dnn=0, dnn_dropout=0, init_std=0.0001, seed=1024,
+          pooling_width=(2, 2, 2, 2), dnn_hidden_units=(128,), l2_reg_embedding=1e-5, l2_reg_dnn=0, dnn_dropout=0, init_std=0.0001, seed=1024,
           task='binary', ):
     """Instantiates the Feature Generation by Convolutional Neural Network architecture.
 
@@ -74,7 +73,8 @@ def FGCNN(feature_dim_dict, embedding_size=8, conv_kernel_width=(7, 7, 7, 7), co
 
     check_feature_config_dict(feature_dim_dict)
     if not (len(conv_kernel_width) == len(conv_filters) == len(new_maps) == len(pooling_width)):
-        raise ValueError("conv_kernel_width,conv_filters,new_maps  and pooling_width must have same length")
+        raise ValueError(
+            "conv_kernel_width,conv_filters,new_maps  and pooling_width must have same length")
 
     deep_emb_list, fg_deep_emb_list, _, inputs_list = preprocess_input_embedding(feature_dim_dict,
                                                                                  embedding_size,
@@ -85,7 +85,8 @@ def FGCNN(feature_dim_dict, embedding_size=8, conv_kernel_width=(7, 7, 7, 7), co
     origin_input = concat_fun(deep_emb_list, axis=1)
 
     if len(conv_filters) > 0:
-        new_features = FGCNNLayer(conv_filters, conv_kernel_width, new_maps, pooling_width)(fg_input)
+        new_features = FGCNNLayer(
+            conv_filters, conv_kernel_width, new_maps, pooling_width)(fg_input)
         combined_input = concat_fun([origin_input, new_features], axis=1)
     else:
         combined_input = origin_input
@@ -96,7 +97,8 @@ def FGCNN(feature_dim_dict, embedding_size=8, conv_kernel_width=(7, 7, 7, 7), co
     dnn_input = tf.keras.layers.Concatenate()([linear_signal, inner_product])
     dnn_input = tf.keras.layers.Flatten()(dnn_input)
 
-    final_logit = DNN(dnn_hidden_units, dropout_rate=dnn_dropout, l2_reg=l2_reg_dnn)(dnn_input)
+    final_logit = DNN(dnn_hidden_units, dropout_rate=dnn_dropout,
+                      l2_reg=l2_reg_dnn)(dnn_input)
     final_logit = tf.keras.layers.Dense(1, use_bias=False)(final_logit)
     output = PredictionLayer(task)(final_logit)
 

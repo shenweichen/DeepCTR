@@ -20,7 +20,7 @@ setuptools.setup(
     download_url='https://github.com/shenweichen/deepctr/tags',
     packages=setuptools.find_packages(
         exclude=["tests", "tests.models", "tests.layers"]),
-    python_requires=">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*", #'>=3.4',  # 3.4.6
+    python_requires=">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*",  # '>=3.4',  # 3.4.6
     install_requires=REQUIRED_PACKAGES,
     extras_require={
         "tf": ['tensorflow>=1.4.0,!=1.7.*,!=1.8.*,<=1.12.0'],
