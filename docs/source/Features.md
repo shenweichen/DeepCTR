@@ -23,10 +23,10 @@ DNN based CTR estimation models consists of the following 4 modules:
 
  > High-order Extractor learns feature combination through complex neural network functions like MLP,Cross Net,etc.
 
-# Models
+## Models
 
 
-## CCPM (Convolutional Click Prediction Model)
+### CCPM (Convolutional Click Prediction Model)
 
 
 CCPM can extract local-global key features from an input instance with varied elements, which can be implemented for not only single ad impression but also sequential ad impression. 
@@ -37,7 +37,7 @@ CCPM can extract local-global key features from an input instance with varied el
 [Liu Q, Yu F, Wu S, et al. A convolutional click prediction model[C]//Proceedings of the 24th ACM International on Conference on Information and Knowledge Management. ACM, 2015: 1743-1746.](http://ir.ia.ac.cn/bitstream/173211/12337/1/A%20Convolutional%20Click%20Prediction%20Model.pdf) 
 
 
-## FNN (Factorization-supported Neural Network)
+### FNN (Factorization-supported Neural Network)
 
 According to the paper,FNN learn embedding vectors of categorical data via pre-trained FM.
 It use FM's latent vector to initialiaze the embedding vectors.During the training stage,it 
@@ -50,7 +50,7 @@ concatenates the embedding vectors and feeds them into a MLP(MultiLayer Perceptr
 
 [Zhang W, Du T, Wang J. Deep learning over multi-field categorical data[C]//European conference on information retrieval. Springer, Cham, 2016: 45-57.](https://arxiv.org/pdf/1601.02376.pdf)
 
-## PNN (Product-based Neural Network)
+### PNN (Product-based Neural Network)
 
 PNN concatenates sparse feature embeddings and the product between  embedding vectors as the input of MLP. 
 
@@ -61,7 +61,7 @@ PNN concatenates sparse feature embeddings and the product between  embedding ve
 [Qu Y, Cai H, Ren K, et al. Product-based neural networks for user response prediction[C]//Data Mining (ICDM), 2016 IEEE 16th International Conference on. IEEE, 2016: 1149-1154.](https://arxiv.org/pdf/1611.00144.pdf)
 
 
-## Wide & Deep
+### Wide & Deep
 
 WDL's deep part concatenates sparse feature embeddings as the input of MLP,the wide part use handcrafted feature as input.
 The logits of deep part and wide part are added to get the prediction probability.
@@ -73,7 +73,7 @@ The logits of deep part and wide part are added to get the prediction probabilit
 [Cheng H T, Koc L, Harmsen J, et al. Wide & deep learning for recommender systems[C]//Proceedings of the 1st Workshop on Deep Learning for Recommender Systems. ACM, 2016: 7-10.](https://arxiv.org/pdf/1606.07792.pdf)
 
 
-## DeepFM
+### DeepFM
 
 DeepFM can be seen as an improvement of WDL and FNN.Compared with WDL,DeepFM use
 FM instead of LR in the wide part and use concatenation of embedding vectors as the input of MLP in the deep part.
@@ -86,7 +86,7 @@ And they do not need a FM pretrained vector to initialiaze,they are learned end2
 
 [Guo H, Tang R, Ye Y, et al. Deepfm: a factorization-machine based neural network for ctr prediction[J]. arXiv preprint arXiv:1703.04247, 2017.](http://www.ijcai.org/proceedings/2017/0239.pdf)
 
-## MLR(Mixed Logistic Regression/Piece-wise Linear Model)
+### MLR(Mixed Logistic Regression/Piece-wise Linear Model)
 
 MLR can be viewed as a combination of 2*m LR model,m is the piece(region) number.
 m LR model learns the weight that the sample belong to each region,another m LR model learn sample's click probability in the region.
@@ -99,7 +99,7 @@ Finally,the sample's CTR is a weighted sum of each region's click probability.No
 [Gai K, Zhu X, Li H, et al. Learning Piece-wise Linear Models from Large Scale Data for Ad Click Prediction[J]. arXiv preprint arXiv:1704.05194, 2017.](http://arxiv.org/abs/1704.05194)
 
 
-## NFM (Neural Factorization Machine)
+### NFM (Neural Factorization Machine)
 
 NFM use a bi-interaction pooling layer to learn feature interaction between
 embedding vectors and compress the result into a singe vector which has the same size as a single embedding vector.
@@ -112,7 +112,7 @@ And then fed it into a MLP.The output logit of MLP and the output logit of linea
 [He X, Chua T S. Neural factorization machines for sparse predictive analytics[C]//Proceedings of the 40th International ACM SIGIR conference on Research and Development in Information Retrieval. ACM, 2017: 355-364.](https://arxiv.org/pdf/1708.05027.pdf)
 
 
-## AFM (Attentional Factorization Machine)
+### AFM (Attentional Factorization Machine)
 
 AFM is a variant of FM,tradional FM sums the inner product of embedding vector uniformly.
 AFM can be seen as weighted sum of feature interactions.The weight is learned by a small MLP. 
@@ -124,7 +124,7 @@ AFM can be seen as weighted sum of feature interactions.The weight is learned by
 [Xiao J, Ye H, He X, et al. Attentional factorization machines: Learning the weight of feature interactions via attention networks[J]. arXiv preprint arXiv:1708.04617, 2017.](http://www.ijcai.org/proceedings/2017/435)
 
 
-## DCN (Deep & Cross Network)
+### DCN (Deep & Cross Network)
 
 DCN use a Cross Net to learn both low and high order feature interaction explicitly,and use a MLP to learn feature interaction implicitly.
 The output of Cross Net and MLP are concatenated.The concatenated vector are feed into one fully connected layer to get the prediction probability. 
@@ -136,7 +136,7 @@ The output of Cross Net and MLP are concatenated.The concatenated vector are fee
 [Wang R, Fu B, Fu G, et al. Deep & cross network for ad click predictions[C]//Proceedings of the ADKDD'17. ACM, 2017: 12.](https://arxiv.org/abs/1708.05123) 
 
 
-## DIN (Deep Interest Network)
+### DIN (Deep Interest Network)
 
 DIN introduce a attention method to learn from sequence(multi-valued) feature.
 Tradional method usually use sum/mean pooling on sequence feature.
@@ -151,7 +151,7 @@ user's interest vector and other embedding vectors are concatenated and fed into
 
 [Zhou G, Zhu X, Song C, et al. Deep interest network for click-through rate prediction[C]//Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. ACM, 2018: 1059-1068.](https://arxiv.org/pdf/1706.06978.pdf)
 
-## DIEN (Deep Interest Evolution Network)
+### DIEN (Deep Interest Evolution Network)
 
 Deep Interest Evolution Network (DIEN) uses interest extractor layer to capture temporal interests from history behavior sequence. At this layer,  an auxiliary loss is proposed to supervise interest extracting at each step. As user interests are diverse, especially in the e-commerce system, interest evolving layer is proposed to capture interest evolving process that is relative to the target item. At interest evolving layer, attention mechanism is embedded into the sequential structure novelly, and the effects of relative interests are strengthened during interest evolution.
 
@@ -163,7 +163,7 @@ Deep Interest Evolution Network (DIEN) uses interest extractor layer to capture 
 [Zhou G, Mou N, Fan Y, et al. Deep Interest Evolution Network for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1809.03672, 2018.](https://arxiv.org/pdf/1809.03672.pdf)
 
 
-## xDeepFM
+### xDeepFM
 
 xDeepFM use a Compressed Interaction Network (CIN) to learn both low and high order feature interaction explicitly,and use a MLP to learn feature interaction implicitly.
 In each layer of CIN,first compute outer products between $x^k$ and $x_0$ to get a tensor $Z_{k+1}$,then use a 1DConv to learn feature maps $H_{k+1}$ on this tensor.
@@ -178,7 +178,7 @@ Finally,apply sum pooling on all the feature maps $H_k$ to get one vector.The ve
 
 [Lian J, Zhou X, Zhang F, et al. xDeepFM: Combining Explicit and Implicit Feature Interactions for Recommender Systems[J]. arXiv preprint arXiv:1803.05170, 2018.](https://arxiv.org/pdf/1803.05170.pdf)
 
-## AutoInt(Automatic Feature Interaction)
+### AutoInt(Automatic Feature Interaction)
 
 AutoInt use a interacting layer to model the interactions between different features.
 Within each interacting layer, each feature is allowed to interact with all the other features and is able to automatically identify relevant features to form meaningful higher-order features via the multi-head attention mechanism.
@@ -192,7 +192,7 @@ By stacking multiple interacting layers,AutoInt is able to model different order
 
 [Song W, Shi C, Xiao Z, et al. AutoInt: Automatic Feature Interaction Learning via Self-Attentive Neural Networks[J]. arXiv preprint arXiv:1810.11921, 2018.](https://arxiv.org/abs/1810.11921)
 
-## NFFM(Field-aware Neural Factorization Machine)
+### NFFM(Field-aware Neural Factorization Machine)
 
 NFFM models second order feature interactions like like FFM and preserves second-order interaction information  as much as possible.Further more,deep neural network is used to learn higher-ordered feature interactions. 
 
@@ -202,7 +202,7 @@ NFFM models second order feature interactions like like FFM and preserves second
 
 [Zhang L, Shen W, Li S, et al. Field-aware Neural Factorization Machine for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1902.09096, 2019.](https://arxiv.org/pdf/1902.09096.pdf)
 
-## FGCNN(Feature Generation by Convolutional Neural Network)
+### FGCNN(Feature Generation by Convolutional Neural Network)
 
 FGCNN models with two components: Feature Generation and Deep Classifier. Feature Generation leverages the strength of CNN to generate local patterns and recombine them to generate new features. Deep Classifier adopts the structure of IPNN to learn interactions from the augmented feature space.
 
@@ -212,7 +212,7 @@ FGCNN models with two components: Feature Generation and Deep Classifier. Featur
 
 [Liu B, Tang R, Chen Y, et al. Feature Generation by Convolutional Neural Network for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1904.04447, 2019.](https://arxiv.org/pdf/1904.04447)
 
-# Layers
+## Layers
 
 The models of deepctr are modular,
 so you can use different modules to build your own models.

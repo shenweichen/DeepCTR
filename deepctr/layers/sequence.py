@@ -163,7 +163,7 @@ class AttentionSequencePoolingLayer(Layer):
         super(AttentionSequencePoolingLayer, self).build(
             input_shape)  # Be sure to call this somewhere!
 
-    def call(self, inputs, mask=None,training=None, **kwargs):
+    def call(self, inputs, mask=None, training=None, **kwargs):
 
         if self.supports_masking:
             if mask is None:
@@ -178,10 +178,9 @@ class AttentionSequencePoolingLayer(Layer):
             hist_len = keys.get_shape()[1]
             key_masks = tf.sequence_mask(keys_length, hist_len)
 
-        attention_score = self.local_att([queries, keys],training=training)
+        attention_score = self.local_att([queries, keys], training=training)
 
         outputs = tf.transpose(attention_score, (0, 2, 1))
-
 
         if self.weight_normalization:
             paddings = tf.ones_like(outputs) * (-2 ** 32 + 1)
@@ -189,9 +188,6 @@ class AttentionSequencePoolingLayer(Layer):
             paddings = tf.zeros_like(outputs)
 
         outputs = tf.where(key_masks, outputs, paddings)
-
-
-
 
         if self.weight_normalization:
             outputs = tf.nn.softmax(outputs)
@@ -268,10 +264,12 @@ class BiLSTM(Layer):
         self.fw_lstm = []
         self.bw_lstm = []
         for _ in range(self.layers):
-            self.fw_lstm.append(LSTM(self.units, dropout=self.dropout_rate, bias_initializer='ones', return_sequences=True,
-                                     unroll=True))
-            self.bw_lstm.append(LSTM(self.units, dropout=self.dropout_rate, bias_initializer='ones', return_sequences=True,
-                                     go_backwards=True, unroll=True))
+            self.fw_lstm.append(
+                LSTM(self.units, dropout=self.dropout_rate, bias_initializer='ones', return_sequences=True,
+                     unroll=True))
+            self.bw_lstm.append(
+                LSTM(self.units, dropout=self.dropout_rate, bias_initializer='ones', return_sequences=True,
+                     go_backwards=True, unroll=True))
 
         super(BiLSTM, self).build(
             input_shape)  # Be sure to call this somewhere!
@@ -652,7 +650,7 @@ class BiasEncoding(Layer):
 
 
 class DynamicGRU(Layer):
-    def __init__(self, num_units=None, gru_type='GRU', return_sequence=True , **kwargs):
+    def __init__(self, num_units=None, gru_type='GRU', return_sequence=True, **kwargs):
 
         self.num_units = num_units
         self.return_sequence = return_sequence
@@ -701,7 +699,7 @@ class DynamicGRU(Layer):
             return (None, 1, rnn_input_shape[2])
 
     def get_config(self, ):
-        config = {'num_units': self.num_units, 'gru_type': self.gru_type,'return_sequence':self.return_sequence}
+        config = {'num_units': self.num_units, 'gru_type': self.gru_type, 'return_sequence': self.return_sequence}
         base_config = super(DynamicGRU, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
