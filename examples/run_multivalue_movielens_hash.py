@@ -1,45 +1,32 @@
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import LabelEncoder
 from tensorflow.python.keras.preprocessing.sequence import pad_sequences
 
 from deepctr.models import DeepFM
 from deepctr.utils import VarLenFeat, SingleFeat
 
-
-def split(x):
-    key_ans = x.split('|')
-    for key in key_ans:
-        if key not in key2index:
-            # Notice : input value 0 is a special "padding",so we do not use 0 to encode valid feature for sequence input
-            key2index[key] = len(key2index) + 1
-    return list(map(lambda x: key2index[x], key_ans))
-
-
 data = pd.read_csv("./movielens_sample.txt")
 sparse_features = ["movie_id", "user_id",
                    "gender", "age", "occupation", "zip", ]
+
+data[sparse_features] = data[sparse_features].astype('string')
 target = ['rating']
 
-# 1.Label Encoding for sparse features,and process sequence features
-for feat in sparse_features:
-    lbe = LabelEncoder()
-    data[feat] = lbe.fit_transform(data[feat])
-# preprocess the sequence feature
+# 1.Use hashing encoding on the fly for sparse features,and process sequence features
 
-key2index = {}
-genres_list = list(map(split, data['genres'].values))
+genres_list = list(map(lambda x: x.split('|'), data['genres'].values))
 genres_length = np.array(list(map(len, genres_list)))
 max_len = max(genres_length)
+
 # Notice : padding=`post`
-genres_list = pad_sequences(genres_list, maxlen=max_len, padding='post', )
+genres_list = pad_sequences(genres_list, maxlen=max_len, padding='post', dtype='string', value=0)
 
-# 2.count #unique features for each sparse field and generate feature config for sequence feature
+# 2.set hashing space for each sparse field and generate feature config for sequence feature
 
-sparse_feat_list = [SingleFeat(feat, data[feat].nunique())
+sparse_feat_list = [SingleFeat(feat, data[feat].nunique() * 5, hash_flag=True, dtype='string')
                     for feat in sparse_features]
-sequence_feature = [VarLenFeat('genres', len(
-    key2index) + 1, max_len, 'mean')]  # Notice : value 0 is for padding for sequence input feature
+sequence_feature = [VarLenFeat('genres', 100, max_len, 'mean', hash_flag=True,
+                               dtype="string")]  # Notice : value 0 is for padding for sequence input feature
 
 # 3.generate input data for model
 sparse_input = [data[feat.name].values for feat in sparse_feat_list]

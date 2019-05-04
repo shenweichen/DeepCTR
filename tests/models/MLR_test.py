@@ -53,8 +53,8 @@ def test_MLR():
     sample_size = SAMPLE_SIZE
     feature_dim_dict = {'sparse': [SingleFeat('sparse_1',2),SingleFeat('sparse_2',5),SingleFeat('sparse_3',10)] ,
                                     'dense': [SingleFeat('dense_1',0),SingleFeat('dense_2',0),SingleFeat('dense_3',0)]}
-    sparse_input = [np.random.randint(0, dim, sample_size)
-                    for feat,dim in feature_dim_dict['sparse']]
+    sparse_input = [np.random.randint(0, feat.dimension, sample_size)
+                    for feat in feature_dim_dict['sparse']]
     dense_input = [np.random.random(sample_size)
                    for _ in feature_dim_dict['dense']]
     y = np.random.randint(0, 2, sample_size)
@@ -65,4 +65,4 @@ def test_MLR():
 
 
 if __name__ == "__main__":
-    test_MLR()
+    pass

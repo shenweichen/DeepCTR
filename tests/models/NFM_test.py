@@ -12,13 +12,12 @@ def test_NFM(hidden_size, sparse_feature_num):
     model_name = "NFM"
 
     sample_size = SAMPLE_SIZE
-    x, y, feature_dim_dict = get_test_data(
-        sample_size, sparse_feature_num, sparse_feature_num)
+    x, y, feature_dim_dict = get_test_data(sample_size, sparse_feature_num, sparse_feature_num)
 
     model = NFM(feature_dim_dict, embedding_size=8,
-                hidden_size=[32, 32], keep_prob=0.5, )
+                dnn_hidden_units=[32, 32], dnn_dropout=0.5, )
     check_model(model, model_name, x, y)
 
 
 if __name__ == "__main__":
-    test_NFM((8, 8), 1)
+    pass

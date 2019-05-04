@@ -1,14 +1,9 @@
-from tensorflow.python.ops.rnn_cell import *
-
-
+from tensorflow.python.ops import array_ops
+from tensorflow.python.ops import init_ops
 from tensorflow.python.ops import math_ops
 from tensorflow.python.ops import nn_ops
-from tensorflow.python.ops import init_ops
-
-from tensorflow.python.ops import array_ops
-
 from tensorflow.python.ops import variable_scope as vs
-
+from tensorflow.python.ops.rnn_cell import *
 from tensorflow.python.util import nest
 
 _BIAS_VARIABLE_NAME = "bias"
@@ -17,7 +12,6 @@ _WEIGHTS_VARIABLE_NAME = "kernel"
 
 
 class _Linear_(object):
-
     """Linear map: sum_i(args[i] * W[i]), where W[i] is a variable.
 
 
@@ -61,7 +55,6 @@ class _Linear_(object):
         self._build_bias = build_bias
 
         if args is None or (nest.is_sequence(args) and not args):
-
             raise ValueError("`args` must be specified")
 
         if not nest.is_sequence(args):
@@ -83,7 +76,6 @@ class _Linear_(object):
         for shape in shapes:
 
             if shape.ndims != 2:
-
                 raise ValueError(
                     "linear is expecting 2D arguments: %s" % shapes)
 
@@ -118,7 +110,6 @@ class _Linear_(object):
                     inner_scope.set_partitioner(None)
 
                     if bias_initializer is None:
-
                         bias_initializer = init_ops.constant_initializer(
                             0.0, dtype=dtype)
 
@@ -133,7 +124,6 @@ class _Linear_(object):
     def __call__(self, args):
 
         if not self._is_sequence:
-
             args = [args]
 
         if len(args) == 1:
@@ -145,7 +135,6 @@ class _Linear_(object):
             res = math_ops.matmul(array_ops.concat(args, 1), self._weights)
 
         if self._build_bias:
-
             res = nn_ops.bias_add(res, self._biases)
 
         return res
@@ -158,7 +147,6 @@ except:
 
 
 class QAAttGRUCell(RNNCell):
-
     """Gated Recurrent Unit cell (cf. http://arxiv.org/abs/1406.1078).
 
     Args:
@@ -229,7 +217,6 @@ class QAAttGRUCell(RNNCell):
             bias_ones = self._bias_initializer
 
             if self._bias_initializer is None:
-
                 bias_ones = init_ops.constant_initializer(
                     1.0, dtype=inputs.dtype)
 
@@ -254,9 +241,7 @@ class QAAttGRUCell(RNNCell):
         r_state = r * state
 
         if self._candidate_linear is None:
-
             with vs.variable_scope("candidate"):
-
                 self._candidate_linear = _Linear(
 
                     [inputs, r_state],
@@ -277,7 +262,6 @@ class QAAttGRUCell(RNNCell):
 
 
 class VecAttGRUCell(RNNCell):
-
     """Gated Recurrent Unit cell (cf. http://arxiv.org/abs/1406.1078).
 
     Args:
@@ -348,7 +332,6 @@ class VecAttGRUCell(RNNCell):
             bias_ones = self._bias_initializer
 
             if self._bias_initializer is None:
-
                 bias_ones = init_ops.constant_initializer(
                     1.0, dtype=inputs.dtype)
 
@@ -373,9 +356,7 @@ class VecAttGRUCell(RNNCell):
         r_state = r * state
 
         if self._candidate_linear is None:
-
             with vs.variable_scope("candidate"):
-
                 self._candidate_linear = _Linear(
 
                     [inputs, r_state],

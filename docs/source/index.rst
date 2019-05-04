@@ -35,18 +35,18 @@ You can read the latest code at https://github.com/shenweichen/DeepCTR
 
 News
 -----
+05/04/2019 : Support `feature hashing on the fly <./Examples.html#classification-criteo-with-feature-hashing-on-the-fly>`_ and python2.7. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.4.0>`_
+
 04/27/2019 : Add `FGCNN <./Features.html#fgcnn-feature-generation-by-convolutional-neural-network>`_  and ``FGCNNLayer``. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.4>`_
 
 04/21/2019 : Add `CCPM <./Features.html#ccpm-convolutional-click-prediction-model>`_ . `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.3>`_
-
-03/30/2019 : Add `DIEN <./Features.html#dien-deep-interest-evolution-network>`_ and `NFFM <./Features.html#nffm-field-aware-neural-factorization-machine>`_ models. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.2>`_
 
 .. toctree::
    :maxdepth: 2
    :caption: Home:
 
    Quick-Start<Quick-Start.md>
-   Features
+   Features<Features.md>
    Examples<Examples.md>
    FAQ<FAQ.md>
    History<History.md>

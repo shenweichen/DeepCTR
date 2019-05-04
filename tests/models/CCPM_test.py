@@ -1,7 +1,7 @@
 import pytest
 
 from deepctr.models import CCPM
-from tests.utils import check_model, get_test_data,SAMPLE_SIZE
+from tests.utils import check_model, get_test_data, SAMPLE_SIZE
 
 
 @pytest.mark.parametrize(
@@ -16,7 +16,8 @@ def test_CCPM(sparse_feature_num, dense_feature_num):
     x, y, feature_dim_dict = get_test_data(
         sample_size, sparse_feature_num, dense_feature_num)
 
-    model = CCPM(feature_dim_dict, conv_kernel_width=(3, 2), conv_filters=(2, 1), hidden_size=[32, ], keep_prob=0.5, )
+    model = CCPM(feature_dim_dict, conv_kernel_width=(3, 2), conv_filters=(
+        2, 1), dnn_hidden_units=[32, ], dnn_dropout=0.5, )
     check_model(model, model_name, x, y)
 
 
@@ -32,7 +33,8 @@ def test_CCPM_without_seq(sparse_feature_num, dense_feature_num):
     x, y, feature_dim_dict = get_test_data(
         sample_size, sparse_feature_num, dense_feature_num, sequence_feature=())
 
-    model = CCPM(feature_dim_dict, conv_kernel_width=(3, 2), conv_filters=(2, 1), hidden_size=[32, ], keep_prob=0.5, )
+    model = CCPM(feature_dim_dict, conv_kernel_width=(3, 2), conv_filters=(
+        2, 1), dnn_hidden_units=[32, ], dnn_dropout=0.5, )
     check_model(model, model_name, x, y)
 
 
