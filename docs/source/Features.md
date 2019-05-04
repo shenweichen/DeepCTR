@@ -1,8 +1,6 @@
 # Features
 
-
 ## Overview
-
 
 With the great success of deep learning,DNN-based techniques have been widely used in CTR estimation task.
 
@@ -88,8 +86,8 @@ And they do not need a FM pretrained vector to initialiaze,they are learned end2
 
 ### MLR(Mixed Logistic Regression/Piece-wise Linear Model)
 
-MLR can be viewed as a combination of 2*m LR model,m is the piece(region) number.
-m LR model learns the weight that the sample belong to each region,another m LR model learn sample's click probability in the region.
+MLR can be viewed as a combination of $2m$ LR model, $m$  is the piece(region) number.
+$m$ LR model learns the weight that the sample belong to each region,another m LR model learn sample's click probability in the region.
 Finally,the sample's CTR is a weighted sum of each region's click probability.Notice the weight is normalized weight.
 
 [**MLR Model API**](./deepctr.models.mlr.html)
@@ -147,7 +145,7 @@ user's interest vector and other embedding vectors are concatenated and fed into
 [**DIN Model API**](./deepctr.models.din.html)  
 [DIN example](https://github.com/shenweichen/DeepCTR/tree/master/examples/run_din.py)
 
-![DIN](../pics/din.png)
+![DIN](../pics/DIN.png)
 
 [Zhou G, Zhu X, Song C, et al. Deep interest network for click-through rate prediction[C]//Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. ACM, 2018: 1059-1068.](https://arxiv.org/pdf/1706.06978.pdf)
 
