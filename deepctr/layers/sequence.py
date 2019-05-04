@@ -120,7 +120,7 @@ class AttentionSequencePoolingLayer(Layer):
       Arguments
         - **att_hidden_units**:list of positive integer, the attention net layer number and units in each layer.
 
-        - **activation**: Activation function to use in attention net.
+        - **att_activation**: Activation function to use in attention net.
 
         - **weight_normalization**: bool.Whether normalize the attention score of local activation unit.
 
@@ -154,8 +154,8 @@ class AttentionSequencePoolingLayer(Layer):
 
             if input_shape[0][-1] != input_shape[1][-1] or input_shape[0][1] != 1 or input_shape[2][1] != 1:
                 raise ValueError('A `AttentionSequencePoolingLayer` layer requires '
-                                 'inputs of a 3 inputs with shape (None,1,embedding_size),(None,T,embedding_size) and (None,1)'
-                                 'Got different shapes: %s,%s and %s' % (input_shape))
+                                 'inputs of a 3 tensor with shape (None,1,embedding_size),(None,T,embedding_size) and (None,1)'
+                                 'Got different shapes: %s' % (input_shape))
         else:
             pass
         self.local_att = LocalActivationUnit(
@@ -163,7 +163,7 @@ class AttentionSequencePoolingLayer(Layer):
         super(AttentionSequencePoolingLayer, self).build(
             input_shape)  # Be sure to call this somewhere!
 
-    def call(self, inputs, mask=None,training=None, **kwargs):
+    def call(self, inputs, mask=None, training=None, **kwargs):
 
         if self.supports_masking:
             if mask is None:
@@ -178,10 +178,9 @@ class AttentionSequencePoolingLayer(Layer):
             hist_len = keys.get_shape()[1]
             key_masks = tf.sequence_mask(keys_length, hist_len)
 
-        attention_score = self.local_att([queries, keys],training=training)
+        attention_score = self.local_att([queries, keys], training=training)
 
         outputs = tf.transpose(attention_score, (0, 2, 1))
-
 
         if self.weight_normalization:
             paddings = tf.ones_like(outputs) * (-2 ** 32 + 1)
@@ -189,9 +188,6 @@ class AttentionSequencePoolingLayer(Layer):
             paddings = tf.zeros_like(outputs)
 
         outputs = tf.where(key_masks, outputs, paddings)
-
-
-
 
         if self.weight_normalization:
             outputs = tf.nn.softmax(outputs)
@@ -268,10 +264,12 @@ class BiLSTM(Layer):
         self.fw_lstm = []
         self.bw_lstm = []
         for _ in range(self.layers):
-            self.fw_lstm.append(LSTM(self.units, dropout=self.dropout_rate, bias_initializer='ones', return_sequences=True,
-                                     unroll=True))
-            self.bw_lstm.append(LSTM(self.units, dropout=self.dropout_rate, bias_initializer='ones', return_sequences=True,
-                                     go_backwards=True, unroll=True))
+            self.fw_lstm.append(
+                LSTM(self.units, dropout=self.dropout_rate, bias_initializer='ones', return_sequences=True,
+                     unroll=True))
+            self.bw_lstm.append(
+                LSTM(self.units, dropout=self.dropout_rate, bias_initializer='ones', return_sequences=True,
+                     go_backwards=True, unroll=True))
 
         super(BiLSTM, self).build(
             input_shape)  # Be sure to call this somewhere!
@@ -652,12 +650,11 @@ class BiasEncoding(Layer):
 
 
 class DynamicGRU(Layer):
-    def __init__(self, num_units=None, gru_type='GRU', return_sequence=True, name="gru", **kwargs):
+    def __init__(self, num_units=None, gru_type='GRU', return_sequence=True, **kwargs):
 
         self.num_units = num_units
         self.return_sequence = return_sequence
-        # self.name = name
-        self.type = gru_type
+        self.gru_type = gru_type
         super(DynamicGRU, self).__init__(**kwargs)
 
     def build(self, input_shape):
@@ -665,9 +662,9 @@ class DynamicGRU(Layer):
         input_seq_shape = input_shape[0]
         if self.num_units is None:
             self.num_units = input_seq_shape.as_list()[-1]
-        if self.type == "AGRU":
+        if self.gru_type == "AGRU":
             self.gru_cell = QAAttGRUCell(self.num_units)
-        elif self.type == "AUGRU":
+        elif self.gru_type == "AUGRU":
             self.gru_cell = VecAttGRUCell(self.num_units)
         else:
             self.gru_cell = tf.nn.rnn_cell.GRUCell(self.num_units)
@@ -680,7 +677,7 @@ class DynamicGRU(Layer):
         :param concated_embeds_value: None * field_size * embedding_size
         :return: None*1
         """
-        if self.type == "GRU" or self.type == "AIGRU":
+        if self.gru_type == "GRU" or self.gru_type == "AIGRU":
             rnn_input, sequence_length = input_list
             att_score = None
         else:
@@ -700,6 +697,11 @@ class DynamicGRU(Layer):
             return rnn_input_shape
         else:
             return (None, 1, rnn_input_shape[2])
+
+    def get_config(self, ):
+        config = {'num_units': self.num_units, 'gru_type': self.gru_type, 'return_sequence': self.return_sequence}
+        base_config = super(DynamicGRU, self).get_config()
+        return dict(list(base_config.items()) + list(config.items()))
 
 
 class KMaxPooling(Layer):

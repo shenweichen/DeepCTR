@@ -50,7 +50,7 @@ def NFFM(feature_dim_dict, embedding_size=4, dnn_hidden_units=(128, 128),
 
     check_feature_config_dict(feature_dim_dict)
     if 'sequence' in feature_dim_dict and len(feature_dim_dict['sequence']) > 0:
-        raise ValueError("now sequence input is not supported in NFFM")#TODO:support feature hashing on the fly
+        raise ValueError("now sequence input is not supported in NFFM")#TODO:support sequence input
 
     sparse_input_dict, dense_input_dict = create_singlefeat_inputdict(
         feature_dim_dict)

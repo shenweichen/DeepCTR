@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     # 2.set hashing space for each sparse field,and record dense feature field name
 
-    sparse_feature_list = [SingleFeat(feat, 1000, True, 'string')  # since the input is string
+    sparse_feature_list = [SingleFeat(feat, 1000, hash_flag=True, dtype='string')  # since the input is string
                            for feat in sparse_features]
     dense_feature_list = [SingleFeat(feat, 0, )
                           for feat in dense_features]
