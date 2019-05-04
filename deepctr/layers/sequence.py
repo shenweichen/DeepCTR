@@ -556,16 +556,19 @@ def positional_encoding(inputs,
                         scale=True,
                         ):
     '''Sinusoidal Positional_Encoding.
+
     Args:
-      inputs: A 2d Tensor with shape of (N, T).
-      num_units: Output dimensionality
-      zero_pad: Boolean. If True, all the values of the first row (id = 0) should be constant zero
-      scale: Boolean. If True, the output will be multiplied by sqrt num_units(check details from paper)
-      scope: Optional scope for `variable_scope`.
-      reuse: Boolean, whether to reuse the weights of a previous layer
-        by the same name.
+
+      - inputs: A 2d Tensor with shape of (N, T).
+      - num_units: Output dimensionality
+      - zero_pad: Boolean. If True, all the values of the first row (id = 0) should be constant zero
+      - scale: Boolean. If True, the output will be multiplied by sqrt num_units(check details from paper)
+      - scope: Optional scope for `variable_scope`.
+      - reuse: Boolean, whether to reuse the weights of a previous layer by the same name.
+
     Returns:
-        A 'Tensor' with one more rank than inputs's, with the dimensionality should be 'num_units'
+
+      - A 'Tensor' with one more rank than inputs's, with the dimensionality should be 'num_units'
     '''
 
     _, T, num_units = inputs.get_shape().as_list()
