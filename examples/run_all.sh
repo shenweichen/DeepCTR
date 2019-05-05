@@ -3,7 +3,7 @@
 function run_py(){
 
     code_path=./
-    for file in `ls`
+    for file in $(ls)
     do
       if [[ $file =~ .py ]]
         then
