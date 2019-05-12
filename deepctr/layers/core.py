@@ -76,8 +76,8 @@ class LocalActivationUnit(Layer):
                                       name="kernel")
         self.bias = self.add_weight(
             shape=(1,), initializer=Zeros(), name="bias")
-        #self.dnn = DNN(self.hidden_units, self.activation, self.l2_reg,
-        #               self.dropout_rate, self.use_bn, seed=self.seed)
+        self.dnn = DNN(self.hidden_units, self.activation, self.l2_reg,
+                      self.dropout_rate, self.use_bn, seed=self.seed)
         super(LocalActivationUnit, self).build(
             input_shape)  # Be sure to call this somewhere!
 
@@ -91,8 +91,7 @@ class LocalActivationUnit(Layer):
         att_input = tf.concat(
             [queries, keys, queries - keys, queries * keys], axis=-1)
 
-        att_out = DNN(self.hidden_units, self.activation, self.l2_reg,
-                       self.dropout_rate, self.use_bn, seed=self.seed)(att_input, training=training)
+        att_out = self.dnn(att_input, training=training)
         attention_score = tf.keras.layers.Lambda(lambda x:tf.nn.bias_add(tf.tensordot(
             x[0], x[1], axes=(-1, 0)), x[2]))([att_out,self.kernel,self.bias])
 
