@@ -139,7 +139,7 @@ def DIEN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
          gru_type="GRU", use_negsampling=False, alpha=1.0, use_bn=False, dnn_hidden_units=(200, 80),
          dnn_activation='relu',
          att_hidden_units=(64, 16), att_activation="dice", att_weight_normalization=True,
-         l2_reg_dnn=0, l2_reg_embedding=1e-5, dnn_dropout=0, init_std=0.0001, seed=1024, task='binary'):
+         l2_reg_dnn=0, l2_reg_embedding=1e-6, dnn_dropout=0, init_std=0.0001, seed=1024, task='binary'):
     """Instantiates the Deep Interest Evolution Network architecture.
 
     :param feature_dim_dict: dict,to indicate sparse field (**now only support sparse feature**)like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':[]}

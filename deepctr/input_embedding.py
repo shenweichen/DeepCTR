@@ -13,7 +13,6 @@ from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.layers import Concatenate, Dense, Embedding, Input, Reshape, add
 from tensorflow.python.keras.regularizers import l2
 
-from deepctr.layers import Hash
 from .layers.sequence import SequencePoolingLayer
 from .layers.utils import Hash
 
@@ -28,7 +27,7 @@ def create_singlefeat_inputdict(feature_dim_dict, prefix=''):
 
     for i, feat in enumerate(feature_dim_dict["dense"]):
         dense_input[feat.name] = Input(
-            shape=(1,), name=feat.name)  # prefix+'dense_' + str(i) + '-' + feat.name)
+            shape=(1,), name=feat.name,dtype=feat.dtype)  # prefix+'dense_' + str(i) + '-' + feat.name)
 
     return sparse_input, dense_input
 
@@ -37,14 +36,13 @@ def create_varlenfeat_inputdict(feature_dim_dict, mask_zero=True):
     sequence_dim_dict = feature_dim_dict.get('sequence', [])
     sequence_input_dict = OrderedDict()
     for i, feat in enumerate(sequence_dim_dict):
-        sequence_input_dict[feat.name] = Input(shape=(feat.maxlen,), name='seq_' + str(
-            i) + '-' + feat.name, dtype=feat.dtype)
+        sequence_input_dict[feat.name] = Input(shape=(feat.maxlen,), name='seq_' + feat.name, dtype=feat.dtype)
 
     if mask_zero:
         sequence_len_dict, sequence_max_len_dict = None, None
     else:
         sequence_len_dict = {feat.name: Input(shape=(
-            1,), name='seq_length' + str(i) + '-' + feat.name) for i, feat in enumerate(sequence_dim_dict)}
+            1,), name='seq_length_' + feat.name) for i, feat in enumerate(sequence_dim_dict)}
         sequence_max_len_dict = {feat.name: feat.maxlen
                                  for i, feat in enumerate(sequence_dim_dict)}
     return sequence_input_dict, sequence_len_dict, sequence_max_len_dict
@@ -58,7 +56,7 @@ def create_embedding_dict(feature_dim_dict, embedding_size, init_std, seed, l2_r
                                                  embeddings_initializer=RandomNormal(
                                                      mean=0.0, stddev=init_std, seed=seed),
                                                  embeddings_regularizer=l2(l2_reg),
-                                                 name=prefix + '_emb_' + str(i) + '-' + feat.name) for i, feat in
+                                                 name=prefix + '_emb_' + feat.name) for i, feat in
                             enumerate(feature_dim_dict["sparse"])}
     else:
 
@@ -67,7 +65,7 @@ def create_embedding_dict(feature_dim_dict, embedding_size, init_std, seed, l2_r
                                                      mean=0.0, stddev=init_std, seed=seed),
                                                  embeddings_regularizer=l2(
                                                      l2_reg),
-                                                 name=prefix + '_emb_' + str(i) + '-' + feat.name) for i, feat in
+                                                 name=prefix + '_emb_'  + feat.name) for i, feat in
                             enumerate(feature_dim_dict["sparse"])}
 
     if 'sequence' in feature_dim_dict:
@@ -81,7 +79,7 @@ def create_embedding_dict(feature_dim_dict, embedding_size, init_std, seed, l2_r
                                                             mean=0.0, stddev=init_std, seed=seed),
                                                         embeddings_regularizer=l2(
                                                             l2_reg),
-                                                        name=prefix + '_emb_' + str(count) + '-' + feat.name,
+                                                        name=prefix + 'seq_emb_' + feat.name,
                                                         mask_zero=seq_mask_zero)
 
             else:
@@ -90,7 +88,7 @@ def create_embedding_dict(feature_dim_dict, embedding_size, init_std, seed, l2_r
                                                             mean=0.0, stddev=init_std, seed=seed),
                                                         embeddings_regularizer=l2(
                                                             l2_reg),
-                                                        name=prefix + '_emb_' + str(count) + '-' + feat.name,
+                                                        name=prefix + 'seq_emb_' + feat.name,
                                                         mask_zero=seq_mask_zero)
 
             count += 1
