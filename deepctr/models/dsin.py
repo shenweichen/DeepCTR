@@ -21,13 +21,33 @@ from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.regularizers import l2
 
 
-def DSIN(feature_dim_dict, sess_feature_list, embedding_size=8, sess_max_count=5, sess_len_max=10,
-         att_embedding_size=1, att_head_num=8, dnn_hidden_units=(200, 80), dnn_activation='sigmoid',
-         l2_reg_dnn=0, l2_reg_embedding=1e-6, task='binary', dnn_dropout=0, init_std=0.0001, seed=1024,
-         bias_encoding=False):
-    check_feature_config_dict(feature_dim_dict)
+def DSIN(feature_dim_dict, sess_feature_list, embedding_size=8, sess_max_count=5, sess_len_max=10, bias_encoding=False,
+         att_embedding_size=1, att_head_num=8, dnn_hidden_units=(200, 80), dnn_activation='sigmoid', dnn_dropout=0, dnn_use_bn=False, 
+         l2_reg_dnn=0, l2_reg_embedding=1e-6,  init_std=0.0001, seed=1024, task='binary', 
+         ):
+    """Instantiates the Deep Session Interest Network architecture.
 
-    print('sess_count', sess_max_count, 'use_bias_encoding', bias_encoding, )
+    :param feature_dim_dict: dict,to indicate sparse field (**now only support sparse feature**)like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':[]}
+    :param seq_feature_list: list,to indicate  sequence sparse field (**now only support sparse feature**),must be a subset of ``feature_dim_dict["sparse"]``
+    :param embedding_size: positive integer,sparse feature embedding_size.
+    :param sess_max_count: positive int, to indicate the max number of sessions
+    :param sess_len_max: positive int, to indicate the max length of each session
+    :param bias_encoding: bool. Whether use bias encoding or postional encoding
+    :param att_embedding_size: positive int, the embedding size of each attention head
+    :param att_head_num: positive int, the number of attention head
+    :param dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of deep net
+    :param dnn_activation: Activation function to use in deep net
+    :param dnn_dropout: float in [0,1), the probability we will drop out a given DNN coordinate.
+    :param dnn_use_bn: bool. Whether use BatchNormalization before activation or not in deep net
+    :param l2_reg_dnn: float. L2 regularizer strength applied to DNN
+    :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
+    :param init_std: float,to use as the initialize std of embedding vector
+    :param seed: integer ,to use as random seed.
+    :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
+    :return: A Keras model instance.
+
+    """
+    check_feature_config_dict(feature_dim_dict)
 
     sparse_input, dense_input, user_behavior_input_dict, _, user_sess_length = get_input(
         feature_dim_dict, sess_feature_list, sess_max_count, sess_len_max)
@@ -72,7 +92,7 @@ def DSIN(feature_dim_dict, sess_feature_list, embedding_size=8, sess_max_count=5
     if len(dense_input) > 0:
         deep_input_emb = Concatenate()([deep_input_emb] + list(dense_input.values()))
 
-    output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, False, seed)(deep_input_emb)
+    output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed)(deep_input_emb)
     output = Dense(1, use_bias=False, activation=None)(output)
     output = PredictionLayer(task)(output)
 

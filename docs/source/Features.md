@@ -210,6 +210,16 @@ FGCNN models with two components: Feature Generation and Deep Classifier. Featur
 
 [Liu B, Tang R, Chen Y, et al. Feature Generation by Convolutional Neural Network for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1904.04447, 2019.](https://arxiv.org/pdf/1904.04447)
 
+### DSIN(Deep Session Interest  Network)
+
+Deep Session Interest Network (DSIN) extracts users' multiple historical sessions in their behavior sequences. First it uses self-attention mechanism with bias encoding to extract users' interests in each session. Then apply Bi-LSTM to model how users' interests evolve and interact among sessions. Finally, local activation unit is used to adaptively learn the influences of various session interests on the target item. 
+
+[**DSIN Model API**](./deepctr.models.dsin.html)
+
+![DSIN](../pics/DSIN.png)
+
+[Feng Y, Lv F, Shen W, et al. Deep Session Interest Network for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1905.06482, 2019.](https://arxiv.org/abs/1905.06482)
+
 ## Layers
 
 The models of deepctr are modular,
