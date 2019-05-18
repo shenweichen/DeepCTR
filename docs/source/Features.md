@@ -143,6 +143,7 @@ User's interest are represented by weighted sum of user behaviors.
 user's interest vector and other embedding vectors are concatenated and fed into a MLP to get the prediction. 
 
 [**DIN Model API**](./deepctr.models.din.html)  
+
 [DIN example](https://github.com/shenweichen/DeepCTR/tree/master/examples/run_din.py)
 
 ![DIN](../pics/DIN.png)
@@ -153,7 +154,8 @@ user's interest vector and other embedding vectors are concatenated and fed into
 
 Deep Interest Evolution Network (DIEN) uses interest extractor layer to capture temporal interests from history behavior sequence. At this layer,  an auxiliary loss is proposed to supervise interest extracting at each step. As user interests are diverse, especially in the e-commerce system, interest evolving layer is proposed to capture interest evolving process that is relative to the target item. At interest evolving layer, attention mechanism is embedded into the sequential structure novelly, and the effects of relative interests are strengthened during interest evolution.
 
-[**DIEN Model API**](./deepctr.models.dien.html)  
+[**DIEN Model API**](./deepctr.models.dien.html) 
+
 [DIEN example](https://github.com/shenweichen/DeepCTR/tree/master/examples/run_dien.py)
 
 ![DIEN](../pics/DIEN.png)
@@ -214,7 +216,9 @@ FGCNN models with two components: Feature Generation and Deep Classifier. Featur
 
 Deep Session Interest Network (DSIN) extracts users' multiple historical sessions in their behavior sequences. First it uses self-attention mechanism with bias encoding to extract users' interests in each session. Then apply Bi-LSTM to model how users' interests evolve and interact among sessions. Finally, local activation unit is used to adaptively learn the influences of various session interests on the target item. 
 
-[**DSIN Model API**](./deepctr.models.dsin.html)
+[**DSIN Model API**](./deepctr.models.dsin.html)  
+
+[DSIN example](https://github.com/shenweichen/DeepCTR/tree/master/examples/run_dsin.py)
 
 ![DSIN](../pics/DSIN.png)
 

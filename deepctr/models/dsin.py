@@ -10,25 +10,29 @@ Reference:
 
 from collections import OrderedDict
 
-from ..input_embedding import get_inputs_list, create_singlefeat_inputdict, get_embedding_vec_list
-from ..layers.core import DNN, PredictionLayer
-from ..layers.sequence import AttentionSequencePoolingLayer, BiLSTM, Transformer, BiasEncoding
-from ..layers.utils import concat_fun, NoMask
-from ..utils import check_feature_config_dict
 from tensorflow.python.keras.initializers import RandomNormal
-from tensorflow.python.keras.layers import Input, Dense, Embedding, Concatenate, Flatten
+from tensorflow.python.keras.layers import (Concatenate, Dense, Embedding,
+                                            Flatten, Input)
 from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.regularizers import l2
 
+from ..input_embedding import (create_singlefeat_inputdict,
+                               get_embedding_vec_list, get_inputs_list)
+from ..layers.core import DNN, PredictionLayer
+from ..layers.sequence import (AttentionSequencePoolingLayer, BiasEncoding,
+                               BiLSTM, Transformer)
+from ..layers.utils import NoMask, concat_fun
+from ..utils import check_feature_config_dict
+
 
 def DSIN(feature_dim_dict, sess_feature_list, embedding_size=8, sess_max_count=5, sess_len_max=10, bias_encoding=False,
-         att_embedding_size=1, att_head_num=8, dnn_hidden_units=(200, 80), dnn_activation='sigmoid', dnn_dropout=0, dnn_use_bn=False, 
-         l2_reg_dnn=0, l2_reg_embedding=1e-6,  init_std=0.0001, seed=1024, task='binary', 
+         att_embedding_size=1, att_head_num=8, dnn_hidden_units=(200, 80), dnn_activation='sigmoid', dnn_dropout=0,
+         dnn_use_bn=False, l2_reg_dnn=0, l2_reg_embedding=1e-6, init_std=0.0001, seed=1024, task='binary',
          ):
     """Instantiates the Deep Session Interest Network architecture.
 
     :param feature_dim_dict: dict,to indicate sparse field (**now only support sparse feature**)like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':[]}
-    :param seq_feature_list: list,to indicate  sequence sparse field (**now only support sparse feature**),must be a subset of ``feature_dim_dict["sparse"]``
+    :param sess_feature_list: list,to indicate session feature sparse field (**now only support sparse feature**),must be a subset of ``feature_dim_dict["sparse"]``
     :param embedding_size: positive integer,sparse feature embedding_size.
     :param sess_max_count: positive int, to indicate the max number of sessions
     :param sess_len_max: positive int, to indicate the max length of each session
@@ -57,7 +61,8 @@ def DSIN(feature_dim_dict, sess_feature_list, embedding_size=8, sess_max_count=5
                                                       mean=0.0, stddev=init_std, seed=seed),
                                                   embeddings_regularizer=l2(
                                                       l2_reg_embedding),
-                                                  name='sparse_emb_' + str(i) + '-' + feat.name,
+                                                  name='sparse_emb_' +
+                                                  str(i) + '-' + feat.name,
                                                   mask_zero=(feat.name in sess_feature_list)) for i, feat in
                              enumerate(feature_dim_dict["sparse"])}
 
@@ -77,22 +82,26 @@ def DSIN(feature_dim_dict, sess_feature_list, embedding_size=8, sess_max_count=5
     Self_Attention = Transformer(att_embedding_size, att_head_num, dropout_rate=0, use_layer_norm=False,
                                  use_positional_encoding=(not bias_encoding), seed=seed, supports_masking=True,
                                  blinding=True)
-    sess_fea = sess_interest_extractor(tr_input, sess_max_count, Self_Attention)
+    sess_fea = sess_interest_extractor(
+        tr_input, sess_max_count, Self_Attention)
 
     interest_attention_layer = AttentionSequencePoolingLayer(att_hidden_units=(64, 16), weight_normalization=True,
                                                              supports_masking=False)(
         [query_emb, sess_fea, user_sess_length])
 
-    lstm_outputs = BiLSTM(len(sess_feature_list) * embedding_size, layers=2, res_layers=0, dropout_rate=0.2, )(sess_fea)
+    lstm_outputs = BiLSTM(len(sess_feature_list) * embedding_size,
+                          layers=2, res_layers=0, dropout_rate=0.2, )(sess_fea)
     lstm_attention_layer = AttentionSequencePoolingLayer(att_hidden_units=(64, 16), weight_normalization=True)(
         [query_emb, lstm_outputs, user_sess_length])
 
     deep_input_emb = Concatenate()(
         [deep_input_emb, Flatten()(interest_attention_layer), Flatten()(lstm_attention_layer)])
     if len(dense_input) > 0:
-        deep_input_emb = Concatenate()([deep_input_emb] + list(dense_input.values()))
+        deep_input_emb = Concatenate()(
+            [deep_input_emb] + list(dense_input.values()))
 
-    output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed)(deep_input_emb)
+    output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn,
+                 dnn_dropout, dnn_use_bn, seed)(deep_input_emb)
     output = Dense(1, use_bias=False, activation=None)(output)
     output = PredictionLayer(task)(output)
 
@@ -100,7 +109,8 @@ def DSIN(feature_dim_dict, sess_feature_list, embedding_size=8, sess_max_count=5
     # sess_input_length_list = []
     for i in range(sess_max_count):
         sess_name = "sess_" + str(i)
-        sess_input_list.extend(get_inputs_list([user_behavior_input_dict[sess_name]]))
+        sess_input_list.extend(get_inputs_list(
+            [user_behavior_input_dict[sess_name]]))
         # sess_input_length_list.append(user_behavior_length_dict[sess_name])
 
     model_input_list = get_inputs_list([sparse_input, dense_input]) + sess_input_list + [
@@ -117,7 +127,8 @@ def get_input(feature_dim_dict, seq_feature_list, sess_max_count, seq_max_len):
     for idx in range(sess_max_count):
         sess_input = OrderedDict()
         for i, feat in enumerate(seq_feature_list):
-            sess_input[feat] = Input(shape=(seq_max_len,), name='seq_' + str(idx) + str(i) + '-' + feat)
+            sess_input[feat] = Input(
+                shape=(seq_max_len,), name='seq_' + str(idx) + str(i) + '-' + feat)
 
         user_behavior_input["sess_" + str(idx)] = sess_input
 

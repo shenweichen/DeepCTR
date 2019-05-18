@@ -35,7 +35,7 @@ You can read the latest code at https://github.com/shenweichen/DeepCTR
 
 News
 -----
-05/18/2019 : Add `DSIN <./Features.html#ccpm-convolutional-click-prediction-model>`_ . `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.4.1>`_
+05/18/2019 : Add `DSIN <./Features.html#dsin-deep-session-interest-network>`_ . `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.4.1>`_
 
 05/04/2019 : Support `feature hashing on the fly <./Examples.html#classification-criteo-with-feature-hashing-on-the-fly>`_ and python2.7. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.4.0>`_
 
