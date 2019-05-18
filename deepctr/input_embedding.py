@@ -19,36 +19,36 @@ from .layers.utils import Hash
 
 def create_singlefeat_inputdict(feature_dim_dict, prefix=''):
     sparse_input = OrderedDict()
-    for i, feat in enumerate(feature_dim_dict["sparse"]):
+    for feat in feature_dim_dict["sparse"]:
         sparse_input[feat.name] = Input(
-            shape=(1,), name=feat.name, dtype=feat.dtype)  # prefix+'sparse_' + str(i) + '-' + feat.name)
+            shape=(1,), name=prefix+feat.name, dtype=feat.dtype)
 
     dense_input = OrderedDict()
 
-    for i, feat in enumerate(feature_dim_dict["dense"]):
+    for  feat in feature_dim_dict["dense"]:
         dense_input[feat.name] = Input(
-            shape=(1,), name=feat.name,dtype=feat.dtype)  # prefix+'dense_' + str(i) + '-' + feat.name)
+            shape=(1,), name=prefix+feat.name,dtype=feat.dtype)
 
     return sparse_input, dense_input
 
 
-def create_varlenfeat_inputdict(feature_dim_dict, mask_zero=True):
+def create_varlenfeat_inputdict(feature_dim_dict, mask_zero=True,prefix=''):
     sequence_dim_dict = feature_dim_dict.get('sequence', [])
     sequence_input_dict = OrderedDict()
-    for i, feat in enumerate(sequence_dim_dict):
-        sequence_input_dict[feat.name] = Input(shape=(feat.maxlen,), name='seq_' + feat.name, dtype=feat.dtype)
+    for feat in sequence_dim_dict:
+        sequence_input_dict[feat.name] = Input(shape=(feat.maxlen,), name=prefix+'seq_' + feat.name, dtype=feat.dtype)
 
     if mask_zero:
         sequence_len_dict, sequence_max_len_dict = None, None
     else:
         sequence_len_dict = {feat.name: Input(shape=(
-            1,), name='seq_length_' + feat.name) for i, feat in enumerate(sequence_dim_dict)}
+            1,), name=prefix+'seq_length_' + feat.name) for  feat in sequence_dim_dict}
         sequence_max_len_dict = {feat.name: feat.maxlen
-                                 for i, feat in enumerate(sequence_dim_dict)}
+                                 for  feat in sequence_dim_dict}
     return sequence_input_dict, sequence_len_dict, sequence_max_len_dict
 
 
-def create_embedding_dict(feature_dim_dict, embedding_size, init_std, seed, l2_reg, prefix='sparse',
+def create_embedding_dict(feature_dim_dict, embedding_size, init_std, seed, l2_reg, prefix='sparse_',
                           seq_mask_zero=True):
     if embedding_size == 'auto':
         print("Notice:Do not use auto embedding in models other than DCN")
@@ -56,8 +56,8 @@ def create_embedding_dict(feature_dim_dict, embedding_size, init_std, seed, l2_r
                                                  embeddings_initializer=RandomNormal(
                                                      mean=0.0, stddev=init_std, seed=seed),
                                                  embeddings_regularizer=l2(l2_reg),
-                                                 name=prefix + '_emb_' + feat.name) for i, feat in
-                            enumerate(feature_dim_dict["sparse"])}
+                                                 name=prefix + 'emb_' + feat.name) for feat in
+                                    feature_dim_dict["sparse"]}
     else:
 
         sparse_embedding = {feat.name: Embedding(feat.dimension, embedding_size,
@@ -65,8 +65,8 @@ def create_embedding_dict(feature_dim_dict, embedding_size, init_std, seed, l2_r
                                                      mean=0.0, stddev=init_std, seed=seed),
                                                  embeddings_regularizer=l2(
                                                      l2_reg),
-                                                 name=prefix + '_emb_'  + feat.name) for i, feat in
-                            enumerate(feature_dim_dict["sparse"])}
+                                                 name=prefix + 'emb_'  + feat.name) for feat in
+                                    feature_dim_dict["sparse"]}
 
     if 'sequence' in feature_dim_dict:
         count = len(sparse_embedding)
