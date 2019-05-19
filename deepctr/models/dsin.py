@@ -53,6 +53,11 @@ def DSIN(feature_dim_dict, sess_feature_list, embedding_size=8, sess_max_count=5
     """
     check_feature_config_dict(feature_dim_dict)
 
+    if (att_embedding_size * att_head_num != len(sess_feature_list) * embedding_size):
+        raise ValueError(
+            "len(session_feature_lsit) * embedding_size must equal to att_embedding_size * att_head_num ,got %d * %d != %d *%d" % (
+            len(sess_feature_list), embedding_size, att_embedding_size, att_head_num))
+
     sparse_input, dense_input, user_behavior_input_dict, _, user_sess_length = get_input(
         feature_dim_dict, sess_feature_list, sess_max_count, sess_len_max)
 
@@ -62,7 +67,7 @@ def DSIN(feature_dim_dict, sess_feature_list, embedding_size=8, sess_max_count=5
                                                   embeddings_regularizer=l2(
                                                       l2_reg_embedding),
                                                   name='sparse_emb_' +
-                                                  str(i) + '-' + feat.name,
+                                                       str(i) + '-' + feat.name,
                                                   mask_zero=(feat.name in sess_feature_list)) for i, feat in
                              enumerate(feature_dim_dict["sparse"])}
 

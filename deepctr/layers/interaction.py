@@ -14,8 +14,9 @@ from tensorflow.python.keras.initializers import (Zeros, glorot_normal,
                                                   glorot_uniform)
 from tensorflow.python.keras.layers import Layer
 from tensorflow.python.keras.regularizers import l2
+from tensorflow.python.layers import utils
 
-from .activation import activation_fun
+from .activation import activation_layer
 from .utils import concat_fun
 
 
@@ -87,6 +88,8 @@ class AFMLayer(Layer):
             embedding_size, 1), initializer=glorot_normal(seed=self.seed), name="projection_p")
         self.dropout = tf.keras.layers.Dropout(self.dropout_rate, seed=self.seed)
 
+        self.tensordot = tf.keras.layers.Lambda(lambda x: tf.tensordot(x[0], x[1], axes=(-1, 0)))
+
         # Be sure to call this somewhere!
         super(AFMLayer, self).build(input_shape)
 
@@ -119,9 +122,7 @@ class AFMLayer(Layer):
 
         attention_output = self.dropout(attention_output)  # training
 
-        afm_out = tf.keras.layers.Lambda(lambda x: tf.tensordot(x[0], x[1]
-                                                                , axes=(-1, 0)))([attention_output, self.projection_p])
-
+        afm_out = self.tensordot([attention_output, self.projection_p])
         return afm_out
 
     def compute_output_shape(self, input_shape):
@@ -246,6 +247,8 @@ class CIN(Layer):
             else:
                 self.field_nums.append(size)
 
+        self.activation_layers = [activation_layer(self.activation) for _ in self.layer_size]
+
         super(CIN, self).build(input_shape)  # Be sure to call this somewhere!
 
     def call(self, inputs, **kwargs):
@@ -275,7 +278,7 @@ class CIN(Layer):
 
             curr_out = tf.nn.bias_add(curr_out, self.bias[idx])
 
-            curr_out = activation_fun(self.activation, curr_out)
+            curr_out = self.activation_layers[idx](curr_out)
 
             curr_out = tf.transpose(curr_out, perm=[0, 2, 1])
 
@@ -783,6 +786,26 @@ class FGCNNLayer(Layer):
         if len(input_shape) != 3:
             raise ValueError(
                 "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (len(input_shape)))
+        self.conv_layers = []
+        self.pooling_layers = []
+        self.dense_layers = []
+        pooling_shape = input_shape.as_list() + [1, ]
+        embedding_size = input_shape[-1].value
+        for i in range(1, len(self.filters) + 1):
+            filters = self.filters[i - 1]
+            width = self.kernel_width[i - 1]
+            new_filters = self.new_maps[i - 1]
+            pooling_width = self.pooling_width[i - 1]
+            conv_output_shape = self._conv_output_shape(pooling_shape, (width, 1))
+            pooling_shape = self._pooling_output_shape(conv_output_shape, (pooling_width, 1))
+            self.conv_layers.append(tf.keras.layers.Conv2D(filters=filters, kernel_size=(width, 1), strides=(1, 1),
+                                                           padding='same',
+                                                           activation='tanh', use_bias=True, ))
+            self.pooling_layers.append(tf.keras.layers.MaxPooling2D(pool_size=(pooling_width, 1)))
+            self.dense_layers.append(tf.keras.layers.Dense(pooling_shape[1] * embedding_size * new_filters,
+                                                           activation='tanh', use_bias=True))
+
+        self.flatten = tf.keras.layers.Flatten()
 
         super(FGCNNLayer, self).build(
             input_shape)  # Be sure to call this somewhere!
@@ -794,24 +817,24 @@ class FGCNNLayer(Layer):
                 "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
 
         embedding_size = inputs.shape[-1].value
-        pooling_result = tf.keras.layers.Lambda(lambda x: tf.expand_dims(x, axis=3))(inputs)
+        pooling_result = tf.expand_dims(inputs, axis=3)
 
         new_feature_list = []
 
         for i in range(1, len(self.filters) + 1):
-            filters = self.filters[i - 1]
-            width = self.kernel_width[i - 1]
             new_filters = self.new_maps[i - 1]
-            pooling_width = self.pooling_width[i - 1]
-            conv_result = tf.keras.layers.Conv2D(filters=filters, kernel_size=(width, 1), strides=(1, 1),
-                                                 padding='same',
-                                                 activation='tanh', use_bias=True, )(pooling_result)
-            pooling_result = tf.keras.layers.MaxPooling2D(pool_size=(pooling_width, 1))(conv_result)
-            flatten_result = tf.keras.layers.Flatten()(pooling_result)
-            new_result = tf.keras.layers.Dense(pooling_result.shape[1].value * embedding_size * new_filters,
-                                               activation='tanh', use_bias=True)(flatten_result)
+
+            conv_result = self.conv_layers[i - 1](pooling_result)
+
+            pooling_result = self.pooling_layers[i - 1](conv_result)
+
+            flatten_result = self.flatten(pooling_result)
+
+            new_result = self.dense_layers[i - 1](flatten_result)
+
             new_feature_list.append(
-                tf.keras.layers.Reshape((pooling_result.shape[1].value * new_filters, embedding_size))(new_result))
+                tf.reshape(new_result, (-1, pooling_result.shape[1].value * new_filters, embedding_size)))
+
         new_features = concat_fun(new_feature_list, axis=1)
         return new_features
 
@@ -832,3 +855,30 @@ class FGCNNLayer(Layer):
                   'pooling_width': self.pooling_width}
         base_config = super(FGCNNLayer, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
+
+    def _conv_output_shape(self, input_shape, kernel_size):
+        # input_shape = tensor_shape.TensorShape(input_shape).as_list()
+        # 'channels_last':
+        space = input_shape[1:-1]
+        new_space = []
+        for i in range(len(space)):
+            new_dim = utils.conv_output_length(
+                space[i],
+                kernel_size[i],
+                padding='same',
+                stride=1,
+                dilation=1)
+            new_space.append(new_dim)
+        return ([input_shape[0]] + new_space + [self.filters])
+
+    def _pooling_output_shape(self, input_shape, pool_size):
+        # input_shape = tensor_shape.TensorShape(input_shape).as_list()
+        # channels_last
+
+        rows = input_shape[1]
+        cols = input_shape[2]
+        rows = utils.conv_output_length(rows, pool_size[0], 'valid',
+                                        pool_size[0])
+        cols = utils.conv_output_length(cols, pool_size[1], 'valid',
+                                        pool_size[1])
+        return [input_shape[0], rows, cols, input_shape[3]]

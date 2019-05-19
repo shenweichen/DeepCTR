@@ -12,7 +12,7 @@ from tensorflow.python.keras.initializers import Zeros, glorot_normal
 from tensorflow.python.keras.layers import Layer
 from tensorflow.python.keras.regularizers import l2
 
-from .activation import activation_fun
+from .activation import activation_layer
 
 
 class LocalActivationUnit(Layer):
@@ -78,6 +78,10 @@ class LocalActivationUnit(Layer):
             shape=(1,), initializer=Zeros(), name="bias")
         self.dnn = DNN(self.hidden_units, self.activation, self.l2_reg,
                       self.dropout_rate, self.use_bn, seed=self.seed)
+
+        self.dense = tf.keras.layers.Lambda(lambda x:tf.nn.bias_add(tf.tensordot(
+            x[0], x[1], axes=(-1, 0)), x[2]))
+
         super(LocalActivationUnit, self).build(
             input_shape)  # Be sure to call this somewhere!
 
@@ -92,8 +96,8 @@ class LocalActivationUnit(Layer):
             [queries, keys, queries - keys, queries * keys], axis=-1)
 
         att_out = self.dnn(att_input, training=training)
-        attention_score = tf.keras.layers.Lambda(lambda x:tf.nn.bias_add(tf.tensordot(
-            x[0], x[1], axes=(-1, 0)), x[2]))([att_out,self.kernel,self.bias])
+
+        attention_score = self.dense([att_out,self.kernel,self.bias])
 
         return attention_score
 
@@ -156,6 +160,12 @@ class DNN(Layer):
                                      shape=(self.hidden_units[i],),
                                      initializer=Zeros(),
                                      trainable=True) for i in range(len(self.hidden_units))]
+        if self.use_bn:
+            self.bn_layers = [tf.keras.layers.BatchNormalization() for _ in range(len(self.hidden_units))]
+
+        self.dropout_layers = [tf.keras.layers.Dropout(self.dropout_rate,seed=self.seed+i) for i in range(len(self.hidden_units))]
+
+        self.activation_layers = [activation_layer(self.activation) for _ in range(len(self.hidden_units))]
 
         super(DNN, self).build(input_shape)  # Be sure to call this somewhere!
 
@@ -170,10 +180,11 @@ class DNN(Layer):
             #           kernel_initializer=glorot_normal(seed=self.seed), \
             #           kernel_regularizer=l2(self.l2_reg))(deep_input)
             if self.use_bn:
-                fc = tf.keras.layers.BatchNormalization()(fc, training=training)
-            fc = activation_fun(self.activation, fc)
+                fc = self.bn_layers[i](fc, training=training)
 
-            fc = tf.keras.layers.Dropout(self.dropout_rate,seed=self.seed)(fc, training=training)
+            fc = self.activation_layers[i](fc)
+
+            fc = self.dropout_layers[i](fc,training = training)
             deep_input = fc
 
         return deep_input

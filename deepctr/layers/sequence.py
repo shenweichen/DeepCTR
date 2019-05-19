@@ -379,6 +379,9 @@ class Transformer(Layer):
     def build(self, input_shape):
 
         embedding_size = input_shape[0][-1].value
+        if self.num_units != embedding_size:
+            raise ValueError(
+                "att_embedding_size * head_num must equal the last dimension size of inputs,got %d * %d != %d" % (self.att_embedding_size,self.head_num,embedding_size))
         self.seq_len_max = input_shape[0][-2].value
         self.W_Query = self.add_weight(name='query', shape=[embedding_size, self.att_embedding_size * self.head_num],
                                        dtype=tf.float32,
