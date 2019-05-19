@@ -857,8 +857,7 @@ class FGCNNLayer(Layer):
         return dict(list(base_config.items()) + list(config.items()))
 
     def _conv_output_shape(self, input_shape, kernel_size):
-        # input_shape = tensor_shape.TensorShape(input_shape).as_list()
-        # 'channels_last':
+        # channels_last
         space = input_shape[1:-1]
         new_space = []
         for i in range(len(space)):
@@ -872,7 +871,6 @@ class FGCNNLayer(Layer):
         return ([input_shape[0]] + new_space + [self.filters])
 
     def _pooling_output_shape(self, input_shape, pool_size):
-        # input_shape = tensor_shape.TensorShape(input_shape).as_list()
         # channels_last
 
         rows = input_shape[1]
