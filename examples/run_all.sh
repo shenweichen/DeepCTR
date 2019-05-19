@@ -3,7 +3,7 @@
 function run_py(){
 
     code_path=./
-    for file in `ls`
+    for file in $(ls)
     do
       if [[ $file =~ .py ]]
         then
@@ -20,21 +20,23 @@ function run_py(){
 
 
 }
-#python2
-python_version=python2
-cd ..
-pip install deepctr -e .
-cd ./examples
-run_py
-echo "all examples run succeed in python2.7"
 
 ## python3
 python_version=python3
 source activate py36
 cd ..
-pip install deepctr -e .
+pip install deepctr -U -e .
 cd ./examples
 run_py
+
+#python2
+python_version=python2
+cd ..
+pip install deepctr -U -e .
+cd ./examples
+run_py
+echo "all examples run succeed in python2.7"
+
 
 echo "all examples run succeed in python3.6"
 

@@ -1,19 +1,18 @@
 # Quick-Start
 
 ## Installation Guide
-`deepctr` is available for `python 2.7`and `python 3.4-3.6`。
+Now `deepctr` is available for python `2.7 `and `3.4,  3.5, 3.6`.  
+`deepctr` depends on tensorflow, you can specify to install the cpu version or gpu version through `pip`.
 
 ### CPU version
-Install `deepctr` package is through `pip` 
+
 ```bash
-$ pip install deepctr
+$ pip install deepctr[cpu]
 ```
 ### GPU version
-If you have a `tensorflow-gpu` on your local machine,make sure its version is
-**`tensorflow-gpu>=1.4.0,!=1.7.*,!=1.8.*,<=1.13.1`**  
-Then,use the following command to install
+
 ```bash
-$ pip install deepctr --no-deps
+$ pip install deepctr[gpu]
 ```
 ## Getting started: 4 steps to DeepCTR
 

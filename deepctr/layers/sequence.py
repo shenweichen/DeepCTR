@@ -379,6 +379,9 @@ class Transformer(Layer):
     def build(self, input_shape):
 
         embedding_size = input_shape[0][-1].value
+        if self.num_units != embedding_size:
+            raise ValueError(
+                "att_embedding_size * head_num must equal the last dimension size of inputs,got %d * %d != %d" % (self.att_embedding_size,self.head_num,embedding_size))
         self.seq_len_max = input_shape[0][-2].value
         self.W_Query = self.add_weight(name='query', shape=[embedding_size, self.att_embedding_size * self.head_num],
                                        dtype=tf.float32,
@@ -506,47 +509,6 @@ class Transformer(Layer):
                   'blinding': self.blinding}
         base_config = super(Transformer, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
-
-
-class Position_Embedding(Layer):
-
-    def __init__(self, size=None, scale=False, mode='sum', **kwargs):
-        self.size = size  # must be even
-        self.scale = scale
-        self.mode = mode
-        super(Position_Embedding, self).__init__(**kwargs)
-        self.supports_masking = True
-
-    def call(self, x, mask=None):
-        if (self.size == None) or (self.mode == 'sum'):
-            self.size = int(x.shape[-1])
-
-        position_j = 1. / \
-                     K.pow(10000., 2 * K.arange(self.size / 2, dtype='float32') / self.size)
-        position_j = K.expand_dims(position_j, 0)
-
-        position_i = tf.cumsum(K.ones_like(x[:, :, 0]), 1) - 1
-        position_i = K.expand_dims(position_i, 2)
-        position_ij = K.dot(position_i, position_j)
-        outputs = K.concatenate(
-            [K.cos(position_ij), K.sin(position_ij)], 2)
-
-        if self.mode == 'sum':
-            if self.scale:
-                outputs = outputs * self.size ** 0.5
-            return x + outputs
-        elif self.mode == 'concat':
-            return K.concatenate([outputs, x], 2)
-
-    def compute_mask(self, inputs, mask=None):
-        return None
-
-    def compute_output_shape(self, input_shape):
-        if self.mode == 'sum':
-            return input_shape
-        elif self.mode == 'concat':
-            return (input_shape[0], input_shape[1], input_shape[2] + self.size)
-
 
 def positional_encoding(inputs,
                         pos_embedding_trainable=True,

@@ -47,13 +47,14 @@ def check_version(version):
                 releases = j.get('releases', [])
                 for release in releases:
                     ver = parse(release)
-                    if not ver.is_prerelease:
-                        latest_version = max(latest_version, ver)
+                    if ver.is_prerelease or  ver.is_postrelease:
+                        continue
+                    latest_version = max(latest_version, ver)
                 if latest_version > version:
                     logging.warning(
                         '\nDeepCTR version {0} detected. Your version is {1}.\nUse `pip install -U deepctr` to upgrade.Changelog: https://github.com/shenweichen/DeepCTR/releases/tag/v{0}'.format(
                             latest_version, version))
-        except Exception:
+        except Exception as e:
             return
 
     Thread(target=check, args=(version,)).start()

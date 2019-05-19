@@ -59,14 +59,14 @@ class Dice(Layer):
         base_config = super(Dice, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
-def activation_fun(activation, fc):
+def activation_layer(activation):
     if activation == "dice" or activation == "Dice":
-        fc = Dice()(fc)
+        act_layer =  Dice()
     elif (isinstance(activation, str)) or (sys.version_info.major == 2 and isinstance(activation, (str, unicode))):
-        fc = tf.keras.layers.Activation(activation)(fc)
+        act_layer = tf.keras.layers.Activation(activation)
     elif issubclass(activation, Layer):
-        fc = activation()(fc)
+        act_layer = activation()
     else:
         raise ValueError(
             "Invalid activation,found %s.You should use a str or a Activation Layer Class." % (activation))
-    return fc
+    return act_layer
