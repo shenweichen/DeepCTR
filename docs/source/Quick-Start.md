@@ -1,17 +1,18 @@
 # Quick-Start
 
 ## Installation Guide
+Now `deepctr` is available for python `2.7 `and `3.4,  3.5, 3.6`.  
+`deepctr` depends on tensorflow, you can specify to install the cpu version or gpu version through `pip`.
+
 ### CPU version
-Install `deepctr` package is through `pip` 
+
 ```bash
-$ pip install deepctr
+$ pip install deepctr[cpu]
 ```
 ### GPU version
-If you have a `tensorflow-gpu` on your local machine,make sure its version is
-**`tensorflow-gpu>=1.4.0,!=1.7.*,!=1.8.*,<=1.12.0`**  
-Then,use the following command to install
+
 ```bash
-$ pip install deepctr --no-deps
+$ pip install deepctr[gpu]
 ```
 ## Getting started: 4 steps to DeepCTR
 
@@ -24,7 +25,7 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 from sklearn.model_selection import train_test_split
 from deepctr.models import DeepFM
-from deepctr import SingleFeat
+from deepctr.utils import SingleFeat
 
 data = pd.read_csv('./criteo_sample.txt')
 
@@ -44,14 +45,26 @@ target = ['label']
 Usually there are two simple way to encode the sparse categorical feature for embedding
 
 - Label Encoding: map the features to integer value from 0 ~ len(#unique) - 1
-- Hash Encoding: map the features to a fix range,like 0 ~ 9999
+  ```python
+  for feat in sparse_features:
+      lbe = LabelEncoder()
+      data[feat] = lbe.fit_transform(data[feat])
+  ```
+- Hash Encoding: map the features to a fix range,like 0 ~ 9999.Here is 2 way to do that:
+  - Do feature hashing before training
+    ```python
+    for feat in sparse_features:
+        lbe = HashEncoder()
+        data[feat] = lbe.transform(data[feat])
+    ```
+  - Do feature hashing on the flay in training process 
+
+    We can do feature hasing throug setting `hash_flag=True` in `SingleFeat` or `VarlenFeat` in Step3.
+
 
 And for dense numerical features,they are usually  discretized to buckets,here we use normalization.
 
 ```python
-for feat in sparse_features:
-    lbe = LabelEncoder()# or Hash
-    data[feat] = lbe.fit_transform(data[feat])
 mms = MinMaxScaler(feature_range=(0,1))
 data[dense_features] = mms.fit_transform(data[dense_features])
 ```
@@ -63,10 +76,17 @@ Here, for sparse features, we transform them into dense vectors by embedding tec
 For dense numerical features, we add a dummy index like LIBFM.
 That is to say, all dense features under the same field share the same embedding vector.
 In some implementations, the dense feature is concatened to the input embedding vectors of the deep network, you can modify the code yourself.
-
+- Label Encoding
 ```python
 sparse_feature_list = [SingleFeat(feat, data[feat].nunique())
                         for feat in sparse_features]
+dense_feature_list = [SingleFeat(feat, 0)
+                      for feat in dense_features]
+```
+- Feature Hashing on the fly
+```python
+sparse_feature_list = [SingleFeat(feat, dimension=1e6,hash_flag=True)
+                        for feat in sparse_features]#The dimension can be set according to data
 dense_feature_list = [SingleFeat(feat, 0)
                       for feat in dense_features]
 ```

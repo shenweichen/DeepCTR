@@ -1,7 +1,8 @@
 import pytest
+
+from deepctr.utils import SingleFeat
 from deepctr.models import DCN
-from deepctr import SingleFeat
-from ..utils import check_model, get_test_data
+from ..utils import check_model, get_test_data,SAMPLE_SIZE
 
 
 @pytest.mark.parametrize(
@@ -12,22 +13,21 @@ from ..utils import check_model, get_test_data
 def test_DCN(embedding_size, cross_num, hidden_size, sparse_feature_num):
     model_name = "DCN"
 
-    sample_size = 64
-    x, y, feature_dim_dict = get_test_data(
-        sample_size, sparse_feature_num, sparse_feature_num)
+    sample_size = SAMPLE_SIZE
+    x, y, feature_dim_dict = get_test_data(sample_size, sparse_feature_num, sparse_feature_num)
 
     model = DCN(feature_dim_dict, embedding_size=embedding_size, cross_num=cross_num,
-                hidden_size=hidden_size, keep_prob=0.5, )
+                dnn_hidden_units=hidden_size, dnn_dropout=0.5, )
     check_model(model, model_name, x, y)
 
 
 def test_DCN_invalid(embedding_size=8, cross_num=0, hidden_size=()):
-    feature_dim_dict = {'sparse': [SingleFeat('sparse_1',2),SingleFeat('sparse_2',5),SingleFeat('sparse_3',10)],
-    'dense': [SingleFeat('dense_1',1),SingleFeat('dense_1',1),SingleFeat('dense_1',1)]}
+    feature_dim_dict = {'sparse': [SingleFeat('sparse_1', 2), SingleFeat('sparse_2', 5), SingleFeat('sparse_3', 10)],
+                        'dense': [SingleFeat('dense_1', 1), SingleFeat('dense_1', 1), SingleFeat('dense_1', 1)]}
     with pytest.raises(ValueError):
         _ = DCN(feature_dim_dict, embedding_size=embedding_size, cross_num=cross_num,
-                hidden_size=hidden_size, keep_prob=0.5, )
+                dnn_hidden_units=hidden_size, dnn_dropout=0.5, )
 
 
 if __name__ == "__main__":
-    test_DCN(8, 2, [32, 32], 2)
+    pass

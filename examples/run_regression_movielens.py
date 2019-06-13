@@ -1,9 +1,10 @@
 import pandas as pd
-from sklearn.preprocessing import LabelEncoder
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+
 from deepctr.models import DeepFM
-from deepctr import SingleFeat
+from deepctr.utils import SingleFeat
 
 if __name__ == "__main__":
 
@@ -26,11 +27,11 @@ if __name__ == "__main__":
     test_model_input = [test[feat.name].values for feat in sparse_feat_list]
     # 4.Define Model,train,predict and evaluate
     model = DeepFM({"sparse": sparse_feat_list},
-                   final_activation='linear')
-    model.compile("adam", "mse", metrics=['mse'],)
+                   task='regression')
+    model.compile("adam", "mse", metrics=['mse'], )
 
     history = model.fit(train_model_input, train[target].values,
-                        batch_size=256, epochs=10, verbose=2, validation_split=0.2,)
+                        batch_size=256, epochs=10, verbose=2, validation_split=0.2, )
     pred_ans = model.predict(test_model_input, batch_size=256)
     print("test MSE", round(mean_squared_error(
         test[target].values, pred_ans), 4))

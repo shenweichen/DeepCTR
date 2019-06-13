@@ -3,5 +3,5 @@ deepctr.models.din module
 
 .. automodule:: deepctr.models.din
     :members:
-    :undoc-members:
-    :show-inheritance:
+    :no-undoc-members:
+    :no-show-inheritance:

@@ -1,18 +1,19 @@
 import pandas as pd
-from sklearn.preprocessing import LabelEncoder, MinMaxScaler
-from sklearn.model_selection import train_test_split
 from sklearn.metrics import log_loss, roc_auc_score
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder, MinMaxScaler
+
 from deepctr.models import DeepFM
-from deepctr import SingleFeat
+from deepctr.utils import SingleFeat
 
 if __name__ == "__main__":
     data = pd.read_csv('./criteo_sample.txt')
 
     sparse_features = ['C' + str(i) for i in range(1, 27)]
-    dense_features = ['I'+str(i) for i in range(1, 14)]
+    dense_features = ['I' + str(i) for i in range(1, 14)]
 
     data[sparse_features] = data[sparse_features].fillna('-1', )
-    data[dense_features] = data[dense_features].fillna(0,)
+    data[dense_features] = data[dense_features].fillna(0, )
     target = ['label']
 
     # 1.Label Encoding for sparse features,and do simple Transformation for dense features
@@ -26,20 +27,20 @@ if __name__ == "__main__":
 
     sparse_feature_list = [SingleFeat(feat, data[feat].nunique())
                            for feat in sparse_features]
-    dense_feature_list = [SingleFeat(feat, 0)
+    dense_feature_list = [SingleFeat(feat, 0,)
                           for feat in dense_features]
 
     # 3.generate input data for model
 
     train, test = train_test_split(data, test_size=0.2)
     train_model_input = [train[feat.name].values for feat in sparse_feature_list] + \
-        [train[feat.name].values for feat in dense_feature_list]
+                        [train[feat.name].values for feat in dense_feature_list]
     test_model_input = [test[feat.name].values for feat in sparse_feature_list] + \
-        [test[feat.name].values for feat in dense_feature_list]
+                       [test[feat.name].values for feat in dense_feature_list]
 
     # 4.Define Model,train,predict and evaluate
     model = DeepFM({"sparse": sparse_feature_list,
-                    "dense": dense_feature_list}, final_activation='sigmoid')
+                    "dense": dense_feature_list}, task='binary')
     model.compile("adam", "binary_crossentropy",
                   metrics=['binary_crossentropy'], )
 

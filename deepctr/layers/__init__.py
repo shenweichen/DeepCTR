@@ -1,5 +1,37 @@
-from .core import LocalActivationUnit,MLP,PredictionLayer
-from .interaction import AFMLayer,BiInteractionPooling,CIN,CrossNet,FM,InnerProductLayer,InteractingLayer,OutterProductLayer
-from .normalization import LayerNormalization
+import tensorflow as tf
+
 from .activation import Dice
-from .sequence import SequencePoolingLayer,AttentionSequencePoolingLayer,BiLSTM,Transformer,Position_Embedding
+from .core import DNN, LocalActivationUnit, PredictionLayer
+from .interaction import (CIN, FM, AFMLayer, BiInteractionPooling, CrossNet,
+                          InnerProductLayer, InteractingLayer,
+                          OutterProductLayer, FGCNNLayer)
+from .normalization import LayerNormalization
+from .sequence import (AttentionSequencePoolingLayer, BiasEncoding, BiLSTM,
+                       KMaxPooling, SequencePoolingLayer,
+                       Transformer, DynamicGRU)
+from .utils import NoMask, Hash
+
+custom_objects = {'tf': tf,
+                  'InnerProductLayer': InnerProductLayer,
+                  'OutterProductLayer': OutterProductLayer,
+                  'DNN': DNN,
+                  'PredictionLayer': PredictionLayer,
+                  'FM': FM,
+                  'AFMLayer': AFMLayer,
+                  'CrossNet': CrossNet,
+                  'BiInteractionPooling': BiInteractionPooling,
+                  'LocalActivationUnit': LocalActivationUnit,
+                  'Dice': Dice,
+                  'SequencePoolingLayer': SequencePoolingLayer,
+                  'AttentionSequencePoolingLayer': AttentionSequencePoolingLayer,
+                  'CIN': CIN,
+                  'InteractingLayer': InteractingLayer,
+                  'LayerNormalization': LayerNormalization,
+                  'BiLSTM': BiLSTM,
+                  'Transformer': Transformer,
+                  'NoMask': NoMask,
+                  'BiasEncoding': BiasEncoding,
+                  'KMaxPooling': KMaxPooling,
+                  'FGCNNLayer': FGCNNLayer,
+                  'Hash': Hash,
+                  'DynamicGRU': DynamicGRU}

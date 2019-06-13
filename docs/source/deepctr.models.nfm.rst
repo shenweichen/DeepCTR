@@ -3,5 +3,5 @@ deepctr.models.nfm module
 
 .. automodule:: deepctr.models.nfm
     :members:
-    :undoc-members:
-    :show-inheritance:
+    :no-undoc-members:
+    :no-show-inheritance:

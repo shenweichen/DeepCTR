@@ -1,8 +1,13 @@
 # History
+- 05/19/2019 : [v0.4.1](https://github.com/shenweichen/DeepCTR/releases/tag/v0.4.1) released.Add [DSIN](./Features.html#dsin-deep-session-interest-network). 
+- 05/04/2019 : [v0.4.0](https://github.com/shenweichen/DeepCTR/releases/tag/v0.4.0) released.Support [feature hashing on the fly](./Examples.html#classification-criteo-with-feature-hashing-on-the-fly) and python2.7.
+- 04/27/2019 : [v0.3.4](https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.4) released.Add [FGCNN](./Features.html#fgcnn-feature-generation-by-convolutional-neural-network) and `FGCNNLayer`.
+- 04/21/2019 : [v0.3.3](https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.3) released.Add [CCPM](./Features.html#ccpm-convolutional-click-prediction-model).
+- 03/30/2019 : [v0.3.2](https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.2) released.Add [DIEN](./Features.html#dien-deep-interest-evolution-network) and [NFFM](./Features.html#nffm-field-aware-neural-factorization-machine)  Model.
 - 02/17/2019 : [v0.3.1](https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.1) released.Refactor layers ,add `BiLSTM` and `Transformer`.
 - 01/24/2019 : [v0.2.3](https://github.com/shenweichen/DeepCTR/releases/tag/v0.2.3) released.Use a new feature config generation method and fix bugs.
 - 01/01/2019 : [v0.2.2](https://github.com/shenweichen/DeepCTR/releases/tag/v0.2.2) released.Add [sequence(multi-value) input support](./Examples.html#multi-value-input-movielens) for `AFM,AutoInt,DCN,DeepFM,FNN,NFM,PNN,xDeepFM` models.
-- 12/27/2018 : [v0.2.1](https://github.com/shenweichen/DeepCTR/releases/tag/v0.2.1) released.Add [AutoInt](./Features.html#autoint-automatic-feature-interactiont) Model.
+- 12/27/2018 : [v0.2.1](https://github.com/shenweichen/DeepCTR/releases/tag/v0.2.1) released.Add [AutoInt](./Features.html#autoint-automatic-feature-interaction) Model.
 - 12/22/2018 : [v0.2.0](https://github.com/shenweichen/DeepCTR/releases/tag/v0.2.0) released.Add [xDeepFM](./Features.html#xdeepfm) and automatic check for new version.
 - 12/19/2018 : [v0.1.6](https://github.com/shenweichen/DeepCTR/releases/tag/v0.1.6) released.Now DeepCTR is compatible with tensorflow from `1.4-1.12` except for `1.7` and `1.8`. 
 - 11/29/2018 : [v0.1.4](https://github.com/shenweichen/DeepCTR/releases/tag/v0.1.4) released.Add [FAQ](./FAQ.html) in docs

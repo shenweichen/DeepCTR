@@ -6,12 +6,16 @@ Author:
 
 """
 
+import numpy as np
 import tensorflow as tf
 from tensorflow.python.keras import backend as K
+from tensorflow.python.keras.initializers import TruncatedNormal
 from tensorflow.python.keras.layers import LSTM, Lambda, Layer
 
 from .core import LocalActivationUnit
 from .normalization import LayerNormalization
+from ..contrib.rnn import dynamic_rnn
+from ..contrib.utils import QAAttGRUCell, VecAttGRUCell
 
 
 class SequencePoolingLayer(Layer):
@@ -37,7 +41,7 @@ class SequencePoolingLayer(Layer):
 
         if mode not in ['sum', 'mean', 'max']:
             raise ValueError("mode must be sum or mean")
-        #self.seq_len_max = seq_len_max
+        # self.seq_len_max = seq_len_max
         self.mode = mode
         self.eps = 1e-8
         super(SequencePoolingLayer, self).__init__(**kwargs)
@@ -78,7 +82,7 @@ class SequencePoolingLayer(Layer):
         hist = tf.reduce_sum(hist, 1, keep_dims=False)
 
         if self.mode == "mean":
-            hist = tf.div(hist, user_behavior_length+self.eps)
+            hist = tf.div(hist, user_behavior_length + self.eps)
 
         hist = tf.expand_dims(hist, axis=1)
         return hist
@@ -92,7 +96,7 @@ class SequencePoolingLayer(Layer):
     def compute_mask(self, inputs, mask):
         return None
 
-    def get_config(self,):
+    def get_config(self, ):
         config = {'mode': self.mode, 'supports_masking': self.supports_masking}
         base_config = super(SequencePoolingLayer, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
@@ -114,9 +118,9 @@ class AttentionSequencePoolingLayer(Layer):
         - 3D tensor with shape: ``(batch_size, 1, embedding_size)``.
 
       Arguments
-        - **hidden_size**:list of positive integer, the attention net layer number and units in each layer.
+        - **att_hidden_units**:list of positive integer, the attention net layer number and units in each layer.
 
-        - **activation**: Activation function to use in attention net.
+        - **att_activation**: Activation function to use in attention net.
 
         - **weight_normalization**: bool.Whether normalize the attention score of local activation unit.
 
@@ -126,12 +130,14 @@ class AttentionSequencePoolingLayer(Layer):
         - [Zhou G, Zhu X, Song C, et al. Deep interest network for click-through rate prediction[C]//Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. ACM, 2018: 1059-1068.](https://arxiv.org/pdf/1706.06978.pdf)
     """
 
-    def __init__(self, hidden_size=(80, 40), activation='sigmoid', weight_normalization=False, supports_masking=False, **kwargs):
+    def __init__(self, att_hidden_units=(80, 40), att_activation='sigmoid', weight_normalization=False,
+                 return_score=False,
+                 supports_masking=False, **kwargs):
 
-        self.hidden_size = hidden_size
-        self.activation = activation
+        self.att_hidden_units = att_hidden_units
+        self.att_activation = att_activation
         self.weight_normalization = weight_normalization
-
+        self.return_score = return_score
         super(AttentionSequencePoolingLayer, self).__init__(**kwargs)
         self.supports_masking = supports_masking
 
@@ -142,19 +148,22 @@ class AttentionSequencePoolingLayer(Layer):
                                  'on a list of 3 inputs')
 
             if len(input_shape[0]) != 3 or len(input_shape[1]) != 3 or len(input_shape[2]) != 2:
-                raise ValueError("Unexpected inputs dimensions,the 3 tensor dimensions are %d,%d and %d , expect to be 3,3 and 2" % (
-                    len(input_shape[0]), len(input_shape[1]), len(input_shape[2])))
+                raise ValueError(
+                    "Unexpected inputs dimensions,the 3 tensor dimensions are %d,%d and %d , expect to be 3,3 and 2" % (
+                        len(input_shape[0]), len(input_shape[1]), len(input_shape[2])))
 
             if input_shape[0][-1] != input_shape[1][-1] or input_shape[0][1] != 1 or input_shape[2][1] != 1:
                 raise ValueError('A `AttentionSequencePoolingLayer` layer requires '
-                                 'inputs of a 3 inputs with shape (None,1,embedding_size),(None,T,embedding_size) and (None,1)'
-                                 'Got different shapes: %s,%s and %s' % (input_shape))
+                                 'inputs of a 3 tensor with shape (None,1,embedding_size),(None,T,embedding_size) and (None,1)'
+                                 'Got different shapes: %s' % (input_shape))
         else:
             pass
+        self.local_att = LocalActivationUnit(
+            self.att_hidden_units, self.att_activation, l2_reg=0, dropout_rate=0, use_bn=False, seed=1024, )
         super(AttentionSequencePoolingLayer, self).build(
             input_shape)  # Be sure to call this somewhere!
 
-    def call(self, inputs, mask=None, **kwargs):
+    def call(self, inputs, mask=None, training=None, **kwargs):
 
         if self.supports_masking:
             if mask is None:
@@ -169,8 +178,7 @@ class AttentionSequencePoolingLayer(Layer):
             hist_len = keys.get_shape()[1]
             key_masks = tf.sequence_mask(keys_length, hist_len)
 
-        attention_score = LocalActivationUnit(
-            self.hidden_size, self.activation, 0, 1, False, 1024,)([queries, keys])
+        attention_score = self.local_att([queries, keys], training=training)
 
         outputs = tf.transpose(attention_score, (0, 2, 1))
 
@@ -184,20 +192,27 @@ class AttentionSequencePoolingLayer(Layer):
         if self.weight_normalization:
             outputs = tf.nn.softmax(outputs)
 
-        outputs = tf.matmul(outputs, keys)
+        if not self.return_score:
+            outputs = tf.matmul(outputs, keys)
+
+        outputs._uses_learning_phase = attention_score._uses_learning_phase
 
         return outputs
 
     def compute_output_shape(self, input_shape):
-        return (None, 1, input_shape[0][-1])
+        if self.return_score:
+            return (None, 1, input_shape[1][1])
+        else:
+            return (None, 1, input_shape[0][-1])
 
     def compute_mask(self, inputs, mask):
         return None
 
-    def get_config(self,):
+    def get_config(self, ):
 
-        config = {'hidden_size': self.hidden_size, 'activation': self.activation,
-                  'weight_normalization': self.weight_normalization, 'supports_masking': self.supports_masking}
+        config = {'att_hidden_units': self.att_hidden_units, 'att_activation': self.att_activation,
+                  'weight_normalization': self.weight_normalization, 'return_score': self.return_score,
+                  'supports_masking': self.supports_masking}
         base_config = super(AttentionSequencePoolingLayer, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
@@ -218,14 +233,14 @@ class BiLSTM(Layer):
 
         - **res_layers**: Positive integer, number of residual connection to used in last ``res_layers``.
 
-        - **dropout**:  Float between 0 and 1. Fraction of the units to drop for the linear transformation of the inputs.
+        - **dropout_rate**:  Float between 0 and 1. Fraction of the units to drop for the linear transformation of the inputs.
 
         - **merge_mode**: merge_mode: Mode by which outputs of the forward and backward RNNs will be combined. One of { ``'fw'`` , ``'bw'`` , ``'sum'`` , ``'mul'`` , ``'concat'`` , ``'ave'`` , ``None`` }. If None, the outputs will not be combined, they will be returned as a list.
 
 
     """
 
-    def __init__(self, units, layers=2, res_layers=0, dropout=0.2, merge_mode='ave', **kwargs):
+    def __init__(self, units, layers=2, res_layers=0, dropout_rate=0.2, merge_mode='ave', **kwargs):
 
         if merge_mode not in ['fw', 'bw', 'sum', 'mul', 'ave', 'concat', None]:
             raise ValueError('Invalid merge mode. '
@@ -235,7 +250,7 @@ class BiLSTM(Layer):
         self.units = units
         self.layers = layers
         self.res_layers = res_layers
-        self.dropout = dropout
+        self.dropout_rate = dropout_rate
         self.merge_mode = merge_mode
 
         super(BiLSTM, self).__init__(**kwargs)
@@ -249,10 +264,12 @@ class BiLSTM(Layer):
         self.fw_lstm = []
         self.bw_lstm = []
         for _ in range(self.layers):
-            self.fw_lstm.append(LSTM(self.units, dropout=self.dropout, bias_initializer='ones', return_sequences=True,
-                                     unroll=True))
-            self.bw_lstm.append(LSTM(self.units, dropout=self.dropout, bias_initializer='ones', return_sequences=True,
-                                     go_backwards=True, unroll=True))
+            self.fw_lstm.append(
+                LSTM(self.units, dropout=self.dropout_rate, bias_initializer='ones', return_sequences=True,
+                     unroll=True))
+            self.bw_lstm.append(
+                LSTM(self.units, dropout=self.dropout_rate, bias_initializer='ones', return_sequences=True,
+                     go_backwards=True, unroll=True))
 
         super(BiLSTM, self).build(
             input_shape)  # Be sure to call this somewhere!
@@ -298,23 +315,23 @@ class BiLSTM(Layer):
         if self.merge_mode is None:
             return [input_shape, input_shape]
         elif self.merge_mode == 'concat':
-            return input_shape[:-1]+(input_shape[-1]*2,)
+            return input_shape[:-1] + (input_shape[-1] * 2,)
         else:
             return input_shape
 
     def compute_mask(self, inputs, mask):
         return mask
 
-    def get_config(self,):
+    def get_config(self, ):
 
         config = {'units': self.units, 'layers': self.layers,
-                  'res_layers': self.res_layers, 'dropout': self.dropout, 'merge_mode': self.merge_mode}
+                  'res_layers': self.res_layers, 'dropout_rate': self.dropout_rate, 'merge_mode': self.merge_mode}
         base_config = super(BiLSTM, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
 
 class Transformer(Layer):
-    """Transformer  proposed in 《Attention is all you need》
+    """  Simplified version of Transformer  proposed in 《Attention is all you need》
 
       Input shape
         - a list of two 3D tensor with shape ``(batch_size, timesteps, input_dim)`` if supports_masking=True.
@@ -342,7 +359,8 @@ class Transformer(Layer):
     """
 
     def __init__(self, att_embedding_size=1, head_num=8, dropout_rate=0.0, use_positional_encoding=True, use_res=True,
-                 use_feed_forward=True, use_layer_norm=False, blinding=False, seed=1024, supports_masking=False,  **kwargs):
+                 use_feed_forward=True, use_layer_norm=False, blinding=True, seed=1024, supports_masking=False,
+                 **kwargs):
         if head_num <= 0:
             raise ValueError('head_num must be a int > 0')
         self.att_embedding_size = att_embedding_size
@@ -361,6 +379,9 @@ class Transformer(Layer):
     def build(self, input_shape):
 
         embedding_size = input_shape[0][-1].value
+        if self.num_units != embedding_size:
+            raise ValueError(
+                "att_embedding_size * head_num must equal the last dimension size of inputs,got %d * %d != %d" % (self.att_embedding_size,self.head_num,embedding_size))
         self.seq_len_max = input_shape[0][-2].value
         self.W_Query = self.add_weight(name='query', shape=[embedding_size, self.att_embedding_size * self.head_num],
                                        dtype=tf.float32,
@@ -380,17 +401,17 @@ class Transformer(Layer):
             self.fw2 = self.add_weight('fw2', shape=[4 * self.num_units, self.num_units], dtype=tf.float32,
                                        initializer=tf.keras.initializers.glorot_uniform(seed=self.seed))
 
-        if self.use_positional_encoding:
-
-            self.kpe = Position_Embedding(input_shape[0][-1].value)
-            self.qpe = Position_Embedding(input_shape[1][-1].value)
+        # if self.use_positional_encoding:
+        #
+        #     self.kpe = Position_Embedding(input_shape[0][-1].value)
+        #     self.qpe = Position_Embedding(input_shape[1][-1].value)
         self.dropout = tf.keras.layers.Dropout(
             self.dropout_rate, seed=self.seed)
         self.ln = LayerNormalization()
         # Be sure to call this somewhere!
         super(Transformer, self).build(input_shape)
 
-    def call(self, inputs, mask=None, **kwargs):
+    def call(self, inputs, mask=None, training=None, **kwargs):
 
         if self.supports_masking:
             queries, keys = inputs
@@ -408,8 +429,8 @@ class Transformer(Layer):
             key_masks = tf.squeeze(key_masks, axis=1)
 
         if self.use_positional_encoding:
-            queries = self.qpe(queries)
-            keys = self.kpe(keys)
+            queries = positional_encoding(queries)
+            keys = positional_encoding(queries)
 
         querys = tf.tensordot(queries, self.W_Query,
                               axes=(-1, 0))  # None T_q D*head_num
@@ -439,7 +460,7 @@ class Transformer(Layer):
         outputs = tf.where(tf.equal(key_masks, 1), outputs, paddings, )
         if self.blinding:
             outputs = tf.matrix_set_diag(outputs, tf.ones_like(outputs)[
-                                         :, :, 0] * (-2 ** 32 + 1))
+                                                  :, :, 0] * (-2 ** 32 + 1))
 
         outputs -= tf.reduce_max(outputs, axis=-1, keep_dims=True)
         outputs = tf.nn.softmax(outputs)
@@ -450,7 +471,7 @@ class Transformer(Layer):
 
         outputs *= query_masks
 
-        outputs = self.dropout(outputs)
+        outputs = self.dropout(outputs, training=training)
         # Weighted sum
         # ( h*N, T_q, C/h)
         result = tf.matmul(outputs, values)
@@ -464,7 +485,7 @@ class Transformer(Layer):
 
         if self.use_feed_forward:
             fw1 = tf.nn.relu(tf.tensordot(result, self.fw1, axes=[-1, 0]))
-            fw1 = self.dropout(fw1)
+            fw1 = self.dropout(fw1, training=training)
             fw2 = tf.tensordot(fw1, self.fw2, axes=[-1, 0])
             if self.use_res:
                 result += fw2
@@ -484,42 +505,224 @@ class Transformer(Layer):
         config = {'att_embedding_size': self.att_embedding_size, 'head_num': self.head_num,
                   'dropout_rate': self.dropout_rate, 'use_res': self.use_res,
                   'use_positional_encoding': self.use_positional_encoding, 'use_feed_forward': self.use_feed_forward,
-                  'use_layer_norm': self.use_layer_norm, 'seed': self.seed, 'supports_masking': self.supports_masking, 'blinding': self.blinding}
+                  'use_layer_norm': self.use_layer_norm, 'seed': self.seed, 'supports_masking': self.supports_masking,
+                  'blinding': self.blinding}
         base_config = super(Transformer, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
+def positional_encoding(inputs,
+                        pos_embedding_trainable=True,
+                        zero_pad=False,
+                        scale=True,
+                        ):
+    '''Sinusoidal Positional_Encoding.
 
-class Position_Embedding(Layer):
+    Args:
 
-    def __init__(self, size=None, scale=True, mode='sum', **kwargs):
-        self.size = size  # must be even
-        self.scale = scale
-        self.mode = mode
-        super(Position_Embedding, self).__init__(**kwargs)
+      - inputs: A 2d Tensor with shape of (N, T).
+      - num_units: Output dimensionality
+      - zero_pad: Boolean. If True, all the values of the first row (id = 0) should be constant zero
+      - scale: Boolean. If True, the output will be multiplied by sqrt num_units(check details from paper)
+      - scope: Optional scope for `variable_scope`.
+      - reuse: Boolean, whether to reuse the weights of a previous layer by the same name.
 
-    def call(self, x):
-        if (self.size == None) or (self.mode == 'sum'):
-            self.size = int(x.shape[-1])
+    Returns:
 
-        position_j = 1. / \
-            K.pow(10000., 2 * K.arange(self.size / 2, dtype='float32') / self.size)
-        position_j = K.expand_dims(position_j, 0)
+      - A 'Tensor' with one more rank than inputs's, with the dimensionality should be 'num_units'
+    '''
 
-        position_i = tf.cumsum(K.ones_like(x[:, :, 0]), 1) - 1
-        position_i = K.expand_dims(position_i, 2)
-        position_ij = K.dot(position_i, position_j)
-        outputs = K.concatenate(
-            [K.cos(position_ij), K.sin(position_ij)], 2)
+    _, T, num_units = inputs.get_shape().as_list()
+    # with tf.variable_scope(scope, reuse=reuse):
+    position_ind = tf.expand_dims(tf.range(T), 0)
+    # First part of the PE function: sin and cos argument
+    position_enc = np.array([
+        [pos / np.power(10000, 2. * i / num_units)
+         for i in range(num_units)]
+        for pos in range(T)])
 
-        if self.mode == 'sum':
-            if self.scale:
-                outputs = outputs * outputs ** 0.5
-            return x + outputs
-        elif self.mode == 'concat':
-            return K.concatenate([outputs, x], 2)
+    # Second part, apply the cosine to even columns and sin to odds.
+    position_enc[:, 0::2] = np.sin(position_enc[:, 0::2])  # dim 2i
+    position_enc[:, 1::2] = np.cos(position_enc[:, 1::2])  # dim 2i+1
+
+    # Convert to a tensor
+
+    if pos_embedding_trainable:
+        lookup_table = K.variable(position_enc, dtype=tf.float32)
+
+    if zero_pad:
+        lookup_table = tf.concat((tf.zeros(shape=[1, num_units]),
+                                  lookup_table[1:, :]), 0)
+
+    outputs = tf.nn.embedding_lookup(lookup_table, position_ind)
+
+    if scale:
+        outputs = outputs * num_units ** 0.5
+    return outputs + inputs
+
+
+class BiasEncoding(Layer):
+    def __init__(self, sess_max_count, seed=1024, **kwargs):
+        self.sess_max_count = sess_max_count
+        self.seed = seed
+        super(BiasEncoding, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+        # Create a trainable weight variable for this layer.
+
+        if self.sess_max_count == 1:
+            embed_size = input_shape[2].value
+            seq_len_max = input_shape[1].value
+        else:
+            embed_size = input_shape[0][2].value
+            seq_len_max = input_shape[0][1].value
+
+        self.sess_bias_embedding = self.add_weight('sess_bias_embedding', shape=(self.sess_max_count, 1, 1),
+                                                   initializer=TruncatedNormal(
+                                                       mean=0.0, stddev=0.0001, seed=self.seed))
+        self.seq_bias_embedding = self.add_weight('seq_bias_embedding', shape=(1, seq_len_max, 1),
+                                                  initializer=TruncatedNormal(
+                                                      mean=0.0, stddev=0.0001, seed=self.seed))
+        self.item_bias_embedding = self.add_weight('item_bias_embedding', shape=(1, 1, embed_size),
+                                                   initializer=TruncatedNormal(
+                                                       mean=0.0, stddev=0.0001, seed=self.seed))
+
+        # Be sure to call this somewhere!
+        super(BiasEncoding, self).build(input_shape)
+
+    def call(self, inputs, mask=None):
+        """
+        :param concated_embeds_value: None * field_size * embedding_size
+        :return: None*1
+        """
+        transformer_out = []
+        for i in range(self.sess_max_count):
+            transformer_out.append(
+                inputs[i] + self.item_bias_embedding + self.seq_bias_embedding + self.sess_bias_embedding[i])
+        return transformer_out
 
     def compute_output_shape(self, input_shape):
-        if self.mode == 'sum':
-            return input_shape
-        elif self.mode == 'concat':
-            return (input_shape[0], input_shape[1], input_shape[2] + self.size)
+
+        return input_shape
+
+    def compute_mask(self, inputs, mask=None):
+        return mask
+
+    def get_config(self, ):
+
+        config = {'sess_max_count': self.sess_max_count, 'seed': self.seed, }
+        base_config = super(BiasEncoding, self).get_config()
+        return dict(list(base_config.items()) + list(config.items()))
+
+
+class DynamicGRU(Layer):
+    def __init__(self, num_units=None, gru_type='GRU', return_sequence=True, **kwargs):
+
+        self.num_units = num_units
+        self.return_sequence = return_sequence
+        self.gru_type = gru_type
+        super(DynamicGRU, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+        # Create a trainable weight variable for this layer.
+        input_seq_shape = input_shape[0]
+        if self.num_units is None:
+            self.num_units = input_seq_shape.as_list()[-1]
+        if self.gru_type == "AGRU":
+            self.gru_cell = QAAttGRUCell(self.num_units)
+        elif self.gru_type == "AUGRU":
+            self.gru_cell = VecAttGRUCell(self.num_units)
+        else:
+            self.gru_cell = tf.nn.rnn_cell.GRUCell(self.num_units)
+
+        # Be sure to call this somewhere!
+        super(DynamicGRU, self).build(input_shape)
+
+    def call(self, input_list):
+        """
+        :param concated_embeds_value: None * field_size * embedding_size
+        :return: None*1
+        """
+        if self.gru_type == "GRU" or self.gru_type == "AIGRU":
+            rnn_input, sequence_length = input_list
+            att_score = None
+        else:
+            rnn_input, sequence_length, att_score = input_list
+
+        rnn_output, hidden_state = dynamic_rnn(self.gru_cell, inputs=rnn_input, att_scores=att_score,
+                                               sequence_length=tf.squeeze(sequence_length,
+                                                                          ), dtype=tf.float32, scope=self.name)
+        if self.return_sequence:
+            return rnn_output
+        else:
+            return tf.expand_dims(hidden_state, axis=1)
+
+    def compute_output_shape(self, input_shape):
+        rnn_input_shape = input_shape[0]
+        if self.return_sequence:
+            return rnn_input_shape
+        else:
+            return (None, 1, rnn_input_shape[2])
+
+    def get_config(self, ):
+        config = {'num_units': self.num_units, 'gru_type': self.gru_type, 'return_sequence': self.return_sequence}
+        base_config = super(DynamicGRU, self).get_config()
+        return dict(list(base_config.items()) + list(config.items()))
+
+
+class KMaxPooling(Layer):
+    """K Max pooling that selects the k biggest value along the specific axis.
+
+      Input shape
+        -  nD tensor with shape: ``(batch_size, ..., input_dim)``.
+
+      Output shape
+        - nD tensor with shape: ``(batch_size, ..., output_dim)``.
+
+      Arguments
+        - **k**: positive integer, number of top elements to look for along the ``axis`` dimension.
+
+        - **axis**: positive integer, the dimension to look for elements.
+
+     """
+
+    def __init__(self, k=1, axis=-1, **kwargs):
+
+        self.k = k
+        self.axis = axis
+        super(KMaxPooling, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+
+        if self.axis < 1 or self.axis > len(input_shape):
+            raise ValueError("axis must be 1~%d,now is %d" %
+                             (len(input_shape), len(input_shape)))
+
+        if self.k < 1 or self.k > input_shape[self.axis]:
+            raise ValueError("k must be in 1 ~ %d,now k is %d" %
+                             (input_shape[self.axis], self.k))
+        self.dims = len(input_shape)
+        # Be sure to call this somewhere!
+        super(KMaxPooling, self).build(input_shape)
+
+    def call(self, inputs):
+
+        # swap the last and the axis dimensions since top_k will be applied along the last dimension
+        perm = list(range(self.dims))
+        perm[-1], perm[self.axis] = perm[self.axis], perm[-1]
+        shifted_input = tf.transpose(inputs, perm)
+
+        # extract top_k, returns two tensors [values, indices]
+        top_k = tf.nn.top_k(shifted_input, k=self.k, sorted=True, name=None)[0]
+        output = tf.transpose(top_k, perm)
+
+        return output
+
+    def compute_output_shape(self, input_shape):
+        output_shape = list(input_shape)
+        output_shape[self.axis] = self.k
+        return tuple(output_shape)
+
+    def get_config(self, ):
+        config = {'k': self.k, 'axis': self.axis}
+        base_config = super(KMaxPooling, self).get_config()
+        return dict(list(base_config.items()) + list(config.items()))

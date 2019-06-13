@@ -48,11 +48,16 @@ def test_SequencePoolingLayer(mode, supports_masking, input_shape):
 )
 def test_BiLSTM(merge_mode):
     with CustomObjectScope({'BiLSTM': sequence.BiLSTM}):
-        layer_test(sequence.BiLSTM, kwargs={'merge_mode': merge_mode, 'units': EMBEDDING_SIZE},
+        layer_test(sequence.BiLSTM, kwargs={'merge_mode': merge_mode, 'units': EMBEDDING_SIZE,'dropout_rate':0.5},
                    input_shape=(BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE))
 
 
 def test_Transformer():
     with CustomObjectScope({'Transformer': sequence.Transformer}):
-        layer_test(sequence.Transformer, kwargs={'att_embedding_size': 1, 'head_num': 8, 'use_layer_norm': True, 'supports_masking': False},
+        layer_test(sequence.Transformer, kwargs={'att_embedding_size': 1, 'head_num': 8, 'use_layer_norm': True, 'supports_masking': False,'dropout_rate':0.5},
                    input_shape=[(BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE), (BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE), (BATCH_SIZE, 1), (BATCH_SIZE, 1)])
+
+
+def test_KMaxPooling():
+    with CustomObjectScope({'KMaxPooling':sequence.KMaxPooling}):
+        layer_test(sequence.KMaxPooling,kwargs={'k':3,'axis':1},input_shape=(BATCH_SIZE,SEQ_LENGTH,EMBEDDING_SIZE,2))
