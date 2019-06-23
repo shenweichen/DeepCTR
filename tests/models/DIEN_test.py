@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from deepctr.models import DIEN
-from deepctr.utils import SingleFeat
+from deepctr.inputs import SparseFeat
 from ..utils import check_model
 
 

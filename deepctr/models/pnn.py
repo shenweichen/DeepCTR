@@ -9,7 +9,7 @@ Reference:
 
 import tensorflow as tf
 
-from ..input_embedding import preprocess_input_embedding
+from ..inputs import input_from_feature_columns
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import InnerProductLayer, OutterProductLayer
 from ..layers.utils import concat_fun
@@ -41,12 +41,8 @@ def PNN(feature_dim_dict, embedding_size=8, dnn_hidden_units=(128, 128), l2_reg_
     if kernel_type not in ['mat', 'vec', 'num']:
         raise ValueError("kernel_type must be mat,vec or num")
 
-    deep_emb_list, _, _, inputs_list = preprocess_input_embedding(feature_dim_dict,
-                                                                  embedding_size,
-                                                                  l2_reg_embedding,
-                                                                  0, init_std,
-                                                                  seed,
-                                                                  create_linear_weight=False)
+    deep_emb_list, _, _, inputs_list = input_from_feature_columns(feature_dim_dict, embedding_size, l2_reg_embedding, 0,
+                                                                  init_std, seed)
 
     inner_product = tf.keras.layers.Flatten()(InnerProductLayer()(deep_emb_list))
     outter_product = OutterProductLayer(kernel_type)(deep_emb_list)

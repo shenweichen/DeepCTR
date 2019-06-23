@@ -1,7 +1,7 @@
 import numpy as np
 
 from deepctr.models import DSIN
-from deepctr.utils import SingleFeat
+from deepctr.inputs import SparseFeat
 
 
 def get_xy_fd(hash_flag=False):

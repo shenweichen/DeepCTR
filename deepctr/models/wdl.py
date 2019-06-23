@@ -10,7 +10,7 @@ Reference:
 from tensorflow.python.keras.layers import Dense, Concatenate, Flatten, add
 from tensorflow.python.keras.models import Model
 
-from ..input_embedding import create_singlefeat_inputdict, create_embedding_dict, get_embedding_vec_list, \
+from ..inputs import build_input_features, create_embedding_dict, get_embedding_vec_list, \
     get_inputs_list
 from ..layers.core import PredictionLayer, DNN
 
@@ -39,14 +39,12 @@ def WDL(deep_feature_dim_dict, wide_feature_dim_dict, embedding_size=8, dnn_hidd
         raise ValueError(
             "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
 
-    sparse_input, dense_input, = create_singlefeat_inputdict(
-        deep_feature_dim_dict)
-    bias_sparse_input, bias_dense_input = create_singlefeat_inputdict(
-        wide_feature_dim_dict, 'bias')
-    sparse_embedding = create_embedding_dict(
-        deep_feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding)
-    wide_linear_embedding = create_embedding_dict(
-        wide_feature_dim_dict, 1, init_std, seed, l2_reg_linear, 'linear')
+    sparse_input, dense_input, = build_input_features(deep_feature_dim_dict)
+    bias_sparse_input, bias_dense_input = build_input_features(wide_feature_dim_dict, 'bias')
+    sparse_embedding = create_embedding_dict(deep_feature_dim_dict, None, embedding_size, init_std, seed,
+                                             l2_reg_embedding)
+    wide_linear_embedding = create_embedding_dict(wide_feature_dim_dict, None, 1, init_std, seed, l2_reg_linear,
+                                                  'linear')
 
     embed_list = get_embedding_vec_list(sparse_embedding, sparse_input, deep_feature_dim_dict['sparse'])
 

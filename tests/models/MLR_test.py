@@ -1,7 +1,8 @@
 import numpy as np
 import pytest
 from deepctr.models import MLR
-from ..utils import check_model,SingleFeat,SAMPLE_SIZE
+from ..utils import check_model, SAMPLE_SIZE
+from deepctr.inputs import SparseFeat
 
 
 @pytest.mark.parametrize(

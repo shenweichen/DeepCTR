@@ -1,5 +1,5 @@
 import pytest
-from deepctr.models import NFFM
+from deepctr.models import ONN
 from ..utils import check_model, get_test_data,SAMPLE_SIZE
 
 
@@ -14,8 +14,8 @@ def test_NFFM(hidden_size, sparse_feature_num):
     sample_size = SAMPLE_SIZE
     x, y, feature_dim_dict = get_test_data(sample_size, sparse_feature_num, sparse_feature_num, sequence_feature=(),hash_flag=True)
 
-    model = NFFM(feature_dim_dict, embedding_size=8,
-                 dnn_hidden_units=[32, 32], dnn_dropout=0.5)
+    model = ONN(feature_dim_dict, embedding_size=8,
+                dnn_hidden_units=[32, 32], dnn_dropout=0.5)
     check_model(model, model_name, x, y)
 
 

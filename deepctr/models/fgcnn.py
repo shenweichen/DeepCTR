@@ -11,8 +11,8 @@ Reference:
 """
 import tensorflow as tf
 
-from ..input_embedding import create_singlefeat_inputdict, create_varlenfeat_inputdict, get_linear_logit
-from ..input_embedding import get_inputs_embedding
+from ..inputs import build_input_features, create_varlenfeat_inputdict, get_linear_logit
+from ..inputs import get_inputs_embedding
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import InnerProductLayer, FGCNNLayer
 from ..layers.utils import concat_fun
@@ -21,21 +21,18 @@ from ..utils import check_feature_config_dict
 
 def preprocess_input_embedding(feature_dim_dict, embedding_size, l2_reg_embedding, l2_reg_linear, init_std, seed,
                                return_linear_logit=True, ):
-    sparse_input_dict, dense_input_dict = create_singlefeat_inputdict(
-        feature_dim_dict)
+    sparse_input_dict, dense_input_dict = build_input_features(feature_dim_dict)
     sequence_input_dict, sequence_input_len_dict, sequence_max_len_dict = create_varlenfeat_inputdict(
         feature_dim_dict)
-    inputs_list, deep_emb_list, linear_emb_list = get_inputs_embedding(feature_dim_dict, embedding_size,
-                                                                       l2_reg_embedding, l2_reg_linear, init_std, seed,
-                                                                       sparse_input_dict, dense_input_dict,
-                                                                       sequence_input_dict, sequence_input_len_dict,
-                                                                       sequence_max_len_dict,
-                                                                       return_linear_logit, prefix='')
-    _, fg_deep_emb_list, _ = get_inputs_embedding(feature_dim_dict, embedding_size,
-                                                  l2_reg_embedding, l2_reg_linear, init_std, seed,
-                                                  sparse_input_dict, dense_input_dict,
-                                                  sequence_input_dict, sequence_input_len_dict,
-                                                  sequence_max_len_dict, False, prefix='fg')
+    inputs_list, deep_emb_list, linear_emb_list = get_inputs_embedding(None, feature_dim_dict, l2_reg_embedding,
+                                                                       l2_reg_linear, init_std, seed, sparse_input_dict,
+                                                                       dense_input_dict, sequence_input_dict,
+                                                                       sequence_input_len_dict, sequence_max_len_dict,
+                                                                       return_linear_logit, embedding_size, prefix='')
+    _, fg_deep_emb_list, _ = get_inputs_embedding(None, feature_dim_dict, l2_reg_embedding, l2_reg_linear, init_std,
+                                                  seed, sparse_input_dict, dense_input_dict, sequence_input_dict,
+                                                  sequence_input_len_dict, sequence_max_len_dict, False, embedding_size,
+                                                  prefix='fg')
     if return_linear_logit:
         linear_logit = get_linear_logit(
             linear_emb_list, dense_input_dict, l2_reg_linear)

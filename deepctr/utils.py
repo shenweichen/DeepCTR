@@ -8,7 +8,6 @@ Author:
 
 import json
 import logging
-from collections import namedtuple
 from threading import Thread
 
 import requests
@@ -17,20 +16,6 @@ try:
     from packaging.version import parse
 except ImportError:
     from pip._vendor.packaging.version import parse
-
-
-class SingleFeat(namedtuple('SingleFeat', ['name', 'dimension', 'hash_flag', 'dtype'])):
-    __slots__ = ()
-
-    def __new__(cls, name, dimension, hash_flag=False, dtype="float32"):
-        return super(SingleFeat, cls).__new__(cls, name, dimension, hash_flag, dtype)
-
-
-class VarLenFeat(namedtuple('VarLenFeat', ['name', 'dimension', 'maxlen', 'combiner', 'hash_flag', 'dtype'])):
-    __slots__ = ()
-
-    def __new__(cls, name, dimension, maxlen, combiner="mean", hash_flag=False, dtype="float32"):
-        return super(VarLenFeat, cls).__new__(cls, name, dimension, maxlen, combiner, hash_flag, dtype)
 
 
 def check_version(version):

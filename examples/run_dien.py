@@ -1,7 +1,7 @@
 import numpy as np
 
 from deepctr.models import DIEN
-from deepctr.utils import SingleFeat
+from deepctr.inputs import SparseFeat
 
 
 def get_xy_fd(use_neg=False):

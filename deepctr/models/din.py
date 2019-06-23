@@ -14,7 +14,7 @@ from tensorflow.python.keras.layers import Input, Dense, Embedding, Concatenate,
 from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.regularizers import l2
 
-from ..input_embedding import get_inputs_list, create_singlefeat_inputdict, get_embedding_vec_list
+from ..inputs import get_inputs_list, build_input_features, get_embedding_vec_list
 from ..layers.core import DNN, PredictionLayer
 from ..layers.sequence import AttentionSequencePoolingLayer
 from ..layers.utils import concat_fun, NoMask
@@ -22,7 +22,7 @@ from ..utils import check_feature_config_dict
 
 
 def get_input(feature_dim_dict, seq_feature_list, seq_max_len):
-    sparse_input, dense_input = create_singlefeat_inputdict(feature_dim_dict)
+    sparse_input, dense_input = build_input_features(feature_dim_dict)
     user_behavior_input = OrderedDict()
     for i, feat in enumerate(seq_feature_list):
         user_behavior_input[feat] = Input(shape=(seq_max_len,), name='seq_' + str(i) + '-' + feat)

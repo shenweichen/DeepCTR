@@ -11,7 +11,7 @@ Reference:
 """
 import tensorflow as tf
 
-from ..input_embedding import preprocess_input_embedding, get_linear_logit
+from ..inputs import input_from_feature_columns, get_linear_logit
 from ..layers.core import PredictionLayer
 from ..layers.interaction import AFMLayer, FM
 from ..layers.utils import concat_fun
@@ -37,14 +37,13 @@ def AFM(feature_dim_dict, embedding_size=8, use_attention=True, attention_factor
     :return: A Keras model instance.
     """
 
-    check_feature_config_dict(feature_dim_dict)
+    #check_feature_config_dict(feature_dim_dict)
 
-    deep_emb_list, linear_emb_list, dense_input_dict, inputs_list = preprocess_input_embedding(feature_dim_dict,
+    deep_emb_list, linear_emb_list, dense_input_dict, inputs_list = input_from_feature_columns(feature_dim_dict,
                                                                                                embedding_size,
                                                                                                l2_reg_embedding,
                                                                                                l2_reg_linear, init_std,
-                                                                                               seed,
-                                                                                               create_linear_weight=True)
+                                                                                               seed)
 
     linear_logit = get_linear_logit(linear_emb_list, dense_input_dict, l2_reg_linear)
 

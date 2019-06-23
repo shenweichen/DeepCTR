@@ -4,8 +4,8 @@ Author:
     Weichen Shen,wcshen1994@163.com
 
 Reference:
-    [1] Zhang L, Shen W, Li S, et al. Field-aware Neural Factorization Machine for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1902.09096, 2019.(https://arxiv.org/abs/1902.09096)
-    (The original NFFM was first used by Yi Yang(yangyi868@gmail.com) in TSA competition in 2017.)
+    [1] [Operation-aware Neural Networks for User Response Prediction](https://arxiv.org/pdf/1904.12579.pdf)
+
 """
 
 import itertools
@@ -18,19 +18,19 @@ from tensorflow.python.keras.layers import (Dense, Embedding, Lambda, add,
 from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.regularizers import l2
 
-from ..input_embedding import (create_singlefeat_inputdict,
-                               get_embedding_vec_list, get_inputs_list,
-                               get_linear_logit)
+from ..inputs import (build_input_features,
+                      get_embedding_vec_list, get_inputs_list,
+                      get_linear_logit)
 from ..layers.core import DNN, PredictionLayer
 from ..layers.utils import concat_fun,Hash
 from ..utils import check_feature_config_dict
 
 
-def NFFM(feature_dim_dict, embedding_size=4, dnn_hidden_units=(128, 128),
-         l2_reg_embedding=1e-5, l2_reg_linear=1e-5, l2_reg_dnn=0, dnn_dropout=0,
-         init_std=0.0001, seed=1024, include_linear=True, use_bn=True, reduce_sum=False, task='binary',
-         ):
-    """Instantiates the Field-aware Neural Factorization Machine architecture.
+def ONN(feature_dim_dict, embedding_size=4, dnn_hidden_units=(128, 128),
+        l2_reg_embedding=1e-5, l2_reg_linear=1e-5, l2_reg_dnn=0, dnn_dropout=0,
+        init_std=0.0001, seed=1024, include_linear=True, use_bn=True, reduce_sum=False, task='binary',
+        ):
+    """Instantiates the Operation-aware Neural Networks  architecture.
 
     :param feature_dim_dict: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
     :param embedding_size: positive integer,sparse feature embedding_size
@@ -52,8 +52,7 @@ def NFFM(feature_dim_dict, embedding_size=4, dnn_hidden_units=(128, 128),
     if 'sequence' in feature_dim_dict and len(feature_dim_dict['sequence']) > 0:
         raise ValueError("now sequence input is not supported in NFFM")#TODO:support sequence input
 
-    sparse_input_dict, dense_input_dict = create_singlefeat_inputdict(
-        feature_dim_dict)
+    sparse_input_dict, dense_input_dict = build_input_features(feature_dim_dict)
 
     sparse_embedding, dense_embedding, linear_embedding = create_embedding_dict(
         feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding, l2_reg_linear, )

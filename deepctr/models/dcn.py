@@ -8,7 +8,7 @@ Reference:
 """
 import tensorflow as tf
 
-from ..input_embedding import preprocess_input_embedding
+from ..inputs import input_from_feature_columns
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import CrossNet
 from ..layers.utils import concat_fun
@@ -42,12 +42,8 @@ def DCN(feature_dim_dict, embedding_size='auto',
 
     check_feature_config_dict(feature_dim_dict)
 
-    deep_emb_list, _, _, inputs_list = preprocess_input_embedding(feature_dim_dict,
-                                                                  embedding_size,
-                                                                  l2_reg_embedding,
-                                                                  0, init_std,
-                                                                  seed,
-                                                                  create_linear_weight=False)
+    deep_emb_list, _, _, inputs_list = input_from_feature_columns(feature_dim_dict, embedding_size, l2_reg_embedding, 0,
+                                                                  init_std, seed)
 
     deep_input = tf.keras.layers.Flatten()(concat_fun(deep_emb_list))
 

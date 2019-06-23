@@ -16,8 +16,8 @@ from tensorflow.python.keras.layers import (Concatenate, Dense, Embedding,
 from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.regularizers import l2
 
-from ..input_embedding import (create_singlefeat_inputdict,
-                               get_embedding_vec_list, get_inputs_list)
+from ..inputs import (build_input_features,
+                      get_embedding_vec_list, get_inputs_list)
 from ..layers.core import DNN, PredictionLayer
 from ..layers.sequence import (AttentionSequencePoolingLayer, BiasEncoding,
                                BiLSTM, Transformer)
@@ -127,7 +127,7 @@ def DSIN(feature_dim_dict, sess_feature_list, embedding_size=8, sess_max_count=5
 
 
 def get_input(feature_dim_dict, seq_feature_list, sess_max_count, seq_max_len):
-    sparse_input, dense_input = create_singlefeat_inputdict(feature_dim_dict)
+    sparse_input, dense_input = build_input_features(feature_dim_dict)
     user_behavior_input = {}
     for idx in range(sess_max_count):
         sess_input = OrderedDict()

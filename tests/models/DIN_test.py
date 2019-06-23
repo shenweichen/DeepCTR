@@ -1,7 +1,7 @@
 import numpy as np
 
 from deepctr.models.din import DIN
-from deepctr.utils import SingleFeat
+from deepctr.inputs import SparseFeat
 from ..utils import check_model
 
 
