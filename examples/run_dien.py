@@ -1,13 +1,14 @@
 import numpy as np
 
 from deepctr.models import DIEN
-from deepctr.inputs import SparseFeat
+from deepctr.inputs import SparseFeat,DenseFeat
 
 
 def get_xy_fd(use_neg=False):
-    feature_dim_dict = {"sparse": [SingleFeat('user', 3), SingleFeat(
-        'gender', 2), SingleFeat('item', 3 + 1), SingleFeat('item_gender', 2 + 1)], "dense": [SingleFeat('score', 0)]}
+    feature_dim_dict = {"sparse": [SparseFeat('user', 3), SparseFeat(
+        'gender', 2), SparseFeat('item', 3 + 1), SparseFeat('item_gender', 2 + 1)], "dense": [DenseFeat('score', 0)]}
     behavior_feature_list = ["item", "item_gender"]
+
     uid = np.array([0, 1, 2])
     ugender = np.array([0, 1, 0])
     iid = np.array([1, 2, 3])  # 0 is mask value

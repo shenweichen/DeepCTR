@@ -8,20 +8,20 @@ Reference:
 """
 import tensorflow as tf
 
-from ..inputs import input_from_feature_columns, get_linear_logit
+from ..inputs import input_from_feature_columns, get_linear_logit, build_input_features,combined_dnn_input
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import BiInteractionPooling
 from ..layers.utils import concat_fun
 from ..utils import check_feature_config_dict
 
 
-def NFM(feature_dim_dict, embedding_size=8,
-        dnn_hidden_units=(128, 128), l2_reg_embedding=1e-5, l2_reg_linear=1e-5, l2_reg_dnn=0,
-        init_std=0.0001, seed=1024, bi_dropout=0, dnn_dropout=0, dnn_activation='relu', task='binary',
-        ):
+def NFM(linear_feature_columns, dnn_feature_columns, embedding_size=8, dnn_hidden_units=(128, 128),
+        l2_reg_embedding=1e-5, l2_reg_linear=1e-5, l2_reg_dnn=0, init_std=0.0001, seed=1024, bi_dropout=0,
+        dnn_dropout=0, dnn_activation='relu', task='binary'):
     """Instantiates the Neural Factorization Machine architecture.
 
-    :param feature_dim_dict: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
+    :param dnn_feature_columns:
+    :param linear_feature_columns: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
     :param embedding_size: positive integer,sparse feature embedding_size
     :param dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of deep net
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
@@ -35,17 +35,21 @@ def NFM(feature_dim_dict, embedding_size=8,
     :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
     :return: A Keras model instance.
     """
-    check_feature_config_dict(feature_dim_dict)
+    #check_feature_config_dict(linear_feature_columns)
 
-    deep_emb_list, linear_emb_list, dense_input_dict, inputs_list = input_from_feature_columns(feature_dim_dict,
-                                                                                               embedding_size,
-                                                                                               l2_reg_embedding,
-                                                                                               l2_reg_linear, init_std,
-                                                                                               seed)
+    features = build_input_features(linear_feature_columns + dnn_feature_columns)
 
-    linear_logit = get_linear_logit(linear_emb_list, dense_input_dict, l2_reg_linear)
+    inputs_list = list(features.values())
 
-    fm_input = concat_fun(deep_emb_list, axis=1)
+    sparse_embedding_list, dense_value_list = input_from_feature_columns(features,dnn_feature_columns,
+                                                                              embedding_size,
+                                                                              l2_reg_embedding,init_std,
+                                                                              seed)
+    #todo not support dense
+    linear_logit = get_linear_logit(features,linear_feature_columns,
+                                       l2_reg_linear, init_std,seed,prefix='linear')
+
+    fm_input = concat_fun(sparse_embedding_list, axis=1)
     bi_out = BiInteractionPooling()(fm_input)
     if bi_dropout:
         bi_out = tf.keras.layers.Dropout(bi_dropout)(bi_out, training=None)

@@ -11,20 +11,20 @@ Reference:
 
 import tensorflow as tf
 
-from ..inputs import input_from_feature_columns
+from ..inputs import input_from_feature_columns,build_input_features,combined_dnn_input
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import InteractingLayer
 from ..layers.utils import concat_fun
 from ..utils import check_feature_config_dict
 
 
-def AutoInt(feature_dim_dict, embedding_size=8, att_layer_num=3, att_embedding_size=8, att_head_num=2, att_res=True,
+def AutoInt(dnn_feature_columns, embedding_size=8, att_layer_num=3, att_embedding_size=8, att_head_num=2, att_res=True,
             dnn_hidden_units=(256, 256), dnn_activation='relu',
             l2_reg_dnn=0, l2_reg_embedding=1e-5, dnn_use_bn=False, dnn_dropout=0, init_std=0.0001, seed=1024,
             task='binary', ):
     """Instantiates the AutoInt Network architecture.
 
-    :param feature_dim_dict: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
+    :param dnn_feature_columns: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
     :param embedding_size: positive integer,sparse feature embedding_size
     :param att_layer_num: int.The InteractingLayer number to be used.
     :param att_embedding_size: int.The embedding size in multi-head self-attention network.
@@ -44,29 +44,36 @@ def AutoInt(feature_dim_dict, embedding_size=8, att_layer_num=3, att_embedding_s
 
     if len(dnn_hidden_units) <= 0 and att_layer_num <= 0:
         raise ValueError("Either hidden_layer or att_layer_num must > 0")
-    check_feature_config_dict(feature_dim_dict)
+    #check_feature_config_dict(dnn_feature_columns)
 
-    deep_emb_list, _, _, inputs_list = input_from_feature_columns(feature_dim_dict, embedding_size, l2_reg_embedding, 0,
-                                                                  init_std, seed)
+    features = build_input_features(dnn_feature_columns)
+    inputs_list = list(features.values())
 
-    att_input = concat_fun(deep_emb_list, axis=1)
+    sparse_embedding_list, dense_value_list = input_from_feature_columns(dnn_feature_columns,embedding_size,
+                                                                                               l2_reg_embedding,
+                                                                                                init_std,
+                                                                                               seed)
+
+
+    att_input = concat_fun(sparse_embedding_list, axis=1)
 
     for _ in range(att_layer_num):
         att_input = InteractingLayer(
             att_embedding_size, att_head_num, att_res)(att_input)
     att_output = tf.keras.layers.Flatten()(att_input)
 
-    deep_input = tf.keras.layers.Flatten()(concat_fun(deep_emb_list))
+    #dnn_input = tf.keras.layers.Flatten()(concat_fun(sparse_embedding_list))
+    dnn_input = combined_dnn_input(sparse_embedding_list,dense_value_list)
 
     if len(dnn_hidden_units) > 0 and att_layer_num > 0:  # Deep & Interacting Layer
         deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
-                       dnn_use_bn, seed)(deep_input)
+                       dnn_use_bn, seed)(dnn_input)
         stack_out = tf.keras.layers.Concatenate()([att_output, deep_out])
         final_logit = tf.keras.layers.Dense(
             1, use_bias=False, activation=None)(stack_out)
     elif len(dnn_hidden_units) > 0:  # Only Deep
         deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
-                       dnn_use_bn, seed)(deep_input)
+                       dnn_use_bn, seed)(dnn_input)
         final_logit = tf.keras.layers.Dense(
             1, use_bias=False, activation=None)(deep_out)
     elif att_layer_num > 0:  # Only Interacting Layer

@@ -68,7 +68,7 @@ def FGCNN(feature_dim_dict, embedding_size=8, conv_kernel_width=(7, 7, 7, 7), co
     :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
     :return: A Keras model instance.
     """
-
+    #todo 这个还没修改
     check_feature_config_dict(feature_dim_dict)
     if not (len(conv_kernel_width) == len(conv_filters) == len(new_maps) == len(pooling_width)):
         raise ValueError(

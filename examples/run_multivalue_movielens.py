@@ -4,7 +4,7 @@ from sklearn.preprocessing import LabelEncoder
 from tensorflow.python.keras.preprocessing.sequence import pad_sequences
 
 from deepctr.models import DeepFM
-from deepctr.inputs import SparseFeat,DenseFeat, VarLenSparseFeat,get_feature_names
+from deepctr.inputs import SparseFeat,DenseFeat, VarLenSparseFeat,get_fixlen_feature_names
 
 
 def split(x):
@@ -43,7 +43,7 @@ sequence_feature = [VarLenSparseFeat('genres', len(
 
 linear_feature_columns = sparse_feat_list + sequence_feature
 dnn_feature_columns = linear_feature_columns
-feature_names = get_feature_names(linear_feature_columns+dnn_feature_columns)
+feature_names = get_fixlen_feature_names(linear_feature_columns + dnn_feature_columns)
 
 
 # 3.generate input data for model

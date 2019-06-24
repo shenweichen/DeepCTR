@@ -14,8 +14,7 @@ def test_NFM(hidden_size, sparse_feature_num):
     sample_size = SAMPLE_SIZE
     x, y, feature_dim_dict = get_test_data(sample_size, sparse_feature_num, sparse_feature_num)
 
-    model = NFM(feature_dim_dict, embedding_size=8,
-                dnn_hidden_units=[32, 32], dnn_dropout=0.5, )
+    model = NFM(feature_dim_dict, embedding_size=8, dnn_hidden_units=[32, 32], dnn_dropout=0.5)
     check_model(model, model_name, x, y)
 
 

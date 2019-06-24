@@ -10,7 +10,7 @@ from tensorflow.python.keras import backend as K
 from tensorflow.python.keras.layers import Input, Masking
 from tensorflow.python.keras.models import Model, load_model, save_model
 
-from deepctr.inputs import SparseFeat, VarLenSparseFeat
+from deepctr.inputs import SparseFeat, DenseFeat,VarLenSparseFeat,get_fixlen_feature_names,get_varlen_feature_names
 from deepctr.layers import  custom_objects
 
 SAMPLE_SIZE=32
@@ -23,39 +23,52 @@ def get_test_data(sample_size=1000, sparse_feature_num=1, dense_feature_num=1, s
                   classification=True, include_length=False, hash_flag=False):
 
     feature_dim_dict = {"sparse": [], 'dense': [], 'sequence': []}
+    feature_columns = []
 
     for i in range(sparse_feature_num):
         dim = np.random.randint(1, 10)
-        feature_dim_dict['sparse'].append(SingleFeat('sparse_'+str(i), dim,hash_flag,tf.int32))
+        feature_columns.append(SparseFeat('sparse_feature_'+str(i), dim,hash_flag,tf.int32))
     for i in range(dense_feature_num):
-        feature_dim_dict['dense'].append(SingleFeat('dense_'+str(i), 0,False,tf.float32))
+        feature_columns.append(DenseFeat('dense_feature_'+str(i), 1,tf.float32))
     for i, mode in enumerate(sequence_feature):
         dim = np.random.randint(1, 10)
         maxlen = np.random.randint(1, 10)
-        feature_dim_dict['sequence'].append(
-            VarLenFeat('sequence_' + str(i), dim, maxlen, mode))
+        feature_columns.append(
+            VarLenSparseFeat('sequence_' + str(i), dim, maxlen, mode))
 
-    sparse_input = [np.random.randint(0, dim, sample_size)
-                    for feat, dim,_,_ in feature_dim_dict['sparse']]
-    dense_input = [np.random.random(sample_size)
-                   for _ in feature_dim_dict['dense']]
+    fixlen_feature_names = get_fixlen_feature_names(feature_columns)
+    varlen_feature_names = get_varlen_feature_names(feature_columns)
+
+    model_input = []
     sequence_input = []
     sequence_len_input = []
-    for var in feature_dim_dict['sequence']:
-        s_input, s_len_input = gen_sequence(
-            var.dimension, var.maxlen, sample_size)
-        sequence_input.append(s_input)
-        sequence_len_input.append(s_len_input)
+    for fc in feature_columns:
+        if isinstance(fc,SparseFeat):
+            model_input.append(np.random.randint(0, fc.dimension, sample_size))
+        elif isinstance(fc,DenseFeat):
+            model_input.append(np.random.random(sample_size))
+        else:
+            s_input, s_len_input = gen_sequence(
+                fc.dimension, fc.maxlen, sample_size)
+            sequence_input.append(s_input)
+            sequence_len_input.append(s_len_input)
+
+
+    # sparse_input = [np.random.randint(0, dim, sample_size)
+    #                 for feat, dim,_,_ in feature_dim_dict['sparse']]
+    # dense_input = [np.random.random(sample_size)
+    #                for _ in feature_dim_dict['dense']]
+
     if classification:
         y = np.random.randint(0, 2, sample_size)
     else:
         y = np.random.random(sample_size)
 
-    x = sparse_input + dense_input + sequence_input
+    x = model_input+ sequence_input
     if include_length:
         x += sequence_len_input
 
-    return x, y, feature_dim_dict
+    return x, y, feature_columns
 
 
 def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,

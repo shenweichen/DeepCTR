@@ -31,6 +31,7 @@ def MLR(region_feature_dim_dict, base_feature_dim_dict={"sparse": [], "dense": [
     :return: A Keras model instance.
     """
 
+    #todo 还没修改
     if region_num <= 1:
         raise ValueError("region_num must > 1")
     if not isinstance(region_feature_dim_dict,

@@ -4,7 +4,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 
 from deepctr.models import DeepFM
-from deepctr.inputs import SparseFeat, DenseFeat,get_feature_names
+from deepctr.inputs import SparseFeat, DenseFeat,get_fixlen_feature_names
 
 if __name__ == "__main__":
     data = pd.read_csv('./criteo_sample.txt')
@@ -28,7 +28,7 @@ if __name__ == "__main__":
                           for feat in dense_features]
     linear_feature_columns = sparse_feature_list + dense_feature_list
     dnn_feature_columns = linear_feature_columns
-    feature_names = get_feature_names(linear_feature_columns + dnn_feature_columns, )
+    feature_names = get_fixlen_feature_names(linear_feature_columns + dnn_feature_columns, )
 
     # 3.generate input data for model
 

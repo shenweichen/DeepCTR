@@ -11,19 +11,20 @@ Reference:
 """
 import tensorflow as tf
 
-from ..inputs import input_from_feature_columns, get_linear_logit
+from ..inputs import input_from_feature_columns, get_linear_logit,build_input_features
 from ..layers.core import DNN, PredictionLayer
 from ..layers.sequence import KMaxPooling
 from ..layers.utils import concat_fun
 from ..utils import check_feature_config_dict
 
 
-def CCPM(feature_dim_dict, embedding_size=8, conv_kernel_width=(6, 5), conv_filters=(4, 4), dnn_hidden_units=(256,),
-         l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_dnn=0, dnn_dropout=0, init_std=0.0001, seed=1024,
-         task='binary', ):
+def CCPM(linear_feature_columns, dnn_feature_columns, embedding_size=8, conv_kernel_width=(6, 5), conv_filters=(4, 4),
+         dnn_hidden_units=(256,), l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_dnn=0, dnn_dropout=0,
+         init_std=0.0001, seed=1024, task='binary'):
     """Instantiates the Convolutional Click Prediction Model architecture.
 
-    :param feature_dim_dict: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
+    :param dnn_feature_columns:
+    :param linear_feature_columns: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
     :param embedding_size: positive integer,sparse feature embedding_size
     :param conv_kernel_width: list,list of positive integer or empty list,the width of filter in each conv layer.
     :param conv_filters: list,list of positive integer or empty list,the number of filters in each conv layer.
@@ -38,23 +39,26 @@ def CCPM(feature_dim_dict, embedding_size=8, conv_kernel_width=(6, 5), conv_filt
     :return: A Keras model instance.
     """
 
-    check_feature_config_dict(feature_dim_dict)
+    #check_feature_config_dict(linear_feature_columns)
     if len(conv_kernel_width) != len(conv_filters):
         raise ValueError(
             "conv_kernel_width must have same element with conv_filters")
 
-    deep_emb_list, linear_emb_list, dense_input_dict, inputs_list = input_from_feature_columns(feature_dim_dict,
+    features = build_input_features(linear_feature_columns+dnn_feature_columns)
+    inputs_list = list(features.values())
+
+    sparse_embedding_list, dense_value_list = input_from_feature_columns(linear_feature_columns,
                                                                                                embedding_size,
                                                                                                l2_reg_embedding,
                                                                                                l2_reg_linear, init_std,
                                                                                                seed)
+    #todo not support dense????
+    linear_logit = get_linear_logit(features, linear_feature_columns, l2_reg_linear)
 
-    linear_logit = get_linear_logit(
-        linear_emb_list, dense_input_dict, l2_reg_linear)
-    n = len(deep_emb_list)
+    n = len(sparse_embedding_list)
     l = len(conv_filters)
 
-    conv_input = concat_fun(deep_emb_list, axis=1)
+    conv_input = concat_fun(sparse_embedding_list, axis=1)
     pooling_result = tf.keras.layers.Lambda(
         lambda x: tf.expand_dims(x, axis=3))(conv_input)
 

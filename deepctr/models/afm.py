@@ -11,19 +11,20 @@ Reference:
 """
 import tensorflow as tf
 
-from ..inputs import input_from_feature_columns, get_linear_logit
+from ..inputs import input_from_feature_columns, get_linear_logit,build_input_features
 from ..layers.core import PredictionLayer
 from ..layers.interaction import AFMLayer, FM
 from ..layers.utils import concat_fun
 from ..utils import check_feature_config_dict
 
 
-def AFM(feature_dim_dict, embedding_size=8, use_attention=True, attention_factor=8,
+def AFM(linear_feature_columns, dnn_feature_columns, embedding_size=8, use_attention=True, attention_factor=8,
         l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_att=1e-5, afm_dropout=0, init_std=0.0001, seed=1024,
-        task='binary', ):
+        task='binary'):
     """Instantiates the Attentonal Factorization Machine architecture.
 
-    :param feature_dim_dict: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
+    :param dnn_feature_columns:
+    :param linear_feature_columns: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
     :param embedding_size: positive integer,sparse feature embedding_size
     :param use_attention: bool,whether use attention or not,if set to ``False``.it is the same as **standard Factorization Machine**
     :param attention_factor: positive integer,units in attention net
@@ -39,18 +40,21 @@ def AFM(feature_dim_dict, embedding_size=8, use_attention=True, attention_factor
 
     #check_feature_config_dict(feature_dim_dict)
 
-    deep_emb_list, linear_emb_list, dense_input_dict, inputs_list = input_from_feature_columns(feature_dim_dict,
-                                                                                               embedding_size,
-                                                                                               l2_reg_embedding,
-                                                                                               l2_reg_linear, init_std,
+    features = build_input_features(linear_feature_columns+dnn_feature_columns)
+
+    inputs_list = list(features.values())
+
+    sparse_embedding_list, _ = input_from_feature_columns(features,dnn_feature_columns,embedding_size,
+                                                                                               l2_reg_embedding, init_std,
                                                                                                seed)
+    # todo not support dense
 
-    linear_logit = get_linear_logit(linear_emb_list, dense_input_dict, l2_reg_linear)
+    linear_logit = get_linear_logit(features, linear_feature_columns, l2_reg_linear,init_std,seed,prefix='linear')
 
-    fm_input = concat_fun(deep_emb_list, axis=1)
+    fm_input = concat_fun(sparse_embedding_list, axis=1)
     if use_attention:
         fm_logit = AFMLayer(attention_factor, l2_reg_att, afm_dropout,
-        seed)(deep_emb_list,)
+        seed)(sparse_embedding_list,)
     else:
         fm_logit = FM()(fm_input)
 

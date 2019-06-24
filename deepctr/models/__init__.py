@@ -3,8 +3,8 @@ from .autoint import AutoInt
 from .ccpm import CCPM
 from .dcn import DCN
 from .deepfm import DeepFM
-#from .dien import DIEN
-#from .din import DIN
+from .dien import DIEN
+from .din import DIN
 from .fnn import FNN
 from .mlr import MLR
 from .onn import ONN

@@ -3,7 +3,7 @@ import pandas as pd
 from tensorflow.python.keras.preprocessing.sequence import pad_sequences
 
 from deepctr.models import DeepFM
-from deepctr.inputs import SparseFeat, VarLenSparseFeat,get_feature_names
+from deepctr.inputs import SparseFeat, VarLenSparseFeat,get_fixlen_feature_names
 
 data = pd.read_csv("./movielens_sample.txt")
 sparse_features = ["movie_id", "user_id",
@@ -29,7 +29,7 @@ sequence_feature = [VarLenSparseFeat('genres', 100, max_len, 'mean', use_hash=Tr
                                dtype="string")]  # Notice : value 0 is for padding for sequence input feature
 linear_feature_columns = sparse_feat_list + sequence_feature
 dnn_feature_columns = linear_feature_columns
-feature_names = get_feature_names(linear_feature_columns+dnn_feature_columns)
+feature_names = get_fixlen_feature_names(linear_feature_columns + dnn_feature_columns)
 
 # 3.generate input data for model
 sparse_input = [data[name].values for name in feature_names]
