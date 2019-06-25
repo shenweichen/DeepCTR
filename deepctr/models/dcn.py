@@ -43,7 +43,7 @@ def DCN(dnn_feature_columns, embedding_size='auto', cross_num=2, dnn_hidden_unit
     features = build_input_features(dnn_feature_columns)
     inputs_list = list(features.values())
 
-    sparse_embedding_list, dense_value_list = input_from_feature_columns(dnn_feature_columns,
+    sparse_embedding_list, dense_value_list = input_from_feature_columns(features,dnn_feature_columns,
                                                                                                embedding_size,
                                                                                                l2_reg_embedding, init_std,
                                                                                                seed)

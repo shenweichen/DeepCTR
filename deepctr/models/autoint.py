@@ -49,7 +49,7 @@ def AutoInt(dnn_feature_columns, embedding_size=8, att_layer_num=3, att_embeddin
     features = build_input_features(dnn_feature_columns)
     inputs_list = list(features.values())
 
-    sparse_embedding_list, dense_value_list = input_from_feature_columns(dnn_feature_columns,embedding_size,
+    sparse_embedding_list, dense_value_list = input_from_feature_columns(features,dnn_feature_columns,embedding_size,
                                                                                                l2_reg_embedding,
                                                                                                 init_std,
                                                                                                seed)

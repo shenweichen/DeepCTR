@@ -41,7 +41,7 @@ def AFM(linear_feature_columns, dnn_feature_columns, embedding_size=8, use_atten
     #check_feature_config_dict(feature_dim_dict)
 
     features = build_input_features(linear_feature_columns+dnn_feature_columns)
-
+    print(features)
     inputs_list = list(features.values())
 
     sparse_embedding_list, _ = input_from_feature_columns(features,dnn_feature_columns,embedding_size,

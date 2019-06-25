@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from deepctr.models import WDL
-from ..utils import check_model, SAMPLE_SIZE
+from ..utils import check_model, SAMPLE_SIZE,get_test_data
 from deepctr.inputs import SparseFeat
 
 
@@ -14,37 +14,10 @@ from deepctr.inputs import SparseFeat
 def test_WDL(sparse_feature_num, wide_feature_num):
     model_name = "WDL"
     sample_size = SAMPLE_SIZE
-    feature_dim_dict = {"sparse": [], 'dense': []}
-    wide_feature_dim_dict = {"sparse": [], 'dense': []}
-    for name, num in zip(["sparse", "dense"], [sparse_feature_num, sparse_feature_num]):
-        if name == "sparse":
-            for i in range(num):
-                feature_dim_dict[name].append(SingleFeat(name + '_' +str(i),np.random.randint(1, 10)))
-        else:
-            for i in range(num):
-                feature_dim_dict[name].append(SingleFeat(name + '_' + str(i),0))
-    for name, num in zip(["sparse", "dense"], [wide_feature_num, wide_feature_num]):
-        if name == "sparse":
-            for i in range(num):
-                wide_feature_dim_dict[name].append(SingleFeat(name + 'wide_' +str(i),np.random.randint(1, 10)))
-        else:
-            for i in range(num):
-                wide_feature_dim_dict[name].append(SingleFeat(name + 'wide_' + str(i),0))
+    x, y, feature_columns = get_test_data(sample_size, sparse_feature_num, sparse_feature_num)
 
-    sparse_input = [np.random.randint(0, feat.dimension, sample_size)
-                    for feat in feature_dim_dict['sparse']]
-    dense_input = [np.random.random(sample_size)
-                   for _ in feature_dim_dict['dense']]
-    wide_sparse_input = [np.random.randint(0, feat.dimension, sample_size)
-                         for feat in wide_feature_dim_dict['sparse']]
-    wide_dense_input = [np.random.random(sample_size)
-                        for _ in wide_feature_dim_dict['dense']]
-    y = np.random.randint(0, 2, sample_size)
-    x = sparse_input + dense_input
-    x_wide = wide_sparse_input + wide_dense_input
-
-    model = WDL(feature_dim_dict, wide_feature_dim_dict, dnn_hidden_units=[32, 32], dnn_dropout=0.5)
-    check_model(model, model_name, x+x_wide, y)
+    model = WDL(feature_columns, feature_columns, dnn_hidden_units=[32, 32], dnn_dropout=0.5)
+    check_model(model, model_name, x, y)
 
 
 if __name__ == "__main__":

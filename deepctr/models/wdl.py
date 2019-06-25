@@ -8,6 +8,7 @@ Reference:
 """
 
 from tensorflow.python.keras.models import Model
+from tensorflow.python.keras.layers import Dense,add
 
 from ..inputs import build_input_features, get_linear_logit,input_from_feature_columns,combined_dnn_input
 from ..layers.core import PredictionLayer, DNN
@@ -53,11 +54,11 @@ def WDL(linear_feature_columns, dnn_feature_columns, embedding_size=8, dnn_hidde
     dnn_input = combined_dnn_input(sparse_embedding_list, dense_value_list)
     dnn_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
                   False, seed)(dnn_input)
-    dnn_logit = tf.keras.layers.Dense(
+    dnn_logit = Dense(
         1, use_bias=False, activation=None)(dnn_out)
 
     if len(linear_feature_columns) > 0 and len(dnn_feature_columns) > 0:  # linear + dnn
-        final_logit = linear_logit + dnn_logit
+        final_logit = add([linear_logit,dnn_logit])
     elif len(linear_feature_columns) == 0:
         final_logit = dnn_logit
     elif len(dnn_feature_columns) == 0:

@@ -36,6 +36,8 @@ def get_test_data(sample_size=1000, sparse_feature_num=1, dense_feature_num=1, s
         feature_columns.append(
             VarLenSparseFeat('sequence_' + str(i), dim, maxlen, mode))
 
+
+
     fixlen_feature_names = get_fixlen_feature_names(feature_columns)
     varlen_feature_names = get_varlen_feature_names(feature_columns)
 
@@ -66,6 +68,12 @@ def get_test_data(sample_size=1000, sparse_feature_num=1, dense_feature_num=1, s
 
     x = model_input+ sequence_input
     if include_length:
+        for i, mode in enumerate(sequence_feature):
+            dim = np.random.randint(1, 10)
+            maxlen = np.random.randint(1, 10)
+            feature_columns.append(
+                SparseFeat('sequence_' + str(i)+'_seq_length', 1,embedding=False))
+
         x += sequence_len_input
 
     return x, y, feature_columns

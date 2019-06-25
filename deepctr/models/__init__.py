@@ -12,8 +12,8 @@ from .nfm import NFM
 from .pnn import PNN
 from .wdl import WDL
 from .xdeepfm import xDeepFM
-#from .fgcnn import FGCNN
-#from .dsin import DSIN
+from .fgcnn import FGCNN
+from .dsin import DSIN
 
 __all__ = ["AFM", "CCPM","DCN", "MLR",  "DeepFM",
            "MLR", "NFM", "DIN", "DIEN", "FNN", "PNN", "WDL", "xDeepFM", "AutoInt", "ONN", "FGCNN", "DSIN"]
