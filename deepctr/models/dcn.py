@@ -20,7 +20,7 @@ def DCN(dnn_feature_columns, embedding_size='auto', cross_num=2, dnn_hidden_unit
         dnn_activation='relu', task='binary'):
     """Instantiates the Deep&Cross Network architecture.
 
-    :param dnn_feature_columns:
+    :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
     :param embedding_size: positive int or str,sparse feature embedding_size.If set to "auto",it will be 6*pow(cardinality,025)
     :param cross_num: positive integet,cross layer number
     :param dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of DNN

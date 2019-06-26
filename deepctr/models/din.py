@@ -36,8 +36,8 @@ def DIN(dnn_feature_columns, history_feature_list, embedding_size=8, hist_len_ma
         task='binary'):
     """Instantiates the Deep Interest Network architecture.
 
-    :param dnn_feature_columns: dict,to indicate sparse field (**now only support sparse feature**)like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':[]}
-    :param history_feature_list: list,to indicate  sequence sparse field (**now only support sparse feature**),must be a subset of ``feature_dim_dict["sparse"]``
+    :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
+    :param history_feature_list: list,to indicate  sequence sparse field
     :param embedding_size: positive integer,sparse feature embedding_size.
     :param hist_len_max: positive int, to indicate the max length of seq input
     :param dnn_use_bn: bool. Whether use BatchNormalization before activation or not in deep net
@@ -55,10 +55,7 @@ def DIN(dnn_feature_columns, history_feature_list, embedding_size=8, hist_len_ma
     :return: A Keras model instance.
 
     """
-    #check_feature_config_dict(dnn_feature_columns)
 
-    #sparse_input, dense_input, user_behavior_input = get_input(
-    #    dnn_feature_columns, history_feature_columns, hist_len_max)
 
     features = build_input_features(dnn_feature_columns)
 

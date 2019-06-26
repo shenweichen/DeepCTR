@@ -18,3 +18,4 @@ DeepCTR Models API
    AutoInt<deepctr.models.autoint>
    NFFM<deepctr.models.nffm>
    FGCNN<deepctr.models.fgcnn>
+   DSIN<deepctr.models.dsin>

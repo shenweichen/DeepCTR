@@ -24,7 +24,7 @@ def test_FGCNN(sparse_feature_num, dense_feature_num):
 
 @pytest.mark.parametrize(
     'sparse_feature_num,dense_feature_num',
-    [(1, 1),
+    [(2, 1),
      ]
 )
 def test_FGCNN_without_seq(sparse_feature_num, dense_feature_num):

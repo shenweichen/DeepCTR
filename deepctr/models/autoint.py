@@ -24,7 +24,7 @@ def AutoInt(dnn_feature_columns, embedding_size=8, att_layer_num=3, att_embeddin
             task='binary', ):
     """Instantiates the AutoInt Network architecture.
 
-    :param dnn_feature_columns: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
+    :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
     :param embedding_size: positive integer,sparse feature embedding_size
     :param att_layer_num: int.The InteractingLayer number to be used.
     :param att_embedding_size: int.The embedding size in multi-head self-attention network.

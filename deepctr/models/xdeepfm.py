@@ -21,8 +21,8 @@ def xDeepFM(linear_feature_columns, dnn_feature_columns, embedding_size=8, dnn_h
             dnn_activation='relu', dnn_use_bn=False, task='binary'):
     """Instantiates the xDeepFM architecture.
 
-    :param dnn_feature_columns:
-    :param linear_feature_columns: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
+    :param linear_feature_columns: An iterable containing all the features used by linear part of the model.
+    :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
     :param embedding_size: positive integer,sparse feature embedding_size
     :param dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of deep net
     :param cin_layer_size: list,list of positive integer or empty list, the feature maps  in each hidden layer of Compressed Interaction Network

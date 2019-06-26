@@ -20,21 +20,21 @@ def gen_sequence(dim, max_len, sample_size):
 
 
 def get_test_data(sample_size=1000, sparse_feature_num=1, dense_feature_num=1, sequence_feature=('max', 'mean', 'sum'),
-                  classification=True, include_length=False, hash_flag=False):
+                  classification=True, include_length=False, hash_flag=False,prefix=''):
 
     feature_dim_dict = {"sparse": [], 'dense': [], 'sequence': []}
     feature_columns = []
 
     for i in range(sparse_feature_num):
         dim = np.random.randint(1, 10)
-        feature_columns.append(SparseFeat('sparse_feature_'+str(i), dim,hash_flag,tf.int32))
+        feature_columns.append(SparseFeat(prefix+'sparse_feature_'+str(i), dim,hash_flag,tf.int32))
     for i in range(dense_feature_num):
-        feature_columns.append(DenseFeat('dense_feature_'+str(i), 1,tf.float32))
+        feature_columns.append(DenseFeat(prefix+'dense_feature_'+str(i), 1,tf.float32))
     for i, mode in enumerate(sequence_feature):
         dim = np.random.randint(1, 10)
         maxlen = np.random.randint(1, 10)
         feature_columns.append(
-            VarLenSparseFeat('sequence_' + str(i), dim, maxlen, mode))
+            VarLenSparseFeat(prefix+'sequence_' + str(i), dim, maxlen, mode))
 
 
 
@@ -72,7 +72,7 @@ def get_test_data(sample_size=1000, sparse_feature_num=1, dense_feature_num=1, s
             dim = np.random.randint(1, 10)
             maxlen = np.random.randint(1, 10)
             feature_columns.append(
-                SparseFeat('sequence_' + str(i)+'_seq_length', 1,embedding=False))
+                SparseFeat(prefix+'sequence_' + str(i)+'_seq_length', 1,embedding=False))
 
         x += sequence_len_input
 

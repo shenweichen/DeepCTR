@@ -23,8 +23,8 @@ def CCPM(linear_feature_columns, dnn_feature_columns, embedding_size=8, conv_ker
          init_std=0.0001, seed=1024, task='binary'):
     """Instantiates the Convolutional Click Prediction Model architecture.
 
-    :param dnn_feature_columns:
-    :param linear_feature_columns: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
+    :param linear_feature_columns: An iterable containing all the features used by linear part of the model.
+    :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
     :param embedding_size: positive integer,sparse feature embedding_size
     :param conv_kernel_width: list,list of positive integer or empty list,the width of filter in each conv layer.
     :param conv_filters: list,list of positive integer or empty list,the number of filters in each conv layer.
@@ -47,7 +47,7 @@ def CCPM(linear_feature_columns, dnn_feature_columns, embedding_size=8, conv_ker
     features = build_input_features(linear_feature_columns+dnn_feature_columns)
     inputs_list = list(features.values())
 
-    sparse_embedding_list, dense_value_list = input_from_feature_columns(features,linear_feature_columns,
+    sparse_embedding_list, _ = input_from_feature_columns(features,linear_feature_columns,
                                                                                                embedding_size,
                                                                                                l2_reg_embedding, init_std,
                                                                                                seed)

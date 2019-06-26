@@ -17,7 +17,7 @@ from .layers.sequence import SequencePoolingLayer
 from .layers.utils import Hash,concat_fun
 
 
-class SparseFeat(namedtuple('SparseFeat', ['name', 'dimension', 'hash_flag', 'dtype','embedding_name','embedding'])):
+class SparseFeat(namedtuple('SparseFeat', ['name', 'dimension', 'use_hash', 'dtype','embedding_name','embedding'])):
     __slots__ = ()
 
     def __new__(cls, name, dimension, use_hash=False, dtype="int32", embedding_name=None,embedding=True):
@@ -34,7 +34,7 @@ class DenseFeat(namedtuple('DenseFeat', ['name', 'dimension', 'dtype'])):
         return super(DenseFeat, cls).__new__(cls, name, dimension, dtype)
 
 
-class VarLenSparseFeat(namedtuple('VarLenFeat', ['name', 'dimension', 'maxlen', 'combiner', 'hash_flag', 'dtype','embedding_name','embedding'])):
+class VarLenSparseFeat(namedtuple('VarLenFeat', ['name', 'dimension', 'maxlen', 'combiner', 'use_hash', 'dtype','embedding_name','embedding'])):
     __slots__ = ()
 
     def __new__(cls, name, dimension, maxlen, combiner="mean", use_hash=False, dtype="float32", embedding_name=None,embedding=True):
@@ -179,7 +179,7 @@ def get_embedding_vec_list(embedding_dict, input_dict, sparse_feature_columns, r
     for fg in sparse_feature_columns:
         feat_name = fg.name
         if len(return_feat_list) == 0  or feat_name in return_feat_list:
-            if fg.hash_flag:
+            if fg.use_hash:
                 lookup_idx = Hash(fg.dimension,mask_zero=(feat_name in mask_feat_list))(input_dict[feat_name])
             else:
                 lookup_idx = input_dict[feat_name]
@@ -315,7 +315,7 @@ def embedding_lookup(sparse_embedding_dict,sparse_input_dict,sparse_feature_colu
         feature_name = fc.name
         embedding_name = fc.embedding_name
         if len(return_feat_list) == 0  or feature_name in return_feat_list and fc.embedding:
-            if fc.hash_flag:
+            if fc.use_hash:
                 lookup_idx = Hash(fc.dimension,mask_zero=(feature_name in mask_feat_list))(sparse_input_dict[feature_name])
             else:
                 lookup_idx = sparse_input_dict[feature_name]
@@ -331,16 +331,18 @@ def varlen_embedding_lookup(embedding_dict, sequence_input_dict, varlen_sparse_f
     for fc in varlen_sparse_feature_columns:
         feature_name = fc.name
         embedding_name = fc.embedding_name
-        if fc.hash_flag:
+        if fc.use_hash:
             lookup_idx = Hash(fc.dimension, mask_zero=True)(sequence_input_dict[feature_name])
         else:
             lookup_idx = sequence_input_dict[feature_name]
         varlen_embedding_vec_dict[feature_name] = embedding_dict[embedding_name](lookup_idx)
+
     return varlen_embedding_vec_dict
 
 def get_dense_input(features,feature_columns):
     dense_feature_columns = list(filter(lambda x:isinstance(x,DenseFeat),feature_columns)) if feature_columns else []
     dense_input_list = []
+    print(features)
     for fc in dense_feature_columns:
         dense_input_list.append(features[fc.name])
     return dense_input_list

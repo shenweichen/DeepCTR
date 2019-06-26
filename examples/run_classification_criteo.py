@@ -38,11 +38,8 @@ if __name__ == "__main__":
 
     train, test = train_test_split(data, test_size=0.2)
     train_model_input = [train[name] for name in feature_names]
-    #train_model_input = [train[feat.name].values for feat in sparse_feature_list] + \
-    #                    [train[feat.name].values for feat in dense_feature_list]
+
     test_model_input = [test[name] for name in feature_names]
-    #test_model_input = [test[feat.name].values for feat in sparse_feature_list] + \
-    #                   [test[feat.name].values for feat in dense_feature_list]
 
     # 4.Define Model,train,predict and evaluate
     model = DeepFM(linear_feature_columns, dnn_feature_columns, task='binary')

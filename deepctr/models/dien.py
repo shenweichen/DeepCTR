@@ -142,8 +142,8 @@ def DIEN(dnn_feature_columns, history_feature_list, embedding_size=8, hist_len_m
          l2_reg_dnn=0, l2_reg_embedding=1e-6, dnn_dropout=0, init_std=0.0001, seed=1024, task='binary'):
     """Instantiates the Deep Interest Evolution Network architecture.
 
-    :param feature_columns: dict,to indicate sparse field (**now only support sparse feature**)like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':[]}
-    :param history_feature_list: list,to indicate  sequence sparse field (**now only support sparse feature**),must be a subset of ``feature_dim_dict["sparse"]``
+    :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
+    :param history_feature_list: list,to indicate  sequence sparse field
     :param embedding_size: positive integer,sparse feature embedding_size.
     :param hist_len_max: positive int, to indicate the max length of seq input
     :param gru_type: str,can be GRU AIGRU AUGRU AGRU

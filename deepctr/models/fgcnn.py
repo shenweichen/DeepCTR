@@ -52,8 +52,7 @@ def FGCNN(dnn_feature_columns, embedding_size=8, conv_kernel_width=(7, 7, 7, 7),
           task='binary', ):
     """Instantiates the Feature Generation by Convolutional Neural Network architecture.
 
-    :param dnn_feature_columns: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
-    :param embedding_size: positive integer,sparse feature embedding_size
+    :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.    :param embedding_size: positive integer,sparse feature embedding_size
     :param conv_kernel_width: list,list of positive integer or empty list,the width of filter in each conv layer.
     :param conv_filters: list,list of positive integer or empty list,the number of filters in each conv layer.
     :param new_maps: list, list of positive integer or empty list, the feature maps of generated features.
@@ -124,7 +123,6 @@ def FGCNN(dnn_feature_columns, embedding_size=8, conv_kernel_width=(7, 7, 7, 7),
         combined_input = concat_fun([origin_input, new_features], axis=1)
     else:
         combined_input = origin_input
-
     inner_product = tf.keras.layers.Flatten()(InnerProductLayer()(
         tf.keras.layers.Lambda(unstack, mask=[None] * combined_input.shape[1].value)(combined_input)))
     linear_signal = tf.keras.layers.Flatten()(combined_input)

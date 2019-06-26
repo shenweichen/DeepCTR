@@ -17,14 +17,13 @@ from ..layers.interaction import AFMLayer, FM
 from ..layers.utils import concat_fun
 from ..utils import check_feature_config_dict
 
-
 def AFM(linear_feature_columns, dnn_feature_columns, embedding_size=8, use_attention=True, attention_factor=8,
         l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_att=1e-5, afm_dropout=0, init_std=0.0001, seed=1024,
         task='binary'):
-    """Instantiates the Attentonal Factorization Machine architecture.
+    """Instantiates the Attentional Factorization Machine architecture.
 
-    :param dnn_feature_columns:
-    :param linear_feature_columns: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
+    :param linear_feature_columns: An iterable containing all the features used by linear part of the model.
+    :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
     :param embedding_size: positive integer,sparse feature embedding_size
     :param use_attention: bool,whether use attention or not,if set to ``False``.it is the same as **standard Factorization Machine**
     :param attention_factor: positive integer,units in attention net
@@ -41,7 +40,7 @@ def AFM(linear_feature_columns, dnn_feature_columns, embedding_size=8, use_atten
     #check_feature_config_dict(feature_dim_dict)
 
     features = build_input_features(linear_feature_columns+dnn_feature_columns)
-    print(features)
+
     inputs_list = list(features.values())
 
     sparse_embedding_list, _ = input_from_feature_columns(features,dnn_feature_columns,embedding_size,

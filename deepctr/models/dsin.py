@@ -22,7 +22,6 @@ from ..layers.core import DNN, PredictionLayer
 from ..layers.sequence import (AttentionSequencePoolingLayer, BiasEncoding,
                                BiLSTM, Transformer)
 from ..layers.utils import NoMask, concat_fun
-from ..utils import check_feature_config_dict
 
 
 def DSIN(dnn_feature_columns, sess_feature_list, embedding_size=8, sess_max_count=5, sess_len_max=10, bias_encoding=False,
@@ -31,8 +30,7 @@ def DSIN(dnn_feature_columns, sess_feature_list, embedding_size=8, sess_max_coun
          ):
     """Instantiates the Deep Session Interest Network architecture.
 
-    :param dnn_feature_columns: dict,to indicate sparse field (**now only support sparse feature**)like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':[]}
-    :param sess_feature_list: list,to indicate session feature sparse field (**now only support sparse feature**),must be a subset of ``feature_dim_dict["sparse"]``
+    :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.    :param sess_feature_list: list,to indicate session feature sparse field (**now only support sparse feature**),must be a subset of ``feature_dim_dict["sparse"]``
     :param embedding_size: positive integer,sparse feature embedding_size.
     :param sess_max_count: positive int, to indicate the max number of sessions
     :param sess_len_max: positive int, to indicate the max length of each session

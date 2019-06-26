@@ -23,7 +23,7 @@ def test_CCPM(sparse_feature_num, dense_feature_num):
 
 @pytest.mark.parametrize(
     'sparse_feature_num,dense_feature_num',
-    [(0, 1), (1, 0)
+    [(2, 0),
      ]
 )
 def test_CCPM_without_seq(sparse_feature_num, dense_feature_num):
