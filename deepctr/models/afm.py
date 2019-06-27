@@ -15,7 +15,6 @@ from ..inputs import input_from_feature_columns, get_linear_logit,build_input_fe
 from ..layers.core import PredictionLayer
 from ..layers.interaction import AFMLayer, FM
 from ..layers.utils import concat_fun
-from ..utils import check_feature_config_dict
 
 def AFM(linear_feature_columns, dnn_feature_columns, embedding_size=8, use_attention=True, attention_factor=8,
         l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_att=1e-5, afm_dropout=0, init_std=0.0001, seed=1024,

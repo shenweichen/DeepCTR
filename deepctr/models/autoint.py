@@ -15,7 +15,6 @@ from ..inputs import input_from_feature_columns,build_input_features,combined_dn
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import InteractingLayer
 from ..layers.utils import concat_fun
-from ..utils import check_feature_config_dict
 
 
 def AutoInt(dnn_feature_columns, embedding_size=8, att_layer_num=3, att_embedding_size=8, att_head_num=2, att_res=True,

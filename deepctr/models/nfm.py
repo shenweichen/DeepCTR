@@ -12,7 +12,6 @@ from ..inputs import input_from_feature_columns, get_linear_logit, build_input_f
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import BiInteractionPooling
 from ..layers.utils import concat_fun
-from ..utils import check_feature_config_dict
 
 
 def NFM(linear_feature_columns, dnn_feature_columns, embedding_size=8, dnn_hidden_units=(128, 128),

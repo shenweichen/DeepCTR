@@ -15,7 +15,6 @@ from ..inputs import build_input_features, get_linear_logit,input_from_feature_c
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import InnerProductLayer, FGCNNLayer
 from ..layers.utils import concat_fun
-from ..utils import check_feature_config_dict
 
 
 # def preprocess_input_embedding(feature_dim_dict, embedding_size, l2_reg_embedding, l2_reg_linear, init_std, seed,

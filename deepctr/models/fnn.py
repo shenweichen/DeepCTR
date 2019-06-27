@@ -10,8 +10,7 @@ import tensorflow as tf
 
 from ..inputs import input_from_feature_columns, get_linear_logit,build_input_features,combined_dnn_input
 from ..layers.core import PredictionLayer, DNN
-from ..layers.utils import concat_fun
-from ..utils import check_feature_config_dict
+
 
 
 def FNN(linear_feature_columns, dnn_feature_columns, embedding_size=8, dnn_hidden_units=(128, 128),
@@ -45,7 +44,6 @@ def FNN(linear_feature_columns, dnn_feature_columns, embedding_size=8, dnn_hidde
     linear_logit = get_linear_logit(features, linear_feature_columns, l2_reg=l2_reg_linear, init_std=init_std,
                                     seed=seed, prefix='linear')
 
-    #dnn_input = tf.keras.layers.Flatten()(concat_fun(sparse_embedding_list))
     dnn_input = combined_dnn_input(sparse_embedding_list,dense_value_list)
     deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn,
                    dnn_dropout, False, seed)(dnn_input)

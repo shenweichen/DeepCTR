@@ -63,6 +63,3 @@ def check_version(version):
 #     if not isinstance(feature_dim_dict["dense"], list):
 #         raise ValueError("feature_dim_dict['dense'] must be a list,cur is", type(
 #             feature_dim_dict['dense']))
-
-import tensorflow as tf
-tf.estimator.DNNLinearCombinedClassifier

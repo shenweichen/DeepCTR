@@ -239,7 +239,6 @@ def get_varlen_vec_list(embedding_dict, features, varlen_sparse_feature_columns)
         feature_name = fc.name
         feature_length_name = feature_name + "_seq_length"
         if feature_length_name in features:
-            #seq_length = features[feature_length_name]
             vector = SequencePoolingLayer(fc.combiner, supports_masking=False)(
             [embedding_dict[feature_name], features[feature_length_name]])
         else:

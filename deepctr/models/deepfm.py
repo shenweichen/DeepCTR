@@ -14,7 +14,6 @@ from ..inputs import input_from_feature_columns, get_linear_logit,build_input_fe
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import FM
 from ..layers.utils import concat_fun
-from ..utils import check_feature_config_dict
 
 
 def DeepFM(linear_feature_columns, dnn_feature_columns, embedding_size=8, use_fm=True, dnn_hidden_units=(128, 128),

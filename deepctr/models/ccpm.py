@@ -15,7 +15,6 @@ from ..inputs import input_from_feature_columns, get_linear_logit,build_input_fe
 from ..layers.core import DNN, PredictionLayer
 from ..layers.sequence import KMaxPooling
 from ..layers.utils import concat_fun
-from ..utils import check_feature_config_dict
 
 
 def CCPM(linear_feature_columns, dnn_feature_columns, embedding_size=8, conv_kernel_width=(6, 5), conv_filters=(4, 4),

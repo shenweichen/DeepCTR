@@ -13,7 +13,6 @@ from ..inputs import input_from_feature_columns,build_input_features
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import InnerProductLayer, OutterProductLayer
 from ..layers.utils import concat_fun
-from ..utils import check_feature_config_dict
 
 
 def PNN(dnn_feature_columns, embedding_size=8, dnn_hidden_units=(128, 128), l2_reg_embedding=1e-5, l2_reg_dnn=0,
