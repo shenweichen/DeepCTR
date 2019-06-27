@@ -14,20 +14,10 @@ from tensorflow.python.keras.layers import Input, Dense, Embedding, Concatenate,
 from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.regularizers import l2
 
-from ..inputs import get_inputs_list, build_input_features, get_embedding_vec_list,input_from_feature_columns,create_embedding_matrix,SparseFeat,VarLenSparseFeat,DenseFeat,embedding_lookup,get_dense_input,varlen_embedding_lookup,get_varlen_pooling_list,combined_dnn_input
+from ..inputs import  build_input_features,create_embedding_matrix,SparseFeat,VarLenSparseFeat,DenseFeat,embedding_lookup,get_dense_input,varlen_embedding_lookup,get_varlen_pooling_list,combined_dnn_input
 from ..layers.core import DNN, PredictionLayer
 from ..layers.sequence import AttentionSequencePoolingLayer
 from ..layers.utils import concat_fun, NoMask
-from ..utils import check_feature_config_dict
-
-
-def get_input(feature_dim_dict, seq_feature_list, seq_max_len):
-    sparse_input, dense_input = build_input_features(feature_dim_dict)
-    user_behavior_input = OrderedDict()
-    for i, feat in enumerate(seq_feature_list):
-        user_behavior_input[feat] = Input(shape=(seq_max_len,), name='seq_' + str(i) + '-' + feat)
-
-    return sparse_input, dense_input, user_behavior_input
 
 
 def DIN(dnn_feature_columns, history_feature_list, embedding_size=8, hist_len_max=16, dnn_use_bn=False,
@@ -108,7 +98,6 @@ def DIN(dnn_feature_columns, history_feature_list, embedding_size=8, hist_len_ma
     final_logit = Dense(1, use_bias=False)(output)
 
     output = PredictionLayer(task)(final_logit)
-    #model_input_list = get_inputs_list([sparse_input, dense_input, user_behavior_input])
 
     model = Model(inputs=inputs_list, outputs=output)
     return model

@@ -193,24 +193,6 @@ def DSIN(dnn_feature_columns, sess_feature_list, embedding_size=8, sess_max_coun
     return model
 
 
-def get_input(feature_dim_dict, seq_feature_list, sess_max_count, seq_max_len):
-    sparse_input, dense_input = build_input_features(feature_dim_dict)
-    user_behavior_input = {}
-    for idx in range(sess_max_count):
-        sess_input = OrderedDict()
-        for i, feat in enumerate(seq_feature_list):
-            sess_input[feat] = Input(
-                shape=(seq_max_len,), name='seq_' + str(idx) + str(i) + '-' + feat)
-
-        user_behavior_input["sess_" + str(idx)] = sess_input
-
-    user_behavior_length = {"sess_" + str(idx): Input(shape=(1,), name='seq_length' + str(idx)) for idx in
-                            range(sess_max_count)}
-    user_sess_length = Input(shape=(1,), name='sess_length')
-
-    return sparse_input, dense_input, user_behavior_input, user_behavior_length, user_sess_length
-
-
 def sess_interest_division(sparse_embedding_dict, user_behavior_input_dict, sparse_fg_list, sess_feture_list,
                            sess_max_count,
                            bias_encoding=True):

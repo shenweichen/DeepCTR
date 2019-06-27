@@ -39,9 +39,9 @@ def get_xy_fd(use_neg=False, hash_flag=False):
         #x += [feature_dict['neg_hist_'+feat] for feat in behavior_feature_list]
 
 
-    feature_names = get_fixlen_feature_names(feature_columns)
+    fix_feature_names = get_fixlen_feature_names(feature_columns)
     varlen_feature_names = get_varlen_feature_names(feature_columns)
-    x = [feature_dict[name] for name in feature_names] + [feature_dict[name] for name in varlen_feature_names]
+    x = [feature_dict[name] for name in fix_feature_names] + [feature_dict[name] for name in varlen_feature_names]
 
     x += [behavior_length]
     y = [1, 0, 1]

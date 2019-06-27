@@ -77,21 +77,21 @@ For dense numerical features, we concatenate them to the input tensors of fully 
 
 - Label Encoding
 ```python
-sparse_feature_list = [SparseFeat(feat, data[feat].nunique())
+sparse_feature_columns = [SparseFeat(feat, data[feat].nunique())
                         for feat in sparse_features]
-dense_feature_list = [SparseFeat(feat, 1)
+dense_feature_columns = [DenseFeat(feat, 1)
                       for feat in dense_features]
 ```
 - Feature Hashing on the fly
 ```python
-sparse_feature_list = [SparseFeat(feat, dimension=1e6,use_hash=True) for feat in sparse_features]#The dimension can be set according to data
-dense_feature_list = [DenseFeat(feat, 1)
+sparse_feature_columns = [SparseFeat(feat, dimension=1e6,use_hash=True) for feat in sparse_features]#The dimension can be set according to data
+dense_feature_columns = [DenseFeat(feat, 1)
                       for feat in dense_features]
 ```
 - generate feature columns
 ```python
-dnn_feature_columns = sparse_feature_list + dense_feature_list
-linear_feature_columns = sparse_feature_list + dense_feature_list
+dnn_feature_columns = sparse_feature_columns + dense_feature_columns
+linear_feature_columns = sparse_feature_columns + dense_feature_columns
 
 feature_names = get_fixlen_feature_names(linear_feature_columns + dnn_feature_columns)
 

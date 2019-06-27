@@ -52,7 +52,8 @@ def CCPM(linear_feature_columns, dnn_feature_columns, embedding_size=8, conv_ker
                                                                                                l2_reg_embedding, init_std,
                                                                                                seed)
     #todo not support dense????
-    linear_logit = get_linear_logit(features, linear_feature_columns, l2_reg_linear,init_std,seed)
+    linear_logit = get_linear_logit(features, linear_feature_columns, l2_reg=l2_reg_linear, init_std=init_std,
+                                    seed=seed)
 
     n = len(sparse_embedding_list)
     l = len(conv_filters)

@@ -7,30 +7,14 @@ Reference:
     [1] Zhou G, Mou N, Fan Y, et al. Deep Interest Evolution Network for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1809.03672, 2018. (https://arxiv.org/pdf/1809.03672.pdf)
 """
 
-from collections import OrderedDict
 
 import tensorflow as tf
-from tensorflow.python.keras.initializers import RandomNormal
-from tensorflow.python.keras.layers import (Concatenate, Dense, Embedding,
-                                            Input, Permute, multiply)
-from tensorflow.python.keras.regularizers import l2
+from tensorflow.python.keras.layers import (Concatenate, Dense, Input, Permute, multiply)
 
-from ..inputs import build_input_features, get_inputs_list,get_embedding_vec_list,get_varlen_pooling_list,create_embedding_matrix,embedding_lookup,varlen_embedding_lookup,SparseFeat,DenseFeat,VarLenSparseFeat,get_dense_input,combined_dnn_input
+from ..inputs import build_input_features, get_varlen_pooling_list,create_embedding_matrix,embedding_lookup,varlen_embedding_lookup,SparseFeat,DenseFeat,VarLenSparseFeat,get_dense_input,combined_dnn_input
 from ..layers.core import DNN, PredictionLayer
 from ..layers.sequence import AttentionSequencePoolingLayer, DynamicGRU
 from ..layers.utils import concat_fun
-from ..utils import check_feature_config_dict
-
-
-def get_input(feature_dim_dict, seq_feature_list, seq_max_len):
-    sparse_input, dense_input = build_input_features(feature_dim_dict)
-    user_behavior_input = OrderedDict()
-    for i, feat in enumerate(seq_feature_list):
-        user_behavior_input[feat] = Input(shape=(seq_max_len,), name='seq_' + str(i) + '-' + feat)
-
-    user_behavior_length = Input(shape=(1,), name='seq_length')
-
-    return sparse_input, dense_input, user_behavior_input, user_behavior_length
 
 
 def auxiliary_loss(h_states, click_seq, noclick_seq, mask, stag=None):

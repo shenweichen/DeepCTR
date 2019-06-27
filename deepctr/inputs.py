@@ -77,22 +77,6 @@ def build_input_features(feature_columns, include_varlen=True, mask_zero=True, p
     return input_features
 
 
-# def create_varlenfeat_inputdict(feature_dim_dict, mask_zero=True,prefix=''):
-#     sequence_dim_dict = feature_dim_dict.get('sequence', [])
-#     sequence_input_dict = OrderedDict()
-#     for feat in sequence_dim_dict:
-#         sequence_input_dict[feat.name] = Input(shape=(feat.maxlen,), name=prefix+'seq_' + feat.name, dtype=feat.dtype)
-#
-#     if mask_zero:
-#         sequence_len_dict, sequence_max_len_dict = None, None
-#     else:
-#         sequence_len_dict = {feat.name: Input(shape=(
-#             1,), name=prefix+'seq_length_' + feat.name) for  feat in sequence_dim_dict}
-#         sequence_max_len_dict = {feat.name: feat.maxlen
-#                                  for  feat in sequence_dim_dict}
-#     return sequence_input_dict, sequence_len_dict, sequence_max_len_dict
-
-
 def create_embedding_dict(sparse_feature_columns, varlen_sparse_feature_columns, embedding_size, init_std, seed, l2_reg,
                           prefix='sparse_', seq_mask_zero=True):
     if embedding_size == 'auto':
@@ -137,41 +121,6 @@ def create_embedding_dict(sparse_feature_columns, varlen_sparse_feature_columns,
 
     return sparse_embedding
 
-
-def merge_dense_input(dense_input_, embed_list, embedding_size, l2_reg):
-    dense_input = list(dense_input_.values())
-    if len(dense_input) > 0:
-        if embedding_size == "auto":
-            print("Notice:Do not use auto embedding in models other than DCN")
-            if len(dense_input) == 1:
-                continuous_embedding_list = dense_input[0]
-            else:
-                continuous_embedding_list = Concatenate()(dense_input)
-            continuous_embedding_list = Reshape(
-                [1, len(dense_input)])(continuous_embedding_list)
-            embed_list.append(continuous_embedding_list)
-
-        else:
-            continuous_embedding_list = list(
-                map(Dense(embedding_size, use_bias=False, kernel_regularizer=l2(l2_reg), ),
-                    dense_input))
-            continuous_embedding_list = list(
-                map(Reshape((1, embedding_size)), continuous_embedding_list))
-            embed_list += continuous_embedding_list
-
-    return embed_list
-
-
-def merge_sequence_input(embedding_dict, embed_list, sequence_input_dict, sequence_len_dict, sequence_max_len_dict,
-                         sequence_fd_list):
-    if len(sequence_input_dict) > 0:
-        sequence_embed_dict = get_varlen_pooling_list(
-            embedding_dict, sequence_input_dict, sequence_fd_list)
-        sequence_embed_list = get_pooling_vec_list(
-            sequence_embed_dict, sequence_len_dict, sequence_max_len_dict, sequence_fd_list)
-        embed_list += sequence_embed_list
-
-    return embed_list
 
 
 def get_embedding_vec_list(embedding_dict, input_dict, sparse_feature_columns, return_feat_list=(), mask_feat_list=()):
@@ -223,53 +172,16 @@ def create_embedding_matrix(feature_columns,l2_reg,init_std,seed,embedding_size,
     sparse_emb_dict = create_embedding_dict(sparse_feature_columns, varlen_sparse_feature_columns, embedding_size, init_std, seed,
                                                  l2_reg, prefix=prefix + 'sparse',seq_mask_zero=seq_mask_zero)
     return sparse_emb_dict
-#
-# def get_inputs_embedding(linear_feature_columns, dnn_feature_columns, l2_reg_embedding, l2_reg_linear, init_std, seed,
-#                          sparse_input_dict, dense_input_dict, sequence_input_dict, sequence_input_len_dict,
-#                          sequence_max_len_dict, include_linear, embedding_size, prefix=""):
-#
-#     dnn_sparse_feature_columns = list(filter(lambda x:isinstance(x,SparseFeat),dnn_feature_columns)) if dnn_feature_columns else []
-#     dnn_varlen_sparse_feature_columns = list(filter(lambda x: isinstance(x, VarLenFeat), dnn_feature_columns)) if dnn_feature_columns else []
-#     linear_sparse_feature_columns = list(filter(lambda x:isinstance(x, SparseFeat), linear_feature_columns)) if linear_feature_columns else []
-#     linear_varlen_sparse_feature_columns = list(filter(lambda x: isinstance(x, VarLenFeat), linear_feature_columns)) if linear_feature_columns else []
-#
-#
-#     dnn_sparse_emb_dict = create_embedding_dict(dnn_sparse_feature_columns, dnn_varlen_sparse_feature_columns, embedding_size, init_std, seed,
-#                                                  l2_reg_embedding, prefix=prefix + 'sparse')
-#
-#     deep_emb_list = get_embedding_vec_list(
-#         dnn_sparse_emb_dict, sparse_input_dict, dnn_sparse_feature_columns)
-#
-#     #todo 添加序列输入支持
-#     #deep_emb_list = merge_sequence_input(dnn_sparse_emb_dict, deep_emb_list, sequence_input_dict,
-#     #                                     sequence_input_len_dict, sequence_max_len_dict, dnn_varlen_sparse_feature_columns)
-#
-#     deep_emb_list = merge_dense_input(
-#         dense_input_dict, deep_emb_list, embedding_size, l2_reg_embedding)
-#
-#     if include_linear:
-#         linear_sparse_emb_dict = create_embedding_dict(linear_sparse_feature_columns, linear_varlen_sparse_feature_columns, 1, init_std, seed, l2_reg_linear,
-#                                                        prefix + 'linear')
-#
-#         linear_emb_list = get_embedding_vec_list(
-#             linear_sparse_emb_dict, sparse_input_dict, linear_feature_columns)
-#         # todo 添加序列输入支持
-#         #linear_emb_list = merge_sequence_input(linear_sparse_emb_dict, linear_emb_list, sequence_input_dict,
-#         #                                       sequence_input_len_dict,
-#         #                                       sequence_max_len_dict, linear_varlen_sparse_feature_columns)
-#     else:
-#         linear_emb_list = None
-#
-#     inputs_list = get_inputs_list(
-#         [sparse_input_dict, dense_input_dict, sequence_input_dict, sequence_input_len_dict])
-#     return inputs_list, deep_emb_list, linear_emb_list
 
+def get_linear_logit(features, feature_columns, units=1, l2_reg=0, init_std=0.0001, seed=1024, prefix='linear'):
 
-def get_linear_logit_v1(linear_emb_list, dense_input_list, l2_reg):
-    if len(linear_emb_list) > 1:
-        linear_term = add(linear_emb_list)
-    elif len(linear_emb_list) == 1:
-        linear_term = linear_emb_list[0]
+    linear_emb_list = [input_from_feature_columns(features,feature_columns,1,l2_reg,init_std,seed,prefix=prefix+str(i))[0] for i in range(units)]
+    _, dense_input_list = input_from_feature_columns(features,feature_columns,1,l2_reg,init_std,seed,prefix=prefix)
+
+    if len(linear_emb_list[0]) > 1:
+        linear_term = concat_fun([add(linear_emb) for linear_emb in linear_emb_list])
+    elif len(linear_emb_list[0]) == 1:
+        linear_term = concat_fun([linear_emb[0] for linear_emb in linear_emb_list])
     else:
         linear_term = None
 
@@ -277,31 +189,7 @@ def get_linear_logit_v1(linear_emb_list, dense_input_list, l2_reg):
         dense_input__ = dense_input_list[0] if len(
             dense_input_list) == 1 else Concatenate()(dense_input_list)
         linear_dense_logit = Dense(
-            1, activation=None, use_bias=False, kernel_regularizer=l2(l2_reg))(dense_input__)
-        if linear_term is not None:
-            linear_term = add([linear_dense_logit, linear_term])
-        else:
-            linear_term = linear_dense_logit
-
-    return linear_term
-
-
-def get_linear_logit(features, feature_columns, l2_reg, init_std, seed, prefix='linear'):
-
-    linear_emb_list, dense_input_list = input_from_feature_columns(features,feature_columns,1,l2_reg,init_std,seed,prefix=prefix)
-
-    if len(linear_emb_list) > 1:
-        linear_term = add(linear_emb_list)
-    elif len(linear_emb_list) == 1:
-        linear_term = linear_emb_list[0]
-    else:
-        linear_term = None
-
-    if len(dense_input_list) > 0:
-        dense_input__ = dense_input_list[0] if len(
-            dense_input_list) == 1 else Concatenate()(dense_input_list)
-        linear_dense_logit = Dense(
-            1, activation=None, use_bias=False, kernel_regularizer=l2(l2_reg))(dense_input__)
+            units, activation=None, use_bias=False, kernel_regularizer=l2(l2_reg))(dense_input__)
         if linear_term is not None:
             linear_term = add([linear_dense_logit, linear_term])
         else:
@@ -319,10 +207,8 @@ def embedding_lookup(sparse_embedding_dict,sparse_input_dict,sparse_feature_colu
                 lookup_idx = Hash(fc.dimension,mask_zero=(feature_name in mask_feat_list))(sparse_input_dict[feature_name])
             else:
                 lookup_idx = sparse_input_dict[feature_name]
-            try:
-                embedding_vec_list.append(sparse_embedding_dict[embedding_name](lookup_idx))
-            except:
-                print(feature_name,embedding_name,lookup_idx)
+
+            embedding_vec_list.append(sparse_embedding_dict[embedding_name](lookup_idx))
 
     return embedding_vec_list
 
@@ -342,12 +228,9 @@ def varlen_embedding_lookup(embedding_dict, sequence_input_dict, varlen_sparse_f
 def get_dense_input(features,feature_columns):
     dense_feature_columns = list(filter(lambda x:isinstance(x,DenseFeat),feature_columns)) if feature_columns else []
     dense_input_list = []
-    print(features)
     for fc in dense_feature_columns:
         dense_input_list.append(features[fc.name])
     return dense_input_list
-
-
 
 
 def get_varlen_vec_list(embedding_dict, features, varlen_sparse_feature_columns):

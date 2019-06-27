@@ -22,20 +22,20 @@ if __name__ == "__main__":
 
     # 2.set hashing space for each sparse field,and record dense feature field name
 
-    sparse_feature_list = [SparseFeat(feat, 1000, use_hash=True, dtype='string')  # since the input is string
-                           for feat in sparse_features]
-    dense_feature_list = [DenseFeat(feat, 1, )
+    fixlen_feature_columns = [SparseFeat(feat, 1000, use_hash=True, dtype='string')  # since the input is string
+                              for feat in sparse_features] + [DenseFeat(feat, 1, )
                           for feat in dense_features]
-    linear_feature_columns = sparse_feature_list + dense_feature_list
-    dnn_feature_columns = linear_feature_columns
-    feature_names = get_fixlen_feature_names(linear_feature_columns + dnn_feature_columns, )
+
+    linear_feature_columns = fixlen_feature_columns
+    dnn_feature_columns = fixlen_feature_columns
+    fixlen_feature_names = get_fixlen_feature_names(linear_feature_columns + dnn_feature_columns, )
 
     # 3.generate input data for model
 
     train, test = train_test_split(data, test_size=0.2)
-    train_model_input = [train[name] for name in feature_names]
+    train_model_input = [train[name] for name in fixlen_feature_names]
 
-    test_model_input = [test[name] for name in feature_names]
+    test_model_input = [test[name] for name in fixlen_feature_names]
 
 
     # 4.Define Model,train,predict and evaluate

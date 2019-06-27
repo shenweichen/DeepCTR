@@ -22,7 +22,6 @@ from ..inputs import (build_input_features,VarLenSparseFeat,
                       get_linear_logit,SparseFeat,get_dense_input,combined_dnn_input)
 from ..layers.core import DNN, PredictionLayer
 from ..layers.utils import concat_fun,Hash
-from ..utils import check_feature_config_dict
 
 
 def ONN(linear_feature_columns,dnn_feature_columns, embedding_size=4, dnn_hidden_units=(128, 128),
@@ -48,7 +47,7 @@ def ONN(linear_feature_columns,dnn_feature_columns, embedding_size=4, dnn_hidden
     :return: A Keras model instance.
     """
 
-    #check_feature_config_dict(feature_dim_dict)
+
     #todo 需要修改
     varlen_sparse_feature_columns = list(filter(lambda x: isinstance(x, VarLenSparseFeat), dnn_feature_columns)) if dnn_feature_columns else []
 
@@ -60,8 +59,8 @@ def ONN(linear_feature_columns,dnn_feature_columns, embedding_size=4, dnn_hidden
 
     inputs_list = list(features.values())
 
-    linear_logit = get_linear_logit(features,linear_feature_columns,
-                                       l2_reg_linear, init_std,seed,prefix='linear')
+    linear_logit = get_linear_logit(features, linear_feature_columns, l2_reg=l2_reg_linear, init_std=init_std,
+                                    seed=seed, prefix='linear')
 
     sparse_feature_columns = list(filter(lambda x:isinstance(x,SparseFeat),dnn_feature_columns)) if dnn_feature_columns else []
     #varlen_sparse_feature_columns = list(filter(lambda x: isinstance(x, VarLenSparseFeat), dnn_feature_columns)) if dnn_feature_columns else []
@@ -97,7 +96,6 @@ def ONN(linear_feature_columns,dnn_feature_columns, embedding_size=4, dnn_hidden
                 element_wise_prod, axis=-1))(element_wise_prod)
         embed_list.append(element_wise_prod)
 
-    print(embed_list)
     ffm_out = tf.keras.layers.Flatten()(concat_fun(embed_list, axis=1))
     if use_bn:
         ffm_out = tf.keras.layers.BatchNormalization()(ffm_out)

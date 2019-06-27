@@ -18,16 +18,16 @@ if __name__ == "__main__":
         lbe = LabelEncoder()
         data[feat] = lbe.fit_transform(data[feat])
     # 2.count #unique features for each sparse field
-    sparse_feat_list = [SparseFeat(feat, data[feat].nunique())
-                        for feat in sparse_features]
-    linear_feature_columns = sparse_feat_list
-    dnn_feature_columns = linear_feature_columns
-    feature_names = get_fixlen_feature_names(linear_feature_columns + dnn_feature_columns)
+    fixlen_feature_columns = [SparseFeat(feat, data[feat].nunique())
+                              for feat in sparse_features]
+    linear_feature_columns = fixlen_feature_columns
+    dnn_feature_columns = fixlen_feature_columns
+    fixlen_feature_names = get_fixlen_feature_names(linear_feature_columns + dnn_feature_columns)
 
     # 3.generate input data for model
     train, test = train_test_split(data, test_size=0.2)
-    train_model_input = [train[name].values for name in feature_names]
-    test_model_input = [test[name].values for name in feature_names]
+    train_model_input = [train[name].values for name in fixlen_feature_names]
+    test_model_input = [test[name].values for name in fixlen_feature_names]
     # 4.Define Model,train,predict and evaluate
     model = DeepFM(linear_feature_columns, dnn_feature_columns, task='regression')
     model.compile("adam", "mse", metrics=['mse'], )

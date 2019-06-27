@@ -5,9 +5,7 @@ from deepctr.inputs import SparseFeat,VarLenSparseFeat,DenseFeat,get_varlen_feat
 
 
 def get_xy_fd(hash_flag=False):
-    feature_dim_dict = {"sparse": [SparseFeat('user', 3, hash_flag), SparseFeat(
-        'gender', 2, hash_flag), SparseFeat('item', 3 + 1, hash_flag), SparseFeat('item_gender', 2 + 1, hash_flag)],
-                        "dense": [DenseFeat('score', 0)]}
+
     feature_columns = [SparseFeat('user', 3, hash_flag),
                        SparseFeat('gender', 2, hash_flag),
                        SparseFeat('item', 3 + 1, hash_flag),
@@ -35,14 +33,10 @@ def get_xy_fd(hash_flag=False):
                     'sess_0_item': sess1_iid, 'sess_0_item_gender': sess1_igender, 'score': score,
                     'sess_1_item': sess2_iid, 'sess_1_item_gender': sess2_igender, }
 
-    feature_names = get_fixlen_feature_names(feature_columns)
+    fixlen_feature_names = get_fixlen_feature_names(feature_columns)
     varlen_feature_names = get_varlen_feature_names(feature_columns)
-    x = [feature_dict[name] for name in feature_names] + [feature_dict[name] for name in varlen_feature_names]
+    x = [feature_dict[name] for name in fixlen_feature_names] + [feature_dict[name] for name in varlen_feature_names]
 
-    # x = [feature_dict[feat.name] for feat in feature_dim_dict["sparse"]] + [feature_dict[feat.name] for feat in
-    #                                                                         feature_dim_dict["dense"]] + [
-    #         feature_dict['sess1_' + feat] for feat in behavior_feature_list] + [
-    #         feature_dict['sess2_' + feat] for feat in behavior_feature_list]
 
     x += [sess_number]
 

@@ -45,21 +45,24 @@ def check_version(version):
     Thread(target=check, args=(version,)).start()
 
 
-def check_feature_config_dict(feature_dim_dict):
-    if not isinstance(feature_dim_dict, dict):
-        raise ValueError(
-            "feature_dim_dict must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}")
-    if "sparse" not in feature_dim_dict:
-        feature_dim_dict['sparse'] = []
-    if "dense" not in feature_dim_dict:
-        feature_dim_dict['dense'] = []
-    if "sequence" not in feature_dim_dict:
-        feature_dim_dict["sequence"] = []  # TODO:check if it's ok
+# def check_feature_config_dict(feature_dim_dict):
+#     if not isinstance(feature_dim_dict, dict):
+#         raise ValueError(
+#             "feature_dim_dict must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}")
+#     if "sparse" not in feature_dim_dict:
+#         feature_dim_dict['sparse'] = []
+#     if "dense" not in feature_dim_dict:
+#         feature_dim_dict['dense'] = []
+#     if "sequence" not in feature_dim_dict:
+#         feature_dim_dict["sequence"] = []  # TODO:check if it's ok
+#
+#     if not isinstance(feature_dim_dict["sparse"], list):
+#         raise ValueError("feature_dim_dict['sparse'] must be a list,cur is", type(
+#             feature_dim_dict['sparse']))
+#
+#     if not isinstance(feature_dim_dict["dense"], list):
+#         raise ValueError("feature_dim_dict['dense'] must be a list,cur is", type(
+#             feature_dim_dict['dense']))
 
-    if not isinstance(feature_dim_dict["sparse"], list):
-        raise ValueError("feature_dim_dict['sparse'] must be a list,cur is", type(
-            feature_dim_dict['sparse']))
-
-    if not isinstance(feature_dim_dict["dense"], list):
-        raise ValueError("feature_dim_dict['dense'] must be a list,cur is", type(
-            feature_dim_dict['dense']))
+import tensorflow as tf
+tf.estimator.DNNLinearCombinedClassifier

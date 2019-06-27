@@ -23,21 +23,19 @@ genres_list = pad_sequences(genres_list, maxlen=max_len, padding='post', dtype=s
 
 # 2.set hashing space for each sparse field and generate feature config for sequence feature
 
-sparse_feat_list = [SparseFeat(feat, data[feat].nunique() * 5, use_hash=True, dtype='string')
-                    for feat in sparse_features]
-sequence_feature = [VarLenSparseFeat('genres', 100, max_len, 'mean', use_hash=True,
-                               dtype="string")]  # Notice : value 0 is for padding for sequence input feature
-linear_feature_columns = sparse_feat_list + sequence_feature
-dnn_feature_columns = linear_feature_columns
+fixlen_feature_columns = [SparseFeat(feat, data[feat].nunique() * 5, use_hash=True, dtype='string')
+                          for feat in sparse_features]
+varlen_feature_columns = [VarLenSparseFeat('genres', 100, max_len, 'mean', use_hash=True,
+                                           dtype="string")]  # Notice : value 0 is for padding for sequence input feature
+linear_feature_columns = fixlen_feature_columns + varlen_feature_columns
+dnn_feature_columns = fixlen_feature_columns + varlen_feature_columns
 feature_names = get_fixlen_feature_names(linear_feature_columns + dnn_feature_columns)
 
 # 3.generate input data for model
-sparse_input = [data[name].values for name in feature_names]
-#dense_input = []
-sequence_input = [genres_list]
+fixlen_input = [data[name].values for name in feature_names]
+varlen_input = [genres_list]
 
-model_input = sparse_input + sequence_input #dense_input + \
-                # make sure the order is right
+model_input = fixlen_input + varlen_input # make sure the order is right
 
 # 4.Define Model,compile and train
 model = DeepFM(linear_feature_columns,dnn_feature_columns, task='regression')

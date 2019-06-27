@@ -38,7 +38,6 @@ def DeepFM(linear_feature_columns, dnn_feature_columns, embedding_size=8, use_fm
     :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
     :return: A Keras model instance.
     """
-    #check_feature_config_dict(linear_feature_columns)
 
     features = build_input_features(linear_feature_columns + dnn_feature_columns)
 
@@ -49,8 +48,8 @@ def DeepFM(linear_feature_columns, dnn_feature_columns, embedding_size=8, use_fm
                                                                               l2_reg_embedding,init_std,
                                                                               seed)
 
-    linear_logit = get_linear_logit(features,linear_feature_columns,
-                                       l2_reg_linear, init_std,seed,prefix='linear')
+    linear_logit = get_linear_logit(features, linear_feature_columns, l2_reg=l2_reg_linear, init_std=init_std,
+                                    seed=seed, prefix='linear')
 
     fm_input = concat_fun(sparse_embedding_list, axis=1)
     fm_logit = FM()(fm_input)
