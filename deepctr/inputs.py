@@ -152,13 +152,13 @@ def get_varlen_pooling_list(embedding_dict, features, varlen_sparse_feature_colu
         pooling_vec_list.append(vec)
     return pooling_vec_list
 
-def get_pooling_vec_list(sequence_embed_dict, sequence_len_dict, sequence_max_len_dict, sequence_fd_list):
-    if sequence_max_len_dict is None or sequence_len_dict is None:
-        return [SequencePoolingLayer(feat.combiner, supports_masking=True)(sequence_embed_dict[feat.name]) for feat in
-                sequence_fd_list]
-    else:
-        return [SequencePoolingLayer(feat.combiner, supports_masking=False)(
-            [sequence_embed_dict[feat.name], sequence_len_dict[feat.name]]) for feat in sequence_fd_list]
+# def get_pooling_vec_list(sequence_embed_dict, sequence_len_dict, sequence_max_len_dict, sequence_fd_list):
+#     if sequence_max_len_dict is None or sequence_len_dict is None:
+#         return [SequencePoolingLayer(feat.combiner, supports_masking=True)(sequence_embed_dict[feat.name]) for feat in
+#                 sequence_fd_list]
+#     else:
+#         return [SequencePoolingLayer(feat.combiner, supports_masking=False)(
+#             [sequence_embed_dict[feat.name], sequence_len_dict[feat.name]]) for feat in sequence_fd_list]
 
 
 def get_inputs_list(inputs):
@@ -233,18 +233,18 @@ def get_dense_input(features,feature_columns):
     return dense_input_list
 
 
-def get_varlen_vec_list(embedding_dict, features, varlen_sparse_feature_columns):
-    vec_list = []
-    for fc in varlen_sparse_feature_columns:
-        feature_name = fc.name
-        feature_length_name = feature_name + "_seq_length"
-        if feature_length_name in features:
-            vector = SequencePoolingLayer(fc.combiner, supports_masking=False)(
-            [embedding_dict[feature_name], features[feature_length_name]])
-        else:
-            vector = SequencePoolingLayer(fc.combiner, supports_masking=True)(embedding_dict[feature_name])
-        vec_list.append(vector)
-    return vec_list
+# def get_varlen_vec_list(embedding_dict, features, varlen_sparse_feature_columns):
+#     vec_list = []
+#     for fc in varlen_sparse_feature_columns:
+#         feature_name = fc.name
+#         feature_length_name = feature_name + "_seq_length"
+#         if feature_length_name in features:
+#             vector = SequencePoolingLayer(fc.combiner, supports_masking=False)(
+#             [embedding_dict[feature_name], features[feature_length_name]])
+#         else:
+#             vector = SequencePoolingLayer(fc.combiner, supports_masking=True)(embedding_dict[feature_name])
+#         vec_list.append(vector)
+#     return vec_list
 
 
 
