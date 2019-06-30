@@ -35,7 +35,7 @@ You can read the latest code at https://github.com/shenweichen/DeepCTR
 
 News
 -----
-06/30/2019 : Refactor inputs. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.5.0>`_
+06/30/2019 : Refactor inputs module. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.5.0>`_
 
 05/19/2019 : Add `DSIN <./Features.html#dsin-deep-session-interest-network>`_ . `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.4.1>`_
 

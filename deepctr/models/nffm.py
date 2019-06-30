@@ -4,7 +4,8 @@ Author:
     Weichen Shen,wcshen1994@163.com
 
 Reference:
-    [1] [Operation-aware Neural Networks for User Response Prediction](https://arxiv.org/pdf/1904.12579.pdf)
+    [1] Yang Y, Xu B, Shen F, et al. Operation-aware Neural Networks for User Response Prediction[J]. arXiv preprint arXiv:1904.12579, 2019. （https://arxiv.org/pdf/1904.12579）
+
 
 """
 
@@ -24,10 +25,10 @@ from ..layers.core import DNN, PredictionLayer
 from ..layers.utils import concat_fun,Hash
 
 
-def ONN(linear_feature_columns,dnn_feature_columns, embedding_size=4, dnn_hidden_units=(128, 128),
-        l2_reg_embedding=1e-5, l2_reg_linear=1e-5, l2_reg_dnn=0, dnn_dropout=0,
-        init_std=0.0001, seed=1024, include_linear=True, use_bn=True, reduce_sum=False, task='binary',
-        ):
+def NFFM(linear_feature_columns, dnn_feature_columns, embedding_size=4, dnn_hidden_units=(128, 128),
+         l2_reg_embedding=1e-5, l2_reg_linear=1e-5, l2_reg_dnn=0, dnn_dropout=0,
+         init_std=0.0001, seed=1024, include_linear=True, use_bn=True, reduce_sum=False, task='binary',
+         ):
     """Instantiates the Operation-aware Neural Networks  architecture.
 
     :param linear_feature_columns: An iterable containing all the features used by linear part of the model.

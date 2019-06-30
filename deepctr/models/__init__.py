@@ -7,7 +7,7 @@ from .dien import DIEN
 from .din import DIN
 from .fnn import FNN
 from .mlr import MLR
-from .onn import ONN
+from .nffm import NFFM
 from .nfm import NFM
 from .pnn import PNN
 from .wdl import WDL
@@ -16,4 +16,4 @@ from .fgcnn import FGCNN
 from .dsin import DSIN
 
 __all__ = ["AFM", "CCPM","DCN", "MLR",  "DeepFM",
-           "MLR", "NFM", "DIN", "DIEN", "FNN", "PNN", "WDL", "xDeepFM", "AutoInt", "ONN", "FGCNN", "DSIN"]
+           "MLR", "NFM", "DIN", "DIEN", "FNN", "PNN", "WDL", "xDeepFM", "AutoInt", "NFFM", "FGCNN", "DSIN"]
