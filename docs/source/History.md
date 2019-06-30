@@ -1,4 +1,5 @@
 # History
+- 06/30/2019 : [v0.5.0](https://github.com/shenweichen/DeepCTR/releases/tag/v0.5.0) released.Refactor inputs module. 
 - 05/19/2019 : [v0.4.1](https://github.com/shenweichen/DeepCTR/releases/tag/v0.4.1) released.Add [DSIN](./Features.html#dsin-deep-session-interest-network). 
 - 05/04/2019 : [v0.4.0](https://github.com/shenweichen/DeepCTR/releases/tag/v0.4.0) released.Support [feature hashing on the fly](./Examples.html#classification-criteo-with-feature-hashing-on-the-fly) and python2.7.
 - 04/27/2019 : [v0.3.4](https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.4) released.Add [FGCNN](./Features.html#fgcnn-feature-generation-by-convolutional-neural-network) and `FGCNNLayer`.

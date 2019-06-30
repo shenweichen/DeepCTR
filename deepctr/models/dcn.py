@@ -8,20 +8,18 @@ Reference:
 """
 import tensorflow as tf
 
-from ..input_embedding import preprocess_input_embedding
+from ..inputs import input_from_feature_columns,build_input_features
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import CrossNet
 from ..layers.utils import concat_fun
-from ..utils import check_feature_config_dict
 
 
-def DCN(feature_dim_dict, embedding_size='auto',
-        cross_num=2, dnn_hidden_units=(128, 128,), l2_reg_embedding=1e-5, l2_reg_cross=1e-5, l2_reg_dnn=0,
-        init_std=0.0001, seed=1024, dnn_dropout=0, dnn_use_bn=False, dnn_activation='relu', task='binary',
-        ):
+def DCN(dnn_feature_columns, embedding_size='auto', cross_num=2, dnn_hidden_units=(128, 128,), l2_reg_embedding=1e-5,
+        l2_reg_cross=1e-5, l2_reg_dnn=0, init_std=0.0001, seed=1024, dnn_dropout=0, dnn_use_bn=False,
+        dnn_activation='relu', task='binary'):
     """Instantiates the Deep&Cross Network architecture.
 
-    :param feature_dim_dict: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
+    :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
     :param embedding_size: positive int or str,sparse feature embedding_size.If set to "auto",it will be 6*pow(cardinality,025)
     :param cross_num: positive integet,cross layer number
     :param dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of DNN
@@ -40,29 +38,29 @@ def DCN(feature_dim_dict, embedding_size='auto',
     if len(dnn_hidden_units) == 0 and cross_num == 0:
         raise ValueError("Either hidden_layer or cross layer must > 0")
 
-    check_feature_config_dict(feature_dim_dict)
+    #check_feature_config_dict(feature_dim_dict)
+    features = build_input_features(dnn_feature_columns)
+    inputs_list = list(features.values())
 
-    deep_emb_list, _, _, inputs_list = preprocess_input_embedding(feature_dim_dict,
-                                                                  embedding_size,
-                                                                  l2_reg_embedding,
-                                                                  0, init_std,
-                                                                  seed,
-                                                                  create_linear_weight=False)
-
-    deep_input = tf.keras.layers.Flatten()(concat_fun(deep_emb_list))
+    sparse_embedding_list, dense_value_list = input_from_feature_columns(features,dnn_feature_columns,
+                                                                                               embedding_size,
+                                                                                               l2_reg_embedding, init_std,
+                                                                                               seed)
+    #todo not support dense?
+    dnn_input = tf.keras.layers.Flatten()(concat_fun(sparse_embedding_list))
 
     if len(dnn_hidden_units) > 0 and cross_num > 0:  # Deep & Cross
         deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
-                       dnn_use_bn, seed)(deep_input)
-        cross_out = CrossNet(cross_num, l2_reg=l2_reg_cross)(deep_input)
+                       dnn_use_bn, seed)(dnn_input)
+        cross_out = CrossNet(cross_num, l2_reg=l2_reg_cross)(dnn_input)
         stack_out = tf.keras.layers.Concatenate()([cross_out, deep_out])
         final_logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(stack_out)
     elif len(dnn_hidden_units) > 0:  # Only Deep
         deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
-                       dnn_use_bn, seed)(deep_input)
+                       dnn_use_bn, seed)(dnn_input)
         final_logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(deep_out)
     elif cross_num > 0:  # Only Cross
-        cross_out = CrossNet(cross_num, l2_reg=l2_reg_cross)(deep_input)
+        cross_out = CrossNet(cross_num, l2_reg=l2_reg_cross)(dnn_input)
         final_logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(cross_out)
     else:  # Error
         raise NotImplementedError

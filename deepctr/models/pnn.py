@@ -9,19 +9,19 @@ Reference:
 
 import tensorflow as tf
 
-from ..input_embedding import preprocess_input_embedding
+from ..inputs import input_from_feature_columns,build_input_features
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import InnerProductLayer, OutterProductLayer
 from ..layers.utils import concat_fun
-from ..utils import check_feature_config_dict
 
 
-def PNN(feature_dim_dict, embedding_size=8, dnn_hidden_units=(128, 128), l2_reg_embedding=1e-5, l2_reg_dnn=0,
-        init_std=0.0001, seed=1024, dnn_dropout=0, dnn_activation='relu',
-        use_inner=True, use_outter=False, kernel_type='mat', task='binary'):
+def PNN(dnn_feature_columns, embedding_size=8, dnn_hidden_units=(128, 128), l2_reg_embedding=1e-5, l2_reg_dnn=0,
+        init_std=0.0001, seed=1024, dnn_dropout=0, dnn_activation='relu', use_inner=True, use_outter=False,
+        kernel_type='mat', task='binary'):
     """Instantiates the Product-based Neural Network architecture.
 
-    :param feature_dim_dict: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
+    :param linear_feature_columns: An iterable containing all the features used by linear part of the model.
+    :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
     :param embedding_size: positive integer,sparse feature embedding_size
     :param dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of deep net
     :param l2_reg_embedding: float . L2 regularizer strength applied to embedding vector
@@ -36,24 +36,26 @@ def PNN(feature_dim_dict, embedding_size=8, dnn_hidden_units=(128, 128), l2_reg_
     :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
     :return: A Keras model instance.
     """
-    check_feature_config_dict(feature_dim_dict)
+    #check_feature_config_dict(dnn_feature_columns)
 
     if kernel_type not in ['mat', 'vec', 'num']:
         raise ValueError("kernel_type must be mat,vec or num")
 
-    deep_emb_list, _, _, inputs_list = preprocess_input_embedding(feature_dim_dict,
-                                                                  embedding_size,
-                                                                  l2_reg_embedding,
-                                                                  0, init_std,
-                                                                  seed,
-                                                                  create_linear_weight=False)
+    features = build_input_features(dnn_feature_columns)
 
-    inner_product = tf.keras.layers.Flatten()(InnerProductLayer()(deep_emb_list))
-    outter_product = OutterProductLayer(kernel_type)(deep_emb_list)
+    inputs_list = list(features.values())
+
+    sparse_embedding_list, dense_value_list = input_from_feature_columns(features,dnn_feature_columns,
+                                                                              embedding_size,
+                                                                              l2_reg_embedding,init_std,
+                                                                              seed)
+    # todo note support dense
+    inner_product = tf.keras.layers.Flatten()(InnerProductLayer()(sparse_embedding_list))
+    outter_product = OutterProductLayer(kernel_type)(sparse_embedding_list)
 
     # ipnn deep input
     linear_signal = tf.keras.layers.Reshape(
-        [len(deep_emb_list) * embedding_size])(concat_fun(deep_emb_list))
+        [len(sparse_embedding_list) * embedding_size])(concat_fun(sparse_embedding_list))
 
     if use_inner and use_outter:
         deep_input = tf.keras.layers.Concatenate()(

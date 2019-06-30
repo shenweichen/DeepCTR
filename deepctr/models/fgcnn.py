@@ -11,37 +11,32 @@ Reference:
 """
 import tensorflow as tf
 
-from ..input_embedding import create_singlefeat_inputdict, create_varlenfeat_inputdict, get_linear_logit
-from ..input_embedding import get_inputs_embedding
+from ..inputs import build_input_features, get_linear_logit,input_from_feature_columns
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import InnerProductLayer, FGCNNLayer
 from ..layers.utils import concat_fun
-from ..utils import check_feature_config_dict
 
 
-def preprocess_input_embedding(feature_dim_dict, embedding_size, l2_reg_embedding, l2_reg_linear, init_std, seed,
-                               return_linear_logit=True, ):
-    sparse_input_dict, dense_input_dict = create_singlefeat_inputdict(
-        feature_dim_dict)
-    sequence_input_dict, sequence_input_len_dict, sequence_max_len_dict = create_varlenfeat_inputdict(
-        feature_dim_dict)
-    inputs_list, deep_emb_list, linear_emb_list = get_inputs_embedding(feature_dim_dict, embedding_size,
-                                                                       l2_reg_embedding, l2_reg_linear, init_std, seed,
-                                                                       sparse_input_dict, dense_input_dict,
-                                                                       sequence_input_dict, sequence_input_len_dict,
-                                                                       sequence_max_len_dict,
-                                                                       return_linear_logit, prefix='')
-    _, fg_deep_emb_list, _ = get_inputs_embedding(feature_dim_dict, embedding_size,
-                                                  l2_reg_embedding, l2_reg_linear, init_std, seed,
-                                                  sparse_input_dict, dense_input_dict,
-                                                  sequence_input_dict, sequence_input_len_dict,
-                                                  sequence_max_len_dict, False, prefix='fg')
-    if return_linear_logit:
-        linear_logit = get_linear_logit(
-            linear_emb_list, dense_input_dict, l2_reg_linear)
-    else:
-        linear_logit = None
-    return deep_emb_list, fg_deep_emb_list, linear_logit, inputs_list
+# def preprocess_input_embedding(feature_dim_dict, embedding_size, l2_reg_embedding, l2_reg_linear, init_std, seed,
+#                                return_linear_logit=True, ):
+#     sparse_input_dict, dense_input_dict = build_input_features(feature_dim_dict)
+#     sequence_input_dict, sequence_input_len_dict, sequence_max_len_dict = create_varlenfeat_inputdict(
+#         feature_dim_dict)
+#     inputs_list, deep_emb_list, linear_emb_list = get_inputs_embedding(None, feature_dim_dict, l2_reg_embedding,
+#                                                                        l2_reg_linear, init_std, seed, sparse_input_dict,
+#                                                                        dense_input_dict, sequence_input_dict,
+#                                                                        sequence_input_len_dict, sequence_max_len_dict,
+#                                                                        return_linear_logit, embedding_size, prefix='')
+#     _, fg_deep_emb_list, _ = get_inputs_embedding(None, feature_dim_dict, l2_reg_embedding, l2_reg_linear, init_std,
+#                                                   seed, sparse_input_dict, dense_input_dict, sequence_input_dict,
+#                                                   sequence_input_len_dict, sequence_max_len_dict, False, embedding_size,
+#                                                   prefix='fg')
+#     if return_linear_logit:
+#         linear_logit = get_linear_logit(
+#             linear_emb_list, dense_input_dict, l2_reg_linear)
+#     else:
+#         linear_logit = None
+#     return deep_emb_list, fg_deep_emb_list, linear_logit, inputs_list
 
 
 def unstack(input_tensor):
@@ -49,15 +44,14 @@ def unstack(input_tensor):
     return tf.unstack(input_, input_.shape[1], 1)
 
 
-def FGCNN(feature_dim_dict, embedding_size=8, conv_kernel_width=(7, 7, 7, 7), conv_filters=(14, 16, 18, 20),
+def FGCNN(dnn_feature_columns, embedding_size=8, conv_kernel_width=(7, 7, 7, 7), conv_filters=(14, 16, 18, 20),
           new_maps=(3, 3, 3, 3),
           pooling_width=(2, 2, 2, 2), dnn_hidden_units=(128,), l2_reg_embedding=1e-5, l2_reg_dnn=0, dnn_dropout=0,
           init_std=0.0001, seed=1024,
           task='binary', ):
     """Instantiates the Feature Generation by Convolutional Neural Network architecture.
 
-    :param feature_dim_dict: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
-    :param embedding_size: positive integer,sparse feature embedding_size
+    :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.    :param embedding_size: positive integer,sparse feature embedding_size
     :param conv_kernel_width: list,list of positive integer or empty list,the width of filter in each conv layer.
     :param conv_filters: list,list of positive integer or empty list,the number of filters in each conv layer.
     :param new_maps: list, list of positive integer or empty list, the feature maps of generated features.
@@ -71,17 +65,54 @@ def FGCNN(feature_dim_dict, embedding_size=8, conv_kernel_width=(7, 7, 7, 7), co
     :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
     :return: A Keras model instance.
     """
-
-    check_feature_config_dict(feature_dim_dict)
+    #todo 这个还没修改
+    #check_feature_config_dict(feature_dim_dict)
     if not (len(conv_kernel_width) == len(conv_filters) == len(new_maps) == len(pooling_width)):
         raise ValueError(
             "conv_kernel_width,conv_filters,new_maps  and pooling_width must have same length")
 
-    deep_emb_list, fg_deep_emb_list, _, inputs_list = preprocess_input_embedding(feature_dim_dict,
-                                                                                 embedding_size,
-                                                                                 l2_reg_embedding,
-                                                                                 0, init_std,
-                                                                                 seed, False)
+    features = build_input_features(dnn_feature_columns)
+
+    inputs_list = list(features.values())
+
+    deep_emb_list, _ = input_from_feature_columns(features,dnn_feature_columns,
+                                                                              embedding_size,
+                                                                              l2_reg_embedding,init_std,
+                                                                              seed)
+    fg_deep_emb_list,_ = input_from_feature_columns(features,dnn_feature_columns,
+                                                                              embedding_size,
+                                                                              l2_reg_embedding,init_std,
+                                                                              seed,prefix='fg')
+
+
+    # sequence_input_dict, sequence_input_len_dict, sequence_max_len_dict = create_varlenfeat_inputdict(
+    #     feature_dim_dict)
+    # inputs_list, deep_emb_list, linear_emb_list = get_inputs_embedding(None, feature_dim_dict, l2_reg_embedding,
+    #                                                                    l2_reg_linear, init_std, seed, sparse_input_dict,
+    #                                                                    dense_input_dict, sequence_input_dict,
+    #                                                                    sequence_input_len_dict, sequence_max_len_dict,
+    #                                                                    return_linear_logit, embedding_size, prefix='')
+    # _, fg_deep_emb_list, _ = get_inputs_embedding(None, feature_dim_dict, l2_reg_embedding, l2_reg_linear, init_std,
+    #                                               seed, sparse_input_dict, dense_input_dict, sequence_input_dict,
+    #                                               sequence_input_len_dict, sequence_max_len_dict, False, embedding_size,
+    #                                               prefix='fg')
+    # if return_linear_logit:
+    #     linear_logit = get_linear_logit(
+    #         linear_emb_list, dense_input_dict, l2_reg_linear)
+    # else:
+    #     linear_logit = None
+    # return deep_emb_list, fg_deep_emb_list, linear_logit, inputs_list
+
+
+
+
+
+
+    # deep_emb_list, fg_deep_emb_list, _, inputs_list = preprocess_input_embedding(dnn_feature_columns,
+    #                                                                              embedding_size,
+    #                                                                              l2_reg_embedding,
+    #                                                                              0, init_std,
+    #                                                                              seed, False)
     fg_input = concat_fun(fg_deep_emb_list, axis=1)
     origin_input = concat_fun(deep_emb_list, axis=1)
 
@@ -91,7 +122,6 @@ def FGCNN(feature_dim_dict, embedding_size=8, conv_kernel_width=(7, 7, 7, 7), co
         combined_input = concat_fun([origin_input, new_features], axis=1)
     else:
         combined_input = origin_input
-
     inner_product = tf.keras.layers.Flatten()(InnerProductLayer()(
         tf.keras.layers.Lambda(unstack, mask=[None] * combined_input.shape[1].value)(combined_input)))
     linear_signal = tf.keras.layers.Flatten()(combined_input)

@@ -7,30 +7,14 @@ Reference:
     [1] Zhou G, Mou N, Fan Y, et al. Deep Interest Evolution Network for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1809.03672, 2018. (https://arxiv.org/pdf/1809.03672.pdf)
 """
 
-from collections import OrderedDict
 
 import tensorflow as tf
-from tensorflow.python.keras.initializers import RandomNormal
-from tensorflow.python.keras.layers import (Concatenate, Dense, Embedding,
-                                            Input, Permute, multiply)
-from tensorflow.python.keras.regularizers import l2
+from tensorflow.python.keras.layers import (Concatenate, Dense, Input, Permute, multiply)
 
-from ..input_embedding import create_singlefeat_inputdict, get_inputs_list,get_embedding_vec_list
+from ..inputs import build_input_features, get_varlen_pooling_list,create_embedding_matrix,embedding_lookup,varlen_embedding_lookup,SparseFeat,DenseFeat,VarLenSparseFeat,get_dense_input,combined_dnn_input
 from ..layers.core import DNN, PredictionLayer
 from ..layers.sequence import AttentionSequencePoolingLayer, DynamicGRU
 from ..layers.utils import concat_fun
-from ..utils import check_feature_config_dict
-
-
-def get_input(feature_dim_dict, seq_feature_list, seq_max_len):
-    sparse_input, dense_input = create_singlefeat_inputdict(feature_dim_dict)
-    user_behavior_input = OrderedDict()
-    for i, feat in enumerate(seq_feature_list):
-        user_behavior_input[feat] = Input(shape=(seq_max_len,), name='seq_' + str(i) + '-' + feat)
-
-    user_behavior_length = Input(shape=(1,), name='seq_length')
-
-    return sparse_input, dense_input, user_behavior_input, user_behavior_length
 
 
 def auxiliary_loss(h_states, click_seq, noclick_seq, mask, stag=None):
@@ -135,15 +119,15 @@ def interest_evolution(concat_behavior, deep_input_item, user_behavior_length, g
     return hist, aux_loss_1
 
 
-def DIEN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
+def DIEN(dnn_feature_columns, history_feature_list, embedding_size=8, hist_len_max=16,
          gru_type="GRU", use_negsampling=False, alpha=1.0, use_bn=False, dnn_hidden_units=(200, 80),
          dnn_activation='relu',
          att_hidden_units=(64, 16), att_activation="dice", att_weight_normalization=True,
          l2_reg_dnn=0, l2_reg_embedding=1e-6, dnn_dropout=0, init_std=0.0001, seed=1024, task='binary'):
     """Instantiates the Deep Interest Evolution Network architecture.
 
-    :param feature_dim_dict: dict,to indicate sparse field (**now only support sparse feature**)like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':[]}
-    :param seq_feature_list: list,to indicate  sequence sparse field (**now only support sparse feature**),must be a subset of ``feature_dim_dict["sparse"]``
+    :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
+    :param history_feature_list: list,to indicate  sequence sparse field
     :param embedding_size: positive integer,sparse feature embedding_size.
     :param hist_len_max: positive int, to indicate the max length of seq input
     :param gru_type: str,can be GRU AIGRU AUGRU AGRU
@@ -164,40 +148,88 @@ def DIEN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
     :return: A Keras model instance.
 
     """
-    check_feature_config_dict(feature_dim_dict)
+    # check_feature_config_dict(feature_columns)
+    #
+    # sparse_input, dense_input, user_behavior_input, user_behavior_length = get_input(
+    #     feature_columns, seq_feature_list, hist_len_max)
+    # sparse_embedding_dict = {feat.name: Embedding(feat.dimension, embedding_size,
+    #                                               embeddings_initializer=RandomNormal(
+    #                                                   mean=0.0, stddev=init_std, seed=seed),
+    #                                               embeddings_regularizer=l2(
+    #                                                   l2_reg_embedding),
+    #                                               name='sparse_emb_' + str(i) + '-' + feat.name) for i, feat in
+    #                          enumerate(feature_columns["sparse"])}
+    #
+    # query_emb_list = get_embedding_vec_list(sparse_embedding_dict, sparse_input, feature_columns["sparse"], return_feat_list=seq_feature_list)
+    # keys_emb_list = get_embedding_vec_list(sparse_embedding_dict, user_behavior_input, feature_columns['sparse'], return_feat_list=seq_feature_list)
+    # deep_input_emb_list = get_embedding_vec_list(sparse_embedding_dict, sparse_input, feature_columns['sparse'])
+    #
+    # query_emb = concat_fun(query_emb_list)
+    # keys_emb = concat_fun(keys_emb_list)
+    # deep_input_emb = concat_fun(deep_input_emb_list)
 
-    sparse_input, dense_input, user_behavior_input, user_behavior_length = get_input(
-        feature_dim_dict, seq_feature_list, hist_len_max)
-    sparse_embedding_dict = {feat.name: Embedding(feat.dimension, embedding_size,
-                                                  embeddings_initializer=RandomNormal(
-                                                      mean=0.0, stddev=init_std, seed=seed),
-                                                  embeddings_regularizer=l2(
-                                                      l2_reg_embedding),
-                                                  name='sparse_emb_' + str(i) + '-' + feat.name) for i, feat in
-                             enumerate(feature_dim_dict["sparse"])}
+    features = build_input_features(dnn_feature_columns)
 
-    query_emb_list = get_embedding_vec_list(sparse_embedding_dict,sparse_input,feature_dim_dict["sparse"],return_feat_list=seq_feature_list)
-    keys_emb_list = get_embedding_vec_list(sparse_embedding_dict,user_behavior_input,feature_dim_dict['sparse'],return_feat_list=seq_feature_list)
-    deep_input_emb_list = get_embedding_vec_list(sparse_embedding_dict, sparse_input, feature_dim_dict['sparse'])
+    user_behavior_length = Input(shape=(1,), name='seq_length')
 
-    query_emb = concat_fun(query_emb_list)
+    sparse_feature_columns = list(
+        filter(lambda x: isinstance(x, SparseFeat), dnn_feature_columns)) if dnn_feature_columns else []
+    dense_feature_columns = list(
+        filter(lambda x: isinstance(x, DenseFeat), dnn_feature_columns)) if dnn_feature_columns else []
+    varlen_sparse_feature_columns = list(
+        filter(lambda x: isinstance(x, VarLenSparseFeat), dnn_feature_columns)) if dnn_feature_columns else []
+
+    history_feature_columns = []
+    neg_history_feature_columns = []
+    sparse_varlen_feature_columns = []
+    history_fc_names = list(map(lambda x: "hist_" + x, history_feature_list))
+    neg_history_fc_names = list(map(lambda x: "neg_" + x, history_fc_names))
+    for fc in varlen_sparse_feature_columns:
+        feature_name = fc.name
+        if feature_name in history_fc_names:
+            history_feature_columns.append(fc)
+        elif feature_name in neg_history_fc_names:
+            neg_history_feature_columns.append(fc)
+        else:
+            sparse_varlen_feature_columns.append(fc)
+
+    inputs_list = list(features.values())
+
+    embedding_dict = create_embedding_matrix(dnn_feature_columns, l2_reg_embedding, init_std, seed, embedding_size,
+                                             prefix="",seq_mask_zero=False)
+
+    query_emb_list = embedding_lookup(embedding_dict, features, sparse_feature_columns, return_feat_list=history_feature_list,
+                                      )  # query是单独的
+
+    keys_emb_list = embedding_lookup(embedding_dict, features, history_feature_columns,return_feat_list=history_fc_names)
+    dnn_input_emb_list = embedding_lookup(embedding_dict, features, sparse_feature_columns,
+                                          mask_feat_list=history_feature_list)
+    dense_value_list = get_dense_input(features, dense_feature_columns)
+
+    sequence_embed_dict = varlen_embedding_lookup(embedding_dict, features, sparse_varlen_feature_columns)
+    sequence_embed_list = get_varlen_pooling_list(sequence_embed_dict, features, sparse_varlen_feature_columns)
+    dnn_input_emb_list += sequence_embed_list
+
+
     keys_emb = concat_fun(keys_emb_list)
-    deep_input_emb = concat_fun(deep_input_emb_list)
+    deep_input_emb = concat_fun(dnn_input_emb_list)
+    query_emb = concat_fun(query_emb_list)
+
 
 
     if use_negsampling:
-        neg_user_behavior_input = OrderedDict()
-        for i, feat in enumerate(seq_feature_list):
-            neg_user_behavior_input[feat] = Input(shape=(hist_len_max,), name='neg_seq_' + str(i) + '-' + feat)
+        #neg_user_behavior_input = OrderedDict()
+        #for i, feat in enumerate(history_feature_list):
+        #    neg_user_behavior_input[feat] = Input(shape=(hist_len_max,), name='neg_seq_' + str(i) + '-' + feat)
 
-        neg_uiseq_embed_list = get_embedding_vec_list(sparse_embedding_dict,neg_user_behavior_input,feature_dim_dict["sparse"],seq_feature_list,)
+        neg_uiseq_embed_list = embedding_lookup(embedding_dict, features, neg_history_feature_columns, neg_history_fc_names,)
+            #get_embedding_vec_list(sparse_embedding_dict, neg_user_behavior_input, feature_columns["sparse"], history_feature_list, )
            # [sparse_embedding_dict[feat](
            # neg_user_behavior_input[feat]) for feat in seq_feature_list]
         neg_concat_behavior = concat_fun(neg_uiseq_embed_list)
 
     else:
         neg_concat_behavior = None
-
     hist, aux_loss_1 = interest_evolution(keys_emb, query_emb, user_behavior_length, gru_type=gru_type,
                                           use_neg=use_negsampling, neg_concat_behavior=neg_concat_behavior,
                                           embedding_size=embedding_size, att_hidden_size=att_hidden_units,
@@ -207,20 +239,19 @@ def DIEN(feature_dim_dict, seq_feature_list, embedding_size=8, hist_len_max=16,
     deep_input_emb = Concatenate()([deep_input_emb, hist])
 
     deep_input_emb = tf.keras.layers.Flatten()(deep_input_emb)
-    if len(dense_input) > 0:
-        deep_input_emb = Concatenate()(
-            [deep_input_emb] + list(dense_input.values()))
 
+    dnn_input = combined_dnn_input([deep_input_emb], dense_value_list)
     output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn,
-                 dnn_dropout, use_bn, seed)(deep_input_emb)
+                 dnn_dropout, use_bn, seed)(dnn_input)
     final_logit = Dense(1, use_bias=False)(output)
     output = PredictionLayer(task)(final_logit)
 
-    model_input_list = get_inputs_list(
-        [sparse_input, dense_input, user_behavior_input])
+    #model_input_list = get_inputs_list(
+    #    [sparse_input, dense_input, user_behavior_input])
+    model_input_list = inputs_list
 
-    if use_negsampling:
-        model_input_list += list(neg_user_behavior_input.values())
+    #if use_negsampling:
+    #    model_input_list += list(neg_user_behavior_input.values())
 
     model_input_list += [user_behavior_length]
 

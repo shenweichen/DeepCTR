@@ -1,12 +1,16 @@
 import numpy as np
 
 from deepctr.models import DIN
-from deepctr.utils import SingleFeat
+from deepctr.inputs import SparseFeat,VarLenSparseFeat,DenseFeat,get_fixlen_feature_names,get_varlen_feature_names
 
 
 def get_xy_fd():
-    feature_dim_dict = {"sparse": [SingleFeat('user', 3), SingleFeat(
-        'gender', 2), SingleFeat('item', 3 + 1), SingleFeat('item_gender', 2 + 1)], "dense": [SingleFeat('score', 0)]}
+
+    feature_columns = [SparseFeat('user',3),SparseFeat(
+        'gender', 2), SparseFeat('item', 3 + 1), SparseFeat('item_gender', 2 + 1),DenseFeat('score', 0)]
+    feature_columns += [VarLenSparseFeat('hist_item',3+1, maxlen=4, embedding_name='item'),
+                        VarLenSparseFeat('hist_item_gender',3+1, maxlen=4, embedding_name='item_gender')]
+
     behavior_feature_list = ["item", "item_gender"]
     uid = np.array([0, 1, 2])
     ugender = np.array([0, 1, 0])
@@ -20,17 +24,17 @@ def get_xy_fd():
     feature_dict = {'user': uid, 'gender': ugender, 'item': iid, 'item_gender': igender,
                     'hist_item': hist_iid, 'hist_item_gender': hist_igender, 'score': score}
 
-    x = [feature_dict[feat.name] for feat in feature_dim_dict["sparse"]] + [feature_dict[feat.name]
-                                                                            for feat in feature_dim_dict["dense"]] + [
-            feature_dict['hist_' + feat] for feat in behavior_feature_list]
+    fixlen_feature_names = get_fixlen_feature_names(feature_columns)
+    varlen_feature_names = get_varlen_feature_names(feature_columns)
+    x = [feature_dict[name] for name in fixlen_feature_names] + [feature_dict[name] for name in varlen_feature_names]
 
     y = [1, 0, 1]
-    return x, y, feature_dim_dict, behavior_feature_list
+    return x, y, feature_columns, behavior_feature_list
 
 
 if __name__ == "__main__":
-    x, y, feature_dim_dict, behavior_feature_list = get_xy_fd()
-    model = DIN(feature_dim_dict, behavior_feature_list, hist_len_max=4, )
+    x, y, feature_columns, behavior_feature_list = get_xy_fd()
+    model = DIN(feature_columns, behavior_feature_list, hist_len_max=4, )
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
     history = model.fit(x, y, verbose=1, epochs=10, validation_split=0.5)

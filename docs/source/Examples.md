@@ -9,15 +9,17 @@ click-through rate. It has 13 integer features and
 
 ![image](../pics/criteo_sample.png)
 
-In this example,we simply normailize the integer feature between 0 and 1,you
-can try other transformation technique like log normalization or discretization.Then we use `SingleFeat` to generate feature config dict for sparse features and dense features.
+In this example,we simply normailize the dense feature between 0 and 1,you
+can try other transformation technique like log normalization or discretization.Then we use `SparseFeat` and `DenseFeat` to generate feature columns  for sparse features and dense features.
 
-``SingleFeat`` is a namedtuple with signature ``SingleFeat(name, dimension, hash_flag, dtype)``
+``SparseFeat`` is a namedtuple with signature ``SparseFeat(name, dimension, use_hash, dtype, embedding_name,embedding)``
 
 - name : feature name
 - dimension : number of unique feature values for sprase feature,hashing space when hash_flag=True, any value for dense feature.
-- hash_flag : defualt `False`.if `True` the input will be hashed to space of size `dimension`.
+- use_hash : defualt `False`.If `True` the input will be hashed to space of size `dimension`.
 - dtype : default `float32`.dtype of input tensor.
+- embedding_name : default `None`. If None, the embedding_name` will be same as `name`.
+- embedding : default `True`.If `False`, the feature will not be embeded to a dense vector.
 
 This example shows how to use ``DeepFM`` to solve a simple binary classification task. You can get the demo data [criteo_sample.txt](https://github.com/shenweichen/DeepCTR/tree/master/examples/criteo_sample.txt)
 and run the following codes.
@@ -29,7 +31,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 
 from deepctr.models import DeepFM
-from deepctr.utils import SingleFeat
+from deepctr.utils import SparseFeat,DenseFeat
 
 if __name__ == "__main__":
     data = pd.read_csv('./criteo_sample.txt')
@@ -50,22 +52,25 @@ if __name__ == "__main__":
 
     # 2.count #unique features for each sparse field,and record dense feature field name
 
-    sparse_feature_list = [SingleFeat(feat, data[feat].nunique())
-                           for feat in sparse_features]
-    dense_feature_list = [SingleFeat(feat, 0,)
+    fixlen_feature_columns = [SparseFeat(feat, data[feat].nunique())
+                           for feat in sparse_features] + [DenseFeat(feat, 1,)
                           for feat in dense_features]
+
+    dnn_feature_columns = fixlen_feature_columns
+    linear_feature_columns = fixlen_feature_columns
+
+    fixlen_feature_names = get_fixlen_feature_names(linear_feature_columns + dnn_feature_columns)
+
 
     # 3.generate input data for model
 
     train, test = train_test_split(data, test_size=0.2)
-    train_model_input = [train[feat.name].values for feat in sparse_feature_list] + \
-                        [train[feat.name].values for feat in dense_feature_list]
-    test_model_input = [test[feat.name].values for feat in sparse_feature_list] + \
-                       [test[feat.name].values for feat in dense_feature_list]
+    train_model_input = [train[name] for name in fixlen_feature_names]
+
+    test_model_input = [test[name] for name in fixlen_feature_names]
 
     # 4.Define Model,train,predict and evaluate
-    model = DeepFM({"sparse": sparse_feature_list,
-                    "dense": dense_feature_list}, task='binary')
+    model = DeepFM(linear_feature_columns,dnn_feature_columns, task='binary')
     model.compile("adam", "binary_crossentropy",
                   metrics=['binary_crossentropy'], )
 
@@ -87,7 +92,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 
 from deepctr.models import DeepFM
-from deepctr.utils import SingleFeat
+from deepctr.utils import SparseFeat,DenseFeat
 
 if __name__ == "__main__":
     data = pd.read_csv('./criteo_sample.txt')
@@ -105,22 +110,23 @@ if __name__ == "__main__":
 
     # 2.set hashing space for each sparse field,and record dense feature field name
 
-    sparse_feature_list = [SingleFeat(feat, 1000, hash_flag=True, dtype='string')  # since the input is string
-                           for feat in sparse_features]
-    dense_feature_list = [SingleFeat(feat, 0, )
+    fixlen_feature_columns = [SparseFeat(feat, 1000, use_hash=True, dtype='string')  # since the input is string
+                              for feat in sparse_features] + [DenseFeat(feat, 1, )
                           for feat in dense_features]
+
+    linear_feature_columns = fixlen_feature_columns
+    dnn_feature_columns = fixlen_feature_columns
+    fixlen_feature_names = get_fixlen_feature_names(linear_feature_columns + dnn_feature_columns, )
 
     # 3.generate input data for model
 
     train, test = train_test_split(data, test_size=0.2)
-    train_model_input = [train[feat.name].values for feat in sparse_feature_list] + \
-                        [train[feat.name].values for feat in dense_feature_list]
-    test_model_input = [test[feat.name].values for feat in sparse_feature_list] + \
-                       [test[feat.name].values for feat in dense_feature_list]
+    train_model_input = [train[name] for name in fixlen_feature_names]
+
+    test_model_input = [test[name] for name in fixlen_feature_names]
 
     # 4.Define Model,train,predict and evaluate
-    model = DeepFM({"sparse": sparse_feature_list,
-                    "dense": dense_feature_list}, task='binary')
+    model = DeepFM(linear_feature_columns,dnn_feature_columns,task='binary')
     model.compile("adam", "binary_crossentropy",
                   metrics=['binary_crossentropy'], )
 
@@ -150,7 +156,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
 from deepctr.models import DeepFM
-from deepctr.utils import SingleFeat
+from deepctr.utils import SparseFeat
 
 if __name__ == "__main__":
 
@@ -164,15 +170,18 @@ if __name__ == "__main__":
         lbe = LabelEncoder()
         data[feat] = lbe.fit_transform(data[feat])
     # 2.count #unique features for each sparse field
-    sparse_feat_list = [SingleFeat(feat, data[feat].nunique())
-                        for feat in sparse_features]
+    fixlen_feature_columns = [SparseFeat(feat, data[feat].nunique())
+                              for feat in sparse_features]
+    linear_feature_columns = fixlen_feature_columns
+    dnn_feature_columns = fixlen_feature_columns
+    fixlen_feature_names = get_fixlen_feature_names(linear_feature_columns + dnn_feature_columns)
 
     # 3.generate input data for model
     train, test = train_test_split(data, test_size=0.2)
-    train_model_input = [train[feat.name].values for feat in sparse_feat_list]
-    test_model_input = [test[feat.name].values for feat in sparse_feat_list]
+    train_model_input = [train[name].values for name in fixlen_feature_names]
+    test_model_input = [test[name].values for name in fixlen_feature_names]
     # 4.Define Model,train,predict and evaluate
-    model = DeepFM({"sparse": sparse_feat_list},
+    model = DeepFM(linear_feature_columns,dnn_feature_columns,
                    task='regression')
     model.compile("adam", "mse", metrics=['mse'], )
 
@@ -195,19 +204,21 @@ Here is a small fraction of data include  sparse fields and a multivalent field.
 There are 2 additional steps to use DeepCTR with sequence feature input.
 
 1. Generate the paded and encoded sequence feature  of sequence input feature(**value 0 is for padding**).
-2. Generate config of sequence feature with `deepctr.utils.VarLenFeat`
+2. Generate config of sequence feature with `deepctr.inputs.VarLenSparseFeat`
 
-``VarLenFeat`` is a namedtuple with signature ``VarLenFeat(name, dimension, maxlen, combiner)``
+``VarLenSparseFeat`` is a namedtuple with signature ``VarLenSparseFeat(name, dimension, maxlen, combiner, use_hash, dtype, embedding_name,embedding)``
 
 - name : feature name,if it is already used in sparse_feature_dim,then a shared embedding mechanism will be used.
 - dimension : number of unique feature values
 - maxlen : maximum length of this feature for all samples
 - combiner : pooling method,can be ``sum``,``mean`` or ``max``
-- hash_flag : defualt `False`.if `True` the input will be hashed to space of size `dimension`.
+- use_hash : defualt `False`.if `True` the input will be hashed to space of size `dimension`.
 - dtype : default `float32`.dtype of input tensor.
+- embedding_name : default `None`. If None, the embedding_name` will be same as `name`.
+- embedding : default `True`.If `False`, the feature will not be embeded to a dense vector.
 
 
-Now multi-value input is avaliable for `AFM,AutoInt,DCN,DeepFM,FNN,NFM,PNN,xDeepFM,CCPM,FGCNN`,for `DIN,DIEN` please read the example in [run_din.py](https://github.com/shenweichen/DeepCTR/blob/master/examples/run_din.py) and [run_dien.py](https://github.com/shenweichen/DeepCTR/blob/master/examples/run_dien.py)
+Now multi-value input is avaliable for `AFM,AutoInt,DCN,DeepFM,FNN,NFM,PNN,xDeepFM,CCPM,FGCNN`,for `DIN,DIEN,DSIN` please read the example in [run_din.py](https://github.com/shenweichen/DeepCTR/blob/master/examples/run_din.py),[run_dien.py](https://github.com/shenweichen/DeepCTR/blob/master/examples/run_dien.py) and [run_dsin.py](https://github.com/shenweichen/DeepCTR/blob/master/examples/run_dsin.py) 
 
 This example shows how to use ``DeepFM`` with sequence(multi-value) feature. You can get the demo data 
 [movielens_sample.txt](https://github.com/shenweichen/DeepCTR/tree/master/examples/movielens_sample.txt) and run the following codes.
@@ -219,7 +230,7 @@ from sklearn.preprocessing import LabelEncoder
 from tensorflow.python.keras.preprocessing.sequence import pad_sequences
 
 from deepctr.models import DeepFM
-from deepctr.utils import VarLenFeat, SingleFeat
+from deepctr.utils import VarLenSparseFeat, SparseFeat
 
 
 def split(x):
@@ -251,21 +262,23 @@ genres_list = pad_sequences(genres_list, maxlen=max_len, padding='post', )
 
 # 2.count #unique features for each sparse field and generate feature config for sequence feature
 
-sparse_feat_list = [SingleFeat(feat, data[feat].nunique())
+fixlen_feature_columns = [SparseFeat(feat, data[feat].nunique())
                     for feat in sparse_features]
-sequence_feature = [VarLenFeat('genres', len(
+varlen_feature_columns = [VarLenSparseFeat('genres', len(
     key2index) + 1, max_len, 'mean')]  # Notice : value 0 is for padding for sequence input feature
 
+linear_feature_columns = fixlen_feature_columns + varlen_feature_columns
+dnn_feature_columns = fixlen_feature_columns + varlen_feature_columns
+feature_names = get_fixlen_feature_names(linear_feature_columns + dnn_feature_columns)
+varlen_feature_names = get_varlen_feature_names(linear_feature_columns+dnn_feature_columns)
+
 # 3.generate input data for model
-sparse_input = [data[feat.name].values for feat in sparse_feat_list]
-dense_input = []
-sequence_input = [genres_list]
-model_input = sparse_input + dense_input + \
-              sequence_input  # make sure the order is right
+fixlen_input = [data[name].values for name in feature_names]
+varlen_input = [genres_list]#varlen_feature_names[0]
+model_input = fixlen_input + varlen_input # make sure the order is right
 
 # 4.Define Model,compile and train
-model = DeepFM({"sparse": sparse_feat_list,
-                "sequence": sequence_feature}, task='regression')
+model = DeepFM(linear_feature_columns,dnn_feature_columns, task='regression')
 
 model.compile("adam", "mse", metrics=['mse'], )
 history = model.fit(model_input, data[target].values,
@@ -280,7 +293,7 @@ import pandas as pd
 from tensorflow.python.keras.preprocessing.sequence import pad_sequences
 
 from deepctr.models import DeepFM
-from deepctr.utils import VarLenFeat, SingleFeat
+from deepctr.utils import SparseFeat,VarLenSparseFeat
 
 data = pd.read_csv("./movielens_sample.txt")
 sparse_features = ["movie_id", "user_id",
@@ -300,21 +313,24 @@ genres_list = pad_sequences(genres_list, maxlen=max_len, padding='post', dtype=s
 
 # 2.set hashing space for each sparse field and generate feature config for sequence feature
 
-sparse_feat_list = [SingleFeat(feat, data[feat].nunique() * 5, hash_flag=True, dtype='string')
-                    for feat in sparse_features]
-sequence_feature = [VarLenFeat('genres', 100, max_len, 'mean', hash_flag=True,
-                               dtype="string")]  # Notice : value 0 is for padding for sequence input feature
+fixlen_feature_columns = [SparseFeat(feat, data[feat].nunique() * 5, use_hash=True, dtype='string')
+                          for feat in sparse_features]
+varlen_feature_columns = [VarLenSparseFeat('genres', 100, max_len, 'mean', use_hash=True,
+                                           dtype="string")]  # Notice : value 0 is for padding for sequence input feature
+linear_feature_columns = fixlen_feature_columns + varlen_feature_columns
+dnn_feature_columns = fixlen_feature_columns + varlen_feature_columns
+feature_names = get_fixlen_feature_names(linear_feature_columns + dnn_feature_columns)
 
 # 3.generate input data for model
-sparse_input = [data[feat.name].values for feat in sparse_feat_list]
-dense_input = []
-sequence_input = [genres_list]
-model_input = sparse_input + dense_input + \
-              sequence_input  # make sure the order is right
+fixlen_input = [data[name].values for name in feature_names]
+#dense_input = []
+varlen_input = [genres_list]
+
+model_input = fixlen_input + varlen_input # make sure the order is right
+
 
 # 4.Define Model,compile and train
-model = DeepFM({"sparse": sparse_feat_list,
-                "sequence": sequence_feature}, task='regression')
+model = DeepFM(linear_feature_columns,dnn_feature_columns, task='regression')
 
 model.compile("adam", "mse", metrics=['mse'], )
 history = model.fit(model_input, data[target].values,

@@ -213,8 +213,8 @@ class PredictionLayer(Layer):
     """
 
     def __init__(self, task='binary', use_bias=True, **kwargs):
-        if task not in ["binary", "regression"]:
-            raise ValueError("task must be binary or regression")
+        if task not in ["binary", "multiclass", "regression"]:
+            raise ValueError("task must be binary,multiclass or regression")
         self.task = task
         self.use_bias = use_bias
         super(PredictionLayer, self).__init__(**kwargs)

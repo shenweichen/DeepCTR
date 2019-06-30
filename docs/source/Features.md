@@ -192,7 +192,7 @@ By stacking multiple interacting layers,AutoInt is able to model different order
 
 [Song W, Shi C, Xiao Z, et al. AutoInt: Automatic Feature Interaction Learning via Self-Attentive Neural Networks[J]. arXiv preprint arXiv:1810.11921, 2018.](https://arxiv.org/abs/1810.11921)
 
-### NFFM(Field-aware Neural Factorization Machine)
+### NFFM(Operation-aware Neural Networks for User Response Prediction)
 
 NFFM models second order feature interactions like like FFM and preserves second-order interaction information  as much as possible.Further more,deep neural network is used to learn higher-ordered feature interactions. 
 
@@ -200,7 +200,7 @@ NFFM models second order feature interactions like like FFM and preserves second
 
 ![NFFM](../pics/NFFM.png)
 
-[Zhang L, Shen W, Li S, et al. Field-aware Neural Factorization Machine for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1902.09096, 2019.](https://arxiv.org/pdf/1902.09096.pdf)
+[Yang Y, Xu B, Shen F, et al. Operation-aware Neural Networks for User Response Prediction[J]. arXiv preprint arXiv:1904.12579, 2019.](https://arxiv.org/pdf/1904.12579.pdf)
 
 ### FGCNN(Feature Generation by Convolutional Neural Network)
 

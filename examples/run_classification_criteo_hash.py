@@ -4,7 +4,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 
 from deepctr.models import DeepFM
-from deepctr.utils import SingleFeat
+from deepctr.inputs import SparseFeat, DenseFeat,get_fixlen_feature_names
 
 if __name__ == "__main__":
     data = pd.read_csv('./criteo_sample.txt')
@@ -22,22 +22,24 @@ if __name__ == "__main__":
 
     # 2.set hashing space for each sparse field,and record dense feature field name
 
-    sparse_feature_list = [SingleFeat(feat, 1000, hash_flag=True, dtype='string')  # since the input is string
-                           for feat in sparse_features]
-    dense_feature_list = [SingleFeat(feat, 0, )
+    fixlen_feature_columns = [SparseFeat(feat, 1000, use_hash=True, dtype='string')  # since the input is string
+                              for feat in sparse_features] + [DenseFeat(feat, 1, )
                           for feat in dense_features]
+
+    linear_feature_columns = fixlen_feature_columns
+    dnn_feature_columns = fixlen_feature_columns
+    fixlen_feature_names = get_fixlen_feature_names(linear_feature_columns + dnn_feature_columns, )
 
     # 3.generate input data for model
 
     train, test = train_test_split(data, test_size=0.2)
-    train_model_input = [train[feat.name].values for feat in sparse_feature_list] + \
-                        [train[feat.name].values for feat in dense_feature_list]
-    test_model_input = [test[feat.name].values for feat in sparse_feature_list] + \
-                       [test[feat.name].values for feat in dense_feature_list]
+    train_model_input = [train[name] for name in fixlen_feature_names]
+
+    test_model_input = [test[name] for name in fixlen_feature_names]
+
 
     # 4.Define Model,train,predict and evaluate
-    model = DeepFM({"sparse": sparse_feature_list,
-                    "dense": dense_feature_list}, task='binary')
+    model = DeepFM(linear_feature_columns,dnn_feature_columns, task='binary')
     model.compile("adam", "binary_crossentropy",
                   metrics=['binary_crossentropy'], )
 

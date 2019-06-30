@@ -4,7 +4,7 @@ from sklearn.preprocessing import LabelEncoder
 from tensorflow.python.keras.preprocessing.sequence import pad_sequences
 
 from deepctr.models import DeepFM
-from deepctr.utils import VarLenFeat, SingleFeat
+from deepctr.inputs import SparseFeat, VarLenSparseFeat,get_fixlen_feature_names,get_varlen_feature_names
 
 
 def split(x):
@@ -36,21 +36,24 @@ genres_list = pad_sequences(genres_list, maxlen=max_len, padding='post', )
 
 # 2.count #unique features for each sparse field and generate feature config for sequence feature
 
-sparse_feat_list = [SingleFeat(feat, data[feat].nunique())
+fixlen_feature_columns = [SparseFeat(feat, data[feat].nunique())
                     for feat in sparse_features]
-sequence_feature = [VarLenFeat('genres', len(
+varlen_feature_columns = [VarLenSparseFeat('genres', len(
     key2index) + 1, max_len, 'mean')]  # Notice : value 0 is for padding for sequence input feature
 
+linear_feature_columns = fixlen_feature_columns + varlen_feature_columns
+dnn_feature_columns = fixlen_feature_columns + varlen_feature_columns
+fixlen_feature_names = get_fixlen_feature_names(linear_feature_columns + dnn_feature_columns)
+varlen_feature_names = get_varlen_feature_names(linear_feature_columns+dnn_feature_columns)
+
+
 # 3.generate input data for model
-sparse_input = [data[feat.name].values for feat in sparse_feat_list]
-dense_input = []
-sequence_input = [genres_list]
-model_input = sparse_input + dense_input + \
-              sequence_input  # make sure the order is right
+fixlen_input = [data[name].values for name in fixlen_feature_names]
+varlen_input = [genres_list]#varlen_feature_names[0]
+model_input = fixlen_input + varlen_input # make sure the order is right
 
 # 4.Define Model,compile and train
-model = DeepFM({"sparse": sparse_feat_list,
-                "sequence": sequence_feature}, task='regression')
+model = DeepFM(linear_feature_columns,dnn_feature_columns,task='regression')
 
 model.compile("adam", "mse", metrics=['mse'], )
 history = model.fit(model_input, data[target].values,
