@@ -6,9 +6,7 @@ from ..utils import check_model
 
 
 def get_xy_fd(hash_flag=False):
-    feature_dim_dict = {"sparse": [SparseFeat('user', 3, hash_flag), SparseFeat(
-        'gender', 2, hash_flag), SparseFeat('item', 3 + 1, hash_flag), SparseFeat('item_gender', 2 + 1, hash_flag)],
-                        "dense": [DenseFeat('score', 0)]}
+
     feature_columns = [SparseFeat('user', 3, hash_flag),
                        SparseFeat('gender', 2, hash_flag),
                        SparseFeat('item', 3 + 1, hash_flag),
@@ -40,11 +38,6 @@ def get_xy_fd(hash_flag=False):
     varlen_feature_names = get_varlen_feature_names(feature_columns)
     x = [feature_dict[name] for name in feature_names] + [feature_dict[name] for name in varlen_feature_names]
 
-    # x = [feature_dict[feat.name] for feat in feature_dim_dict["sparse"]] + [feature_dict[feat.name] for feat in
-    #                                                                         feature_dim_dict["dense"]] + [
-    #         feature_dict['sess1_' + feat] for feat in behavior_feature_list] + [
-    #         feature_dict['sess2_' + feat] for feat in behavior_feature_list]
-
     x += [sess_number]
 
     y = [1, 0, 1]
@@ -56,7 +49,7 @@ def test_DSIN():
 
     x, y, feature_columns, behavior_feature_list = get_xy_fd(True)
 
-    model = DSIN(feature_columns, behavior_feature_list, sess_max_count=2, sess_len_max=4, embedding_size=4,
+    model = DSIN(feature_columns, behavior_feature_list, sess_max_count=2, embedding_size=4,
                  dnn_hidden_units=[4, 4, 4], dnn_dropout=0.5, )
     check_model(model, model_name, x, y)
 

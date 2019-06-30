@@ -22,7 +22,7 @@ def gen_sequence(dim, max_len, sample_size):
 def get_test_data(sample_size=1000, sparse_feature_num=1, dense_feature_num=1, sequence_feature=('max', 'mean', 'sum'),
                   classification=True, include_length=False, hash_flag=False,prefix=''):
 
-    feature_dim_dict = {"sparse": [], 'dense': [], 'sequence': []}
+
     feature_columns = []
 
     for i in range(sparse_feature_num):
@@ -37,9 +37,6 @@ def get_test_data(sample_size=1000, sparse_feature_num=1, dense_feature_num=1, s
             VarLenSparseFeat(prefix+'sequence_' + str(i), dim, maxlen, mode))
 
 
-
-    fixlen_feature_names = get_fixlen_feature_names(feature_columns)
-    varlen_feature_names = get_varlen_feature_names(feature_columns)
 
     model_input = []
     sequence_input = []
@@ -56,10 +53,6 @@ def get_test_data(sample_size=1000, sparse_feature_num=1, dense_feature_num=1, s
             sequence_len_input.append(s_len_input)
 
 
-    # sparse_input = [np.random.randint(0, dim, sample_size)
-    #                 for feat, dim,_,_ in feature_dim_dict['sparse']]
-    # dense_input = [np.random.random(sample_size)
-    #                for _ in feature_dim_dict['dense']]
 
     if classification:
         y = np.random.randint(0, 2, sample_size)

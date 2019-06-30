@@ -24,7 +24,7 @@ from ..layers.sequence import (AttentionSequencePoolingLayer, BiasEncoding,
 from ..layers.utils import NoMask, concat_fun
 
 
-def DSIN(dnn_feature_columns, sess_feature_list, embedding_size=8, sess_max_count=5, sess_len_max=10, bias_encoding=False,
+def DSIN(dnn_feature_columns, sess_feature_list, embedding_size=8, sess_max_count=5, bias_encoding=False,
          att_embedding_size=1, att_head_num=8, dnn_hidden_units=(200, 80), dnn_activation='sigmoid', dnn_dropout=0,
          dnn_use_bn=False, l2_reg_dnn=0, l2_reg_embedding=1e-6, init_std=0.0001, seed=1024, task='binary',
          ):
@@ -49,32 +49,11 @@ def DSIN(dnn_feature_columns, sess_feature_list, embedding_size=8, sess_max_coun
     :return: A Keras model instance.
 
     """
-    #check_feature_config_dict(dnn_feature_columns)
 
     if (att_embedding_size * att_head_num != len(sess_feature_list) * embedding_size):
         raise ValueError(
             "len(session_feature_lsit) * embedding_size must equal to att_embedding_size * att_head_num ,got %d * %d != %d *%d" % (
             len(sess_feature_list), embedding_size, att_embedding_size, att_head_num))
-
-    # sparse_input, dense_input, user_behavior_input_dict, _, user_sess_length = get_input(
-    #     dnn_feature_columns, sess_feature_list, sess_max_count, sess_len_max)
-
-    # def get_input(feature_dim_dict, seq_feature_list, sess_max_count, seq_max_len):
-    #     sparse_input, dense_input = build_input_features(feature_dim_dict)
-    #     user_behavior_input = {}
-    #     for idx in range(sess_max_count):
-    #         sess_input = OrderedDict()
-    #         for i, feat in enumerate(seq_feature_list):
-    #             sess_input[feat] = Input(
-    #                 shape=(seq_max_len,), name='seq_' + str(idx) + str(i) + '-' + feat)
-    #
-    #         user_behavior_input["sess_" + str(idx)] = sess_input
-    #
-    #     user_behavior_length = {"sess_" + str(idx): Input(shape=(1,), name='seq_length' + str(idx)) for idx in
-    #                             range(sess_max_count)}
-    #     user_sess_length = Input(shape=(1,), name='sess_length')
-    #
-    #     return sparse_input, dense_input, user_behavior_input, user_behavior_length, user_sess_length
 
 
     features = build_input_features(dnn_feature_columns)
@@ -85,15 +64,13 @@ def DSIN(dnn_feature_columns, sess_feature_list, embedding_size=8, sess_max_coun
     varlen_sparse_feature_columns = list(filter(lambda x: isinstance(x, VarLenSparseFeat), dnn_feature_columns)) if dnn_feature_columns else []
 
 
-    history_feature_columns = []
+
     sparse_varlen_feature_columns = []
     history_fc_names = list(map(lambda x: "sess" + x, sess_feature_list))
-    #user_behavior_input_dict = {"sess_"+str(i):{} for i in range(sess_max_count)}
     for fc in varlen_sparse_feature_columns:
         feature_name = fc.name
         if feature_name in history_fc_names:
             continue
-            #history_feature_columns.append(fc)
         else:
             sparse_varlen_feature_columns.append(fc)
 
@@ -106,13 +83,11 @@ def DSIN(dnn_feature_columns, sess_feature_list, embedding_size=8, sess_max_coun
         sess_input = OrderedDict()
         for i, feat in enumerate(sess_feature_list):
             sess_input[feat] = features["sess_"+str(idx)+"_"+feat]
-                #Input(shape=(seq_max_len,), name='seq_' + str(idx) + str(i) + '-' + feat)
+
 
         user_behavior_input_dict["sess_" + str(idx)] = sess_input
 
 
-    #user_behavior_length = {"sess_" + str(idx): Input(shape=(1,), name='seq_length' + str(idx)) for idx in
-    #                            range(sess_max_count)}
     user_sess_length = Input(shape=(1,), name='sess_length')
 
 
@@ -130,20 +105,12 @@ def DSIN(dnn_feature_columns, sess_feature_list, embedding_size=8, sess_max_coun
 
 
     query_emb_list = embedding_lookup(embedding_dict,features,sparse_feature_columns,sess_feature_list,sess_feature_list)#query是单独的
-    keys_emb_list = embedding_lookup(embedding_dict, features, history_feature_columns, history_fc_names, history_fc_names)
     dnn_input_emb_list = embedding_lookup(embedding_dict,features,sparse_feature_columns,mask_feat_list=sess_feature_list)
     dense_value_list = get_dense_input(features, dense_feature_columns)
 
-
-
-
-    #query_emb_list = get_embedding_vec_list(sparse_embedding_dict, sparse_input, dnn_feature_columns["sparse"],
-    #                                        sess_feature_list, sess_feature_list)
-
     query_emb = concat_fun(query_emb_list)
 
-    #dnn_input_emb_list = get_embedding_vec_list(sparse_embedding_dict, sparse_input, dnn_feature_columns["sparse"],
-    #                                             mask_feat_list=sess_feature_list)
+
     dnn_input_emb = concat_fun(dnn_input_emb_list)
     dnn_input_emb = Flatten()(NoMask()(dnn_input_emb))
 
@@ -167,9 +134,7 @@ def DSIN(dnn_feature_columns, sess_feature_list, embedding_size=8, sess_max_coun
 
     dnn_input_emb = Concatenate()(
         [dnn_input_emb, Flatten()(interest_attention_layer), Flatten()(lstm_attention_layer)])
-    # if len(dense_input) > 0:
-    #     deep_input_emb = Concatenate()(
-    #         [deep_input_emb] + list(dense_input.values()))
+
     dnn_input_emb = combined_dnn_input([dnn_input_emb],dense_value_list)
     output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn,
                  dnn_dropout, dnn_use_bn, seed)(dnn_input_emb)
@@ -184,9 +149,6 @@ def DSIN(dnn_feature_columns, sess_feature_list, embedding_size=8, sess_max_coun
             [user_behavior_input_dict[sess_name]]))
         # sess_input_length_list.append(user_behavior_length_dict[sess_name])
 
-    # model_input_list = get_inputs_list([sparse_input, dense_input]) + sess_input_list + [
-    #     user_sess_length]
-    #
 
     model = Model(inputs=inputs_list+[user_sess_length], outputs=output)
 

@@ -9,7 +9,7 @@ Reference:
 
 import tensorflow as tf
 
-from ..inputs import input_from_feature_columns,build_input_features
+from ..inputs import input_from_feature_columns,build_input_features,combined_dnn_input
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import InnerProductLayer, OutterProductLayer
 from ..layers.utils import concat_fun
@@ -36,7 +36,6 @@ def PNN(dnn_feature_columns, embedding_size=8, dnn_hidden_units=(128, 128), l2_r
     :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
     :return: A Keras model instance.
     """
-    #check_feature_config_dict(dnn_feature_columns)
 
     if kernel_type not in ['mat', 'vec', 'num']:
         raise ValueError("kernel_type must be mat,vec or num")
@@ -49,7 +48,6 @@ def PNN(dnn_feature_columns, embedding_size=8, dnn_hidden_units=(128, 128), l2_r
                                                                               embedding_size,
                                                                               l2_reg_embedding,init_std,
                                                                               seed)
-    # todo note support dense
     inner_product = tf.keras.layers.Flatten()(InnerProductLayer()(sparse_embedding_list))
     outter_product = OutterProductLayer(kernel_type)(sparse_embedding_list)
 
@@ -69,8 +67,9 @@ def PNN(dnn_feature_columns, embedding_size=8, dnn_hidden_units=(128, 128), l2_r
     else:
         deep_input = linear_signal
 
+    dnn_input = combined_dnn_input([deep_input],dense_value_list)
     deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
-                   False, seed)(deep_input)
+                   False, seed)(dnn_input)
     deep_logit = tf.keras.layers.Dense(
         1, use_bias=False, activation=None)(deep_out)
 

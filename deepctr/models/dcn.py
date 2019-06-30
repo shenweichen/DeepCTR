@@ -8,7 +8,7 @@ Reference:
 """
 import tensorflow as tf
 
-from ..inputs import input_from_feature_columns,build_input_features
+from ..inputs import input_from_feature_columns,build_input_features,combined_dnn_input
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import CrossNet
 from ..layers.utils import concat_fun
@@ -38,7 +38,6 @@ def DCN(dnn_feature_columns, embedding_size='auto', cross_num=2, dnn_hidden_unit
     if len(dnn_hidden_units) == 0 and cross_num == 0:
         raise ValueError("Either hidden_layer or cross layer must > 0")
 
-    #check_feature_config_dict(feature_dim_dict)
     features = build_input_features(dnn_feature_columns)
     inputs_list = list(features.values())
 
@@ -46,8 +45,7 @@ def DCN(dnn_feature_columns, embedding_size='auto', cross_num=2, dnn_hidden_unit
                                                                                                embedding_size,
                                                                                                l2_reg_embedding, init_std,
                                                                                                seed)
-    #todo not support dense?
-    dnn_input = tf.keras.layers.Flatten()(concat_fun(sparse_embedding_list))
+    dnn_input = combined_dnn_input(sparse_embedding_list,dense_value_list)
 
     if len(dnn_hidden_units) > 0 and cross_num > 0:  # Deep & Cross
         deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,

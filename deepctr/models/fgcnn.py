@@ -11,32 +11,11 @@ Reference:
 """
 import tensorflow as tf
 
-from ..inputs import build_input_features, get_linear_logit,input_from_feature_columns
+from ..inputs import build_input_features, input_from_feature_columns
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import InnerProductLayer, FGCNNLayer
 from ..layers.utils import concat_fun
 
-
-# def preprocess_input_embedding(feature_dim_dict, embedding_size, l2_reg_embedding, l2_reg_linear, init_std, seed,
-#                                return_linear_logit=True, ):
-#     sparse_input_dict, dense_input_dict = build_input_features(feature_dim_dict)
-#     sequence_input_dict, sequence_input_len_dict, sequence_max_len_dict = create_varlenfeat_inputdict(
-#         feature_dim_dict)
-#     inputs_list, deep_emb_list, linear_emb_list = get_inputs_embedding(None, feature_dim_dict, l2_reg_embedding,
-#                                                                        l2_reg_linear, init_std, seed, sparse_input_dict,
-#                                                                        dense_input_dict, sequence_input_dict,
-#                                                                        sequence_input_len_dict, sequence_max_len_dict,
-#                                                                        return_linear_logit, embedding_size, prefix='')
-#     _, fg_deep_emb_list, _ = get_inputs_embedding(None, feature_dim_dict, l2_reg_embedding, l2_reg_linear, init_std,
-#                                                   seed, sparse_input_dict, dense_input_dict, sequence_input_dict,
-#                                                   sequence_input_len_dict, sequence_max_len_dict, False, embedding_size,
-#                                                   prefix='fg')
-#     if return_linear_logit:
-#         linear_logit = get_linear_logit(
-#             linear_emb_list, dense_input_dict, l2_reg_linear)
-#     else:
-#         linear_logit = None
-#     return deep_emb_list, fg_deep_emb_list, linear_logit, inputs_list
 
 
 def unstack(input_tensor):
@@ -65,8 +44,7 @@ def FGCNN(dnn_feature_columns, embedding_size=8, conv_kernel_width=(7, 7, 7, 7),
     :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
     :return: A Keras model instance.
     """
-    #todo 这个还没修改
-    #check_feature_config_dict(feature_dim_dict)
+
     if not (len(conv_kernel_width) == len(conv_filters) == len(new_maps) == len(pooling_width)):
         raise ValueError(
             "conv_kernel_width,conv_filters,new_maps  and pooling_width must have same length")
@@ -85,34 +63,6 @@ def FGCNN(dnn_feature_columns, embedding_size=8, conv_kernel_width=(7, 7, 7, 7),
                                                                               seed,prefix='fg')
 
 
-    # sequence_input_dict, sequence_input_len_dict, sequence_max_len_dict = create_varlenfeat_inputdict(
-    #     feature_dim_dict)
-    # inputs_list, deep_emb_list, linear_emb_list = get_inputs_embedding(None, feature_dim_dict, l2_reg_embedding,
-    #                                                                    l2_reg_linear, init_std, seed, sparse_input_dict,
-    #                                                                    dense_input_dict, sequence_input_dict,
-    #                                                                    sequence_input_len_dict, sequence_max_len_dict,
-    #                                                                    return_linear_logit, embedding_size, prefix='')
-    # _, fg_deep_emb_list, _ = get_inputs_embedding(None, feature_dim_dict, l2_reg_embedding, l2_reg_linear, init_std,
-    #                                               seed, sparse_input_dict, dense_input_dict, sequence_input_dict,
-    #                                               sequence_input_len_dict, sequence_max_len_dict, False, embedding_size,
-    #                                               prefix='fg')
-    # if return_linear_logit:
-    #     linear_logit = get_linear_logit(
-    #         linear_emb_list, dense_input_dict, l2_reg_linear)
-    # else:
-    #     linear_logit = None
-    # return deep_emb_list, fg_deep_emb_list, linear_logit, inputs_list
-
-
-
-
-
-
-    # deep_emb_list, fg_deep_emb_list, _, inputs_list = preprocess_input_embedding(dnn_feature_columns,
-    #                                                                              embedding_size,
-    #                                                                              l2_reg_embedding,
-    #                                                                              0, init_std,
-    #                                                                              seed, False)
     fg_input = concat_fun(fg_deep_emb_list, axis=1)
     origin_input = concat_fun(deep_emb_list, axis=1)
 
