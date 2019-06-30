@@ -46,7 +46,7 @@ def get_xy_fd(hash_flag=False):
 if __name__ == "__main__":
     x, y, feature_dim_dict, behavior_feature_list = get_xy_fd(True)
 
-    model = DSIN(feature_dim_dict, behavior_feature_list, sess_max_count=2, sess_len_max=4, embedding_size=4,
+    model = DSIN(feature_dim_dict, behavior_feature_list, sess_max_count=2, embedding_size=4,
                  dnn_hidden_units=[4, 4, 4], dnn_dropout=0.5, )
 
     model.compile('adam', 'binary_crossentropy',
