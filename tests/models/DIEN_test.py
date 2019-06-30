@@ -6,8 +6,7 @@ from ..utils import check_model
 
 
 def get_xy_fd(use_neg=False, hash_flag=False):
-    feature_dim_dict = {"sparse": [SparseFeat('user', 3,hash_flag), SparseFeat(
-        'gender', 2,hash_flag), SparseFeat('item', 3+1,hash_flag), SparseFeat('item_gender', 2+1,hash_flag)], "dense": [DenseFeat('score', 0)]}
+
     feature_columns = [SparseFeat('user', 3,hash_flag),
                        SparseFeat('gender', 2,hash_flag),
                        SparseFeat('item', 3+1,hash_flag),

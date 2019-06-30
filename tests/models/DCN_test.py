@@ -1,6 +1,5 @@
 import pytest
 
-from deepctr.inputs import SparseFeat
 from deepctr.models import DCN
 from ..utils import check_model, get_test_data,SAMPLE_SIZE
 

@@ -34,7 +34,6 @@ def NFM(linear_feature_columns, dnn_feature_columns, embedding_size=8, dnn_hidde
     :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
     :return: A Keras model instance.
     """
-    #check_feature_config_dict(linear_feature_columns)
 
     features = build_input_features(linear_feature_columns + dnn_feature_columns)
 
@@ -44,7 +43,7 @@ def NFM(linear_feature_columns, dnn_feature_columns, embedding_size=8, dnn_hidde
                                                                               embedding_size,
                                                                               l2_reg_embedding,init_std,
                                                                               seed)
-    #todo not support dense
+
     linear_logit = get_linear_logit(features, linear_feature_columns, l2_reg=l2_reg_linear, init_std=init_std,
                                     seed=seed, prefix='linear')
 
@@ -52,8 +51,9 @@ def NFM(linear_feature_columns, dnn_feature_columns, embedding_size=8, dnn_hidde
     bi_out = BiInteractionPooling()(fm_input)
     if bi_dropout:
         bi_out = tf.keras.layers.Dropout(bi_dropout)(bi_out, training=None)
+    dnn_input = combined_dnn_input([bi_out],dense_value_list)
     deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
-                   False, seed)(bi_out)
+                   False, seed)(dnn_input)
     deep_logit = tf.keras.layers.Dense(
         1, use_bias=False, activation=None)(deep_out)
 

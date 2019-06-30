@@ -10,7 +10,7 @@ from collections import OrderedDict, namedtuple
 from itertools import chain
 
 from tensorflow.python.keras.initializers import RandomNormal
-from tensorflow.python.keras.layers import Concatenate, Dense, Embedding, Input, Reshape, add,Flatten
+from tensorflow.python.keras.layers import Concatenate, Dense, Embedding, Input, add,Flatten
 from tensorflow.python.keras.regularizers import l2
 
 from .layers.sequence import SequencePoolingLayer
@@ -152,14 +152,6 @@ def get_varlen_pooling_list(embedding_dict, features, varlen_sparse_feature_colu
         pooling_vec_list.append(vec)
     return pooling_vec_list
 
-# def get_pooling_vec_list(sequence_embed_dict, sequence_len_dict, sequence_max_len_dict, sequence_fd_list):
-#     if sequence_max_len_dict is None or sequence_len_dict is None:
-#         return [SequencePoolingLayer(feat.combiner, supports_masking=True)(sequence_embed_dict[feat.name]) for feat in
-#                 sequence_fd_list]
-#     else:
-#         return [SequencePoolingLayer(feat.combiner, supports_masking=False)(
-#             [sequence_embed_dict[feat.name], sequence_len_dict[feat.name]]) for feat in sequence_fd_list]
-
 
 def get_inputs_list(inputs):
     return list(chain(*list(map(lambda x: x.values(), filter(lambda x: x is not None, inputs)))))
@@ -231,21 +223,6 @@ def get_dense_input(features,feature_columns):
     for fc in dense_feature_columns:
         dense_input_list.append(features[fc.name])
     return dense_input_list
-
-
-# def get_varlen_vec_list(embedding_dict, features, varlen_sparse_feature_columns):
-#     vec_list = []
-#     for fc in varlen_sparse_feature_columns:
-#         feature_name = fc.name
-#         feature_length_name = feature_name + "_seq_length"
-#         if feature_length_name in features:
-#             vector = SequencePoolingLayer(fc.combiner, supports_masking=False)(
-#             [embedding_dict[feature_name], features[feature_length_name]])
-#         else:
-#             vector = SequencePoolingLayer(fc.combiner, supports_masking=True)(embedding_dict[feature_name])
-#         vec_list.append(vector)
-#     return vec_list
-
 
 
 def input_from_feature_columns(features,feature_columns, embedding_size, l2_reg, init_std, seed,prefix='',seq_mask_zero=True):
