@@ -43,7 +43,6 @@ def AutoInt(dnn_feature_columns, embedding_size=8, att_layer_num=3, att_embeddin
 
     if len(dnn_hidden_units) <= 0 and att_layer_num <= 0:
         raise ValueError("Either hidden_layer or att_layer_num must > 0")
-    #check_feature_config_dict(dnn_feature_columns)
 
     features = build_input_features(dnn_feature_columns)
     inputs_list = list(features.values())
@@ -61,7 +60,6 @@ def AutoInt(dnn_feature_columns, embedding_size=8, att_layer_num=3, att_embeddin
             att_embedding_size, att_head_num, att_res)(att_input)
     att_output = tf.keras.layers.Flatten()(att_input)
 
-    #dnn_input = tf.keras.layers.Flatten()(concat_fun(sparse_embedding_list))
     dnn_input = combined_dnn_input(sparse_embedding_list,dense_value_list)
 
     if len(dnn_hidden_units) > 0 and att_layer_num > 0:  # Deep & Interacting Layer

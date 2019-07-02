@@ -36,7 +36,6 @@ def AFM(linear_feature_columns, dnn_feature_columns, embedding_size=8, use_atten
     :return: A Keras model instance.
     """
 
-    #check_feature_config_dict(feature_dim_dict)
 
     features = build_input_features(linear_feature_columns+dnn_feature_columns)
 

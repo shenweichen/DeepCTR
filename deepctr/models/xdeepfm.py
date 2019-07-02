@@ -39,7 +39,7 @@ def xDeepFM(linear_feature_columns, dnn_feature_columns, embedding_size=8, dnn_h
     :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
     :return: A Keras model instance.
     """
-    #check_feature_config_dict(linear_feature_columns)
+
 
     features = build_input_features(linear_feature_columns + dnn_feature_columns)
 
@@ -60,7 +60,7 @@ def xDeepFM(linear_feature_columns, dnn_feature_columns, embedding_size=8, dnn_h
                        cin_split_half, l2_reg_cin, seed)(fm_input)
         exFM_logit = tf.keras.layers.Dense(1, activation=None, )(exFM_out)
 
-    dnn_input = combined_dnn_input(sparse_embedding_list,dense_value_list)#tf.keras.layers.Flatten()(fm_input)
+    dnn_input = combined_dnn_input(sparse_embedding_list,dense_value_list)
 
     deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
                    dnn_use_bn, seed)(dnn_input)

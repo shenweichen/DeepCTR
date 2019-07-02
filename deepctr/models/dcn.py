@@ -11,7 +11,6 @@ import tensorflow as tf
 from ..inputs import input_from_feature_columns,build_input_features,combined_dnn_input
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import CrossNet
-from ..layers.utils import concat_fun
 
 
 def DCN(dnn_feature_columns, embedding_size='auto', cross_num=2, dnn_hidden_units=(128, 128,), l2_reg_embedding=1e-5,

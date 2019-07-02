@@ -31,7 +31,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 
 from deepctr.models import DeepFM
-from deepctr.utils import SparseFeat,DenseFeat
+from deepctr.inputs import  SparseFeat, DenseFeat,get_fixlen_feature_names
 
 if __name__ == "__main__":
     data = pd.read_csv('./criteo_sample.txt')
@@ -61,7 +61,6 @@ if __name__ == "__main__":
 
     fixlen_feature_names = get_fixlen_feature_names(linear_feature_columns + dnn_feature_columns)
 
-
     # 3.generate input data for model
 
     train, test = train_test_split(data, test_size=0.2)
@@ -70,7 +69,7 @@ if __name__ == "__main__":
     test_model_input = [test[name] for name in fixlen_feature_names]
 
     # 4.Define Model,train,predict and evaluate
-    model = DeepFM(linear_feature_columns,dnn_feature_columns, task='binary')
+    model = DeepFM(linear_feature_columns, dnn_feature_columns, task='binary')
     model.compile("adam", "binary_crossentropy",
                   metrics=['binary_crossentropy'], )
 
@@ -92,7 +91,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 
 from deepctr.models import DeepFM
-from deepctr.utils import SparseFeat,DenseFeat
+from deepctr.inputs import SparseFeat, DenseFeat,get_fixlen_feature_names
 
 if __name__ == "__main__":
     data = pd.read_csv('./criteo_sample.txt')
@@ -125,8 +124,9 @@ if __name__ == "__main__":
 
     test_model_input = [test[name] for name in fixlen_feature_names]
 
+
     # 4.Define Model,train,predict and evaluate
-    model = DeepFM(linear_feature_columns,dnn_feature_columns,task='binary')
+    model = DeepFM(linear_feature_columns,dnn_feature_columns, task='binary')
     model.compile("adam", "binary_crossentropy",
                   metrics=['binary_crossentropy'], )
 
@@ -156,7 +156,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
 from deepctr.models import DeepFM
-from deepctr.utils import SparseFeat
+from deepctr.inputs import SparseFeat,get_fixlen_feature_names
 
 if __name__ == "__main__":
 
@@ -181,8 +181,7 @@ if __name__ == "__main__":
     train_model_input = [train[name].values for name in fixlen_feature_names]
     test_model_input = [test[name].values for name in fixlen_feature_names]
     # 4.Define Model,train,predict and evaluate
-    model = DeepFM(linear_feature_columns,dnn_feature_columns,
-                   task='regression')
+    model = DeepFM(linear_feature_columns, dnn_feature_columns, task='regression')
     model.compile("adam", "mse", metrics=['mse'], )
 
     history = model.fit(train_model_input, train[target].values,
@@ -190,6 +189,7 @@ if __name__ == "__main__":
     pred_ans = model.predict(test_model_input, batch_size=256)
     print("test MSE", round(mean_squared_error(
         test[target].values, pred_ans), 4))
+
 
 ```
 ## Multi-value Input : Movielens
@@ -230,7 +230,7 @@ from sklearn.preprocessing import LabelEncoder
 from tensorflow.python.keras.preprocessing.sequence import pad_sequences
 
 from deepctr.models import DeepFM
-from deepctr.utils import VarLenSparseFeat, SparseFeat
+from deepctr.inputs import SparseFeat, VarLenSparseFeat,get_fixlen_feature_names,get_varlen_feature_names
 
 
 def split(x):
@@ -269,20 +269,22 @@ varlen_feature_columns = [VarLenSparseFeat('genres', len(
 
 linear_feature_columns = fixlen_feature_columns + varlen_feature_columns
 dnn_feature_columns = fixlen_feature_columns + varlen_feature_columns
-feature_names = get_fixlen_feature_names(linear_feature_columns + dnn_feature_columns)
+fixlen_feature_names = get_fixlen_feature_names(linear_feature_columns + dnn_feature_columns)
 varlen_feature_names = get_varlen_feature_names(linear_feature_columns+dnn_feature_columns)
 
+
 # 3.generate input data for model
-fixlen_input = [data[name].values for name in feature_names]
+fixlen_input = [data[name].values for name in fixlen_feature_names]
 varlen_input = [genres_list]#varlen_feature_names[0]
 model_input = fixlen_input + varlen_input # make sure the order is right
 
 # 4.Define Model,compile and train
-model = DeepFM(linear_feature_columns,dnn_feature_columns, task='regression')
+model = DeepFM(linear_feature_columns,dnn_feature_columns,task='regression')
 
 model.compile("adam", "mse", metrics=['mse'], )
 history = model.fit(model_input, data[target].values,
                     batch_size=256, epochs=10, verbose=2, validation_split=0.2, )
+
 ```
 
 ## Multi-value Input : Movielens with feature hashing on the fly
@@ -293,7 +295,7 @@ import pandas as pd
 from tensorflow.python.keras.preprocessing.sequence import pad_sequences
 
 from deepctr.models import DeepFM
-from deepctr.utils import SparseFeat,VarLenSparseFeat
+from deepctr.inputs import SparseFeat, VarLenSparseFeat,get_fixlen_feature_names
 
 data = pd.read_csv("./movielens_sample.txt")
 sparse_features = ["movie_id", "user_id",
@@ -323,11 +325,9 @@ feature_names = get_fixlen_feature_names(linear_feature_columns + dnn_feature_co
 
 # 3.generate input data for model
 fixlen_input = [data[name].values for name in feature_names]
-#dense_input = []
 varlen_input = [genres_list]
 
 model_input = fixlen_input + varlen_input # make sure the order is right
-
 
 # 4.Define Model,compile and train
 model = DeepFM(linear_feature_columns,dnn_feature_columns, task='regression')

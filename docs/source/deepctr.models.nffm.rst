@@ -1,7 +1,7 @@
-deepctr.models.onn module
+deepctr.models.nffm module
 ==========================
 
-.. automodule:: deepctr.models.onn
+.. automodule:: deepctr.models.nffm
     :members:
     :no-undoc-members:
     :no-show-inheritance:

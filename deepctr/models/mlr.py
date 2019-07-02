@@ -19,14 +19,14 @@ def MLR(region_feature_columns, base_feature_columns=None, region_num=4,
         bias_feature_columns=None):
     """Instantiates the Mixed Logistic Regression/Piece-wise Linear Model.
 
-    :param region_feature_columns: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
-    :param base_feature_columns: dict or None,to indicate sparse field and dense field of base learner.if None, it is same as region_feature_dim_dict
+    :param region_feature_columns: An iterable containing all the features used by region part of the model.
+    :param base_feature_columns: An iterable containing all the features used by base part of the model.
     :param region_num: integer > 1,indicate the piece number
     :param l2_reg_linear: float. L2 regularizer strength applied to weight
     :param init_std: float,to use as the initialize std of embedding vector
     :param seed: integer ,to use as random seed.
     :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
-    :param bias_feature_columns: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
+    :param bias_feature_columns: An iterable containing all the features used by bias part of the model.
     :return: A Keras model instance.
     """
 
