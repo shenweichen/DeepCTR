@@ -38,7 +38,6 @@ def CCPM(linear_feature_columns, dnn_feature_columns, embedding_size=8, conv_ker
     :return: A Keras model instance.
     """
 
-    #check_feature_config_dict(linear_feature_columns)
     if len(conv_kernel_width) != len(conv_filters):
         raise ValueError(
             "conv_kernel_width must have same element with conv_filters")

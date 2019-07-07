@@ -5,7 +5,7 @@ from ..utils import check_model, get_test_data,SAMPLE_SIZE
 
 @pytest.mark.parametrize(
     'use_attention,sparse_feature_num,dense_feature_num',
-    [(True, 1, 1), (False, 3, 3),
+    [(True, 3, 0),
      ]
 )
 def test_AFM(use_attention, sparse_feature_num, dense_feature_num):
