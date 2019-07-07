@@ -8,13 +8,13 @@ Reference:
 """
 
 from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.layers import Dense,add
+from tensorflow.python.keras.layers import Dense,add,multiply
 
 from ..inputs import build_input_features, get_linear_logit,input_from_feature_columns,combined_dnn_input
 from ..layers.core import PredictionLayer, DNN
 
 
-def WDL(linear_feature_columns, dnn_feature_columns, embedding_size=8, dnn_hidden_units=(128, 128), l2_reg_linear=1e-5,
+def ESMM(dnn_feature_columns, embedding_size=8, dnn_hidden_units=(128, 128), l2_reg_linear=1e-5,
         l2_reg_embedding=1e-5, l2_reg_dnn=0, init_std=0.0001, seed=1024, dnn_dropout=0, dnn_activation='relu',
         task='binary'):
     """Instantiates the Wide&Deep Learning architecture.
@@ -34,7 +34,7 @@ def WDL(linear_feature_columns, dnn_feature_columns, embedding_size=8, dnn_hidde
     :return: A Keras model instance.
     """
 
-    features = build_input_features(linear_feature_columns + dnn_feature_columns)
+    features = build_input_features(dnn_feature_columns)
 
     inputs_list = list(features.values())
 
@@ -43,26 +43,18 @@ def WDL(linear_feature_columns, dnn_feature_columns, embedding_size=8, dnn_hidde
                                                                          l2_reg_embedding, init_std,
                                                                          seed)
 
-    linear_logit = get_linear_logit(features, linear_feature_columns, l2_reg=l2_reg_linear, init_std=init_std,
-                                    seed=seed, prefix='linear')
-
 
     dnn_input = combined_dnn_input(sparse_embedding_list, dense_value_list)
-    dnn_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
-                  False, seed)(dnn_input)
-    dnn_logit = Dense(
-        1, use_bias=False, activation=None)(dnn_out)
 
-    if len(linear_feature_columns) > 0 and len(dnn_feature_columns) > 0:  # linear + dnn
-        final_logit = add([linear_logit,dnn_logit])
-    elif len(linear_feature_columns) == 0:
-        final_logit = dnn_logit
-    elif len(dnn_feature_columns) == 0:
-        final_logit = linear_logit
-    else:
-        raise NotImplementedError
+    dnn_out_list = [DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
+                  False, seed)(dnn_input) for _ in range(2)]
+    dnn_logit_list = [Dense(
+        1, use_bias=False, activation=None)(dnn_out) for dnn_out in dnn_out_list]
 
-    output = PredictionLayer(task)(final_logit)
 
-    model = Model(inputs=inputs_list, outputs=output)
+    pctr,pcvr = [PredictionLayer(task,name=name)(dnn_logit) for dnn_logit,name in zip(dnn_logit_list,["ctr","cvr"])]
+    pctcvr = multiply([pctr , pcvr],name="ctcvr")
+
+
+    model = Model(inputs=inputs_list, outputs=[pctr,pcvr,pctcvr])
     return model

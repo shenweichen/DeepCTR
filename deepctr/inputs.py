@@ -137,21 +137,6 @@ def get_embedding_vec_list(embedding_dict, input_dict, sparse_feature_columns, r
 
     return embedding_vec_list
 
-def get_varlen_pooling_list(embedding_dict, features, varlen_sparse_feature_columns):
-    pooling_vec_list = []
-    for fc in varlen_sparse_feature_columns:
-        feature_name = fc.name
-        combiner = fc.combiner
-        feature_length_name = feature_name + '_seq_length'
-        if feature_length_name in features:
-            vec = SequencePoolingLayer(combiner, supports_masking=False)(
-            [embedding_dict[feature_name], features[feature_length_name]])
-        else:
-            vec = SequencePoolingLayer(combiner, supports_masking=True)(
-            embedding_dict[feature_name])
-        pooling_vec_list.append(vec)
-    return pooling_vec_list
-
 
 def get_inputs_list(inputs):
     return list(chain(*list(map(lambda x: x.values(), filter(lambda x: x is not None, inputs)))))
@@ -217,6 +202,21 @@ def varlen_embedding_lookup(embedding_dict, sequence_input_dict, varlen_sparse_f
 
     return varlen_embedding_vec_dict
 
+def get_varlen_pooling_list(embedding_dict, features, varlen_sparse_feature_columns):
+    pooling_vec_list = []
+    for fc in varlen_sparse_feature_columns:
+        feature_name = fc.name
+        combiner = fc.combiner
+        feature_length_name = feature_name + '_seq_length'
+        if feature_length_name in features:
+            vec = SequencePoolingLayer(combiner, supports_masking=False)(
+            [embedding_dict[feature_name], features[feature_length_name]])
+        else:
+            vec = SequencePoolingLayer(combiner, supports_masking=True)(
+            embedding_dict[feature_name])
+        pooling_vec_list.append(vec)
+    return pooling_vec_list
+
 def get_dense_input(features,feature_columns):
     dense_feature_columns = list(filter(lambda x:isinstance(x,DenseFeat),feature_columns)) if feature_columns else []
     dense_input_list = []
@@ -225,7 +225,7 @@ def get_dense_input(features,feature_columns):
     return dense_input_list
 
 
-def input_from_feature_columns(features,feature_columns, embedding_size, l2_reg, init_std, seed,prefix='',seq_mask_zero=True):
+def input_from_feature_columns(features,feature_columns, embedding_size, l2_reg, init_std, seed,prefix='',seq_mask_zero=True,support_dense=True):
 
 
     sparse_feature_columns = list(filter(lambda x:isinstance(x,SparseFeat),feature_columns)) if feature_columns else []
@@ -235,6 +235,8 @@ def input_from_feature_columns(features,feature_columns, embedding_size, l2_reg,
     sparse_embedding_list = embedding_lookup(
         embedding_dict, features, sparse_feature_columns)
     dense_value_list = get_dense_input(features,feature_columns)
+    if not support_dense and len(dense_value_list) >0:
+        raise ValueError("DenseFeat is not supported in dnn_feature_columns")
 
     sequence_embed_dict = varlen_embedding_lookup(embedding_dict,features,varlen_sparse_feature_columns)
     sequence_embed_list = get_varlen_pooling_list(sequence_embed_dict, features, varlen_sparse_feature_columns)

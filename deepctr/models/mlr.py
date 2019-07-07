@@ -30,13 +30,8 @@ def MLR(region_feature_columns, base_feature_columns=None, region_num=4,
     :return: A Keras model instance.
     """
 
-    #todo 还没修改
     if region_num <= 1:
         raise ValueError("region_num must > 1")
-    # if not isinstance(region_feature_columns,
-    #                   dict) or "sparse" not in region_feature_columns or "dense" not in region_feature_columns:
-    #     raise ValueError(
-    #         "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
 
 
     if base_feature_columns is None or len(base_feature_columns) == 0:
