@@ -125,4 +125,20 @@ def test_FGCNNLayer():
             BATCH_SIZE, FIELD_SIZE, EMBEDDING_SIZE))
 
 
+# def test_SENETLayer():
+#     with CustomObjectScope({'SENETLayer': layers.SENETLayer}):
+#         layer_test(layers.SENETLayer, kwargs={'reduction_ratio':2}, input_shape=[(
+#             BATCH_SIZE, 1, EMBEDDING_SIZE)]*FIELD_SIZE)
+
+
+@pytest.mark.parametrize(
+    'bilinear_type',
+    ['all','each','interaction'
+     ]
+)
+def test_BilinearInteraction(bilinear_type):
+    with CustomObjectScope({'BilinearInteraction': layers.BilinearInteraction}):
+        layer_test(layers.BilinearInteraction, kwargs={'type':bilinear_type}, input_shape=[(
+            BATCH_SIZE, 1, EMBEDDING_SIZE)]*FIELD_SIZE)
+
 

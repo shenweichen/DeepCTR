@@ -880,3 +880,148 @@ class FGCNNLayer(Layer):
         cols = utils.conv_output_length(cols, pool_size[1], 'valid',
                                         pool_size[1])
         return [input_shape[0], rows, cols, input_shape[3]]
+
+
+class SENETLayer(Layer):
+    """Attentonal Factorization Machine models pairwise (order-2) feature
+    interactions without linear term and bias.
+
+      Input shape
+        - A list of 3D tensor with shape: ``(batch_size,1,embedding_size)``.
+
+      Output shape
+        - A list of 3D tensor with shape: ``(batch_size,1,embedding_size)``.
+
+      Arguments
+        - **reduction_ratio** : Positive integer, dimensionality of the
+         attention network output space.
+
+        - **seed** : A Python integer to use as random seed.
+
+      References
+        - [FiBiNET: Combining Feature Importance and Bilinear feature Interaction for Click-Through Rate Prediction
+Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
+    """
+
+    def __init__(self, reduction_ratio=3,  seed=1024, **kwargs):
+        self.reduction_ratio = reduction_ratio
+
+        self.seed = seed
+        super(SENETLayer, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+
+        self.filed_size = len(input_shape)
+        self.embedding_size = input_shape[0][-1]
+        reduction_size = max(1,self.filed_size//self.reduction_ratio)
+
+        self.W_1 = self.add_weight(shape=(self.filed_size,reduction_size),initializer=glorot_normal(seed=self.seed),name="W_1")
+        self.W_2 = self.add_weight(shape=(reduction_size,self.filed_size),initializer=glorot_normal(seed=self.seed),name="W_2")
+
+
+        self.tensordot = tf.keras.layers.Lambda(lambda x: tf.tensordot(x[0], x[1], axes=(-1, 0)))
+
+        # Be sure to call this somewhere!
+        super(SENETLayer, self).build(input_shape)
+
+    def call(self, inputs, training=None, **kwargs):
+
+        # if K.ndim(inputs) != 3:
+        #     raise ValueError(
+        #         "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
+
+        inputs = concat_fun(inputs,axis=1)
+        Z = tf.reduce_mean(inputs,axis=-1,)
+
+
+        A_1 = tf.sigmoid(self.tensordot([Z,self.W_1]))
+        #print(A_1)
+        A_2 = tf.sigmoid(self.tensordot([A_1,self.W_2]))
+        #print(A_2)
+        V = tf.multiply(inputs,tf.expand_dims(A_2,axis=2))
+        #print(V)
+
+        #print(v_list)
+        return tf.split(V,self.filed_size,axis=1)
+
+    def compute_output_shape(self, input_shape):
+
+        return input_shape#(None,self.filed_size,self.embedding_size)
+    def compute_mask(self, inputs, mask=None):
+        return [None]*self.filed_size
+
+    def get_config(self, ):
+        config = {'reduction_ratio': self.reduction_ratio, 'seed': self.seed}
+        base_config = super(SENETLayer, self).get_config()
+        return dict(list(base_config.items()) + list(config.items()))
+
+class BilinearInteraction(Layer):
+    """BilinearInteraction Layer used in FiBiNET.
+
+      Input shape
+        - A list of 3D tensor with shape: ``(batch_size,1,embedding_size)``.
+
+      Output shape
+        - 3D tensor with shape: ``(batch_size,1,embedding_size)``.
+
+      References
+        - [FiBiNET: Combining Feature Importance and Bilinear feature Interaction for Click-Through Rate Prediction
+Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
+
+    """
+
+    def __init__(self,type="interaction",seed=1024, **kwargs):
+        self.type = type
+        self.seed = seed
+
+        super(BilinearInteraction, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+
+        # if len(input_shape) != 3:
+        #     raise ValueError(
+        #         "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (len(input_shape)))
+
+        embedding_size = input_shape[0][-1].value
+
+        if self.type == "all":
+            self.W = self.add_weight(shape=(embedding_size,embedding_size),initializer=glorot_normal(seed=self.seed),name="bilinear_weight")
+        elif self.type == "each":
+            self.W_list = [self.add_weight(shape=(embedding_size,embedding_size),initializer=glorot_normal(seed=self.seed),name="bilinear_weight"+str(i)) for i in range(len(input_shape))]
+        elif self.type == "interaction":
+            self.W_list = [self.add_weight(shape=(embedding_size,embedding_size),initializer=glorot_normal(seed=self.seed),name="bilinear_weight"+str(i)+'_'+str(j)) for i,j in itertools.combinations(range(len(input_shape)),2)]
+        else:
+            raise NotImplementedError
+
+        super(BilinearInteraction, self).build(
+            input_shape)  # Be sure to call this somewhere!
+
+    def call(self, inputs, **kwargs):
+
+        # if K.ndim(inputs) != 3:
+        #     raise ValueError(
+        #         "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
+        #print(tf.tensordot(inputs[0],self.W,axes=(-1,0)),'xxxxx')
+        if self.type == "all":
+            p = [tf.multiply(tf.tensordot(v_i,self.W,axes=(-1,0)),v_j) for v_i, v_j in itertools.combinations(inputs, 2)]
+        elif self.type == "each":
+            p = [tf.multiply(tf.tensordot(inputs[i],self.W_list[i],axes=(-1,0)),inputs[j]) for i,j in itertools.combinations(range(len(inputs)),2)]
+        elif self.type =="interaction":
+            p = [tf.multiply(tf.tensordot(v[0],w,axes=(-1,0)),v[1]) for v,w in zip(itertools.combinations(inputs,2),self.W_list)]
+        else:
+            raise NotImplementedError
+        #print(p,concat_fun(p),'outoutout')
+        return  concat_fun(p)
+
+    def compute_output_shape(self, input_shape):
+        filed_size = len(input_shape)
+        embedding_size = input_shape[0][-1]
+
+        return (None, 1, filed_size*(filed_size-1)//2 * embedding_size)
+
+
+    def get_config(self, ):
+        config = {'type': self.type, 'seed': self.seed}
+        base_config = super(BilinearInteraction, self).get_config()
+        return dict(list(base_config.items()) + list(config.items()))
+
