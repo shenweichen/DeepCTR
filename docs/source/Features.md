@@ -232,7 +232,7 @@ Feature Importance and Bilinear feature Interaction NETwork is proposed to dynam
 
 ![FiBiNET](../pics/FiBiNET.png)
 
-[Feng Y, Lv F, Shen W, et al. Deep Session Interest Network for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1905.06482, 2019.](https://arxiv.org/pdf/1905.09433.pdf)
+[Huang T, Zhang Z, Zhang J. FiBiNET: Combining Feature Importance and Bilinear feature Interaction for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1905.09433, 2019.](https://arxiv.org/pdf/1905.09433.pdf)
 
 
 ## Layers
