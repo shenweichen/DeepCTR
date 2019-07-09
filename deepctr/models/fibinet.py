@@ -48,11 +48,6 @@ def FiBiNET(linear_feature_columns, dnn_feature_columns, embedding_size=8,biline
 
     senet_embedding_list = SENETLayer(reduction_ratio,seed)(sparse_embedding_list)
 
-    #print(senet_embedding_list,senet_embedding_list.shape)
-    #senet = Lambda(lambda senet_embedding_list:[senet_embedding_list[:,i:i+1,:] for i in range(len(sparse_embedding_list))],mask=[None] * len(sparse_embedding_list))(senet_embedding_list)
-        #Lambda(lambda x:tf.split(x,len(sparse_embedding_list),axis=1))(senet_embedding_list)
-    #print('xxxxx',senet)
-
     senet_bilinear_out = BilinearInteraction(type=bilinear_type,seed=seed)(senet_embedding_list)
     bilinear_out = BilinearInteraction(type=bilinear_type,seed=seed)(sparse_embedding_list)
 

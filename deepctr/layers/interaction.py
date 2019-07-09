@@ -946,7 +946,7 @@ Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
 
     def compute_output_shape(self, input_shape):
 
-        return input_shape#(None,self.filed_size,self.embedding_size)
+        return input_shape
     def compute_mask(self, inputs, mask=None):
         return [None]*self.filed_size
 
@@ -987,7 +987,7 @@ Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
         if self.type == "all":
             self.W = self.add_weight(shape=(embedding_size,embedding_size),initializer=glorot_normal(seed=self.seed),name="bilinear_weight")
         elif self.type == "each":
-            self.W_list = [self.add_weight(shape=(embedding_size,embedding_size),initializer=glorot_normal(seed=self.seed),name="bilinear_weight"+str(i)) for i in range(len(input_shape))]
+            self.W_list = [self.add_weight(shape=(embedding_size,embedding_size),initializer=glorot_normal(seed=self.seed),name="bilinear_weight"+str(i)) for i in range(len(input_shape)-1)]
         elif self.type == "interaction":
             self.W_list = [self.add_weight(shape=(embedding_size,embedding_size),initializer=glorot_normal(seed=self.seed),name="bilinear_weight"+str(i)+'_'+str(j)) for i,j in itertools.combinations(range(len(input_shape)),2)]
         else:
@@ -1005,12 +1005,11 @@ Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
         if self.type == "all":
             p = [tf.multiply(tf.tensordot(v_i,self.W,axes=(-1,0)),v_j) for v_i, v_j in itertools.combinations(inputs, 2)]
         elif self.type == "each":
-            p = [tf.multiply(tf.tensordot(inputs[i],self.W_list[i],axes=(-1,0)),inputs[j]) for i,j in itertools.combinations(range(len(inputs)),2)]
+            p = [tf.multiply(tf.tensordot(inputs[i],self.W_list[i],axes=(-1,0)),inputs[j]) for i, j in itertools.combinations(range(len(inputs)), 2)]
         elif self.type =="interaction":
             p = [tf.multiply(tf.tensordot(v[0],w,axes=(-1,0)),v[1]) for v,w in zip(itertools.combinations(inputs,2),self.W_list)]
         else:
             raise NotImplementedError
-        #print(p,concat_fun(p),'outoutout')
         return  concat_fun(p)
 
     def compute_output_shape(self, input_shape):
