@@ -224,6 +224,17 @@ Deep Session Interest Network (DSIN) extracts users' multiple historical session
 
 [Feng Y, Lv F, Shen W, et al. Deep Session Interest Network for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1905.06482, 2019.](https://arxiv.org/abs/1905.06482)
 
+### FiBiNET(Feature Importance and Bilinear feature Interaction NETwork)
+
+Feature Importance and Bilinear feature Interaction NETwork is proposed to dynamically learn the feature importance and fine-grained feature interactions. On the one hand, the FiBiNET can dynamically learn the importance of fea- tures via the Squeeze-Excitation network (SENET) mechanism; on the other hand, it is able to effectively learn the feature interactions via bilinear function.
+
+[**FiBiNET Model API**](./deepctr.models.fibinet.html)  
+
+![FiBiNET](../pics/FiBiNET.png)
+
+[Feng Y, Lv F, Shen W, et al. Deep Session Interest Network for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1905.06482, 2019.](https://arxiv.org/pdf/1905.09433.pdf)
+
+
 ## Layers
 
 The models of deepctr are modular,
