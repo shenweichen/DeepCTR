@@ -937,8 +937,8 @@ Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
         Z = tf.reduce_mean(inputs,axis=-1,)
 
 
-        A_1 = tf.sigmoid(self.tensordot([Z,self.W_1]))
-        A_2 = tf.sigmoid(self.tensordot([A_1,self.W_2]))
+        A_1 = tf.nn.relu(self.tensordot([Z,self.W_1]))
+        A_2 = tf.nn.relu(self.tensordot([A_1,self.W_2]))
         V = tf.multiply(inputs,tf.expand_dims(A_2,axis=2))
 
         return tf.split(V,self.filed_size,axis=1)
