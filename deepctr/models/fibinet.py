@@ -8,17 +8,17 @@ Reference:
 """
 
 from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.layers import Dense,add,Flatten
+from tensorflow.python.keras.layers import Dense, add, Flatten
 
-from ..inputs import build_input_features, get_linear_logit,input_from_feature_columns,combined_dnn_input
+from ..inputs import build_input_features, get_linear_logit, input_from_feature_columns, combined_dnn_input
 from ..layers.core import PredictionLayer, DNN
-from ..layers.interaction import SENETLayer,BilinearInteraction
+from ..layers.interaction import SENETLayer, BilinearInteraction
 from ..layers.utils import concat_fun
 
 
-def FiBiNET(linear_feature_columns, dnn_feature_columns, embedding_size=8,bilinear_type='interaction',reduction_ratio=3, dnn_hidden_units=(128, 128), l2_reg_linear=1e-5,
-        l2_reg_embedding=1e-5, l2_reg_dnn=0, init_std=0.0001, seed=1024, dnn_dropout=0, dnn_activation='relu',
-        task='binary'):
+def FiBiNET(linear_feature_columns, dnn_feature_columns, embedding_size=8, bilinear_type='interaction', reduction_ratio=3, dnn_hidden_units=(128, 128), l2_reg_linear=1e-5,
+            l2_reg_embedding=1e-5, l2_reg_dnn=0, init_std=0.0001, seed=1024, dnn_dropout=0, dnn_activation='relu',
+            task='binary'):
     """Instantiates the Feature Importance and Bilinear feature Interaction NETwork architecture.
 
     :param linear_feature_columns: An iterable containing all the features used by linear part of the model.
@@ -38,7 +38,8 @@ def FiBiNET(linear_feature_columns, dnn_feature_columns, embedding_size=8,biline
     :return: A Keras model instance.
     """
 
-    features = build_input_features(linear_feature_columns + dnn_feature_columns)
+    features = build_input_features(
+        linear_feature_columns + dnn_feature_columns)
 
     inputs_list = list(features.values())
 
@@ -47,23 +48,26 @@ def FiBiNET(linear_feature_columns, dnn_feature_columns, embedding_size=8,biline
                                                                          l2_reg_embedding, init_std,
                                                                          seed)
 
-    senet_embedding_list = SENETLayer(reduction_ratio,seed)(sparse_embedding_list)
+    senet_embedding_list = SENETLayer(
+        reduction_ratio, seed)(sparse_embedding_list)
 
-    senet_bilinear_out = BilinearInteraction(type=bilinear_type,seed=seed)(senet_embedding_list)
-    bilinear_out = BilinearInteraction(type=bilinear_type,seed=seed)(sparse_embedding_list)
+    senet_bilinear_out = BilinearInteraction(
+        type=bilinear_type, seed=seed)(senet_embedding_list)
+    bilinear_out = BilinearInteraction(
+        type=bilinear_type, seed=seed)(sparse_embedding_list)
 
     linear_logit = get_linear_logit(features, linear_feature_columns, l2_reg=l2_reg_linear, init_std=init_std,
                                     seed=seed, prefix='linear')
 
-
-    dnn_input = combined_dnn_input([Flatten()(concat_fun([senet_bilinear_out,bilinear_out]))], dense_value_list)
+    dnn_input = combined_dnn_input(
+        [Flatten()(concat_fun([senet_bilinear_out, bilinear_out]))], dense_value_list)
     dnn_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
                   False, seed)(dnn_input)
     dnn_logit = Dense(
         1, use_bias=False, activation=None)(dnn_out)
 
     if len(linear_feature_columns) > 0 and len(dnn_feature_columns) > 0:  # linear + dnn
-        final_logit = add([linear_logit,dnn_logit])
+        final_logit = add([linear_logit, dnn_logit])
     elif len(linear_feature_columns) == 0:
         final_logit = dnn_logit
     elif len(dnn_feature_columns) == 0:

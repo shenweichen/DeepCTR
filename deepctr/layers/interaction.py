@@ -86,9 +86,11 @@ class AFMLayer(Layer):
                                             initializer=glorot_normal(seed=self.seed), name="projection_h")
         self.projection_p = self.add_weight(shape=(
             embedding_size, 1), initializer=glorot_normal(seed=self.seed), name="projection_p")
-        self.dropout = tf.keras.layers.Dropout(self.dropout_rate, seed=self.seed)
+        self.dropout = tf.keras.layers.Dropout(
+            self.dropout_rate, seed=self.seed)
 
-        self.tensordot = tf.keras.layers.Lambda(lambda x: tf.tensordot(x[0], x[1], axes=(-1, 0)))
+        self.tensordot = tf.keras.layers.Lambda(
+            lambda x: tf.tensordot(x[0], x[1], axes=(-1, 0)))
 
         # Be sure to call this somewhere!
         super(AFMLayer, self).build(input_shape)
@@ -232,7 +234,8 @@ class CIN(Layer):
             self.filters.append(self.add_weight(name='filter' + str(i),
                                                 shape=[1, self.field_nums[-1]
                                                        * self.field_nums[0], size],
-                                                dtype=tf.float32, initializer=glorot_uniform(seed=self.seed + i),
+                                                dtype=tf.float32, initializer=glorot_uniform(
+                                                    seed=self.seed + i),
                                                 regularizer=l2(self.l2_reg)))
 
             self.bias.append(self.add_weight(name='bias' + str(i), shape=[size], dtype=tf.float32,
@@ -247,7 +250,8 @@ class CIN(Layer):
             else:
                 self.field_nums.append(size)
 
-        self.activation_layers = [activation_layer(self.activation) for _ in self.layer_size]
+        self.activation_layers = [activation_layer(
+            self.activation) for _ in self.layer_size]
 
         super(CIN, self).build(input_shape)  # Be sure to call this somewhere!
 
@@ -668,7 +672,8 @@ class OutterProductLayer(Layer):
         if self.kernel_type == 'mat':
 
             self.kernel = self.add_weight(shape=(embed_size, num_pairs, embed_size),
-                                          initializer=glorot_uniform(seed=self.seed),
+                                          initializer=glorot_uniform(
+                                              seed=self.seed),
                                           name='kernel')
         elif self.kernel_type == 'vec':
             self.kernel = self.add_weight(shape=(num_pairs, embed_size,), initializer=glorot_uniform(self.seed),
@@ -796,12 +801,15 @@ class FGCNNLayer(Layer):
             width = self.kernel_width[i - 1]
             new_filters = self.new_maps[i - 1]
             pooling_width = self.pooling_width[i - 1]
-            conv_output_shape = self._conv_output_shape(pooling_shape, (width, 1))
-            pooling_shape = self._pooling_output_shape(conv_output_shape, (pooling_width, 1))
+            conv_output_shape = self._conv_output_shape(
+                pooling_shape, (width, 1))
+            pooling_shape = self._pooling_output_shape(
+                conv_output_shape, (pooling_width, 1))
             self.conv_layers.append(tf.keras.layers.Conv2D(filters=filters, kernel_size=(width, 1), strides=(1, 1),
                                                            padding='same',
                                                            activation='tanh', use_bias=True, ))
-            self.pooling_layers.append(tf.keras.layers.MaxPooling2D(pool_size=(pooling_width, 1)))
+            self.pooling_layers.append(
+                tf.keras.layers.MaxPooling2D(pool_size=(pooling_width, 1)))
             self.dense_layers.append(tf.keras.layers.Dense(pooling_shape[1] * embedding_size * new_filters,
                                                            activation='tanh', use_bias=True))
 
@@ -916,13 +924,15 @@ Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
 
         self.filed_size = len(input_shape)
         self.embedding_size = input_shape[0][-1]
-        reduction_size = max(1,self.filed_size//self.reduction_ratio)
+        reduction_size = max(1, self.filed_size//self.reduction_ratio)
 
-        self.W_1 = self.add_weight(shape=(self.filed_size,reduction_size),initializer=glorot_normal(seed=self.seed),name="W_1")
-        self.W_2 = self.add_weight(shape=(reduction_size,self.filed_size),initializer=glorot_normal(seed=self.seed),name="W_2")
+        self.W_1 = self.add_weight(shape=(
+            self.filed_size, reduction_size), initializer=glorot_normal(seed=self.seed), name="W_1")
+        self.W_2 = self.add_weight(shape=(
+            reduction_size, self.filed_size), initializer=glorot_normal(seed=self.seed), name="W_2")
 
-
-        self.tensordot = tf.keras.layers.Lambda(lambda x: tf.tensordot(x[0], x[1], axes=(-1, 0)))
+        self.tensordot = tf.keras.layers.Lambda(
+            lambda x: tf.tensordot(x[0], x[1], axes=(-1, 0)))
 
         # Be sure to call this somewhere!
         super(SENETLayer, self).build(input_shape)
@@ -933,18 +943,19 @@ Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
             raise ValueError(
                 "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
 
-        inputs = concat_fun(inputs,axis=1)
-        Z = tf.reduce_mean(inputs,axis=-1,)
+        inputs = concat_fun(inputs, axis=1)
+        Z = tf.reduce_mean(inputs, axis=-1,)
 
-        A_1 = tf.nn.relu(self.tensordot([Z,self.W_1]))
-        A_2 = tf.nn.relu(self.tensordot([A_1,self.W_2]))
-        V = tf.multiply(inputs,tf.expand_dims(A_2,axis=2))
+        A_1 = tf.nn.relu(self.tensordot([Z, self.W_1]))
+        A_2 = tf.nn.relu(self.tensordot([A_1, self.W_2]))
+        V = tf.multiply(inputs, tf.expand_dims(A_2, axis=2))
 
-        return tf.split(V,self.filed_size,axis=1)
+        return tf.split(V, self.filed_size, axis=1)
 
     def compute_output_shape(self, input_shape):
 
         return input_shape
+
     def compute_mask(self, inputs, mask=None):
         return [None]*self.filed_size
 
@@ -952,6 +963,7 @@ Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
         config = {'reduction_ratio': self.reduction_ratio, 'seed': self.seed}
         base_config = super(SENETLayer, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
+
 
 class BilinearInteraction(Layer):
     """BilinearInteraction Layer used in FiBiNET.
@@ -973,7 +985,7 @@ Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
 
     """
 
-    def __init__(self,type="interaction",seed=1024, **kwargs):
+    def __init__(self, type="interaction", seed=1024, **kwargs):
         self.type = type
         self.seed = seed
 
@@ -987,11 +999,14 @@ Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
         embedding_size = input_shape[0][-1].value
 
         if self.type == "all":
-            self.W = self.add_weight(shape=(embedding_size,embedding_size),initializer=glorot_normal(seed=self.seed),name="bilinear_weight")
+            self.W = self.add_weight(shape=(embedding_size, embedding_size), initializer=glorot_normal(
+                seed=self.seed), name="bilinear_weight")
         elif self.type == "each":
-            self.W_list = [self.add_weight(shape=(embedding_size,embedding_size),initializer=glorot_normal(seed=self.seed),name="bilinear_weight"+str(i)) for i in range(len(input_shape)-1)]
+            self.W_list = [self.add_weight(shape=(embedding_size, embedding_size), initializer=glorot_normal(
+                seed=self.seed), name="bilinear_weight"+str(i)) for i in range(len(input_shape)-1)]
         elif self.type == "interaction":
-            self.W_list = [self.add_weight(shape=(embedding_size,embedding_size),initializer=glorot_normal(seed=self.seed),name="bilinear_weight"+str(i)+'_'+str(j)) for i,j in itertools.combinations(range(len(input_shape)),2)]
+            self.W_list = [self.add_weight(shape=(embedding_size, embedding_size), initializer=glorot_normal(
+                seed=self.seed), name="bilinear_weight"+str(i)+'_'+str(j)) for i, j in itertools.combinations(range(len(input_shape)), 2)]
         else:
             raise NotImplementedError
 
@@ -1005,14 +1020,17 @@ Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
                 "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
 
         if self.type == "all":
-            p = [tf.multiply(tf.tensordot(v_i,self.W,axes=(-1,0)),v_j) for v_i, v_j in itertools.combinations(inputs, 2)]
+            p = [tf.multiply(tf.tensordot(v_i, self.W, axes=(-1, 0)), v_j)
+                 for v_i, v_j in itertools.combinations(inputs, 2)]
         elif self.type == "each":
-            p = [tf.multiply(tf.tensordot(inputs[i],self.W_list[i],axes=(-1,0)),inputs[j]) for i, j in itertools.combinations(range(len(inputs)), 2)]
-        elif self.type =="interaction":
-            p = [tf.multiply(tf.tensordot(v[0],w,axes=(-1,0)),v[1]) for v,w in zip(itertools.combinations(inputs,2),self.W_list)]
+            p = [tf.multiply(tf.tensordot(inputs[i], self.W_list[i], axes=(-1, 0)), inputs[j])
+                 for i, j in itertools.combinations(range(len(inputs)), 2)]
+        elif self.type == "interaction":
+            p = [tf.multiply(tf.tensordot(v[0], w, axes=(-1, 0)), v[1])
+                 for v, w in zip(itertools.combinations(inputs, 2), self.W_list)]
         else:
             raise NotImplementedError
-        return  concat_fun(p)
+        return concat_fun(p)
 
     def compute_output_shape(self, input_shape):
         filed_size = len(input_shape)
@@ -1020,9 +1038,7 @@ Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
 
         return (None, 1, filed_size*(filed_size-1)//2 * embedding_size)
 
-
     def get_config(self, ):
         config = {'type': self.type, 'seed': self.seed}
         base_config = super(BilinearInteraction, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
-
