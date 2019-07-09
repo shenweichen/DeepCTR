@@ -883,8 +883,7 @@ class FGCNNLayer(Layer):
 
 
 class SENETLayer(Layer):
-    """Attentonal Factorization Machine models pairwise (order-2) feature
-    interactions without linear term and bias.
+    """SENETLayer used in FiBiNET.
 
       Input shape
         - A list of 3D tensor with shape: ``(batch_size,1,embedding_size)``.
@@ -911,6 +910,10 @@ Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
 
     def build(self, input_shape):
 
+        if not isinstance(input_shape, list) or len(input_shape) < 2:
+            raise ValueError('A `AttentionalFM` layer should be called '
+                             'on a list of at least 2 inputs')
+
         self.filed_size = len(input_shape)
         self.embedding_size = input_shape[0][-1]
         reduction_size = max(1,self.filed_size//self.reduction_ratio)
@@ -926,22 +929,18 @@ Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
 
     def call(self, inputs, training=None, **kwargs):
 
-        # if K.ndim(inputs) != 3:
-        #     raise ValueError(
-        #         "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
+        if K.ndim(inputs[0]) != 3:
+            raise ValueError(
+                "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
 
         inputs = concat_fun(inputs,axis=1)
         Z = tf.reduce_mean(inputs,axis=-1,)
 
 
         A_1 = tf.sigmoid(self.tensordot([Z,self.W_1]))
-        #print(A_1)
         A_2 = tf.sigmoid(self.tensordot([A_1,self.W_2]))
-        #print(A_2)
         V = tf.multiply(inputs,tf.expand_dims(A_2,axis=2))
-        #print(V)
 
-        #print(v_list)
         return tf.split(V,self.filed_size,axis=1)
 
     def compute_output_shape(self, input_shape):
@@ -964,6 +963,11 @@ class BilinearInteraction(Layer):
       Output shape
         - 3D tensor with shape: ``(batch_size,1,embedding_size)``.
 
+      Arguments
+        - **str** : String, types of bilinear functions used in this layer.
+
+        - **seed** : A Python integer to use as random seed.
+
       References
         - [FiBiNET: Combining Feature Importance and Bilinear feature Interaction for Click-Through Rate Prediction
 Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
@@ -978,10 +982,9 @@ Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
 
     def build(self, input_shape):
 
-        # if len(input_shape) != 3:
-        #     raise ValueError(
-        #         "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (len(input_shape)))
-
+        if not isinstance(input_shape, list) or len(input_shape) < 2:
+            raise ValueError('A `AttentionalFM` layer should be called '
+                             'on a list of at least 2 inputs')
         embedding_size = input_shape[0][-1].value
 
         if self.type == "all":
@@ -998,10 +1001,10 @@ Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
 
     def call(self, inputs, **kwargs):
 
-        # if K.ndim(inputs) != 3:
-        #     raise ValueError(
-        #         "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
-        #print(tf.tensordot(inputs[0],self.W,axes=(-1,0)),'xxxxx')
+        if K.ndim(inputs[0]) != 3:
+            raise ValueError(
+                "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
+
         if self.type == "all":
             p = [tf.multiply(tf.tensordot(v_i,self.W,axes=(-1,0)),v_j) for v_i, v_j in itertools.combinations(inputs, 2)]
         elif self.type == "each":

@@ -7,9 +7,8 @@ Reference:
     [1] Huang T, Zhang Z, Zhang J. FiBiNET: Combining Feature Importance and Bilinear feature Interaction for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1905.09433, 2019.
 """
 
-import tensorflow as tf
 from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.layers import Dense,add,Flatten,Lambda
+from tensorflow.python.keras.layers import Dense,add,Flatten
 
 from ..inputs import build_input_features, get_linear_logit,input_from_feature_columns,combined_dnn_input
 from ..layers.core import PredictionLayer, DNN
@@ -25,6 +24,8 @@ def FiBiNET(linear_feature_columns, dnn_feature_columns, embedding_size=8,biline
     :param linear_feature_columns: An iterable containing all the features used by linear part of the model.
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
     :param embedding_size: positive integer,sparse feature embedding_size
+    :param bilinear_type: str,bilinear function type used in Bilinear Interaction Layer,can be ``'all'`` , ``'each'`` or ``'interaction'``
+    :param reduction_ratio: integer in [1,inf), reduction ratio used in SENET Layer
     :param dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of DNN
     :param l2_reg_linear: float. L2 regularizer strength applied to wide part
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
