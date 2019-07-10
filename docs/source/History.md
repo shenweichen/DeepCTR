@@ -1,5 +1,5 @@
 # History
-- 07/10/2019 : [v0.5.1](https://github.com/shenweichen/DeepCTR/releases/tag/v0.5.1) released.Add [FiBiNET](./Features.html#dsin-deep-session-interest-network).  
+- 07/10/2019 : [v0.5.1](https://github.com/shenweichen/DeepCTR/releases/tag/v0.5.1) released.Add [FiBiNET](./Features.html#fibinet-feature-importance-and-bilinear-feature-interaction-network).  
 - 06/30/2019 : [v0.5.0](https://github.com/shenweichen/DeepCTR/releases/tag/v0.5.0) released.Refactor inputs module. 
 - 05/19/2019 : [v0.4.1](https://github.com/shenweichen/DeepCTR/releases/tag/v0.4.1) released.Add [DSIN](./Features.html#dsin-deep-session-interest-network). 
 - 05/04/2019 : [v0.4.0](https://github.com/shenweichen/DeepCTR/releases/tag/v0.4.0) released.Support [feature hashing on the fly](./Examples.html#classification-criteo-with-feature-hashing-on-the-fly) and python2.7.
