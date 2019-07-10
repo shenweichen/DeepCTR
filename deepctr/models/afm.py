@@ -43,8 +43,7 @@ def AFM(linear_feature_columns, dnn_feature_columns, embedding_size=8, use_atten
 
     sparse_embedding_list, _ = input_from_feature_columns(features,dnn_feature_columns,embedding_size,
                                                                                                l2_reg_embedding, init_std,
-                                                                                               seed)
-    # todo not support dense
+                                                                                               seed,support_dense=False)
 
     linear_logit = get_linear_logit(features, linear_feature_columns, l2_reg=l2_reg_linear, init_std=init_std,
                                     seed=seed, prefix='linear')
