@@ -138,7 +138,7 @@ def test_FGCNNLayer():
 )
 def test_BilinearInteraction(bilinear_type):
     with CustomObjectScope({'BilinearInteraction': layers.BilinearInteraction}):
-        layer_test(layers.BilinearInteraction, kwargs={'type':bilinear_type}, input_shape=[(
+        layer_test(layers.BilinearInteraction, kwargs={'bilinear_type':bilinear_type}, input_shape=[(
             BATCH_SIZE, 1, EMBEDDING_SIZE)]*FIELD_SIZE)
 
 

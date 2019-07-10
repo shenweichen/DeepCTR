@@ -985,8 +985,8 @@ Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
 
     """
 
-    def __init__(self, type="interaction", seed=1024, **kwargs):
-        self.type = type
+    def __init__(self, bilinear_type="interaction", seed=1024, **kwargs):
+        self.bilinear_type = bilinear_type
         self.seed = seed
 
         super(BilinearInteraction, self).__init__(**kwargs)
@@ -998,13 +998,13 @@ Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
                              'on a list of at least 2 inputs')
         embedding_size = input_shape[0][-1].value
 
-        if self.type == "all":
+        if self.bilinear_type == "all":
             self.W = self.add_weight(shape=(embedding_size, embedding_size), initializer=glorot_normal(
                 seed=self.seed), name="bilinear_weight")
-        elif self.type == "each":
+        elif self.bilinear_type == "each":
             self.W_list = [self.add_weight(shape=(embedding_size, embedding_size), initializer=glorot_normal(
                 seed=self.seed), name="bilinear_weight"+str(i)) for i in range(len(input_shape)-1)]
-        elif self.type == "interaction":
+        elif self.bilinear_type == "interaction":
             self.W_list = [self.add_weight(shape=(embedding_size, embedding_size), initializer=glorot_normal(
                 seed=self.seed), name="bilinear_weight"+str(i)+'_'+str(j)) for i, j in itertools.combinations(range(len(input_shape)), 2)]
         else:
@@ -1019,13 +1019,13 @@ Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
             raise ValueError(
                 "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
 
-        if self.type == "all":
+        if self.bilinear_type == "all":
             p = [tf.multiply(tf.tensordot(v_i, self.W, axes=(-1, 0)), v_j)
                  for v_i, v_j in itertools.combinations(inputs, 2)]
-        elif self.type == "each":
+        elif self.bilinear_type == "each":
             p = [tf.multiply(tf.tensordot(inputs[i], self.W_list[i], axes=(-1, 0)), inputs[j])
                  for i, j in itertools.combinations(range(len(inputs)), 2)]
-        elif self.type == "interaction":
+        elif self.bilinear_type == "interaction":
             p = [tf.multiply(tf.tensordot(v[0], w, axes=(-1, 0)), v[1])
                  for v, w in zip(itertools.combinations(inputs, 2), self.W_list)]
         else:
@@ -1039,6 +1039,6 @@ Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
         return (None, 1, filed_size*(filed_size-1)//2 * embedding_size)
 
     def get_config(self, ):
-        config = {'type': self.type, 'seed': self.seed}
+        config = {'type': self.bilinear_type, 'seed': self.seed}
         base_config = super(BilinearInteraction, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))

@@ -52,9 +52,9 @@ def FiBiNET(linear_feature_columns, dnn_feature_columns, embedding_size=8, bilin
         reduction_ratio, seed)(sparse_embedding_list)
 
     senet_bilinear_out = BilinearInteraction(
-        type=bilinear_type, seed=seed)(senet_embedding_list)
+        bilinear_type=bilinear_type, seed=seed)(senet_embedding_list)
     bilinear_out = BilinearInteraction(
-        type=bilinear_type, seed=seed)(sparse_embedding_list)
+        bilinear_type=bilinear_type, seed=seed)(sparse_embedding_list)
 
     linear_logit = get_linear_logit(features, linear_feature_columns, l2_reg=l2_reg_linear, init_std=init_std,
                                     seed=seed, prefix='linear')
