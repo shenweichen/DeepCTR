@@ -1039,6 +1039,6 @@ Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
         return (None, 1, filed_size*(filed_size-1)//2 * embedding_size)
 
     def get_config(self, ):
-        config = {'type': self.bilinear_type, 'seed': self.seed}
+        config = {'bilinear_type': self.bilinear_type, 'seed': self.seed}
         base_config = super(BilinearInteraction, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
