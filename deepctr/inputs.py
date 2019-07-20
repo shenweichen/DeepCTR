@@ -9,7 +9,6 @@ Author:
 from collections import OrderedDict, namedtuple
 from itertools import chain
 
-import tensorflow as tf
 from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.layers import  Embedding, Input, Flatten
 from tensorflow.python.keras.regularizers import l2

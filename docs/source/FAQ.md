@@ -30,7 +30,7 @@ import deepctr
 from tensorflow.python.keras.optimizers import Adam,Adagrad
 from tensorflow.python.keras.callbacks import EarlyStopping
 
-model = deepctr.models.DeepFM({"sparse": sparse_feature_dict, "dense": dense_feature_list})
+model = deepctr.models.DeepFM(linear_feature_columns,dnn_feature_columns)
 model.compile(Adagrad('0.0808'),'binary_crossentropy',metrics=['binary_crossentropy'])
 
 es = EarlyStopping(monitor='val_binary_crossentropy')
@@ -63,18 +63,26 @@ fixlen_names = get_fixlen_feature_names( dnn_feature_columns)
 varlen_names = get_varlen_feature_names(dnn_feature_columns)
 feature_interactions = list(itertools.combinations(fixlen_names+varlen_names ,2))
 ```
+## 4. How to extract the embedding vectors in deepfm?
+```python
+feature_columns = [SparseFeat('user_id',120,),SparseFeat('item_id',60,),SparseFeat('cate_id',60,)]
 
-## 4. Does the models support multi-value input?
----------------------------------------------------
-Now multi-value input is avaliable for `AFM,AutoInt,DCN,DeepFM,FNN,NFM,PNN,xDeepFM`,you can read the example [here](./Examples.html#multi-value-input-movielens).
+def get_embedding_weights(dnn_feature_columns,model):
+    embedding_dict = {}
+    for fc in dnn_feature_columns:
+        if hasattr(fc,'embedding_name'):
+            if fc.embedding_name is not None:
+                name = fc.embedding_name
+            else:
+                name = fc.name
+            embedding_dict[name] = model.get_layer("sparse_emb_"+name).get_weights()[0]
+    return embedding_dict
+    
+embedding_dict = get_embedding_weights(feature_columns,model)
 
-For `DIN` please read the code example in [run_din.py](https://github.com/shenweichen/DeepCTR/blob/master/examples/run_din.py
-).
-
-For `DIEN` please read the code example in [run_dien.py](https://github.com/shenweichen/DeepCTR/blob/master/examples/run_dien.py
-).
-
-You can also use layers in [sequence](./deepctr.layers.sequence.html)to build your own models !
+user_id_emb = embedding_dict['user_id']
+item_id_emb = embedding_dict['item_id']
+```
 
 ## 5. How to add a long dense feature vector as a input to the model?
 ```python
