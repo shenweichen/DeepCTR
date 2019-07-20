@@ -54,7 +54,7 @@ def AFM(linear_feature_columns, dnn_feature_columns, embedding_size=8, use_atten
         seed)(sparse_embedding_list,)
     else:
         fm_logit = FM()(fm_input)
-
+        
     final_logit = tf.keras.layers.add([linear_logit, fm_logit])
     output = PredictionLayer(task)(final_logit)
 
