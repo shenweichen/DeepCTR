@@ -63,7 +63,7 @@ class Linear(tf.keras.layers.Layer):
 
     def __init__(self, l2_reg=0.0, mode=0, **kwargs):
 
-        self.l2_reg_linear = l2_reg
+        self.l2_reg = l2_reg
         # self.l2_reg = tf.contrib.layers.l2_regularizer(float(l2_reg_linear))
         self.mode = mode
         super(Linear, self).__init__(**kwargs)
@@ -76,7 +76,7 @@ class Linear(tf.keras.layers.Layer):
                                     trainable=True)
 
         self.dense = tf.keras.layers.Dense(units=1, activation=None, use_bias=False,
-                                           kernel_regularizer=tf.keras.regularizers.l2(self.l2_reg_linear))
+                                           kernel_regularizer=tf.keras.regularizers.l2(self.l2_reg))
 
         super(Linear, self).build(input_shape)  # Be sure to call this somewhere!
 
@@ -102,7 +102,7 @@ class Linear(tf.keras.layers.Layer):
         return (None, 1)
 
     def get_config(self, ):
-        config = {'mode': self.mode, 'l2_reg_linear': self.l2_reg_linear}
+        config = {'mode': self.mode, 'l2_reg': self.l2_reg}
         base_config = super(Linear, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 

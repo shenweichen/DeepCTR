@@ -7,12 +7,10 @@ from ..utils import check_model
 
 
 def get_xy_fd(hash_flag=False):
-    # feature_dim_dict = {"sparse": [SingleFeat('user', 3, hash_flag), SingleFeat(
-    #     'gender', 2, hash_flag), SingleFeat('item', 3 + 1, hash_flag), SingleFeat('item_gender', 2 + 1, hash_flag)],
-    #                     "dense": [SingleFeat('score', 0)]}
+
 
     feature_columns = [SparseFeat('user',3),SparseFeat(
-        'gender', 2), SparseFeat('item', 3 + 1), SparseFeat('item_gender', 2 + 1),DenseFeat('score', 0)]
+        'gender', 2), SparseFeat('item', 3 + 1), SparseFeat('item_gender', 2 + 1),DenseFeat('score', 1)]
     feature_columns += [VarLenSparseFeat('hist_item',3+1, maxlen=4, embedding_name='item'),
                         VarLenSparseFeat('hist_item_gender',3+1, maxlen=4, embedding_name='item_gender')]
 
