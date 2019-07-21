@@ -13,7 +13,7 @@ from tensorflow.python.keras.models import Model, load_model, save_model
 from deepctr.inputs import SparseFeat, DenseFeat,VarLenSparseFeat,get_fixlen_feature_names,get_varlen_feature_names
 from deepctr.layers import  custom_objects
 
-SAMPLE_SIZE=32
+SAMPLE_SIZE=16
 
 def gen_sequence(dim, max_len, sample_size):
     return np.array([np.random.randint(0, dim, max_len) for _ in range(sample_size)]), np.random.randint(1, max_len + 1, sample_size)

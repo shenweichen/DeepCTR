@@ -5,8 +5,8 @@ from ..utils import check_model, get_test_data,SAMPLE_SIZE
 
 @pytest.mark.parametrize(
     'use_fm,hidden_size,sparse_feature_num',
-    [(True, (), 1), (False, (), 2), (True, (32,), 3), (False, (32,), 1)
-     ]
+    [(True, (), 1), (False, (), 2)
+     ]#(True, (32,), 3), (False, (32,), 1)
 )
 def  test_DeepFM(use_fm, hidden_size, sparse_feature_num):
     model_name = "DeepFM"

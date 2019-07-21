@@ -10,11 +10,11 @@ from collections import OrderedDict, namedtuple
 from itertools import chain
 
 from tensorflow.python.keras.initializers import RandomNormal
-from tensorflow.python.keras.layers import Concatenate, Dense, Embedding, Input, add,Flatten
+from tensorflow.python.keras.layers import  Embedding, Input, Flatten
 from tensorflow.python.keras.regularizers import l2
 
 from .layers.sequence import SequencePoolingLayer
-from .layers.utils import Hash,concat_fun
+from .layers.utils import Hash,concat_fun,Linear
 
 
 class SparseFeat(namedtuple('SparseFeat', ['name', 'dimension', 'use_hash', 'dtype','embedding_name','embedding'])):
@@ -45,12 +45,14 @@ class VarLenSparseFeat(namedtuple('VarLenFeat', ['name', 'dimension', 'maxlen', 
 
 def get_fixlen_feature_names(feature_columns):
     features = build_input_features(feature_columns, include_varlen=False,include_fixlen=True)
-    return features.keys()
+    return list(features.keys())
 
 def get_varlen_feature_names(feature_columns):
     features = build_input_features(feature_columns, include_varlen=True,include_fixlen=False)
-    return features.keys()
+    return list(features.keys())
 
+def get_inputs_list(inputs):
+    return list(chain(*list(map(lambda x: x.values(), filter(lambda x: x is not None, inputs)))))
 
 def build_input_features(feature_columns, include_varlen=True, mask_zero=True, prefix='',include_fixlen=True):
     input_features = OrderedDict()
@@ -61,7 +63,7 @@ def build_input_features(feature_columns, include_varlen=True, mask_zero=True, p
                     shape=(1,), name=prefix+fc.name, dtype=fc.dtype)
             elif isinstance(fc,DenseFeat):
                 input_features[fc.name] = Input(
-                    shape=(1,), name=prefix + fc.name, dtype=fc.dtype)
+                    shape=(fc.dimension,), name=prefix + fc.name, dtype=fc.dtype)
     if include_varlen:
         for fc in feature_columns:
             if isinstance(fc,VarLenSparseFeat):
@@ -138,8 +140,7 @@ def get_embedding_vec_list(embedding_dict, input_dict, sparse_feature_columns, r
     return embedding_vec_list
 
 
-def get_inputs_list(inputs):
-    return list(chain(*list(map(lambda x: x.values(), filter(lambda x: x is not None, inputs)))))
+
 
 def create_embedding_matrix(feature_columns,l2_reg,init_std,seed,embedding_size, prefix="",seq_mask_zero=True):
     sparse_feature_columns = list(
@@ -155,24 +156,24 @@ def get_linear_logit(features, feature_columns, units=1, l2_reg=0, init_std=0.00
     linear_emb_list = [input_from_feature_columns(features,feature_columns,1,l2_reg,init_std,seed,prefix=prefix+str(i))[0] for i in range(units)]
     _, dense_input_list = input_from_feature_columns(features,feature_columns,1,l2_reg,init_std,seed,prefix=prefix)
 
-    if len(linear_emb_list[0]) > 1:
-        linear_term = concat_fun([add(linear_emb) for linear_emb in linear_emb_list])
-    elif len(linear_emb_list[0]) == 1:
-        linear_term = concat_fun([linear_emb[0] for linear_emb in linear_emb_list])
-    else:
-        linear_term = None
+    linear_logit_list = []
+    for i in range(units):
 
-    if len(dense_input_list) > 0:
-        dense_input__ = dense_input_list[0] if len(
-            dense_input_list) == 1 else Concatenate()(dense_input_list)
-        linear_dense_logit = Dense(
-            units, activation=None, use_bias=False, kernel_regularizer=l2(l2_reg))(dense_input__)
-        if linear_term is not None:
-            linear_term = add([linear_dense_logit, linear_term])
+        if len(linear_emb_list[0])>0 and len(dense_input_list) >0:
+            sparse_input = concat_fun(linear_emb_list[i])
+            dense_input = concat_fun(dense_input_list)
+            linear_logit = Linear(l2_reg,mode=2)([sparse_input,dense_input])
+        elif len(linear_emb_list[0])>0:
+            sparse_input = concat_fun(linear_emb_list[i])
+            linear_logit = Linear(l2_reg,mode=0)(sparse_input)
+        elif len(dense_input_list) >0:
+            dense_input = concat_fun(dense_input_list)
+            linear_logit = Linear(l2_reg,mode=1)(dense_input)
         else:
-            linear_term = linear_dense_logit
+            raise NotImplementedError
+        linear_logit_list.append(linear_logit)
 
-    return linear_term
+    return concat_fun(linear_logit_list)
 
 def embedding_lookup(sparse_embedding_dict,sparse_input_dict,sparse_feature_columns,return_feat_list=(), mask_feat_list=()):
     embedding_vec_list = []

@@ -17,7 +17,7 @@ from tensorflow.python.keras.models import  save_model,load_model
 model = DeepFM()
 save_model(model, 'DeepFM.h5')# save_model, same as before
 
-from deepctr.utils import custom_objects
+from deepctr.layers import custom_objects
 model = load_model('DeepFM.h5',custom_objects)# load_model,just add a parameter
 ```
 ## 2. Set learning rate and use earlystopping
@@ -30,7 +30,7 @@ import deepctr
 from tensorflow.python.keras.optimizers import Adam,Adagrad
 from tensorflow.python.keras.callbacks import EarlyStopping
 
-model = deepctr.models.DeepFM({"sparse": sparse_feature_dict, "dense": dense_feature_list})
+model = deepctr.models.DeepFM(linear_feature_columns,dnn_feature_columns)
 model.compile(Adagrad('0.0808'),'binary_crossentropy',metrics=['binary_crossentropy'])
 
 es = EarlyStopping(monitor='val_binary_crossentropy')
@@ -47,36 +47,70 @@ Then,use the following code,the `attentional_weights[:,i,0]` is the `feature_int
 ```python
 import itertools
 import deepctr
+from deepctr.models import AFM
+from deepctr.inputs import get_fixlen_feature_names,get_varlen_feature_names
 from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.layers import Lambda
 
-feature_dim_dict = {"sparse": sparse_feature_dict, "dense": dense_feature_list}
-model = deepctr.models.AFM(feature_dim_dict)
+model = AFM(linear_feature_columns,dnn_feature_columns)
 model.fit(model_input,target)
 
 afmlayer = model.layers[-3]
 afm_weight_model = Model(model.input,outputs=Lambda(lambda x:afmlayer.normalized_att_score)(model.input))
 attentional_weights = afm_weight_model.predict(model_input,batch_size=4096)
-feature_interactions = list(itertools.combinations(list(feature_dim_dict['sparse'].keys()) + feature_dim_dict['dense'] ,2))
+
+fixlen_names = get_fixlen_feature_names( dnn_feature_columns)
+varlen_names = get_varlen_feature_names(dnn_feature_columns)
+feature_interactions = list(itertools.combinations(fixlen_names+varlen_names ,2))
+```
+## 4. How to extract the embedding vectors in deepfm?
+```python
+feature_columns = [SparseFeat('user_id',120,),SparseFeat('item_id',60,),SparseFeat('cate_id',60,)]
+
+def get_embedding_weights(dnn_feature_columns,model):
+    embedding_dict = {}
+    for fc in dnn_feature_columns:
+        if hasattr(fc,'embedding_name'):
+            if fc.embedding_name is not None:
+                name = fc.embedding_name
+            else:
+                name = fc.name
+            embedding_dict[name] = model.get_layer("sparse_emb_"+name).get_weights()[0]
+    return embedding_dict
+    
+embedding_dict = get_embedding_weights(feature_columns,model)
+
+user_id_emb = embedding_dict['user_id']
+item_id_emb = embedding_dict['item_id']
 ```
 
-## 4. Does the models support multi-value input?
----------------------------------------------------
-Now multi-value input is avaliable for `AFM,AutoInt,DCN,DeepFM,FNN,NFM,PNN,xDeepFM`,you can read the example [here](./Examples.html#multi-value-input-movielens).
+## 5. How to add a long dense feature vector as a input to the model?
+```python
+from deepctr.models import DeepFM
+from deepctr.inputs import DenseFeat,SparseFeat,get_fixlen_feature_names
+import numpy as np
 
-For `DIN` please read the code example in [run_din.py](https://github.com/shenweichen/DeepCTR/blob/master/examples/run_din.py
-).
+feature_columns = [SparseFeat('user_id',120,),SparseFeat('item_id',60,),DenseFeat("pic_vec",5)]
+fixlen_feature_names = get_fixlen_feature_names(feature_columns)
 
-For `DIEN` please read the code example in [run_dien.py](https://github.com/shenweichen/DeepCTR/blob/master/examples/run_dien.py
-).
+user_id = np.array([[1],[0],[1]])
+item_id = np.array([[30],[20],[10]])
+pic_vec = np.array([[0.1,0.5,0.4,0.3,0.2],[0.1,0.5,0.4,0.3,0.2],[0.1,0.5,0.4,0.3,0.2]])
+label = np.array([1,0,1])
 
-You can also use layers in [sequence](./deepctr.layers.sequence.html)to build your own models !
+input_dict = {'user_id':user_id,'item_id':item_id,'pic_vec':pic_vec}
+model_input = [input_dict[name] for name in fixlen_feature_names]
 
-## 5. How to add a long feature vector as a feature to the model?
-please refer [this](https://github.com/shenweichen/DeepCTR/issues/42)
+model = DeepFM(feature_columns,feature_columns[:-1])
+model.compile('adagrad','binary_crossentropy')
+model.fit(model_input,label)
+```
 
 ## 6. How to run the demo with GPU ?
-please refer [this](https://github.com/shenweichen/DeepCTR/issues/40)
+just install deepctr with 
+```bash
+$ pip install deepctr[gpu]
+```
 
 ## 7. Could not find a version that satisfies the requirement deepctr (from versions)
 please install with `pip3 install` instead of `pip install`

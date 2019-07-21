@@ -5,10 +5,10 @@ from ..utils import check_model, get_test_data,SAMPLE_SIZE
 
 @pytest.mark.parametrize(
     'dnn_hidden_units,cin_layer_size,cin_split_half,cin_activation,sparse_feature_num,dense_feature_dim',
-    [((), (), True, 'linear', 1, 2),
+    [#((), (), True, 'linear', 1, 2),
      ((8,), (), True, 'linear', 1, 1),
      ((), (8,), True, 'linear', 2, 2),
-     ((8,), (8,), False, 'relu', 1, 0)
+    ((8,), (8,), False, 'relu', 1, 0)
      ]
 )
 def test_xDeepFM(dnn_hidden_units, cin_layer_size, cin_split_half, cin_activation, sparse_feature_num, dense_feature_dim):

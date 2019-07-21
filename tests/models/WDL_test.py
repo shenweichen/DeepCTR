@@ -6,7 +6,7 @@ from ..utils import check_model, SAMPLE_SIZE, get_test_data
 
 @pytest.mark.parametrize(
     'sparse_feature_num,dense_feature_num',
-    [(2, 0), (0, 2), (2, 2)
+    [(2, 0), (0, 2)#,(2, 2)
      ]
 )
 def test_WDL(sparse_feature_num, dense_feature_num):

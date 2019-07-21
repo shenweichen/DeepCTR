@@ -218,8 +218,6 @@ There are 2 additional steps to use DeepCTR with sequence feature input.
 - embedding : default `True`.If `False`, the feature will not be embeded to a dense vector.
 
 
-Now multi-value input is avaliable for `AFM,AutoInt,DCN,DeepFM,FNN,NFM,PNN,xDeepFM,CCPM,FGCNN`,for `DIN,DIEN,DSIN` please read the example in [run_din.py](https://github.com/shenweichen/DeepCTR/blob/master/examples/run_din.py),[run_dien.py](https://github.com/shenweichen/DeepCTR/blob/master/examples/run_dien.py) and [run_dsin.py](https://github.com/shenweichen/DeepCTR/blob/master/examples/run_dsin.py) 
-
 This example shows how to use ``DeepFM`` with sequence(multi-value) feature. You can get the demo data 
 [movielens_sample.txt](https://github.com/shenweichen/DeepCTR/tree/master/examples/movielens_sample.txt) and run the following codes.
 
