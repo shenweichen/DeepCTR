@@ -32,10 +32,6 @@ def get_xy_fd(hash_flag=False):
     x = [feature_dict[name] for name in feature_names] + [feature_dict[name] for name in varlen_feature_names]
 
 
-    # x = [feature_dict[feat.name] for feat in feature_dim_dict["sparse"]] + [feature_dict[feat.name] for feat in
-    #                                                                         feature_dim_dict["dense"]] + [
-    #         feature_dict['hist_' + feat] for feat in behavior_feature_list]
-
     y = [1, 0, 1]
     return x, y, feature_columns, behavior_feature_list
 

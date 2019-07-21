@@ -32,10 +32,6 @@ def get_xy_fd(use_neg=False, hash_flag=False):
                     'hist_item': hist_iid, 'hist_item_gender': hist_igender,
                     'score': score}
 
-    #x = [feature_dict[feat.name] for feat in feature_dim_dict["sparse"]] + [feature_dict[feat.name] for feat in
-    #                                                                        feature_dim_dict["dense"]] + [
-    #        feature_dict['hist_' + feat] for feat in behavior_feature_list]
-
 
     if use_neg:
         feature_dict['neg_hist_item'] = np.array([[1, 2, 3, 0], [1, 2, 3, 0], [1, 2, 0, 0]])
@@ -47,12 +43,10 @@ def get_xy_fd(use_neg=False, hash_flag=False):
 
     feature_names = get_fixlen_feature_names(feature_columns)
     varlen_feature_names = get_varlen_feature_names(feature_columns)
-    print(varlen_feature_names)
     x = [feature_dict[name] for name in feature_names] + [feature_dict[name] for name in varlen_feature_names]
 
     x += [behavior_length]
     y = [1, 0, 1]
-    print(len(x))
     return x, y, feature_columns, behavior_feature_list
 
 
@@ -61,7 +55,7 @@ def get_xy_fd(use_neg=False, hash_flag=False):
 
 @pytest.mark.parametrize(
     'gru_type',
-    ['GRU','AIGRU','AGRU','AUGRU',
+    ['GRU','AIGRU','AGRU'#,'AUGRU',
      ]
 )
 def test_DIEN(gru_type):
