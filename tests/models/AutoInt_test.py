@@ -5,7 +5,7 @@ from ..utils import check_model, get_test_data,SAMPLE_SIZE
 
 @pytest.mark.parametrize(
     'att_layer_num,dnn_hidden_units,sparse_feature_num',
-    [(0, (4,), 2), (1, (), 1), (1, (4,), 1), (2, (4, 4,), 2)]
+    [(1, (), 1), (1, (4,), 1)]#(0, (4,), 2), (2, (4, 4,), 2)
 )
 def test_AutoInt(att_layer_num, dnn_hidden_units, sparse_feature_num):
     model_name = "AutoInt"
