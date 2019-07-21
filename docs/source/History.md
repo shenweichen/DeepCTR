@@ -1,5 +1,5 @@
 # History
-- 07/21/2019 : [v0.5.2](https://github.com/shenweichen/DeepCTR/releases/tag/v0.5.2) released.Refactor Linear Layer.
+- 07/21/2019 : [v0.5.2](https://github.com/shenweichen/DeepCTR/releases/tag/v0.5.2) released.Refactor `Linear` Layer.
 - 07/10/2019 : [v0.5.1](https://github.com/shenweichen/DeepCTR/releases/tag/v0.5.1) released.Add [FiBiNET](./Features.html#fibinet-feature-importance-and-bilinear-feature-interaction-network).  
 - 06/30/2019 : [v0.5.0](https://github.com/shenweichen/DeepCTR/releases/tag/v0.5.0) released.Refactor inputs module. 
 - 05/19/2019 : [v0.4.1](https://github.com/shenweichen/DeepCTR/releases/tag/v0.4.1) released.Add [DSIN](./Features.html#dsin-deep-session-interest-network). 
