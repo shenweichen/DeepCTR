@@ -101,7 +101,7 @@ label = np.array([1,0,1])
 input_dict = {'user_id':user_id,'item_id':item_id,'pic_vec':pic_vec}
 model_input = [input_dict[name] for name in fixlen_feature_names]
 
-model = DeepFM(feature_columns,feature_columns[:-1])
+model = DeepFM(feature_columns,feature_columns)
 model.compile('adagrad','binary_crossentropy')
 model.fit(model_input,label)
 ```
