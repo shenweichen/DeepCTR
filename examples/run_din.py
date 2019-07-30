@@ -7,7 +7,7 @@ from deepctr.inputs import SparseFeat,VarLenSparseFeat,DenseFeat,get_fixlen_feat
 def get_xy_fd():
 
     feature_columns = [SparseFeat('user',3),SparseFeat(
-        'gender', 2), SparseFeat('item', 3 + 1), SparseFeat('item_gender', 2 + 1),DenseFeat('score', 0)]
+        'gender', 2), SparseFeat('item', 3 + 1), SparseFeat('item_gender', 2 + 1),DenseFeat('score', 1)]
     feature_columns += [VarLenSparseFeat('hist_item',3+1, maxlen=4, embedding_name='item'),
                         VarLenSparseFeat('hist_item_gender',3+1, maxlen=4, embedding_name='item_gender')]
 
