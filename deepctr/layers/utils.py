@@ -92,7 +92,7 @@ class Linear(tf.keras.layers.Layer):
         else:
             sparse_input, dense_input = inputs
 
-            linear_logit = tf.reduce_sum(sparse_input, axis=-1, keep_dims=False) + self.dense(dense_input)
+            linear_logit = tf.reduce_sum(sparse_input, axis=-1, keepdims=False) + self.dense(dense_input)
 
         linear_bias_logit = linear_logit + self.bias
 

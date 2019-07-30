@@ -195,7 +195,10 @@ class AttentionSequencePoolingLayer(Layer):
         if not self.return_score:
             outputs = tf.matmul(outputs, keys)
 
-        outputs._uses_learning_phase = attention_score._uses_learning_phase
+        if tf.__version__ < '1.13.0':
+            outputs._uses_learning_phase = attention_score._uses_learning_phase
+        else:
+            outputs._uses_learning_phase = training is not None
 
         return outputs
 
