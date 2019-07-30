@@ -112,3 +112,22 @@ def concat_fun(inputs, axis=-1):
         return inputs[0]
     else:
         return tf.keras.layers.Concatenate(axis=axis)(inputs)
+
+def sum_fun(input_tensor,
+                   axis=None,
+                   keep_dims=False,
+                   name=None,
+                   reduction_indices=None):
+    if tf.__version__ < '2.0.0':
+        return tf.reduce_sum(input_tensor,
+                   axis=axis,
+                   keep_dims=keep_dims,
+                   name=name,
+                   reduction_indices=reduction_indices)
+    else:
+        return  tf.reduce_sum(input_tensor,
+                   axis=None,
+                   keepdims=keep_dims,
+                   name=name,
+                   reduction_indices=reduction_indices)
+
