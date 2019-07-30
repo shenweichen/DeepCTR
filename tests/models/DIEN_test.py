@@ -1,5 +1,6 @@
 import numpy as np
 import pytest
+import tensorflow as tf
 from deepctr.models import DIEN
 from deepctr.inputs import SparseFeat,DenseFeat,VarLenSparseFeat,get_fixlen_feature_names,get_varlen_feature_names
 from ..utils import check_model
@@ -71,12 +72,14 @@ def test_DIEN(gru_type):
 
 def test_DIEN_neg():
     model_name = "DIEN_neg"
+    if tf.__version__ >= "1.14.0":
+        return
 
     x, y, feature_dim_dict, behavior_feature_list = get_xy_fd(use_neg=True)
 
     model = DIEN(feature_dim_dict, behavior_feature_list, hist_len_max=4, embedding_size=8,
                  dnn_hidden_units=[4, 4, 4], dnn_dropout=0.5, gru_type="AUGRU", use_negsampling=True)
-
+    print(model.layers)
     check_model(model,model_name,x,y)
 
 if __name__ == "__main__":

@@ -17,7 +17,7 @@ from tensorflow.python.keras.regularizers import l2
 from tensorflow.python.layers import utils
 
 from .activation import activation_layer
-from .utils import concat_fun
+from .utils import concat_fun,reduce_sum,softmax,reduce_mean
 
 
 class AFMLayer(Layer):
@@ -75,7 +75,7 @@ class AFMLayer(Layer):
                              (None, 1, embedding_size)'
                              'Got different shapes: %s' % (input_shape[0]))
 
-        embedding_size = input_shape[0][-1].value
+        embedding_size = int(input_shape[0][-1])
 
         self.attention_W = self.add_weight(shape=(embedding_size,
                                                   self.attention_factor), initializer=glorot_normal(seed=self.seed),
@@ -117,9 +117,9 @@ class AFMLayer(Layer):
         attention_temp = tf.nn.relu(tf.nn.bias_add(tf.tensordot(
             bi_interaction, self.attention_W, axes=(-1, 0)), self.attention_b))
         #  Dense(self.attention_factor,'relu',kernel_regularizer=l2(self.l2_reg_w))(bi_interaction)
-        self.normalized_att_score = tf.nn.softmax(tf.tensordot(
+        self.normalized_att_score = softmax(tf.tensordot(
             attention_temp, self.projection_h, axes=(-1, 0)), dim=1)
-        attention_output = tf.reduce_sum(
+        attention_output = reduce_sum(
             self.normalized_att_score * bi_interaction, axis=1)
 
         attention_output = self.dropout(attention_output)  # training
@@ -175,9 +175,9 @@ class BiInteractionPooling(Layer):
                 "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
 
         concated_embeds_value = inputs
-        square_of_sum = tf.square(tf.reduce_sum(
+        square_of_sum = tf.square(reduce_sum(
             concated_embeds_value, axis=1, keep_dims=True))
-        sum_of_square = tf.reduce_sum(
+        sum_of_square = reduce_sum(
             concated_embeds_value * concated_embeds_value, axis=1, keep_dims=True)
         cross_term = 0.5 * (square_of_sum - sum_of_square)
 
@@ -226,7 +226,7 @@ class CIN(Layer):
             raise ValueError(
                 "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (len(input_shape)))
 
-        self.field_nums = [input_shape[1].value]
+        self.field_nums = [int(input_shape[1])]
         self.filters = []
         self.bias = []
         for i, size in enumerate(self.layer_size):
@@ -261,7 +261,7 @@ class CIN(Layer):
             raise ValueError(
                 "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
 
-        dim = inputs.get_shape()[-1].value
+        dim = int(inputs.get_shape()[-1])
         hidden_nn_layers = [inputs]
         final_result = []
 
@@ -301,7 +301,7 @@ class CIN(Layer):
             hidden_nn_layers.append(next_hidden)
 
         result = tf.concat(final_result, axis=1)
-        result = tf.reduce_sum(result, -1, keep_dims=False)
+        result = reduce_sum(result, -1, keep_dims=False)
 
         return result
 
@@ -354,7 +354,7 @@ class CrossNet(Layer):
             raise ValueError(
                 "Unexpected inputs dimensions %d, expect to be 2 dimensions" % (len(input_shape),))
 
-        dim = input_shape[-1].value
+        dim = int(input_shape[-1])
         self.kernels = [self.add_weight(name='kernel' + str(i),
                                         shape=(dim, 1),
                                         initializer=glorot_normal(
@@ -427,12 +427,12 @@ class FM(Layer):
 
         concated_embeds_value = inputs
 
-        square_of_sum = tf.square(tf.reduce_sum(
+        square_of_sum = tf.square(reduce_sum(
             concated_embeds_value, axis=1, keep_dims=True))
-        sum_of_square = tf.reduce_sum(
+        sum_of_square = reduce_sum(
             concated_embeds_value * concated_embeds_value, axis=1, keep_dims=True)
         cross_term = square_of_sum - sum_of_square
-        cross_term = 0.5 * tf.reduce_sum(cross_term, axis=2, keep_dims=False)
+        cross_term = 0.5 * reduce_sum(cross_term, axis=2, keep_dims=False)
 
         return cross_term
 
@@ -506,7 +506,7 @@ class InnerProductLayer(Layer):
 
         inner_product = p * q
         if self.reduce_sum:
-            inner_product = tf.reduce_sum(
+            inner_product = reduce_sum(
                 inner_product, axis=2, keep_dims=True)
         return inner_product
 
@@ -559,7 +559,7 @@ class InteractingLayer(Layer):
         if len(input_shape) != 3:
             raise ValueError(
                 "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (len(input_shape)))
-        embedding_size = input_shape[-1].value
+        embedding_size = int(input_shape[-1])
         self.W_Query = self.add_weight(name='query', shape=[embedding_size, self.att_embedding_size * self.head_num],
                                        dtype=tf.float32,
                                        initializer=tf.keras.initializers.TruncatedNormal(seed=self.seed))
@@ -594,7 +594,7 @@ class InteractingLayer(Layer):
 
         inner_product = tf.matmul(
             querys, keys, transpose_b=True)  # head_num None F F
-        self.normalized_att_scores = tf.nn.softmax(inner_product)
+        self.normalized_att_scores = softmax(inner_product)
 
         result = tf.matmul(self.normalized_att_scores,
                            values)  # head_num None F D
@@ -668,7 +668,7 @@ class OutterProductLayer(Layer):
         num_inputs = len(input_shape)
         num_pairs = int(num_inputs * (num_inputs - 1) / 2)
         input_shape = input_shape[0]
-        embed_size = input_shape[-1].value
+        embed_size = int(input_shape[-1])
         if self.kernel_type == 'mat':
 
             self.kernel = self.add_weight(shape=(embed_size, num_pairs, embed_size),
@@ -710,7 +710,7 @@ class OutterProductLayer(Layer):
             p = tf.expand_dims(p, 1)
             # k     k* pair* k
             # batch * pair
-            kp = tf.reduce_sum(
+            kp = reduce_sum(
 
                 # batch * pair * k
 
@@ -722,7 +722,7 @@ class OutterProductLayer(Layer):
 
                         # batch * k * pair
 
-                        tf.reduce_sum(
+                        reduce_sum(
 
                             # batch * k * pair * k
 
@@ -744,7 +744,7 @@ class OutterProductLayer(Layer):
 
             # batch * pair
 
-            kp = tf.reduce_sum(p * q * k, -1)
+            kp = reduce_sum(p * q * k, -1)
 
             # p q # b * p * k
 
@@ -795,7 +795,7 @@ class FGCNNLayer(Layer):
         self.pooling_layers = []
         self.dense_layers = []
         pooling_shape = input_shape.as_list() + [1, ]
-        embedding_size = input_shape[-1].value
+        embedding_size = int(input_shape[-1])
         for i in range(1, len(self.filters) + 1):
             filters = self.filters[i - 1]
             width = self.kernel_width[i - 1]
@@ -824,7 +824,7 @@ class FGCNNLayer(Layer):
             raise ValueError(
                 "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
 
-        embedding_size = inputs.shape[-1].value
+        embedding_size = int(inputs.shape[-1])
         pooling_result = tf.expand_dims(inputs, axis=3)
 
         new_feature_list = []
@@ -841,7 +841,7 @@ class FGCNNLayer(Layer):
             new_result = self.dense_layers[i - 1](flatten_result)
 
             new_feature_list.append(
-                tf.reshape(new_result, (-1, pooling_result.shape[1].value * new_filters, embedding_size)))
+                tf.reshape(new_result, (-1, int(pooling_result.shape[1]) * new_filters, embedding_size)))
 
         new_features = concat_fun(new_feature_list, axis=1)
         return new_features
@@ -944,7 +944,7 @@ Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
                 "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
 
         inputs = concat_fun(inputs, axis=1)
-        Z = tf.reduce_mean(inputs, axis=-1,)
+        Z = reduce_mean(inputs, axis=-1,)
 
         A_1 = tf.nn.relu(self.tensordot([Z, self.W_1]))
         A_2 = tf.nn.relu(self.tensordot([A_1, self.W_2]))
@@ -996,7 +996,7 @@ Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
         if not isinstance(input_shape, list) or len(input_shape) < 2:
             raise ValueError('A `AttentionalFM` layer should be called '
                              'on a list of at least 2 inputs')
-        embedding_size = input_shape[0][-1].value
+        embedding_size = int(input_shape[0][-1])
 
         if self.bilinear_type == "all":
             self.W = self.add_weight(shape=(embedding_size, embedding_size), initializer=glorot_normal(

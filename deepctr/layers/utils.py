@@ -84,7 +84,7 @@ class Linear(tf.keras.layers.Layer):
 
         if self.mode == 0:
             sparse_input = inputs
-            linear_logit = tf.reduce_sum(sparse_input, axis=-1, keep_dims=True)
+            linear_logit = reduce_sum(sparse_input, axis=-1, keep_dims=True)
         elif self.mode == 1:
             dense_input = inputs
             linear_logit = self.dense(dense_input)
@@ -92,7 +92,7 @@ class Linear(tf.keras.layers.Layer):
         else:
             sparse_input, dense_input = inputs
 
-            linear_logit = tf.reduce_sum(sparse_input, axis=-1, keepdims=False) + self.dense(dense_input)
+            linear_logit = reduce_sum(sparse_input, axis=-1, keep_dims=False) + self.dense(dense_input)
 
         linear_bias_logit = linear_logit + self.bias
 
@@ -113,11 +113,30 @@ def concat_fun(inputs, axis=-1):
     else:
         return tf.keras.layers.Concatenate(axis=axis)(inputs)
 
-def sum_fun(input_tensor,
-                   axis=None,
-                   keep_dims=False,
-                   name=None,
-                   reduction_indices=None):
+
+def reduce_mean(input_tensor,
+               axis=None,
+               keep_dims=False,
+               name=None,
+               reduction_indices=None):
+    if tf.__version__ < '2.0.0':
+        return tf.reduce_mean(input_tensor,
+                   axis=axis,
+                   keep_dims=keep_dims,
+                   name=name,
+                   reduction_indices=reduction_indices)
+    else:
+        return  tf.reduce_mean(input_tensor,
+                   axis=axis,
+                   keepdims=keep_dims,
+                   name=name)
+
+
+def reduce_sum(input_tensor,
+               axis=None,
+               keep_dims=False,
+               name=None,
+               reduction_indices=None):
     if tf.__version__ < '2.0.0':
         return tf.reduce_sum(input_tensor,
                    axis=axis,
@@ -126,8 +145,36 @@ def sum_fun(input_tensor,
                    reduction_indices=reduction_indices)
     else:
         return  tf.reduce_sum(input_tensor,
-                   axis=None,
+                   axis=axis,
                    keepdims=keep_dims,
+                   name=name)
+
+def reduce_max(input_tensor,
+               axis=None,
+               keep_dims=False,
+               name=None,
+               reduction_indices=None):
+    if tf.__version__ < '2.0.0':
+        return tf.reduce_max(input_tensor,
+                   axis=axis,
+                   keep_dims=keep_dims,
                    name=name,
                    reduction_indices=reduction_indices)
+    else:
+        return  tf.reduce_max(input_tensor,
+                   axis=None,
+                   keepdims=keep_dims,
+                   name=name)
 
+def div(x, y, name=None):
+    if tf.__version__ < '2.0.0':
+        return tf.div(x, y, name=name)
+    else:
+        return tf.divide(x, y, name=name)
+
+def softmax(logits, dim=-1, name=None):
+    if tf.__version__ < '2.0.0':
+        return tf.nn.softmax(logits, dim=dim, name=name)
+    else:
+        return tf.nn.softmax(logits, axis=dim, name=name)
+    

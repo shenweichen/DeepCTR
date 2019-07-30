@@ -14,7 +14,7 @@ from tensorflow.python.keras.layers import (Concatenate, Dense, Input, Permute, 
 from ..inputs import build_input_features, get_varlen_pooling_list,create_embedding_matrix,embedding_lookup,varlen_embedding_lookup,SparseFeat,DenseFeat,VarLenSparseFeat,get_dense_input,combined_dnn_input
 from ..layers.core import DNN, PredictionLayer
 from ..layers.sequence import AttentionSequencePoolingLayer, DynamicGRU
-from ..layers.utils import concat_fun
+from ..layers.utils import concat_fun,reduce_mean
 
 
 def auxiliary_loss(h_states, click_seq, noclick_seq, mask, stag=None):
@@ -46,7 +46,7 @@ def auxiliary_loss(h_states, click_seq, noclick_seq, mask, stag=None):
                         tf.reshape(tf.log(1.0 - noclick_prop_),
                                    [-1, tf.shape(noclick_seq)[1]]) * mask
 
-    loss_ = tf.reduce_mean(click_loss_ + noclick_loss_)
+    loss_ = reduce_mean(click_loss_ + noclick_loss_)
 
     return loss_
 
