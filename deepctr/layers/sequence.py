@@ -639,7 +639,10 @@ class DynamicGRU(Layer):
         elif self.gru_type == "AUGRU":
             self.gru_cell = VecAttGRUCell(self.num_units)
         else:
-            self.gru_cell = tf.nn.rnn_cell.GRUCell(self.num_units)
+            try:
+                self.gru_cell = tf.nn.rnn_cell.GRUCell(self.num_units)
+            except:
+                self.gru_cell = tf.compat.v1.nn.rnn_cell.GRUCell(self.num_units)
 
         # Be sure to call this somewhere!
         super(DynamicGRU, self).build(input_shape)

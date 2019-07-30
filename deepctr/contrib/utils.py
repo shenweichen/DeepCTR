@@ -79,7 +79,7 @@ class _Linear_(object):
                 raise ValueError(
                     "linear is expecting 2D arguments: %s" % shapes)
 
-            if shape[1].value is None:
+            if shape[1] is None:
 
                 raise ValueError("linear expects shape[1] to be provided for shape %s, "
 
@@ -87,7 +87,7 @@ class _Linear_(object):
 
             else:
 
-                total_arg_size += shape[1].value
+                total_arg_size += shape[1]#.value
 
         dtype = [a.dtype for a in args][0]
 

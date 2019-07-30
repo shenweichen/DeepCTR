@@ -41,7 +41,7 @@ class Hash(tf.keras.layers.Layer):
     def call(self, x, mask=None, **kwargs):
         if x.dtype != tf.string:
             x = tf.as_string(x, )
-        hash_x = tf.string_to_hash_bucket_fast(x, self.num_buckets if not self.mask_zero else self.num_buckets - 1,
+        hash_x = tf.strings.to_hash_bucket_fast(x, self.num_buckets if not self.mask_zero else self.num_buckets - 1,
                                                name=None)  # weak hash
         if self.mask_zero:
             mask_1 = tf.cast(tf.not_equal(x, "0"), 'int64')
@@ -162,7 +162,7 @@ def reduce_max(input_tensor,
                    reduction_indices=reduction_indices)
     else:
         return  tf.reduce_max(input_tensor,
-                   axis=None,
+                   axis=axis,
                    keepdims=keep_dims,
                    name=name)
 

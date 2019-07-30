@@ -134,7 +134,7 @@ def _transpose_batch_time(x):
 
         tensor_shape.TensorShape([
 
-            x_static_shape[1].value, x_static_shape[0].value
+            x_static_shape[1], x_static_shape[0]
 
         ]).concatenate(x_static_shape[2:]))
 
@@ -178,7 +178,7 @@ def _best_effort_input_batch_size(flat_input):
 
                 "Expected input tensor %s to have rank at least 2" % input_)
 
-        batch_size = shape[1].value
+        batch_size = shape[1]
 
         if batch_size is not None:
             return batch_size
@@ -1065,7 +1065,12 @@ def dynamic_rnn(cell, inputs, att_scores=None, sequence_length=None, initial_sta
 
     # Variable using the same placement as for the rest of the RNN.
 
-    with vs.variable_scope(scope or "rnn",reuse=tf.AUTO_REUSE) as varscope:#TODO:user defined reuse
+    try:
+        resue = tf.AUTO_REUSE
+    except:
+        resue = tf.compat.v1.AUTO_REUSE
+
+    with vs.variable_scope(scope or "rnn",reuse=resue) as varscope:#TODO:user defined reuse
 
         if varscope.caching_device is None:
             varscope.set_caching_device(lambda op: op.device)
@@ -1249,9 +1254,9 @@ def _dynamic_rnn_loop(cell,
 
                 " but saw value None.")
 
-        got_time_steps = shape[0].value
+        got_time_steps = shape[0]
 
-        got_batch_size = shape[1].value
+        got_batch_size = shape[1]
 
         if const_time_steps != got_time_steps:
             raise ValueError(

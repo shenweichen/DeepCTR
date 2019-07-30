@@ -1,5 +1,5 @@
 import numpy as np
-
+import tensorflow as tf
 from deepctr.models import DSIN
 from deepctr.inputs import SparseFeat,VarLenSparseFeat,DenseFeat,get_varlen_feature_names,get_fixlen_feature_names
 
@@ -44,6 +44,9 @@ def get_xy_fd(hash_flag=False):
     return x, y, feature_columns, behavior_feature_list
 
 if __name__ == "__main__":
+    if tf.__version__ >='2.0.0':
+        tf.compat.v1.disable_eager_execution() #todo
+
     x, y, feature_columns, behavior_feature_list = get_xy_fd(True)
 
     model = DSIN(feature_columns, behavior_feature_list, sess_max_count=2, embedding_size=4,

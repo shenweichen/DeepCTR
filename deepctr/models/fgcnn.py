@@ -73,7 +73,7 @@ def FGCNN(dnn_feature_columns, embedding_size=8, conv_kernel_width=(7, 7, 7, 7),
     else:
         combined_input = origin_input
     inner_product = tf.keras.layers.Flatten()(InnerProductLayer()(
-        tf.keras.layers.Lambda(unstack, mask=[None] * combined_input.shape[1].value)(combined_input)))
+        tf.keras.layers.Lambda(unstack, mask=[None] * int(combined_input.shape[1]))(combined_input)))
     linear_signal = tf.keras.layers.Flatten()(combined_input)
     dnn_input = tf.keras.layers.Concatenate()([linear_signal, inner_product])
     dnn_input = tf.keras.layers.Flatten()(dnn_input)

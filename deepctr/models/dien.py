@@ -39,12 +39,21 @@ def auxiliary_loss(h_states, click_seq, noclick_seq, mask, stag=None):
     noclick_prop_ = auxiliary_net(noclick_input_, stag=stag)[
                     :, :, 0]  # [B,T-1]
 
-    click_loss_ = - tf.reshape(tf.log(click_prop_),
-                               [-1, tf.shape(click_seq)[1]]) * mask
+    try:
+        click_loss_ = - tf.reshape(tf.log(click_prop_),
+                                   [-1, tf.shape(click_seq)[1]]) * mask
+    except:
+        click_loss_ = - tf.reshape(tf.compat.v1.log(click_prop_),
+                                   [-1, tf.shape(click_seq)[1]]) * mask
+    try:
+        noclick_loss_ = - \
+                            tf.reshape(tf.log(1.0 - noclick_prop_),
+                                       [-1, tf.shape(noclick_seq)[1]]) * mask
+    except:
+        noclick_loss_ = - \
+                            tf.reshape(tf.compat.v1.log(1.0 - noclick_prop_),
+                                       [-1, tf.shape(noclick_seq)[1]]) * mask
 
-    noclick_loss_ = - \
-                        tf.reshape(tf.log(1.0 - noclick_prop_),
-                                   [-1, tf.shape(noclick_seq)[1]]) * mask
 
     loss_ = reduce_mean(click_loss_ + noclick_loss_)
 
@@ -52,21 +61,36 @@ def auxiliary_loss(h_states, click_seq, noclick_seq, mask, stag=None):
 
 
 def auxiliary_net(in_, stag='auxiliary_net'):
-    bn1 = tf.layers.batch_normalization(
-        inputs=in_, name='bn1' + stag, reuse=tf.AUTO_REUSE)
+    try:
+        bn1 = tf.layers.batch_normalization(
+            inputs=in_, name='bn1' + stag, reuse=tf.AUTO_REUSE)
+    except:
+        bn1 = tf.compat.v1.layers.batch_normalization(
+            inputs=in_, name='bn1' + stag, reuse=tf.compat.v1.AUTO_REUSE)
 
-    dnn1 = tf.layers.dense(bn1, 100, activation=None,
-                           name='f1' + stag, reuse=tf.AUTO_REUSE)
+    try:#todo
+        dnn1 = tf.layers.dense(bn1, 100, activation=None,
+                               name='f1' + stag, reuse=tf.AUTO_REUSE)
+    except:
+        dnn1 = tf.compat.v1.layers.dense(bn1, 100, activation=None,
+                               name='f1' + stag, reuse=tf.compat.v1.AUTO_REUSE)
+
 
     dnn1 = tf.nn.sigmoid(dnn1)
-
-    dnn2 = tf.layers.dense(dnn1, 50, activation=None,
+    try:
+        dnn2 = tf.layers.dense(dnn1, 50, activation=None,
                            name='f2' + stag, reuse=tf.AUTO_REUSE)
+    except:
+        dnn2 = tf.compat.v1.layers.dense(dnn1, 50, activation=None,
+                           name='f2' + stag, reuse=tf.compat.v1.AUTO_REUSE)
 
     dnn2 = tf.nn.sigmoid(dnn2)
-
-    dnn3 = tf.layers.dense(dnn2, 1, activation=None,
-                           name='f3' + stag, reuse=tf.AUTO_REUSE)
+    try:
+        dnn3 = tf.layers.dense(dnn2, 1, activation=None,
+                               name='f3' + stag, reuse=tf.AUTO_REUSE)
+    except:
+        dnn3 = tf.compat.v1.layers.dense(dnn2, 1, activation=None,
+                               name='f3' + stag, reuse=tf.compat.v1.AUTO_REUSE)
 
     y_hat = tf.nn.sigmoid(dnn3)
 
@@ -259,5 +283,8 @@ def DIEN(dnn_feature_columns, history_feature_list, embedding_size=8, hist_len_m
 
     if use_negsampling:
         model.add_loss(alpha * aux_loss_1)
-    tf.keras.backend.get_session().run(tf.global_variables_initializer())
+    try:
+        tf.keras.backend.get_session().run(tf.global_variables_initializer())
+    except:
+        tf.compat.v1.keras.backend.get_session().run(tf.compat.v1.global_variables_initializer())
     return model
