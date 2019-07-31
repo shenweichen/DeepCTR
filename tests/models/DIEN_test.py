@@ -60,6 +60,8 @@ def get_xy_fd(use_neg=False, hash_flag=False):
      ]
 )
 def test_DIEN(gru_type):
+    if tf.__version__ > '1.14.0':
+        tf.compat.v1.disable_eager_execution() #todo
     model_name = "DIEN_"+gru_type
 
     x, y, feature_columns, behavior_feature_list = get_xy_fd(hash_flag=True)
