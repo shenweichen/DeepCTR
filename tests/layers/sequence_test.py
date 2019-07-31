@@ -35,7 +35,7 @@ def test_AttentionSequencePoolingLayer(weight_normalization):
 )
 def test_SequencePoolingLayer(mode, supports_masking, input_shape):
     if tf.__version__ >='1.14.0' and mode!='sum': #todo check further version
-        return
+       return
     with CustomObjectScope({'SequencePoolingLayer': sequence.SequencePoolingLayer}):
         layer_test(sequence.SequencePoolingLayer, kwargs={'mode': mode, 'supports_masking': supports_masking},
                    input_shape=input_shape, supports_masking=supports_masking)
@@ -55,6 +55,8 @@ def test_BiLSTM(merge_mode):
 
 
 def test_Transformer():
+    if tf.__version__ >= '2.0.0':
+        tf.compat.v1.disable_eager_execution() #todo
     with CustomObjectScope({'Transformer': sequence.Transformer}):
         layer_test(sequence.Transformer, kwargs={'att_embedding_size': 1, 'head_num': 8, 'use_layer_norm': True, 'supports_masking': False,'dropout_rate':0.5},
                    input_shape=[(BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE), (BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE), (BATCH_SIZE, 1), (BATCH_SIZE, 1)])
