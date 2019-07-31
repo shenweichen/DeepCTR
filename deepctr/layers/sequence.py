@@ -14,7 +14,10 @@ from tensorflow.python.keras.layers import LSTM, Lambda, Layer
 
 from .core import LocalActivationUnit
 from .normalization import LayerNormalization
-from ..contrib.rnn import dynamic_rnn
+if tf.__version__ >= '2.0.0':
+    from ..contrib.rnn_v2 import dynamic_rnn
+else:
+    from ..contrib.rnn import dynamic_rnn
 from ..contrib.utils import QAAttGRUCell, VecAttGRUCell
 from .utils import reduce_sum,reduce_max,div,softmax,reduce_mean
 
