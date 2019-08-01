@@ -181,4 +181,3 @@ def softmax(logits, dim=-1, name=None):
         return tf.nn.softmax(logits, dim=dim, name=name)
     else:
         return tf.nn.softmax(logits, axis=dim, name=name)
-    

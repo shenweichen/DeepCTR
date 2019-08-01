@@ -11,8 +11,8 @@ from tests.utils import check_model, get_test_data, SAMPLE_SIZE
      ]
 )
 def test_CCPM(sparse_feature_num, dense_feature_num):
-    if tf.__version__ >= "1.14.0":#todo
-        return
+    #if tf.__version__ >= "1.14.0":#todo
+    #    return
     model_name = "CCPM"
 
     sample_size = SAMPLE_SIZE
@@ -30,8 +30,8 @@ def test_CCPM(sparse_feature_num, dense_feature_num):
      ]
 )
 def test_CCPM_without_seq(sparse_feature_num, dense_feature_num):
-    if tf.__version__ >= "1.14.0":
-        return
+    #if tf.__version__ >= "1.14.0":
+    #    return
     model_name = "CCPM"
 
     sample_size = SAMPLE_SIZE
