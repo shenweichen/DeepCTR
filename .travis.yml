@@ -3,9 +3,9 @@
 language: python
 
 python:
-  #- "2.7" time out
+  - "2.7" time out
   #- "3.4"
-  #- "3.5"
+  - "3.5"
   - "3.6"
   #- "3.7"
 
@@ -22,7 +22,7 @@ env:
   #- TF_VERSION=1.5.1 #- TF_VERSION=1.5.0
   #- TF_VERSION=1.6.0
   - TF_VERSION=2.0.0b1
-  - TF_VERSION=1.13.2
+  #- TF_VERSION=1.13.2
   - TF_VERSION=1.14.0
 
 matrix:
@@ -39,7 +39,7 @@ matrix:
     - env: TF_VERSION=1.12.0 # too slow
     - env: TF_VERSION=1.13.1 # too slow
     - env: TF_VERSION=1.13.2 # too slow
-  #  - env: TF_VERSION=1.14.0 # too slow
+    - env: TF_VERSION=1.14.0 # too slow
 
   fast_finish: true
 
