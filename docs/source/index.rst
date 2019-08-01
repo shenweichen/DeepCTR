@@ -35,11 +35,11 @@ You can read the latest code at https://github.com/shenweichen/DeepCTR
 
 News
 -----
+08/01/2019 : Now DeepCTR is compatible with tensorflow from `1.14` and `2.0.0`. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.6.0>`_
+
 07/21/2019 : Refactor Linear Layer. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.5.2>`_
 
 07/10/2019 : Add `FiBiNEt <./Features.html#fibinet-feature-importance-and-bilinear-feature-interaction-network>`_ . `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.5.1>`_
-
-06/30/2019 : Refactor inputs module. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.5.0>`_
 
 .. toctree::
    :maxdepth: 2
