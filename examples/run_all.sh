@@ -25,14 +25,14 @@ function run_py(){
 python_version=python3
 source activate py36
 cd ..
-pip install deepctr -U -e .
+python setup.py install
 cd ./examples
 run_py
 
 #python2
 python_version=python2
 cd ..
-pip install deepctr -U -e .
+python setup.py install
 cd ./examples
 run_py
 echo "all examples run succeed in python2.7"

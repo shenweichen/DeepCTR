@@ -10,7 +10,7 @@ from tensorflow.python.keras import backend as K
 from tensorflow.python.keras.layers import Input, Masking
 from tensorflow.python.keras.models import Model, load_model, save_model
 
-from deepctr.inputs import SparseFeat, DenseFeat,VarLenSparseFeat,get_fixlen_feature_names,get_varlen_feature_names
+from deepctr.inputs import SparseFeat, DenseFeat,VarLenSparseFeat
 from deepctr.layers import  custom_objects
 
 SAMPLE_SIZE=16
@@ -19,7 +19,7 @@ def gen_sequence(dim, max_len, sample_size):
     return np.array([np.random.randint(0, dim, max_len) for _ in range(sample_size)]), np.random.randint(1, max_len + 1, sample_size)
 
 
-def get_test_data(sample_size=1000, sparse_feature_num=1, dense_feature_num=1, sequence_feature=('max', 'mean', 'sum'),
+def get_test_data(sample_size=1000, sparse_feature_num=1, dense_feature_num=1, sequence_feature=('sum', 'mean', 'max'),
                   classification=True, include_length=False, hash_flag=False,prefix=''):
 
 

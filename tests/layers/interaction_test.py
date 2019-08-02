@@ -1,5 +1,5 @@
 import pytest
-from tensorflow.python.keras.layers import PReLU
+#from tensorflow.python.keras.layers import PReLU
 from tensorflow.python.keras.utils import CustomObjectScope
 
 from deepctr import layers

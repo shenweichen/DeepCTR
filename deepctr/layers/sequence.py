@@ -14,8 +14,12 @@ from tensorflow.python.keras.layers import LSTM, Lambda, Layer
 
 from .core import LocalActivationUnit
 from .normalization import LayerNormalization
-from ..contrib.rnn import dynamic_rnn
+if tf.__version__ >= '2.0.0':
+    from ..contrib.rnn_v2 import dynamic_rnn
+else:
+    from ..contrib.rnn import dynamic_rnn
 from ..contrib.utils import QAAttGRUCell, VecAttGRUCell
+from .utils import reduce_sum,reduce_max,div,softmax,reduce_mean
 
 
 class SequencePoolingLayer(Layer):
@@ -41,7 +45,6 @@ class SequencePoolingLayer(Layer):
 
         if mode not in ['sum', 'mean', 'max']:
             raise ValueError("mode must be sum or mean")
-        # self.seq_len_max = seq_len_max
         self.mode = mode
         self.eps = 1e-8
         super(SequencePoolingLayer, self).__init__(**kwargs)
@@ -50,7 +53,7 @@ class SequencePoolingLayer(Layer):
 
     def build(self, input_shape):
         if not self.supports_masking:
-            self.seq_len_max = input_shape[0][1].value
+            self.seq_len_max = int(input_shape[0][1])
         super(SequencePoolingLayer, self).build(
             input_shape)  # Be sure to call this somewhere!
 
@@ -60,8 +63,8 @@ class SequencePoolingLayer(Layer):
                 raise ValueError(
                     "When supports_masking=True,input must support masking")
             uiseq_embed_list = seq_value_len_list
-            mask = tf.to_float(mask)
-            user_behavior_length = tf.reduce_sum(mask, axis=-1, keep_dims=True)
+            mask = tf.cast(mask,tf.float32)#                tf.to_float(mask)
+            user_behavior_length = reduce_sum(mask, axis=-1, keep_dims=True)
             mask = tf.expand_dims(mask, axis=2)
         else:
             uiseq_embed_list, user_behavior_length = seq_value_len_list
@@ -77,12 +80,12 @@ class SequencePoolingLayer(Layer):
         uiseq_embed_list *= mask
         hist = uiseq_embed_list
         if self.mode == "max":
-            return tf.reduce_max(hist, 1, keep_dims=True)
+            return reduce_max(hist, 1, keep_dims=True)
 
-        hist = tf.reduce_sum(hist, 1, keep_dims=False)
+        hist = reduce_sum(hist, 1, keep_dims=False)
 
         if self.mode == "mean":
-            hist = tf.div(hist, user_behavior_length + self.eps)
+            hist = div(hist, user_behavior_length + self.eps)
 
         hist = tf.expand_dims(hist, axis=1)
         return hist
@@ -190,12 +193,15 @@ class AttentionSequencePoolingLayer(Layer):
         outputs = tf.where(key_masks, outputs, paddings)
 
         if self.weight_normalization:
-            outputs = tf.nn.softmax(outputs)
+            outputs = softmax(outputs)
 
         if not self.return_score:
             outputs = tf.matmul(outputs, keys)
 
-        outputs._uses_learning_phase = attention_score._uses_learning_phase
+        if tf.__version__ < '1.13.0':
+            outputs._uses_learning_phase = attention_score._uses_learning_phase
+        else:
+            outputs._uses_learning_phase = training is not None
 
         return outputs
 
@@ -378,11 +384,11 @@ class Transformer(Layer):
 
     def build(self, input_shape):
 
-        embedding_size = input_shape[0][-1].value
+        embedding_size = int(input_shape[0][-1])
         if self.num_units != embedding_size:
             raise ValueError(
                 "att_embedding_size * head_num must equal the last dimension size of inputs,got %d * %d != %d" % (self.att_embedding_size,self.head_num,embedding_size))
-        self.seq_len_max = input_shape[0][-2].value
+        self.seq_len_max = int(input_shape[0][-2])
         self.W_Query = self.add_weight(name='query', shape=[embedding_size, self.att_embedding_size * self.head_num],
                                        dtype=tf.float32,
                                        initializer=tf.keras.initializers.TruncatedNormal(seed=self.seed))
@@ -459,11 +465,15 @@ class Transformer(Layer):
 
         outputs = tf.where(tf.equal(key_masks, 1), outputs, paddings, )
         if self.blinding:
-            outputs = tf.matrix_set_diag(outputs, tf.ones_like(outputs)[
+            try:
+                outputs = tf.matrix_set_diag(outputs, tf.ones_like(outputs)[
                                                   :, :, 0] * (-2 ** 32 + 1))
+            except:
+                outputs = tf.compat.v1.matrix_set_diag(outputs, tf.ones_like(outputs)[
+                                                      :, :, 0] * (-2 ** 32 + 1))
 
-        outputs -= tf.reduce_max(outputs, axis=-1, keep_dims=True)
-        outputs = tf.nn.softmax(outputs)
+        outputs -= reduce_max(outputs, axis=-1, keep_dims=True)
+        outputs = softmax(outputs)
         query_masks = tf.tile(query_masks, [self.head_num, 1])  # (h*N, T_q)
         # (h*N, T_q, T_k)
         query_masks = tf.tile(tf.expand_dims(
@@ -492,7 +502,7 @@ class Transformer(Layer):
             if self.use_layer_norm:
                 result = self.ln(result)
 
-        return tf.reduce_mean(result, axis=1, keep_dims=True)
+        return reduce_mean(result, axis=1, keep_dims=True)
 
     def compute_output_shape(self, input_shape):
 
@@ -632,7 +642,10 @@ class DynamicGRU(Layer):
         elif self.gru_type == "AUGRU":
             self.gru_cell = VecAttGRUCell(self.num_units)
         else:
-            self.gru_cell = tf.nn.rnn_cell.GRUCell(self.num_units)
+            try:
+                self.gru_cell = tf.nn.rnn_cell.GRUCell(self.num_units)
+            except:
+                self.gru_cell = tf.compat.v1.nn.rnn_cell.GRUCell(self.num_units)
 
         # Be sure to call this somewhere!
         super(DynamicGRU, self).build(input_shape)

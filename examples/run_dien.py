@@ -1,4 +1,5 @@
 import numpy as np
+import tensorflow as tf
 
 from deepctr.models import DIEN
 from deepctr.inputs import SparseFeat,DenseFeat,VarLenSparseFeat,get_fixlen_feature_names,get_varlen_feature_names
@@ -49,6 +50,9 @@ def get_xy_fd(use_neg=False, hash_flag=False):
 
 
 if __name__ == "__main__":
+    if tf.__version__ >= '2.0.0':
+        tf.compat.v1.disable_eager_execution()
+
     x, y, feature_columns, behavior_feature_list = get_xy_fd(use_neg=True)
     model = DIEN(feature_columns, behavior_feature_list, hist_len_max=4, embedding_size=8,
                  dnn_hidden_units=[4, 4, 4], dnn_dropout=0.6, gru_type="AUGRU", use_negsampling=True)

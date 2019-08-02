@@ -66,7 +66,7 @@ def CCPM(linear_feature_columns, dnn_feature_columns, embedding_size=8, conv_ker
         conv_result = tf.keras.layers.Conv2D(filters=filters, kernel_size=(width, 1), strides=(1, 1), padding='same',
                                              activation='tanh', use_bias=True, )(pooling_result)
         pooling_result = KMaxPooling(
-            k=min(k, conv_result.shape[1].value), axis=1)(conv_result)
+            k=min(k, int(conv_result.shape[1])), axis=1)(conv_result)
 
     flatten_result = tf.keras.layers.Flatten()(pooling_result)
     final_logit = DNN(dnn_hidden_units, l2_reg=l2_reg_dnn,

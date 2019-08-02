@@ -40,6 +40,7 @@ def check_version(version):
                         '\nDeepCTR version {0} detected. Your version is {1}.\nUse `pip install -U deepctr` to upgrade.Changelog: https://github.com/shenweichen/DeepCTR/releases/tag/v{0}'.format(
                             latest_version, version))
         except Exception as e:
+            print(e)
             return
 
     Thread(target=check, args=(version,)).start()
