@@ -29,6 +29,10 @@ matrix:
       env: TF_VERSION=1.6.0 # to speed up
     - python: "2.7"
       env: TF_VERSION=2.0.0b1
+    - python: "2.7"
+      env: TF_VERSION=1.14.0 # to speed up
+    - python: "3.5"
+      env: TF_VERSION=1.14.0
     - python: "3.4"
     - python: "3.5"
     - python: "3.7"
@@ -39,7 +43,7 @@ matrix:
     - env: TF_VERSION=1.12.0 # too slow
     - env: TF_VERSION=1.13.1 # too slow
     - env: TF_VERSION=1.13.2 # too slow
-    - env: TF_VERSION=1.14.0 # too slow
+    #- env: TF_VERSION=1.14.0 # too slow
 
   fast_finish: true
 
