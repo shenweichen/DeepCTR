@@ -34,7 +34,7 @@ def test_AttentionSequencePoolingLayer(weight_normalization):
 
 )
 def test_SequencePoolingLayer(mode, supports_masking, input_shape):
-    if tf.__version__ >='1.14.0' and mode!='sum': #todo check further version
+    if tf.__version__ >='2.0.0' and mode!='sum': #todo check further version
        return
     with CustomObjectScope({'SequencePoolingLayer': sequence.SequencePoolingLayer}):
         layer_test(sequence.SequencePoolingLayer, kwargs={'mode': mode, 'supports_masking': supports_masking},

@@ -9,7 +9,7 @@ import tensorflow as tf
     [(1, (), 1), (1, (4,), 1)]#(0, (4,), 2), (2, (4, 4,), 2)
 )
 def test_AutoInt(att_layer_num, dnn_hidden_units, sparse_feature_num):
-    if tf.__version__ >= "1.14.0" and len(dnn_hidden_units)==0:#todo check version
+    if tf.__version__ >= "2.0.0" and len(dnn_hidden_units)==0:#todo check version
         return
     model_name = "AutoInt"
     sample_size = SAMPLE_SIZE
