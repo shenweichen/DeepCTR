@@ -68,7 +68,7 @@ def _like_rnncell_(cell):
 _concat = rnn_cell_impl._concat
 try:
     _like_rnncell = rnn_cell_impl._like_rnncell
-except Exception:
+except Exception as e:
     _like_rnncell = _like_rnncell_
 
 
