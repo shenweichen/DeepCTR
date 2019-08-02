@@ -11,8 +11,8 @@ from ..utils import check_model, get_test_data,SAMPLE_SIZE
      ]
 )
 def test_FNN(sparse_feature_num, dense_feature_num):
-    #if tf.__version__ >= "1.14.0":
-    #    return
+    if tf.__version__ >= "1.14.0":
+        return
     model_name = "FNN"
 
     sample_size = SAMPLE_SIZE
