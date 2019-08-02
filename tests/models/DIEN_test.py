@@ -74,7 +74,7 @@ def test_DIEN(gru_type):
 
 def test_DIEN_neg():
     model_name = "DIEN_neg"
-    if tf.__version__ >= "1.14.0":
+    if tf.__version__ >= "2.0.0":
         return
 
     x, y, feature_dim_dict, behavior_feature_list = get_xy_fd(use_neg=True)
