@@ -44,8 +44,8 @@ def get_xy_fd(hash_flag=False):
     return x, y, feature_columns, behavior_feature_list
 
 if __name__ == "__main__":
-    if tf.__version__ > '1.14.0':
-        tf.compat.v1.disable_eager_execution() #todo
+    if tf.__version__ >= '2.0.0':
+        tf.compat.v1.disable_eager_execution()
 
     x, y, feature_columns, behavior_feature_list = get_xy_fd(True)
 
