@@ -19,6 +19,10 @@ jobs:
       matrix:
         python-version: [3.5,3.6,3.7]
         tf-version: [1.4.0,1.14.0,2.0.0b1]
+        
+        exclude:
+          - python-version: 3.7
+            tf-version: 1.4.0
 
     steps:
     
