@@ -14,22 +14,14 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    timeout-minutes: 120
     strategy:
       matrix:
-        python-version: [3.5,3.6,3.7]#
-        tf-version: [1.4.0,1.12.0,1.14.0,2.0.0rc0]
-        
-        exclude:
-          - python-version: 3.7
-            tf-version: 1.4.0
-            
-          - python-version: 3.7
-            tf-version: 1.12.0
-            
-#           - python-version: 2.7
-#             tf-version: 2.0.0rc0
+        python-version: [3.5,3.6,3.7]
+        tf-version: [1.4.0,1.14.0,2.0.0b1]
 
     steps:
+    
     - uses: actions/checkout@v1
     
     - name: Setup python environment
@@ -43,6 +35,7 @@ jobs:
         pip install -q requests
         pip install -e .
     - name: Test with pytest
+      timeout-minutes: 120
       run: |
         pip install -q pytest
         pip install -q pytest-cov
