@@ -1,7 +1,7 @@
 # Quick-Start
 
 ## Installation Guide
-Now `deepctr` is available for python `2.7 `and `3.4,  3.5, 3.6`.  
+Now `deepctr` is available for python `2.7 `and `3.5, 3.6, 3.7`.  
 `deepctr` depends on tensorflow, you can specify to install the cpu version or gpu version through `pip`.
 
 ### CPU version
