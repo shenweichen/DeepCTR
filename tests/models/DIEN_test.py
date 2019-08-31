@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 import tensorflow as tf
+from packaging import version
 from deepctr.models import DIEN
 from deepctr.inputs import SparseFeat,DenseFeat,VarLenSparseFeat,get_fixlen_feature_names,get_varlen_feature_names
 from ..utils import check_model
@@ -60,7 +61,7 @@ def get_xy_fd(use_neg=False, hash_flag=False):
      ]
 )
 def test_DIEN(gru_type):
-    if tf.__version__ >= '2.0.0':
+    if version.parse(tf.__version__) >= version.parse('2.0.0'):
         tf.compat.v1.disable_eager_execution() #todo
     model_name = "DIEN_"+gru_type
 
@@ -74,7 +75,7 @@ def test_DIEN(gru_type):
 
 def test_DIEN_neg():
     model_name = "DIEN_neg"
-    if tf.__version__ >= "2.0.0":
+    if version.parse(tf.__version__) >= version.parse("1.14.0"):
         return
 
     x, y, feature_dim_dict, behavior_feature_list = get_xy_fd(use_neg=True)
