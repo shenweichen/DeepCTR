@@ -102,9 +102,8 @@ def interest_evolution(concat_behavior, deep_input_item, user_behavior_length, g
                        att_weight_normalization=False, ):
     if gru_type not in ["GRU", "AIGRU", "AGRU", "AUGRU"]:
         raise ValueError("gru_type error ")
-    aux_loss_1 = None
-
-    rnn_outputs = DynamicGRU(embedding_size * 2, return_sequence=True,
+    embedding_size = None
+    rnn_outputs = DynamicGRU(embedding_size, return_sequence=True,
                              name="gru1")([concat_behavior, user_behavior_length])
 
     if gru_type == "AUGRU" and use_neg:
@@ -115,7 +114,7 @@ def interest_evolution(concat_behavior, deep_input_item, user_behavior_length, g
                                     tf.subtract(user_behavior_length, 1), stag="gru")  # [:, 1:]
 
     if gru_type == "GRU":
-        rnn_outputs2 = DynamicGRU(embedding_size * 2, return_sequence=True,
+        rnn_outputs2 = DynamicGRU(embedding_size, return_sequence=True,
                                   name="gru2")([rnn_outputs, user_behavior_length])
         # attention_score = AttentionSequencePoolingLayer(hidden_size=att_hidden_size, activation=att_activation, weight_normalization=att_weight_normalization, return_score=True)([
         #     deep_input_item, rnn_outputs2, user_behavior_length])
@@ -134,10 +133,10 @@ def interest_evolution(concat_behavior, deep_input_item, user_behavior_length, g
 
         if gru_type == "AIGRU":
             hist = multiply([rnn_outputs, Permute([2, 1])(scores)])
-            final_state2 = DynamicGRU(embedding_size * 2, gru_type="GRU", return_sequence=False, name='gru2')(
+            final_state2 = DynamicGRU(embedding_size, gru_type="GRU", return_sequence=False, name='gru2')(
                 [hist, user_behavior_length])
         else:  # AGRU AUGRU
-            final_state2 = DynamicGRU(embedding_size * 2, gru_type=gru_type, return_sequence=False,
+            final_state2 = DynamicGRU(embedding_size, gru_type=gru_type, return_sequence=False,
                                       name='gru2')([rnn_outputs, user_behavior_length, Permute([2, 1])(scores)])
         hist = final_state2
     return hist, aux_loss_1
