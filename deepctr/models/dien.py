@@ -102,6 +102,7 @@ def interest_evolution(concat_behavior, deep_input_item, user_behavior_length, g
                        att_weight_normalization=False, ):
     if gru_type not in ["GRU", "AIGRU", "AGRU", "AUGRU"]:
         raise ValueError("gru_type error ")
+    aux_loss_1 = None
     embedding_size = None
     rnn_outputs = DynamicGRU(embedding_size, return_sequence=True,
                              name="gru1")([concat_behavior, user_behavior_length])
