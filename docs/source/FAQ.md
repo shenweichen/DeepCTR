@@ -112,5 +112,7 @@ just install deepctr with
 $ pip install deepctr[gpu]
 ```
 
-## 7. Could not find a version that satisfies the requirement deepctr (from versions)
-please install with `pip3 install` instead of `pip install`
+## 7. How to run the demo with multiple GPUs
+you can use multiple gpus with tensorflow version higher than ``1.4``
+
+read demos ![run_classification_criteo_multi_gpu.py](https://github.com/shenweichen/DeepCTR/blob/master/examples/run_classification_criteo_multi_gpu.py)
