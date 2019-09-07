@@ -57,7 +57,7 @@ Usually there are two simple way to encode the sparse categorical feature for em
         lbe = HashEncoder()
         data[feat] = lbe.transform(data[feat])
     ```
-  - Do feature hashing on the flay in training process 
+  - Do feature hashing on the fly in training process 
 
     We can do feature hasing throug setting `use_hash=True` in `SparseFeat` or `VarlenSparseFeat` in Step3.
 

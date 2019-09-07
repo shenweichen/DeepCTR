@@ -113,6 +113,4 @@ $ pip install deepctr[gpu]
 ```
 
 ## 7. How to run the demo with multiple GPUs
-you can use multiple gpus with tensorflow version higher than ``1.4``
-
-read demos ![run_classification_criteo_multi_gpu.py](https://github.com/shenweichen/DeepCTR/blob/master/examples/run_classification_criteo_multi_gpu.py)
+you can use multiple gpus with tensorflow version higher than ``1.4``,see [run_classification_criteo_multi_gpu.py](https://github.com/shenweichen/DeepCTR/blob/master/examples/run_classification_criteo_multi_gpu.py)
