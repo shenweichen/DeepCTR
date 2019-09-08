@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
     # 4.Define Model,train,predict and evaluate
     model = DeepFM(linear_feature_columns, dnn_feature_columns, task='binary')
-    #model = multi_gpu_model(model, gpus=2)
+    model = multi_gpu_model(model, gpus=2)
 
     model.compile("adam", "binary_crossentropy",
                   metrics=['binary_crossentropy'], )

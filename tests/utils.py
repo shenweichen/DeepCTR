@@ -348,12 +348,12 @@ def check_model(model, model_name, x, y,check_model_io=True):
     print(model_name+" test train valid pass!")
     model.save_weights(model_name + '_weights.h5')
     model.load_weights(model_name + '_weights.h5')
-    os.remove(model_name + '_weights.h5') 
+    os.remove(model_name + '_weights.h5')
     print(model_name+" test save load weight pass!")
     if check_model_io:
         save_model(model, model_name + '.h5')
         model = load_model(model_name + '.h5', custom_objects)
-        os.remove(model_name + '.h5') 
+        os.remove(model_name + '.h5')
         print(model_name + " test save load model pass!")
 
     print(model_name + " test pass!")
