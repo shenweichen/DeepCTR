@@ -51,6 +51,7 @@ install:
   - pip install -q codacy-coverage
   - pip install -q tensorflow==$TF_VERSION
   - pip install -q pandas
+  - pip install -q packaging
   - pip install -e .
 # command to run tests
 script:

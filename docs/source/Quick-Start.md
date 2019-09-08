@@ -1,7 +1,7 @@
 # Quick-Start
 
 ## Installation Guide
-Now `deepctr` is available for python `2.7 `and `3.4,  3.5, 3.6`.  
+Now `deepctr` is available for python `2.7 `and `3.5, 3.6, 3.7`.  
 `deepctr` depends on tensorflow, you can specify to install the cpu version or gpu version through `pip`.
 
 ### CPU version
@@ -57,7 +57,7 @@ Usually there are two simple way to encode the sparse categorical feature for em
         lbe = HashEncoder()
         data[feat] = lbe.transform(data[feat])
     ```
-  - Do feature hashing on the flay in training process 
+  - Do feature hashing on the fly in training process 
 
     We can do feature hasing throug setting `use_hash=True` in `SparseFeat` or `VarlenSparseFeat` in Step3.
 
