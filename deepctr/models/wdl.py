@@ -15,7 +15,7 @@ from ..layers.core import PredictionLayer, DNN
 
 
 def WDL(linear_feature_columns, dnn_feature_columns, embedding_size=8, dnn_hidden_units=(128, 128), l2_reg_linear=1e-5,
-        l2_reg_embedding=1e-5, l2_reg_dnn=0, init_std=0.0001, seed=1024, dnn_dropout=0, dnn_activation='relu',
+        l2_reg_embedding=1e-5, l2_reg_dnn=0, init_std=0.0001, seed=1024, dnn_dropout=0, dnn_activation='relu',dnn_use_bn=False,
         task='binary'):
     """Instantiates the Wide&Deep Learning architecture.
 
@@ -49,7 +49,7 @@ def WDL(linear_feature_columns, dnn_feature_columns, embedding_size=8, dnn_hidde
 
     dnn_input = combined_dnn_input(sparse_embedding_list, dense_value_list)
     dnn_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
-                  False, seed)(dnn_input)
+                  dnn_use_bn, seed)(dnn_input)
     dnn_logit = Dense(
         1, use_bias=False, activation=None)(dnn_out)
 
