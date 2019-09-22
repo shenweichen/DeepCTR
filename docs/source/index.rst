@@ -34,7 +34,7 @@ You can read the latest code at https://github.com/shenweichen/DeepCTR
 
 News
 -----
-09/08/2019 : Start the development of `DeepCTR-PyTorch <https://github.com/shenweichen/deepctr-pytorch>`_,welcome to join us!! . `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.6.1>`_
+09/22/2019 : `DeepCTR-Torch <https://github.com/shenweichen/DeepCTR-Torch>`_ first version v0.1.0  is released on `PyPi <https://pypi.org/project/deepctr-torch/>`_ !
 
 08/02/2019 : Now DeepCTR is compatible with tensorflow `1.14` and `2.0.0`. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.6.0>`_
 
