@@ -13,7 +13,7 @@ from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import CrossNet
 
 
-def DCN(dnn_feature_columns, embedding_size='auto', cross_num=2, dnn_hidden_units=(256, 128,), l2_reg_embedding=1e-5,
+def DCN(dnn_feature_columns, embedding_size='auto', cross_num=2, dnn_hidden_units=(128, 128,), l2_reg_embedding=1e-5,
         l2_reg_cross=1e-5, l2_reg_dnn=0, init_std=0.0001, seed=1024, dnn_dropout=0, dnn_use_bn=False,
         dnn_activation='relu', task='binary'):
     """Instantiates the Deep&Cross Network architecture.

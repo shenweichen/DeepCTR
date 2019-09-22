@@ -26,7 +26,7 @@ from ..layers.sequence import SequencePoolingLayer
 from ..layers.utils import concat_fun, Hash, NoMask
 
 
-def NFFM(linear_feature_columns, dnn_feature_columns, embedding_size=4, dnn_hidden_units=(256, 128),
+def NFFM(linear_feature_columns, dnn_feature_columns, embedding_size=4, dnn_hidden_units=(128, 128),
          l2_reg_embedding=1e-5, l2_reg_linear=1e-5, l2_reg_dnn=0, dnn_dropout=0,
          init_std=0.0001, seed=1024, use_bn=True, reduce_sum=False, task='binary',
          ):
