@@ -3,7 +3,7 @@ import pytest
 import tensorflow as tf
 from packaging import version
 from deepctr.models import DIEN
-from deepctr.inputs import SparseFeat,DenseFeat,VarLenSparseFeat,get_feature_names,get_varlen_feature_names
+from deepctr.inputs import SparseFeat,DenseFeat,VarLenSparseFeat,get_feature_names
 from ..utils import check_model
 
 
