@@ -3,7 +3,7 @@ import pytest
 import tensorflow as tf
 from packaging import version
 from deepctr.models import DIEN
-from deepctr.inputs import SparseFeat,DenseFeat,VarLenSparseFeat,get_fixlen_feature_names,get_varlen_feature_names
+from deepctr.inputs import SparseFeat,DenseFeat,VarLenSparseFeat,get_feature_names,get_varlen_feature_names
 from ..utils import check_model
 
 
@@ -43,7 +43,7 @@ def get_xy_fd(use_neg=False, hash_flag=False):
         #x += [feature_dict['neg_hist_'+feat] for feat in behavior_feature_list]
 
 
-    feature_names = get_fixlen_feature_names(feature_columns)
+    feature_names = get_feature_names(feature_columns)
     varlen_feature_names = get_varlen_feature_names(feature_columns)
     x = [feature_dict[name] for name in feature_names] + [feature_dict[name] for name in varlen_feature_names]
 

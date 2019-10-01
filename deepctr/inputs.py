@@ -43,12 +43,16 @@ class VarLenSparseFeat(namedtuple('VarLenFeat', ['name', 'dimension', 'maxlen', 
         return super(VarLenSparseFeat, cls).__new__(cls, name, dimension, maxlen, combiner, use_hash, dtype, embedding_name,embedding)
 
 
-def get_fixlen_feature_names(feature_columns):
-    features = build_input_features(feature_columns, include_varlen=False,include_fixlen=True)
-    return list(features.keys())
+# def get_feature_names(feature_columns):
+#     features = build_input_features(feature_columns, include_varlen=False,include_fixlen=True)
+#     return list(features.keys())
+#
+# def get_varlen_feature_names(feature_columns):
+#     features = build_input_features(feature_columns, include_varlen=True,include_fixlen=False)
+#     return list(features.keys())
 
-def get_varlen_feature_names(feature_columns):
-    features = build_input_features(feature_columns, include_varlen=True,include_fixlen=False)
+def get_feature_names(feature_columns):
+    features = build_input_features(feature_columns, include_varlen=True,include_fixlen=True)
     return list(features.keys())
 
 def get_inputs_list(inputs):
@@ -67,7 +71,7 @@ def build_input_features(feature_columns, include_varlen=True, mask_zero=True, p
     if include_varlen:
         for fc in feature_columns:
             if isinstance(fc,VarLenSparseFeat):
-                input_features[fc.name] = Input(shape=(fc.maxlen,), name=prefix + 'seq_' + fc.name,
+                input_features[fc.name] = Input(shape=(fc.maxlen,), name=prefix + fc.name,
                                                       dtype=fc.dtype)
         if not mask_zero:
             for fc in feature_columns:

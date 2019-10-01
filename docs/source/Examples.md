@@ -31,7 +31,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 
 from deepctr.models import DeepFM
-from deepctr.inputs import  SparseFeat, DenseFeat,get_fixlen_feature_names
+from deepctr.inputs import  SparseFeat, DenseFeat,get_feature_names
 
 if __name__ == "__main__":
     data = pd.read_csv('./criteo_sample.txt')
@@ -59,7 +59,7 @@ if __name__ == "__main__":
     dnn_feature_columns = fixlen_feature_columns
     linear_feature_columns = fixlen_feature_columns
 
-    fixlen_feature_names = get_fixlen_feature_names(linear_feature_columns + dnn_feature_columns)
+    fixlen_feature_names = get_feature_names(linear_feature_columns + dnn_feature_columns)
 
     # 3.generate input data for model
 
@@ -91,7 +91,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 
 from deepctr.models import DeepFM
-from deepctr.inputs import SparseFeat, DenseFeat,get_fixlen_feature_names
+from deepctr.inputs import SparseFeat, DenseFeat,get_feature_names
 
 if __name__ == "__main__":
     data = pd.read_csv('./criteo_sample.txt')
@@ -115,7 +115,7 @@ if __name__ == "__main__":
 
     linear_feature_columns = fixlen_feature_columns
     dnn_feature_columns = fixlen_feature_columns
-    fixlen_feature_names = get_fixlen_feature_names(linear_feature_columns + dnn_feature_columns, )
+    fixlen_feature_names = get_feature_names(linear_feature_columns + dnn_feature_columns, )
 
     # 3.generate input data for model
 
@@ -156,7 +156,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
 from deepctr.models import DeepFM
-from deepctr.inputs import SparseFeat,get_fixlen_feature_names
+from deepctr.inputs import SparseFeat,get_feature_names
 
 if __name__ == "__main__":
 
@@ -174,7 +174,7 @@ if __name__ == "__main__":
                               for feat in sparse_features]
     linear_feature_columns = fixlen_feature_columns
     dnn_feature_columns = fixlen_feature_columns
-    fixlen_feature_names = get_fixlen_feature_names(linear_feature_columns + dnn_feature_columns)
+    fixlen_feature_names = get_feature_names(linear_feature_columns + dnn_feature_columns)
 
     # 3.generate input data for model
     train, test = train_test_split(data, test_size=0.2)
@@ -228,7 +228,7 @@ from sklearn.preprocessing import LabelEncoder
 from tensorflow.python.keras.preprocessing.sequence import pad_sequences
 
 from deepctr.models import DeepFM
-from deepctr.inputs import SparseFeat, VarLenSparseFeat,get_fixlen_feature_names,get_varlen_feature_names
+from deepctr.inputs import SparseFeat, VarLenSparseFeat,get_feature_names,get_varlen_feature_names
 
 
 def split(x):
@@ -267,7 +267,7 @@ varlen_feature_columns = [VarLenSparseFeat('genres', len(
 
 linear_feature_columns = fixlen_feature_columns + varlen_feature_columns
 dnn_feature_columns = fixlen_feature_columns + varlen_feature_columns
-fixlen_feature_names = get_fixlen_feature_names(linear_feature_columns + dnn_feature_columns)
+fixlen_feature_names = get_feature_names(linear_feature_columns + dnn_feature_columns)
 varlen_feature_names = get_varlen_feature_names(linear_feature_columns+dnn_feature_columns)
 
 
@@ -293,7 +293,7 @@ import pandas as pd
 from tensorflow.python.keras.preprocessing.sequence import pad_sequences
 
 from deepctr.models import DeepFM
-from deepctr.inputs import SparseFeat, VarLenSparseFeat,get_fixlen_feature_names
+from deepctr.inputs import SparseFeat, VarLenSparseFeat,get_feature_names
 
 data = pd.read_csv("./movielens_sample.txt")
 sparse_features = ["movie_id", "user_id",
@@ -319,7 +319,7 @@ varlen_feature_columns = [VarLenSparseFeat('genres', 100, max_len, 'mean', use_h
                                            dtype="string")]  # Notice : value 0 is for padding for sequence input feature
 linear_feature_columns = fixlen_feature_columns + varlen_feature_columns
 dnn_feature_columns = fixlen_feature_columns + varlen_feature_columns
-feature_names = get_fixlen_feature_names(linear_feature_columns + dnn_feature_columns)
+feature_names = get_feature_names(linear_feature_columns + dnn_feature_columns)
 
 # 3.generate input data for model
 fixlen_input = [data[name].values for name in feature_names]

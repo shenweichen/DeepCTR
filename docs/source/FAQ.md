@@ -48,7 +48,7 @@ Then,use the following code,the `attentional_weights[:,i,0]` is the `feature_int
 import itertools
 import deepctr
 from deepctr.models import AFM
-from deepctr.inputs import get_fixlen_feature_names,get_varlen_feature_names
+from deepctr.inputs import get_feature_names,get_varlen_feature_names
 from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.layers import Lambda
 
@@ -59,7 +59,7 @@ afmlayer = model.layers[-3]
 afm_weight_model = Model(model.input,outputs=Lambda(lambda x:afmlayer.normalized_att_score)(model.input))
 attentional_weights = afm_weight_model.predict(model_input,batch_size=4096)
 
-fixlen_names = get_fixlen_feature_names( dnn_feature_columns)
+fixlen_names = get_feature_names( dnn_feature_columns)
 varlen_names = get_varlen_feature_names(dnn_feature_columns)
 feature_interactions = list(itertools.combinations(fixlen_names+varlen_names ,2))
 ```
@@ -87,11 +87,11 @@ item_id_emb = embedding_dict['item_id']
 ## 5. How to add a long dense feature vector as a input to the model?
 ```python
 from deepctr.models import DeepFM
-from deepctr.inputs import DenseFeat,SparseFeat,get_fixlen_feature_names
+from deepctr.inputs import DenseFeat,SparseFeat,get_feature_names
 import numpy as np
 
 feature_columns = [SparseFeat('user_id',120,),SparseFeat('item_id',60,),DenseFeat("pic_vec",5)]
-fixlen_feature_names = get_fixlen_feature_names(feature_columns)
+fixlen_feature_names = get_feature_names(feature_columns)
 
 user_id = np.array([[1],[0],[1]])
 item_id = np.array([[30],[20],[10]])

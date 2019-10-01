@@ -5,7 +5,7 @@ from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 from tensorflow.python.keras.utils import multi_gpu_model
 
 from deepctr.models import DeepFM
-from deepctr.inputs import  SparseFeat, DenseFeat,get_fixlen_feature_names
+from deepctr.inputs import  SparseFeat, DenseFeat,get_feature_names
 
 if __name__ == "__main__":
     data = pd.read_csv('./criteo_sample.txt')
@@ -33,18 +33,18 @@ if __name__ == "__main__":
     dnn_feature_columns = fixlen_feature_columns
     linear_feature_columns = fixlen_feature_columns
 
-    fixlen_feature_names = get_fixlen_feature_names(linear_feature_columns + dnn_feature_columns)
+    feature_names = get_feature_names(linear_feature_columns + dnn_feature_columns)
 
     # 3.generate input data for model
 
     train, test = train_test_split(data, test_size=0.2)
-    train_model_input = [train[name] for name in fixlen_feature_names]
+    train_model_input = [train[name] for name in feature_names]
 
-    test_model_input = [test[name] for name in fixlen_feature_names]
+    test_model_input = [test[name] for name in feature_names]
 
     # 4.Define Model,train,predict and evaluate
     model = DeepFM(linear_feature_columns, dnn_feature_columns, task='binary')
-    model = multi_gpu_model(model, gpus=2)
+    #model = multi_gpu_model(model, gpus=2)
 
     model.compile("adam", "binary_crossentropy",
                   metrics=['binary_crossentropy'], )
