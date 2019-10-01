@@ -28,10 +28,7 @@ def get_xy_fd(hash_flag=False):
                     'hist_item': hist_iid, 'hist_item_gender': hist_igender, 'score': score}
 
     feature_names = get_feature_names(feature_columns)
-    varlen_feature_names = get_varlen_feature_names(feature_columns)
-    x = [feature_dict[name] for name in feature_names] + [feature_dict[name] for name in varlen_feature_names]
-
-
+    x = {name:feature_dict[name] for name in feature_names}
     y = [1, 0, 1]
     return x, y, feature_columns, behavior_feature_list
 
