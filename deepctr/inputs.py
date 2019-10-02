@@ -59,26 +59,36 @@ def get_inputs_list(inputs):
     return list(chain(*list(map(lambda x: x.values(), filter(lambda x: x is not None, inputs)))))
 
 def build_input_features(feature_columns, include_varlen=True, mask_zero=True, prefix='',include_fixlen=True):
-    input_features = OrderedDict()
-    if include_fixlen:
-        for fc in feature_columns:
-            if isinstance(fc,SparseFeat):
-                input_features[fc.name] = Input(
-                    shape=(1,), name=prefix+fc.name, dtype=fc.dtype)
-            elif isinstance(fc,DenseFeat):
-                input_features[fc.name] = Input(
-                    shape=(fc.dimension,), name=prefix + fc.name, dtype=fc.dtype)
-    if include_varlen:
-        for fc in feature_columns:
-            if isinstance(fc,VarLenSparseFeat):
-                input_features[fc.name] = Input(shape=(fc.maxlen,), name=prefix + fc.name,
-                                                      dtype=fc.dtype)
-        if not mask_zero:
-            for fc in feature_columns:
-                input_features[fc.name+"_seq_length"] = Input(shape=(
+    input_features = {}
+    #if include_fixlen:
+    for fc in feature_columns:
+        if isinstance(fc,SparseFeat):
+            input_features[fc.name] = Input(
+                shape=(1,), name=prefix+fc.name, dtype=fc.dtype)
+        elif isinstance(fc,DenseFeat):
+            input_features[fc.name] = Input(
+                shape=(fc.dimension,), name=prefix + fc.name, dtype=fc.dtype)
+        elif isinstance(fc,VarLenSparseFeat):
+            input_features[fc.name] = Input(shape=(fc.maxlen,), name=prefix + fc.name,
+                                            dtype=fc.dtype)
+            if not mask_zero:
+                input_features[fc.name + "_seq_length"] = Input(shape=(
                     1,), name=prefix + 'seq_length_' + fc.name)
-                input_features[fc.name+"_seq_max_length"] = fc.maxlen
+                input_features[fc.name + "_seq_max_length"] = fc.maxlen
+        else:
+            raise TypeError("Invalid feature column type,got",type(fc))
 
+    # if include_varlen:
+    #     for fc in feature_columns:
+    #         if isinstance(fc,VarLenSparseFeat):
+    #             input_features[fc.name] = Input(shape=(fc.maxlen,), name=prefix + fc.name,
+    #                                                   dtype=fc.dtype)
+    #     if not mask_zero:
+    #         for fc in feature_columns:
+    #             input_features[fc.name+"_seq_length"] = Input(shape=(
+    #                 1,), name=prefix + 'seq_length_' + fc.name)
+    #             input_features[fc.name+"_seq_max_length"] = fc.maxlen
+    #
 
     return input_features
 
@@ -123,8 +133,6 @@ def create_embedding_dict(sparse_feature_columns, varlen_sparse_feature_columns,
                                                             l2_reg),
                                                         name=prefix + '_seq_emb_' + feat.name,
                                                         mask_zero=seq_mask_zero)
-
-
     return sparse_embedding
 
 
