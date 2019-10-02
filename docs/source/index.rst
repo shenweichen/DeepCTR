@@ -6,7 +6,7 @@
 Welcome to DeepCTR's documentation!
 ===================================
 
-|Downloads|_ |Stars|_ |Forks|_ |PyPi|_ |Issues|_ |Gitter|_
+|Downloads|_ |Stars|_ |Forks|_ |PyPii|_ |Issues|_ |Gitter|_
 
 .. |Downloads| image:: https://pepy.tech/badge/deepctr
 .. _Downloads: https://pepy.tech/project/deepctr
@@ -17,8 +17,8 @@ Welcome to DeepCTR's documentation!
 .. |Forks| image:: https://img.shields.io/github/forks/shenweichen/deepctr.svg
 .. _Forks: https://github.com/shenweichen/DeepCTR/fork
 
-.. |PyPi| image:: https://img.shields.io/pypi/v/deepctr.svg
-.. _PyPi: https://pypi.org/project/deepctr/
+.. |PyPii| image:: https://img.shields.io/pypi/v/deepctr.svg
+.. _PyPii: https://pypi.org/project/deepctr
 
 .. |Issues| image:: https://img.shields.io/github/issues/shenweichen/deepctr.svg
 .. _Issues: https://github.com/shenweichen/deepctr/issues

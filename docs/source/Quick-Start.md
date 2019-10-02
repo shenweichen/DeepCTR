@@ -93,7 +93,7 @@ dense_feature_columns = [DenseFeat(feat, 1)
 dnn_feature_columns = sparse_feature_columns + dense_feature_columns
 linear_feature_columns = sparse_feature_columns + dense_feature_columns
 
-feature_names = get_fixlen_feature_names(linear_feature_columns + dnn_feature_columns)
+feature_names = get_feature_names(linear_feature_columns + dnn_feature_columns)
 
 ```
 ### Step 4: Generate the training samples and train the model
@@ -106,9 +106,9 @@ There are two rules here that we must follow
 
 ```python
 train, test = train_test_split(data, test_size=0.2)
-train_model_input = [train[name] for name in feature_names]
 
-test_model_input = [test[name] for name in feature_names]
+train_model_input = {name:train[name].values for name in feature_names}
+test_model_input = {name:test[name].values for name in feature_names}
 
 
 model = DeepFM(linear_feature_columns,dnn_feature_columns,task='binary')
