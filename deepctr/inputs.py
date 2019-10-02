@@ -42,15 +42,6 @@ class VarLenSparseFeat(namedtuple('VarLenFeat', ['name', 'dimension', 'maxlen', 
             embedding_name = name
         return super(VarLenSparseFeat, cls).__new__(cls, name, dimension, maxlen, combiner, use_hash, dtype, embedding_name,embedding)
 
-
-# def get_feature_names(feature_columns):
-#     features = build_input_features(feature_columns, include_varlen=False,include_fixlen=True)
-#     return list(features.keys())
-#
-# def get_varlen_feature_names(feature_columns):
-#     features = build_input_features(feature_columns, include_varlen=True,include_fixlen=False)
-#     return list(features.keys())
-
 def get_feature_names(feature_columns):
     features = build_input_features(feature_columns, include_varlen=True,include_fixlen=True)
     return list(features.keys())
@@ -59,7 +50,7 @@ def get_inputs_list(inputs):
     return list(chain(*list(map(lambda x: x.values(), filter(lambda x: x is not None, inputs)))))
 
 def build_input_features(feature_columns, include_varlen=True, mask_zero=True, prefix='',include_fixlen=True):
-    input_features = {}
+    input_features = OrderedDict()
     #if include_fixlen:
     for fc in feature_columns:
         if isinstance(fc,SparseFeat):

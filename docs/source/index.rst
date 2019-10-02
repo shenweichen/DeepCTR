@@ -34,7 +34,7 @@ You can read the latest code at https://github.com/shenweichen/DeepCTR
 
 News
 -----
-10/02/2019 : Simplify the input logic(`examples <./Examples.html#classification-criteo>`_). `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.6.2>`_
+10/03/2019 : Simplify the input logic(`examples <./Examples.html#classification-criteo>`_). `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.6.2>`_
 
 09/22/2019 : `DeepCTR-Torch <https://github.com/shenweichen/DeepCTR-Torch>`_ first version v0.1.0  is released on `PyPi <https://pypi.org/project/deepctr-torch/>`_ !
 
