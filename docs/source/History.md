@@ -1,4 +1,5 @@
 # History
+- 10/02/2019 : [v0.6.2](https://github.com/shenweichen/DeepCTR/releases/tag/v0.6.2) released.Simplify the input logic.
 - 09/08/2019 : [v0.6.1](https://github.com/shenweichen/DeepCTR/releases/tag/v0.6.1) released.Fix bugs in `CCPM` and `DynamicGRU`.
 - 08/02/2019 : [v0.6.0](https://github.com/shenweichen/DeepCTR/releases/tag/v0.6.0) released.Now DeepCTR is compatible with tensorflow `1.14` and `2.0.0`. 
 - 07/21/2019 : [v0.5.2](https://github.com/shenweichen/DeepCTR/releases/tag/v0.5.2) released.Refactor `Linear` Layer.

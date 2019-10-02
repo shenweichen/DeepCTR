@@ -5,7 +5,7 @@ from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 from tensorflow.python.keras.utils import multi_gpu_model
 
 from deepctr.models import DeepFM
-from deepctr.inputs import  SparseFeat, DenseFeat,get_feature_names
+from deepctr.inputs import  SparseFeat, DenseFeat, get_feature_names
 
 if __name__ == "__main__":
     data = pd.read_csv('./criteo_sample.txt')
