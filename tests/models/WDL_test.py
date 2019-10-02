@@ -1,6 +1,8 @@
-import pytest
+import pytest,gc
+import tensorflow as tf
 
 from deepctr.models import WDL
+from packaging import version
 from ..utils import check_model, SAMPLE_SIZE, get_test_data
 
 
@@ -10,6 +12,9 @@ from ..utils import check_model, SAMPLE_SIZE, get_test_data
      ]
 )
 def test_WDL(sparse_feature_num, dense_feature_num):
+    if version.parse(tf.__version__) >= version.parse('2.0.0'):
+        gc.collect()
+        return
     model_name = "WDL"
     sample_size = SAMPLE_SIZE
     x, y, feature_columns = get_test_data(

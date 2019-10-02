@@ -38,13 +38,13 @@ if __name__ == "__main__":
     # 3.generate input data for model
 
     train, test = train_test_split(data, test_size=0.2)
-    train_model_input = [train[name] for name in feature_names]
 
-    test_model_input = [test[name] for name in feature_names]
+    train_model_input = {name:train[name] for name in feature_names}
+    test_model_input = {name:test[name] for name in feature_names}
 
     # 4.Define Model,train,predict and evaluate
     model = DeepFM(linear_feature_columns, dnn_feature_columns, task='binary')
-    #model = multi_gpu_model(model, gpus=2)
+    model = multi_gpu_model(model, gpus=2)
 
     model.compile("adam", "binary_crossentropy",
                   metrics=['binary_crossentropy'], )
