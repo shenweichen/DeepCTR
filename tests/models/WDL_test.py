@@ -16,7 +16,7 @@ def test_WDL(sparse_feature_num, dense_feature_num):
         sample_size, sparse_feature_num, dense_feature_num)
 
     model = WDL(feature_columns, feature_columns,
-                dnn_hidden_units=[32, 32], dnn_dropout=0.5)
+                dnn_hidden_units=[4, 4], dnn_dropout=0.5)
     check_model(model, model_name, x, y)
 
 
