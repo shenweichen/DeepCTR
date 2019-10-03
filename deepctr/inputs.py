@@ -43,15 +43,14 @@ class VarLenSparseFeat(namedtuple('VarLenFeat', ['name', 'dimension', 'maxlen', 
         return super(VarLenSparseFeat, cls).__new__(cls, name, dimension, maxlen, combiner, use_hash, dtype, embedding_name,embedding)
 
 def get_feature_names(feature_columns):
-    features = build_input_features(feature_columns, include_varlen=True,include_fixlen=True)
+    features = build_input_features(feature_columns)
     return list(features.keys())
 
 def get_inputs_list(inputs):
     return list(chain(*list(map(lambda x: x.values(), filter(lambda x: x is not None, inputs)))))
 
-def build_input_features(feature_columns, include_varlen=True, mask_zero=True, prefix='',include_fixlen=True):
+def build_input_features(feature_columns, mask_zero=True, prefix=''):
     input_features = OrderedDict()
-    #if include_fixlen:
     for fc in feature_columns:
         if isinstance(fc,SparseFeat):
             input_features[fc.name] = Input(
@@ -68,18 +67,6 @@ def build_input_features(feature_columns, include_varlen=True, mask_zero=True, p
                 input_features[fc.name + "_seq_max_length"] = fc.maxlen
         else:
             raise TypeError("Invalid feature column type,got",type(fc))
-
-    # if include_varlen:
-    #     for fc in feature_columns:
-    #         if isinstance(fc,VarLenSparseFeat):
-    #             input_features[fc.name] = Input(shape=(fc.maxlen,), name=prefix + fc.name,
-    #                                                   dtype=fc.dtype)
-    #     if not mask_zero:
-    #         for fc in feature_columns:
-    #             input_features[fc.name+"_seq_length"] = Input(shape=(
-    #                 1,), name=prefix + 'seq_length_' + fc.name)
-    #             input_features[fc.name+"_seq_max_length"] = fc.maxlen
-    #
 
     return input_features
 

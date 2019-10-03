@@ -98,12 +98,6 @@ feature_names = get_feature_names(linear_feature_columns + dnn_feature_columns)
 ```
 ### Step 4: Generate the training samples and train the model
 
-There are two rules here that we must follow
-
-  - The `SparseFeat` and `DenseFeat`  are placed in front of the `VarlenSparseFeat`.
-  - The order of the feature we fit into the model must be consistent with the order of the feature config list.
-
-
 ```python
 train, test = train_test_split(data, test_size=0.2)
 
