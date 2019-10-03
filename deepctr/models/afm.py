@@ -37,7 +37,7 @@ def AFM(linear_feature_columns, dnn_feature_columns, embedding_size=8, use_atten
     """
 
 
-    features = build_input_features(linear_feature_columns+dnn_feature_columns)
+    features = build_input_features(linear_feature_columns + dnn_feature_columns)
 
     inputs_list = list(features.values())
 

@@ -40,7 +40,7 @@ def MLR(region_feature_columns, base_feature_columns=None, region_num=4,
     if bias_feature_columns is None:
         bias_feature_columns = []
 
-    features = build_input_features(region_feature_columns + base_feature_columns+bias_feature_columns)
+    features = build_input_features(region_feature_columns + base_feature_columns + bias_feature_columns)
 
     inputs_list = list(features.values())
 

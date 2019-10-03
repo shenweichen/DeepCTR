@@ -708,7 +708,7 @@ class KMaxPooling(Layer):
 
         if self.axis < 1 or self.axis > len(input_shape):
             raise ValueError("axis must be 1~%d,now is %d" %
-                             (len(input_shape), len(input_shape)))
+                             (len(input_shape), self.axis))
 
         if self.k < 1 or self.k > input_shape[self.axis]:
             raise ValueError("k must be in 1 ~ %d,now k is %d" %

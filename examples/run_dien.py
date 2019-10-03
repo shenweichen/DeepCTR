@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 
 from deepctr.models import DIEN
-from deepctr.inputs import SparseFeat,DenseFeat,VarLenSparseFeat,get_fixlen_feature_names,get_varlen_feature_names
+from deepctr.inputs import SparseFeat,DenseFeat,VarLenSparseFeat,get_feature_names
 
 
 def get_xy_fd(use_neg=False, hash_flag=False):
@@ -37,14 +37,9 @@ def get_xy_fd(use_neg=False, hash_flag=False):
         feature_dict['neg_hist_item_gender'] = np.array([[1, 1, 2, 0], [2, 1, 1, 0], [2, 1, 0, 0]])
         feature_columns += [VarLenSparseFeat('neg_hist_item',3+1, maxlen=4, embedding_name='item'),
                         VarLenSparseFeat('neg_hist_item_gender',3+1, maxlen=4, embedding_name='item_gender')]
-        #x += [feature_dict['neg_hist_'+feat] for feat in behavior_feature_list]
 
-
-    fix_feature_names = get_fixlen_feature_names(feature_columns)
-    varlen_feature_names = get_varlen_feature_names(feature_columns)
-    x = [feature_dict[name] for name in fix_feature_names] + [feature_dict[name] for name in varlen_feature_names]
-
-    x += [behavior_length]
+    x = {name:feature_dict[name] for name in get_feature_names(feature_columns)}
+    x["seq_length"] = behavior_length
     y = [1, 0, 1]
     return x, y, feature_columns, behavior_feature_list
 

@@ -1,10 +1,10 @@
 from deepctr.models import DeepFM
-from deepctr.inputs import DenseFeat, SparseFeat, get_fixlen_feature_names
+from deepctr.inputs import DenseFeat, SparseFeat, get_feature_names
 import numpy as np
 def test_long_dense_vector():
 
     feature_columns = [SparseFeat('user_id', 4, ), SparseFeat('item_id', 5, ), DenseFeat("pic_vec", 5)]
-    fixlen_feature_names = get_fixlen_feature_names(feature_columns)
+    fixlen_feature_names = get_feature_names(feature_columns)
 
     user_id = np.array([[1], [0], [1]])
     item_id = np.array([[3], [2], [1]])

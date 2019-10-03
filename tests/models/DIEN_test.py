@@ -3,7 +3,7 @@ import pytest
 import tensorflow as tf
 from packaging import version
 from deepctr.models import DIEN
-from deepctr.inputs import SparseFeat,DenseFeat,VarLenSparseFeat,get_fixlen_feature_names,get_varlen_feature_names
+from deepctr.inputs import SparseFeat,DenseFeat,VarLenSparseFeat,get_feature_names
 from ..utils import check_model
 
 
@@ -40,14 +40,11 @@ def get_xy_fd(use_neg=False, hash_flag=False):
         feature_dict['neg_hist_item_gender'] = np.array([[1, 1, 2, 0], [2, 1, 1, 0], [2, 1, 0, 0]])
         feature_columns += [VarLenSparseFeat('neg_hist_item',3+1, maxlen=4, embedding_name='item'),
                         VarLenSparseFeat('neg_hist_item_gender',3+1, maxlen=4, embedding_name='item_gender')]
-        #x += [feature_dict['neg_hist_'+feat] for feat in behavior_feature_list]
 
 
-    feature_names = get_fixlen_feature_names(feature_columns)
-    varlen_feature_names = get_varlen_feature_names(feature_columns)
-    x = [feature_dict[name] for name in feature_names] + [feature_dict[name] for name in varlen_feature_names]
-
-    x += [behavior_length]
+    feature_names = get_feature_names(feature_columns)
+    x = {name:feature_dict[name] for name in feature_names}
+    x["seq_length"] = behavior_length
     y = [1, 0, 1]
     return x, y, feature_columns, behavior_feature_list
 
@@ -82,7 +79,6 @@ def test_DIEN_neg():
 
     model = DIEN(feature_dim_dict, behavior_feature_list, hist_len_max=4, embedding_size=8,
                  dnn_hidden_units=[4, 4, 4], dnn_dropout=0.5, gru_type="AUGRU", use_negsampling=True)
-    print(model.layers)
     check_model(model,model_name,x,y)
 
 if __name__ == "__main__":

@@ -42,7 +42,7 @@ def CCPM(linear_feature_columns, dnn_feature_columns, embedding_size=8, conv_ker
         raise ValueError(
             "conv_kernel_width must have same element with conv_filters")
 
-    features = build_input_features(linear_feature_columns+dnn_feature_columns)
+    features = build_input_features(linear_feature_columns + dnn_feature_columns)
     inputs_list = list(features.values())
 
     sparse_embedding_list, _ = input_from_feature_columns(features,dnn_feature_columns,embedding_size,

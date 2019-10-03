@@ -1,7 +1,7 @@
 import numpy as np
 
 from deepctr.models.din import DIN
-from deepctr.inputs import SparseFeat,VarLenSparseFeat,DenseFeat,get_fixlen_feature_names,get_varlen_feature_names
+from deepctr.inputs import SparseFeat,VarLenSparseFeat,DenseFeat,get_feature_names
 from ..utils import check_model
 
 
@@ -27,11 +27,8 @@ def get_xy_fd(hash_flag=False):
     feature_dict = {'user': uid, 'gender': ugender, 'item': iid, 'item_gender': igender,
                     'hist_item': hist_iid, 'hist_item_gender': hist_igender, 'score': score}
 
-    feature_names = get_fixlen_feature_names(feature_columns)
-    varlen_feature_names = get_varlen_feature_names(feature_columns)
-    x = [feature_dict[name] for name in feature_names] + [feature_dict[name] for name in varlen_feature_names]
-
-
+    feature_names = get_feature_names(feature_columns)
+    x = {name:feature_dict[name] for name in feature_names}
     y = [1, 0, 1]
     return x, y, feature_columns, behavior_feature_list
 

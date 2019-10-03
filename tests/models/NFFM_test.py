@@ -1,4 +1,6 @@
 import pytest
+import tensorflow as tf
+from packaging import version
 from deepctr.models import NFFM
 from ..utils import check_model, get_test_data,SAMPLE_SIZE
 
@@ -8,7 +10,8 @@ from ..utils import check_model, get_test_data,SAMPLE_SIZE
     [((8,), 2)]
 )
 def test_NFFM(hidden_size, sparse_feature_num):
-
+    if version.parse(tf.__version__) >= version.parse('2.0.0'):
+        return
     model_name = "NFFM"
 
     sample_size = SAMPLE_SIZE

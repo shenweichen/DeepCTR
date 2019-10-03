@@ -87,7 +87,7 @@ class _Linear_(object):
 
             else:
 
-                total_arg_size += shape[1]#.value
+                total_arg_size += int(shape[1])#.value
 
         dtype = [a.dtype for a in args][0]
 
