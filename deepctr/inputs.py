@@ -13,7 +13,7 @@ from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.layers import  Embedding, Input, Flatten
 from tensorflow.python.keras.regularizers import l2
 
-from .layers.sequence import SequencePoolingLayer
+from .layers.sequence import SequencePoolingLayer,SequenceMultiplyLayer
 from .layers.utils import Hash,concat_fun,Linear
 
 
@@ -25,6 +25,16 @@ class SparseFeat(namedtuple('SparseFeat', ['name', 'dimension', 'use_hash', 'dty
             embedding_name = name
         return super(SparseFeat, cls).__new__(cls, name, dimension, use_hash, dtype, embedding_name,embedding)
 
+    def __hash__(self):  # 哈希算法把形参转为一个数值
+        return self.name.__hash__()  # 把形参 name 字符串,转换为数值
+
+    def __eq__(self, other):  # 一般都跟随__hash__()出现，把转换过来的值，进行比较
+        if self.name == other.name:
+            return True
+        return False
+
+    def __repr__(self):
+        return 'SparseFeat:'+self.name
 
 class DenseFeat(namedtuple('DenseFeat', ['name', 'dimension', 'dtype'])):
     __slots__ = ()
@@ -33,6 +43,16 @@ class DenseFeat(namedtuple('DenseFeat', ['name', 'dimension', 'dtype'])):
 
         return super(DenseFeat, cls).__new__(cls, name, dimension, dtype)
 
+    def __hash__(self):  # 哈希算法把形参转为一个数值
+        return self.name.__hash__()  # 把形参 name 字符串,转换为数值
+
+    def __eq__(self, other):  # 一般都跟随__hash__()出现，把转换过来的值，进行比较
+        if self.name == other.name:
+            return True
+        return False
+
+    def __repr__(self):
+        return 'DenseFeat:'+self.name
 
 class VarLenSparseFeat(namedtuple('VarLenFeat', ['name', 'dimension', 'maxlen', 'combiner', 'use_hash', 'dtype','embedding_name','embedding'])):
     __slots__ = ()
@@ -41,6 +61,17 @@ class VarLenSparseFeat(namedtuple('VarLenFeat', ['name', 'dimension', 'maxlen', 
         if embedding_name is None:
             embedding_name = name
         return super(VarLenSparseFeat, cls).__new__(cls, name, dimension, maxlen, combiner, use_hash, dtype, embedding_name,embedding)
+
+    def __hash__(self):  # 哈希算法把形参转为一个数值
+        return self.name.__hash__()  # 把形参 name 字符串,转换为数值
+
+    def __eq__(self, other):  # 一般都跟随__hash__()出现，把转换过来的值，进行比较
+        if self.name == other.name:
+            return True
+        return False
+
+    def __repr__(self):
+        return 'VarLenSparseFeat:'+self.name
 
 def get_feature_names(feature_columns):
     features = build_input_features(feature_columns)
@@ -207,6 +238,32 @@ def get_varlen_pooling_list(embedding_dict, features, varlen_sparse_feature_colu
             embedding_dict[feature_name])
         pooling_vec_list.append(vec)
     return pooling_vec_list
+
+def get_varlen_multiply_list(embedding_dict, features, varlen_sparse_feature_columns_name_dict):
+    multiply_vec_list = []
+    print(embedding_dict)
+    for key_feature in varlen_sparse_feature_columns_name_dict:
+        for value_feature in varlen_sparse_feature_columns_name_dict[key_feature]:
+            key_feature_length_name = key_feature.name + '_seq_length'
+            if isinstance(value_feature, VarLenSparseFeat):
+                value_input = embedding_dict[value_feature.name]
+            elif isinstance(value_feature, DenseFeat):
+                value_input = features[value_feature.name]
+            else:
+                raise TypeError("Invalid feature column type,got",type(value_feature))
+            if key_feature_length_name in features:
+                varlen_vec = SequenceMultiplyLayer(supports_masking=False)(
+                    [embedding_dict[key_feature.name], features[key_feature_length_name], value_input])
+                vec = SequencePoolingLayer('sum', supports_masking=False)(
+                    [varlen_vec, features[key_feature_length_name]])
+            else:
+                varlen_vec = SequenceMultiplyLayer(supports_masking=True)(
+                    [embedding_dict[key_feature.name], value_input])
+                vec = SequencePoolingLayer('sum', supports_masking=True)( varlen_vec)
+            multiply_vec_list.append(vec)
+    return multiply_vec_list
+
+
 
 def get_dense_input(features,feature_columns):
     dense_feature_columns = list(filter(lambda x:isinstance(x,DenseFeat),feature_columns)) if feature_columns else []

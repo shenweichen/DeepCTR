@@ -7,9 +7,15 @@ from deepctr.inputs import SparseFeat,VarLenSparseFeat,DenseFeat,get_feature_nam
 def get_xy_fd():
 
     feature_columns = [SparseFeat('user',3),SparseFeat(
-        'gender', 2), SparseFeat('item', 3 + 1), SparseFeat('item_gender', 2 + 1),DenseFeat('score', 1)]
+        'gender', 2), SparseFeat('item', 3 + 1), SparseFeat('item_gender', 2 + 1),DenseFeat('score', 1),
+                       DenseFeat('score_list', 3 + 1)]
     feature_columns += [VarLenSparseFeat('hist_item',3+1, maxlen=4, embedding_name='item'),
-                        VarLenSparseFeat('hist_item_gender',3+1, maxlen=4, embedding_name='item_gender')]
+                        VarLenSparseFeat('hist_item_gender',3+1, maxlen=4, embedding_name='item_gender'),
+                        VarLenSparseFeat('test_len_sparese',3+1, maxlen=4, embedding_name='len_sparese'),]
+
+    dict_feat = {VarLenSparseFeat('test_len_sparese',3+1, maxlen=4, embedding_name='len_sparese'): \
+                     [VarLenSparseFeat('hist_item_gender',3+1, maxlen=4, embedding_name='item_gender'),
+                      DenseFeat('score_list', 3 + 1)]}
 
     behavior_feature_list = ["item", "item_gender"]
     uid = np.array([0, 1, 2])
@@ -20,17 +26,23 @@ def get_xy_fd():
 
     hist_iid = np.array([[1, 2, 3, 0], [1, 2, 3, 0], [1, 2, 0, 0]])
     hist_igender = np.array([[1, 1, 2, 0], [2, 1, 1, 0], [2, 1, 0, 0]])
+    test_len_sparese = np.array([[1, 1, 2, 0], [2, 1, 1, 0], [2, 1, 0, 0]])
+
+    score_list = np.array([[0.1, 0.1, 0.2, 0.5], [0.2, 0.1, 0.12, 0], [0.3, 0.4, 0.1, 0]])
 
     feature_dict = {'user': uid, 'gender': ugender, 'item': iid, 'item_gender': igender,
-                    'hist_item': hist_iid, 'hist_item_gender': hist_igender, 'score': score}
+                    'hist_item': hist_iid, 'hist_item_gender': hist_igender, 'score': score,
+                    'test_len_sparese':test_len_sparese,'score_list':score_list}
+
+    feature_columns = set(feature_columns + list(dict_feat.keys()) + [x for value in dict_feat.values() for x in value])
     x = {name:feature_dict[name] for name in get_feature_names(feature_columns)}
     y = [1, 0, 1]
-    return x, y, feature_columns, behavior_feature_list
+    return x, y, feature_columns, behavior_feature_list,dict_feat
 
 
 if __name__ == "__main__":
-    x, y, feature_columns, behavior_feature_list = get_xy_fd()
-    model = DIN(feature_columns, behavior_feature_list, hist_len_max=4, )
+    x, y, feature_columns, behavior_feature_list,dict_feat = get_xy_fd()
+    model = DIN(feature_columns, behavior_feature_list, hist_len_max=4,dict_feature_columns = dict_feat)
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
     history = model.fit(x, y, verbose=1, epochs=10, validation_split=0.5)

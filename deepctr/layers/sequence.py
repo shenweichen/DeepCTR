@@ -10,7 +10,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.python.keras import backend as K
 from tensorflow.python.keras.initializers import TruncatedNormal
-from tensorflow.python.keras.layers import LSTM, Lambda, Layer
+from tensorflow.python.keras.layers import LSTM, Lambda, Layer, Multiply
 
 from .core import LocalActivationUnit
 from .normalization import LayerNormalization
@@ -738,4 +738,52 @@ class KMaxPooling(Layer):
     def get_config(self, ):
         config = {'k': self.k, 'axis': self.axis}
         base_config = super(KMaxPooling, self).get_config()
+        return dict(list(base_config.items()) + list(config.items()))
+
+
+class SequenceMultiplyLayer(Layer):
+
+    def __init__(self, supports_masking, **kwargs):
+        super(SequenceMultiplyLayer, self).__init__(**kwargs)
+        self.supports_masking = supports_masking
+
+    def build(self, input_shape):
+        if not self.supports_masking:
+            self.seq_len_max = int(input_shape[0][1])
+        super(SequenceMultiplyLayer, self).build(
+            input_shape)  # Be sure to call this somewhere!
+
+    def call(self, input_list, mask=None, **kwargs):
+        print("mask  ", mask)
+        if self.supports_masking:
+            if mask is None:
+                raise ValueError(
+                    "When supports_masking=True,input must support masking")
+            key_input, value_input = input_list
+            mask = tf.cast(mask[0], tf.float32)
+            mask = tf.expand_dims(mask, axis=2)
+        else:
+            key_input, key_length_input, value_input = input_list
+            mask = tf.sequence_mask(key_length_input,
+                                    self.seq_len_max, dtype=tf.float32)
+            mask = tf.transpose(mask, (0, 2, 1))
+
+        embedding_size = key_input.shape[-1]
+        mask = tf.tile(mask, [1, 1, embedding_size])
+        key_input *= mask
+        if len(tf.shape(value_input)) == 2:
+            value_input = tf.expand_dims(value_input, axis=2)
+            value_input = tf.tile(value_input, [1, 1, embedding_size])
+        return tf.multiply(key_input,value_input)
+
+    def compute_output_shape(self, input_shape):
+        return input_shape[0]
+
+    def compute_mask(self, inputs, mask):
+        print('compute_mask ',mask[0])
+        return mask[0]
+
+    def get_config(self, ):
+        config = {'supports_masking': self.supports_masking}
+        base_config = super(SequenceMultiplyLayer, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))

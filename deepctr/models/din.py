@@ -11,7 +11,7 @@ Reference:
 from tensorflow.python.keras.layers import Dense,Concatenate, Flatten
 from tensorflow.python.keras.models import Model
 
-from ..inputs import  build_input_features,create_embedding_matrix,SparseFeat,VarLenSparseFeat,DenseFeat,embedding_lookup,get_dense_input,varlen_embedding_lookup,get_varlen_pooling_list,combined_dnn_input
+from ..inputs import  build_input_features,create_embedding_matrix,SparseFeat,VarLenSparseFeat,DenseFeat,embedding_lookup,get_dense_input,varlen_embedding_lookup,get_varlen_pooling_list,combined_dnn_input,get_varlen_multiply_list
 from ..layers.core import DNN, PredictionLayer
 from ..layers.sequence import AttentionSequencePoolingLayer
 from ..layers.utils import concat_fun, NoMask
@@ -20,7 +20,7 @@ from ..layers.utils import concat_fun, NoMask
 def DIN(dnn_feature_columns, history_feature_list, embedding_size=8, hist_len_max=16, dnn_use_bn=False,
         dnn_hidden_units=(200, 80), dnn_activation='relu', att_hidden_size=(80, 40), att_activation="dice",
         att_weight_normalization=False, l2_reg_dnn=0, l2_reg_embedding=1e-6, dnn_dropout=0, init_std=0.0001, seed=1024,
-        task='binary'):
+        task='binary',dict_feature_columns = None):
     """Instantiates the Deep Interest Network architecture.
 
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
@@ -43,6 +43,8 @@ def DIN(dnn_feature_columns, history_feature_list, embedding_size=8, hist_len_ma
 
     """
 
+    if dict_feature_columns == None:
+        dict_feature_columns = {}
 
     features = build_input_features(dnn_feature_columns)
 
@@ -59,8 +61,7 @@ def DIN(dnn_feature_columns, history_feature_list, embedding_size=8, hist_len_ma
         feature_name = fc.name
         if feature_name in history_fc_names:
             history_feature_columns.append(fc)
-        else:
-            sparse_varlen_feature_columns.append(fc)
+        sparse_varlen_feature_columns.append(fc)
 
 
     inputs_list = list(features.values())
@@ -75,9 +76,12 @@ def DIN(dnn_feature_columns, history_feature_list, embedding_size=8, hist_len_ma
     dense_value_list = get_dense_input(features, dense_feature_columns)
 
     sequence_embed_dict = varlen_embedding_lookup(embedding_dict,features,sparse_varlen_feature_columns)
+
+    varlen_multiply_list = get_varlen_multiply_list(sequence_embed_dict,features,dict_feature_columns)
+
     sequence_embed_list = get_varlen_pooling_list(sequence_embed_dict, features, sparse_varlen_feature_columns)
     dnn_input_emb_list += sequence_embed_list
-
+    dnn_input_emb_list += varlen_multiply_list
 
     keys_emb = concat_fun(keys_emb_list)
     deep_input_emb = concat_fun(dnn_input_emb_list)
