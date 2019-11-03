@@ -55,8 +55,8 @@ def FiBiNET(linear_feature_columns, dnn_feature_columns, embedding_size=8, bilin
     bilinear_out = BilinearInteraction(
         bilinear_type=bilinear_type, seed=seed)(sparse_embedding_list)
 
-    linear_logit = get_linear_logit(features, linear_feature_columns, l2_reg=l2_reg_linear, init_std=init_std,
-                                    seed=seed, prefix='linear')
+    linear_logit = get_linear_logit(features, linear_feature_columns, init_std=init_std, seed=seed, prefix='linear',
+                                    l2_reg=l2_reg_linear)
 
     dnn_input = combined_dnn_input(
         [Flatten()(concat_fun([senet_bilinear_out, bilinear_out]))], dense_value_list)

@@ -60,14 +60,14 @@ def MLR(region_feature_columns, base_feature_columns=None, region_num=4,
 
 def get_region_score(features,feature_columns, region_number, l2_reg, init_std, seed,prefix='region_',seq_mask_zero=True):
 
-    region_logit =concat_fun([get_linear_logit(features, feature_columns, l2_reg=l2_reg, init_std=init_std,
-                                               seed=seed + i, prefix=prefix + str(i + 1)) for i in range(region_number)])
+    region_logit =concat_fun([get_linear_logit(features, feature_columns, init_std=init_std, seed=seed + i,
+                                               prefix=prefix + str(i + 1), l2_reg=l2_reg) for i in range(region_number)])
     return Activation('softmax')(region_logit)
 
 def get_learner_score(features,feature_columns, region_number, l2_reg, init_std, seed,prefix='learner_',seq_mask_zero=True,task='binary'):
     region_score = [PredictionLayer(task=task,use_bias=False)(
-        get_linear_logit(features, feature_columns, l2_reg=l2_reg, init_std=init_std, seed=seed + i,
-                         prefix=prefix + str(i + 1))) for i in
+        get_linear_logit(features, feature_columns, init_std=init_std, seed=seed + i, prefix=prefix + str(i + 1),
+                         l2_reg=l2_reg)) for i in
                     range(region_number)]
 
     return concat_fun(region_score)

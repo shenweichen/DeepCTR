@@ -45,8 +45,8 @@ def AFM(linear_feature_columns, dnn_feature_columns, embedding_size=8, use_atten
                                                                                                l2_reg_embedding, init_std,
                                                                                                seed,support_dense=False)
 
-    linear_logit = get_linear_logit(features, linear_feature_columns, l2_reg=l2_reg_linear, init_std=init_std,
-                                    seed=seed, prefix='linear')
+    linear_logit = get_linear_logit(features, linear_feature_columns, init_std=init_std, seed=seed, prefix='linear',
+                                    l2_reg=l2_reg_linear)
 
     fm_input = concat_fun(sparse_embedding_list, axis=1)
     if use_attention:
