@@ -24,7 +24,7 @@ Welcome to DeepCTR's documentation!
 .. _Issues: https://github.com/shenweichen/deepctr/issues
 
 .. |Chat| image:: https://img.shields.io/badge/chat-wechat-brightgreen?style=flat
-.. _Chat: ./#Disscussion-Group
+.. _Chat: ./#DisscussionGroup
 
 DeepCTR is a **Easy-to-use** , **Modular** and **Extendible** package of deep-learning based CTR models along with lots of core components layer  which can be used to build your own custom model easily.It is compatible with **tensorflow 1.4+ and 2.0+**.You can use any complex model with ``model.fit()`` and ``model.predict()``.
 
@@ -40,12 +40,12 @@ News
 
 08/02/2019 : Now DeepCTR is compatible with tensorflow `1.14` and `2.0.0`. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.6.0>`_
 
-Disscussion Group
+DisscussionGroup
 -----------------------
 
 - 公众号：**浅梦的学习笔记**  微信ID: **deepctrbot**
 
-image:: ../pics/weichennote.png
+.. image:: ../pics/weichennote.png
 
 .. toctree::
    :maxdepth: 2
