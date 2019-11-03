@@ -45,10 +45,10 @@ Let's [**Get Started!**](https://deepctr-doc.readthedocs.io/en/latest/Quick-Star
 |     Deep Session Interest Network      | [IJCAI 2019][Deep Session Interest Network for Click-Through Rate Prediction ](https://arxiv.org/abs/1905.06482)                                                |
 |                FiBiNET                 | [RecSys 2019][FiBiNET: Combining Feature Importance and Bilinear feature Interaction for Click-Through Rate Prediction](https://arxiv.org/pdf/1905.09433.pdf)   |
 
-## Disscussion Group
-Please follow our wechat to join group:
-- 公众号：**浅梦的学习笔记**
-- 微信ID: **deepctrbot**(注明来自deepctr项目)
-- QR code
-  
+
+## Disscussion Group  
+
+Please follow our wechat to join group:  
+- 公众号：**浅梦的学习笔记**  
+- wechat ID: **deepctrbot**
 ![wechat](./docs/pics/weichennote.png)

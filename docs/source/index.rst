@@ -42,10 +42,10 @@ News
 
 Disscussion Group
 -----------------------
-- 公众号：**浅梦的学习笔记**
-- 微信ID: **deepctrbot**(注明来自deepctr项目)
 
-image:: https://raw.githubusercontent.com/shenweichen/DeepCTR/blob/master/docs/pics/weichennote.png
+- 公众号：**浅梦的学习笔记**  微信ID: **deepctrbot**
+
+image:: ../pics/weichennote.png
 
 .. toctree::
    :maxdepth: 2
