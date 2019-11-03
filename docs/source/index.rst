@@ -43,7 +43,7 @@ News
 DisscussionGroup
 -----------------------
 
-- 公众号：**浅梦的学习笔记**  微信ID: **deepctrbot**
+* 公众号：**浅梦的学习笔记**  wechat ID: **deepctrbot**
 
 .. image:: ../pics/weichennote.png
 
