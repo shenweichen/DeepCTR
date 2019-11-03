@@ -42,7 +42,7 @@ News
 
 Disscussion Group
 -----
-image:: https://raw.githubusercontent.com/shenweichen/deepctr/master/docs/pics/weichennote.jpg?sanitize=true
+image:: https://raw.githubusercontent.com/shenweichen/deepctr/master/docs/pics/weichennote.png?sanitize=true
 
 .. toctree::
    :maxdepth: 2
