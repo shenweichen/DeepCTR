@@ -23,8 +23,8 @@ Welcome to DeepCTR's documentation!
 .. |Issues| image:: https://img.shields.io/github/issues/shenweichen/deepctr.svg
 .. _Issues: https://github.com/shenweichen/deepctr/issues
 
-.. |Gitter| image:: https://badges.gitter.im/DeepCTR/community.svg
-.. _Gitter: https://gitter.im/DeepCTR/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge
+.. |Chat| image:: https://img.shields.io/badge/chat-wechat-brightgreen?style=flat
+.. _Gitter: ./#Disscussion-Group
 
 DeepCTR is a **Easy-to-use** , **Modular** and **Extendible** package of deep-learning based CTR models along with lots of core components layer  which can be used to build your own custom model easily.It is compatible with **tensorflow 1.4+ and 2.0+**.You can use any complex model with ``model.fit()`` and ``model.predict()``.
 
@@ -39,6 +39,10 @@ News
 09/22/2019 : `DeepCTR-Torch <https://github.com/shenweichen/DeepCTR-Torch>`_ first version v0.1.0  is released on `PyPi <https://pypi.org/project/deepctr-torch/>`_ !
 
 08/02/2019 : Now DeepCTR is compatible with tensorflow `1.14` and `2.0.0`. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.6.0>`_
+
+Disscussion Group
+-----
+image:: https://raw.githubusercontent.com/shenweichen/deepctr/master/docs/pics/weichennote.jpg?sanitize=true
 
 .. toctree::
    :maxdepth: 2

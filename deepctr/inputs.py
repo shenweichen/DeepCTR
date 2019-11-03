@@ -141,7 +141,8 @@ def create_embedding_matrix(feature_columns,l2_reg,init_std,seed,embedding_size,
                                                  l2_reg, prefix=prefix + 'sparse',seq_mask_zero=seq_mask_zero)
     return sparse_emb_dict
 
-def get_linear_logit(features, feature_columns, units=1, l2_reg=0, init_std=0.0001, seed=1024, prefix='linear'):
+def get_linear_logit(features, feature_columns, units=1, use_bias=False, init_std=0.0001, seed=1024, prefix='linear',
+                     l2_reg=0):
 
     linear_emb_list = [input_from_feature_columns(features,feature_columns,1,l2_reg,init_std,seed,prefix=prefix+str(i))[0] for i in range(units)]
     _, dense_input_list = input_from_feature_columns(features,feature_columns,1,l2_reg,init_std,seed,prefix=prefix)
@@ -152,13 +153,13 @@ def get_linear_logit(features, feature_columns, units=1, l2_reg=0, init_std=0.00
         if len(linear_emb_list[0])>0 and len(dense_input_list) >0:
             sparse_input = concat_fun(linear_emb_list[i])
             dense_input = concat_fun(dense_input_list)
-            linear_logit = Linear(l2_reg,mode=2)([sparse_input,dense_input])
+            linear_logit = Linear(l2_reg,mode=2,use_bias=use_bias)([sparse_input,dense_input])
         elif len(linear_emb_list[0])>0:
             sparse_input = concat_fun(linear_emb_list[i])
-            linear_logit = Linear(l2_reg,mode=0)(sparse_input)
+            linear_logit = Linear(l2_reg,mode=0,use_bias=use_bias)(sparse_input)
         elif len(dense_input_list) >0:
             dense_input = concat_fun(dense_input_list)
-            linear_logit = Linear(l2_reg,mode=1)(dense_input)
+            linear_logit = Linear(l2_reg,mode=1,use_bias=use_bias)(dense_input)
         else:
             raise NotImplementedError
         linear_logit_list.append(linear_logit)

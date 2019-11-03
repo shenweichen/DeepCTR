@@ -41,8 +41,8 @@ def FNN(linear_feature_columns, dnn_feature_columns, embedding_size=8, dnn_hidde
                                                                               l2_reg_embedding,init_std,
                                                                               seed)
 
-    linear_logit = get_linear_logit(features, linear_feature_columns, l2_reg=l2_reg_linear, init_std=init_std,
-                                    seed=seed, prefix='linear')
+    linear_logit = get_linear_logit(features, linear_feature_columns, init_std=init_std, seed=seed, prefix='linear',
+                                    l2_reg=l2_reg_linear)
 
     dnn_input = combined_dnn_input(sparse_embedding_list,dense_value_list)
     deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn,
