@@ -48,5 +48,10 @@ Let's [**Get Started!**](https://deepctr-doc.readthedocs.io/en/latest/Quick-Star
 ## Disscussion Group
 Please follow our wechat to join group:
 
+- official account ID:weichennote
 <img src="./docs/pics/weichennote.jpg" width = "300" height = "300" />
+
+- wechat ID:deepctrbot
+<img src="./docs/pics/deepctrbot.jpeg" width = "300" height = "300" />
+
 
