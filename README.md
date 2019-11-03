@@ -48,4 +48,5 @@ Let's [**Get Started!**](https://deepctr-doc.readthedocs.io/en/latest/Quick-Star
 ## Disscussion Group
 Please follow our wechat to join group:
 
-![weichennote](./docs/pics/weichennote.jpg)
+<img src="./docs/pics/weichennote.jpg" width = "300" height = "300" />
+
