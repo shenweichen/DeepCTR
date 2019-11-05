@@ -103,10 +103,9 @@ def DSIN(dnn_feature_columns, sess_feature_list, embedding_size=8, sess_max_coun
                                           mask_feat_list=sess_feature_list)
     dense_value_list = get_dense_input(features, dense_feature_columns)
 
-    query_emb = concat_fun(query_emb_list)
+    query_emb = concat_fun(query_emb_list,mask=True)
 
-    dnn_input_emb = concat_fun(dnn_input_emb_list)
-    dnn_input_emb = Flatten()(NoMask()(dnn_input_emb))
+    dnn_input_emb = Flatten()(concat_fun(dnn_input_emb_list))
 
     tr_input = sess_interest_division(embedding_dict, user_behavior_input_dict, sparse_feature_columns,
                                       sess_feature_list, sess_max_count, bias_encoding=bias_encoding)
@@ -158,7 +157,7 @@ def sess_interest_division(sparse_embedding_dict, user_behavior_input_dict, spar
                                                sparse_fg_list, sess_feture_list, sess_feture_list)
         # [sparse_embedding_dict[feat](user_behavior_input_dict[sess_name][feat]) for feat in
         #             sess_feture_list]
-        keys_emb = concat_fun(keys_emb_list)
+        keys_emb = concat_fun(keys_emb_list,mask=True)
         tr_input.append(keys_emb)
     if bias_encoding:
         tr_input = BiasEncoding(sess_max_count)(tr_input)

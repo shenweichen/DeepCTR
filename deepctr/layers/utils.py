@@ -107,13 +107,18 @@ class Linear(tf.keras.layers.Layer):
     def compute_output_shape(self, input_shape):
         return (None, 1)
 
+    def compute_mask(self, inputs, mask):
+        return None
+
     def get_config(self, ):
         config = {'mode': self.mode, 'l2_reg': self.l2_reg}
         base_config = super(Linear, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
 
-def concat_fun(inputs, axis=-1):
+def concat_fun(inputs, axis=-1,mask=False):
+    if not mask:
+        inputs = list(map(NoMask(), inputs))
     if len(inputs) == 1:
         return inputs[0]
     else:

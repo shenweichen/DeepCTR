@@ -79,9 +79,9 @@ def DIN(dnn_feature_columns, history_feature_list, embedding_size=8, hist_len_ma
     dnn_input_emb_list += sequence_embed_list
 
 
-    keys_emb = concat_fun(keys_emb_list)
+    keys_emb = concat_fun(keys_emb_list,mask=True)
     deep_input_emb = concat_fun(dnn_input_emb_list)
-    query_emb = concat_fun(query_emb_list)
+    query_emb = concat_fun(query_emb_list,mask=True)
 
     hist = AttentionSequencePoolingLayer(att_hidden_size, att_activation,
                                          weight_normalization=att_weight_normalization, supports_masking=True)([
