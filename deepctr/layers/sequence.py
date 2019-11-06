@@ -106,9 +106,29 @@ class SequencePoolingLayer(Layer):
 
 
 class WeightedSequenceLayer(Layer):
+    """The WeightedSequenceLayer is used to apply weight score on variable-length sequence feature/multi-value feature.
 
-    def __init__(self, supports_masking, **kwargs):
+      Input shape
+        - A list of two  tensor [seq_value,seq_len,seq_weight]
+
+        - seq_value is a 3D tensor with shape: ``(batch_size, T, embedding_size)``
+
+        - seq_len is a 2D tensor with shape : ``(batch_size, 1)``,indicate valid length of each sequence.
+
+        - seq_weight is a 3D tensor with shape: ``(batch_size, T, 1)``
+
+      Output shape
+        - 3D tensor with shape: ``(batch_size, T, embedding_size)``.
+
+      Arguments
+        - **weight_normalization**: bool.Whether normalize the weight socre before applying to sequence.
+
+        - **supports_masking**:If True,the input need to support masking.
+    """
+
+    def __init__(self,weight_normalization=False, supports_masking=False, **kwargs):
         super(WeightedSequenceLayer, self).__init__(**kwargs)
+        self.weight_normalization = weight_normalization
         self.supports_masking = supports_masking
 
     def build(self, input_shape):
@@ -123,20 +143,29 @@ class WeightedSequenceLayer(Layer):
                 raise ValueError(
                     "When supports_masking=True,input must support masking")
             key_input, value_input = input_list
-            mask = tf.cast(mask[0], tf.float32)
-            mask = tf.expand_dims(mask, axis=2)
+            mask = tf.expand_dims(mask[0], axis=2)
         else:
             key_input, key_length_input, value_input = input_list
             mask = tf.sequence_mask(key_length_input,
-                                    self.seq_len_max, dtype=tf.float32)
+                                    self.seq_len_max, dtype=tf.bool)
             mask = tf.transpose(mask, (0, 2, 1))
 
         embedding_size = key_input.shape[-1]
-        mask = tf.tile(mask, [1, 1, embedding_size])
-        key_input *= mask
+
+        if self.weight_normalization:
+            paddings = tf.ones_like(value_input) * (-2 ** 32 + 1)
+        else:
+            paddings = tf.zeros_like(value_input)
+        value_input = tf.where(mask, value_input, paddings)
+
+        if self.weight_normalization:
+           value_input = softmax(value_input,dim=1)
+
+
         if len(value_input.shape) == 2:
             value_input = tf.expand_dims(value_input, axis=2)
             value_input = tf.tile(value_input, [1, 1, embedding_size])
+
         return tf.multiply(key_input,value_input)
 
     def compute_output_shape(self, input_shape):

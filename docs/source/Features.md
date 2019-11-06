@@ -21,6 +21,38 @@ DNN based CTR estimation models consists of the following 4 modules:
 
  > High-order Extractor learns feature combination through complex neural network functions like MLP,Cross Net,etc.
 
+## Feature Columns
+### SparseFeat
+``SparseFeat`` is a namedtuple with signature ``SparseFeat(name, dimension, use_hash, dtype, embedding_name,embedding)``
+
+- name : feature name
+- dimension : number of unique feature values for sprase feature,hashing space when hash_flag=True, any value for dense feature.
+- use_hash : defualt `False`.If `True` the input will be hashed to space of size `dimension`.
+- dtype : default `float32`.dtype of input tensor.
+- embedding_name : default `None`. If None, the embedding_name` will be same as `name`.
+- embedding : default `True`.If `False`, the feature will not be embeded to a dense vector.
+
+### DenseFeat
+``DenseFeat`` is a namedtuple with signature ``DenseFeat(name, dimension, dtype)``
+
+- name : feature name
+- dimension : dimension of dense feature vector.
+- dtype : default `float32`.dtype of input tensor.
+
+### VarLenSparseFeat
+
+``VarLenSparseFeat`` is a namedtuple with signature ``VarLenSparseFeat(name, dimension, maxlen, combiner, use_hash, dtype, weight_name,embedding_name,embedding)``
+
+- name : feature name,if it is already used in sparse_feature_dim,then a shared embedding mechanism will be used.
+- dimension : number of unique feature values
+- maxlen : maximum length of this feature for all samples
+- combiner : pooling method,can be ``sum``,``mean`` or ``max``
+- use_hash : defualt `False`.if `True` the input will be hashed to space of size `dimension`.
+- dtype : default `float32`.dtype of input tensor.
+- weight_name : default `None`. If not None, the sequence feature will be multiplyed by the feature whose name is `weight_name`.
+- embedding_name : default `None`. If None, the `embedding_name` will be same as `name`.
+- embedding : default `True`.If `False`, the feature will not be embeded to a dense vector.
+
 ## Models
 
 

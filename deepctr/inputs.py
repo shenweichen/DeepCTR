@@ -28,7 +28,7 @@ class SparseFeat(namedtuple('SparseFeat', ['name', 'dimension', 'use_hash', 'dty
         return self.name.__hash__()
 
     def __eq__(self, other):
-        if self.name == other.name:
+        if self.name == other.name and self.embedding_name == other.embedding_name:
             return True
         return False
 
@@ -71,25 +71,6 @@ class VarLenSparseFeat(namedtuple('VarLenFeat', ['name', 'dimension', 'maxlen', 
 
     def __repr__(self):
         return 'VarLenSparseFeat:'+self.name
-
-# class WeightedVarLenSparseFeat(namedtuple('VarLenFeat', ['name','weight' ,'dimension', 'maxlen', 'combiner', 'use_hash', 'dtype','embedding_name','embedding'])):
-#     __slots__ = ()
-#
-#     def __new__(cls, name, weight,dimension, maxlen, combiner="mean", use_hash=False, dtype="float32", embedding_name=None,embedding=True):
-#         if embedding_name is None:
-#             embedding_name = name
-#         return super(WeightedVarLenSparseFeat, cls).__new__(cls, name, weight,dimension, maxlen, combiner, use_hash, dtype, embedding_name,embedding)
-#
-#     def __hash__(self):
-#         return self.name.__hash__()
-#
-#     def __eq__(self, other):
-#         if self.name == other.name:
-#             return True
-#         return False
-#
-#     def __repr__(self):
-#         return 'WeightedVarLenSparseFeat:'+self.name
 
 
 def get_feature_names(feature_columns):
@@ -254,7 +235,7 @@ def get_varlen_pooling_list(embedding_dict, features, varlen_sparse_feature_colu
         feature_length_name = feature_name + '_seq_length'
         if feature_length_name in features:
             if fc.weight_name is not None:
-                seq_input =WeightedSequenceLayer(supports_masking=False)([embedding_dict[feature_name],features[feature_length_name],features[fc.weight_name]])
+                seq_input =WeightedSequenceLayer()([embedding_dict[feature_name],features[feature_length_name],features[fc.weight_name]])
             else:
                 seq_input = embedding_dict[feature_name]
             vec = SequencePoolingLayer(combiner, supports_masking=False)(
@@ -282,7 +263,7 @@ def get_varlen_multiply_list(embedding_dict, features, varlen_sparse_feature_col
             else:
                 raise TypeError("Invalid feature column type,got",type(value_feature))
             if key_feature_length_name in features:
-                varlen_vec = WeightedSequenceLayer(supports_masking=False)(
+                varlen_vec = WeightedSequenceLayer()(
                     [embedding_dict[key_feature.name], features[key_feature_length_name], value_input])
                 vec = SequencePoolingLayer('sum', supports_masking=False)(
                     [varlen_vec, features[key_feature_length_name]])

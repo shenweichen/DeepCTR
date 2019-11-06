@@ -51,4 +51,5 @@ Let's [**Get Started!**](https://deepctr-doc.readthedocs.io/en/latest/Quick-Star
 Please follow our wechat to join group:  
 - 公众号：**浅梦的学习笔记**  
 - wechat ID: **deepctrbot**
-![wechat](./docs/pics/weichennote.png)
+
+  ![wechat](./docs/pics/weichennote.png)

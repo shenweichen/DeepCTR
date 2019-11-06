@@ -38,8 +38,15 @@ if __name__ == "__main__":
 
     fixlen_feature_columns = [SparseFeat(feat, data[feat].nunique())
                         for feat in sparse_features]
-    varlen_feature_columns = [VarLenSparseFeat('genres', len(
-        key2index) + 1, max_len, 'mean')]  # Notice : value 0 is for padding for sequence input feature
+
+    use_weighted_sequence = False
+    if use_weighted_sequence:
+        data['genres_weight'] = np.random.randn(data.shape[0])
+        varlen_feature_columns = [VarLenSparseFeat('genres', len(
+            key2index) + 1, max_len, 'mean',weight_name='genres_weight')]  # Notice : value 0 is for padding for sequence input feature
+    else:
+        varlen_feature_columns = [VarLenSparseFeat('genres', len(
+            key2index) + 1, max_len, 'mean',weight_name=None)]  # Notice : value 0 is for padding for sequence input feature
 
     linear_feature_columns = fixlen_feature_columns + varlen_feature_columns
     dnn_feature_columns = fixlen_feature_columns + varlen_feature_columns

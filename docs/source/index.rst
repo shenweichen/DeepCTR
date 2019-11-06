@@ -34,11 +34,11 @@ You can read the latest code at https://github.com/shenweichen/DeepCTR
 
 News
 -----
+11/06/2019 : Add ``WeightedSequenceLayer`` and support `weighted sequence feature input <./Examples.html#multi-value-input-movielens>`_. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.6.3>`_
+
 10/03/2019 : Simplify the input logic(`examples <./Examples.html#classification-criteo>`_). `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.6.2>`_
 
 09/22/2019 : `DeepCTR-Torch <https://github.com/shenweichen/DeepCTR-Torch>`_ first version v0.1.0  is released on `PyPi <https://pypi.org/project/deepctr-torch/>`_ !
-
-08/02/2019 : Now DeepCTR is compatible with tensorflow `1.14` and `2.0.0`. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.6.0>`_
 
 DisscussionGroup
 -----------------------

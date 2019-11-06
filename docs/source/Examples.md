@@ -10,16 +10,8 @@ click-through rate. It has 13 integer features and
 ![image](../pics/criteo_sample.png)
 
 In this example,we simply normailize the dense feature between 0 and 1,you
-can try other transformation technique like log normalization or discretization.Then we use `SparseFeat` and `DenseFeat` to generate feature columns  for sparse features and dense features.
+can try other transformation technique like log normalization or discretization.Then we use [`SparseFeat`]((./Features.html)) and [`DenseFeat`](./Features.html) to generate feature columns  for sparse features and dense features.
 
-``SparseFeat`` is a namedtuple with signature ``SparseFeat(name, dimension, use_hash, dtype, embedding_name,embedding)``
-
-- name : feature name
-- dimension : number of unique feature values for sprase feature,hashing space when hash_flag=True, any value for dense feature.
-- use_hash : defualt `False`.If `True` the input will be hashed to space of size `dimension`.
-- dtype : default `float32`.dtype of input tensor.
-- embedding_name : default `None`. If None, the embedding_name` will be same as `name`.
-- embedding : default `True`.If `False`, the feature will not be embeded to a dense vector.
 
 This example shows how to use ``DeepFM`` to solve a simple binary classification task. You can get the demo data [criteo_sample.txt](https://github.com/shenweichen/DeepCTR/tree/master/examples/criteo_sample.txt)
 and run the following codes.
@@ -204,18 +196,7 @@ Here is a small fraction of data include  sparse fields and a multivalent field.
 There are 2 additional steps to use DeepCTR with sequence feature input.
 
 1. Generate the paded and encoded sequence feature  of sequence input feature(**value 0 is for padding**).
-2. Generate config of sequence feature with `deepctr.inputs.VarLenSparseFeat`
-
-``VarLenSparseFeat`` is a namedtuple with signature ``VarLenSparseFeat(name, dimension, maxlen, combiner, use_hash, dtype, embedding_name,embedding)``
-
-- name : feature name,if it is already used in sparse_feature_dim,then a shared embedding mechanism will be used.
-- dimension : number of unique feature values
-- maxlen : maximum length of this feature for all samples
-- combiner : pooling method,can be ``sum``,``mean`` or ``max``
-- use_hash : defualt `False`.if `True` the input will be hashed to space of size `dimension`.
-- dtype : default `float32`.dtype of input tensor.
-- embedding_name : default `None`. If None, the embedding_name` will be same as `name`.
-- embedding : default `True`.If `False`, the feature will not be embeded to a dense vector.
+2. Generate config of sequence feature with [`deepctr.inputs.VarLenSparseFeat`]((./Features.html))
 
 
 This example shows how to use ``DeepFM`` with sequence(multi-value) feature. You can get the demo data 
@@ -262,8 +243,15 @@ if __name__ == "__main__":
 
     fixlen_feature_columns = [SparseFeat(feat, data[feat].nunique())
                         for feat in sparse_features]
-    varlen_feature_columns = [VarLenSparseFeat('genres', len(
-        key2index) + 1, max_len, 'mean')]  # Notice : value 0 is for padding for sequence input feature
+
+    use_weighted_sequence = False
+    if use_weighted_sequence:
+        data['genres_weight'] = np.random.randn(data.shape[0])
+        varlen_feature_columns = [VarLenSparseFeat('genres', len(
+            key2index) + 1, max_len, 'mean',weight_name='genres_weight')]  # Notice : value 0 is for padding for sequence input feature
+    else:
+        varlen_feature_columns = [VarLenSparseFeat('genres', len(
+            key2index) + 1, max_len, 'mean',weight_name=None)]  # Notice : value 0 is for padding for sequence input feature
 
     linear_feature_columns = fixlen_feature_columns + varlen_feature_columns
     dnn_feature_columns = fixlen_feature_columns + varlen_feature_columns
@@ -282,7 +270,6 @@ if __name__ == "__main__":
     model.compile("adam", "mse", metrics=['mse'], )
     history = model.fit(model_input, data[target].values,
                         batch_size=256, epochs=10, verbose=2, validation_split=0.2, )
-
 ```
 
 ## Multi-value Input : Movielens with feature hashing on the fly
