@@ -41,7 +41,6 @@ if __name__ == "__main__":
 
     use_weighted_sequence = False
     if use_weighted_sequence:
-        data['genres_weight'] = np.random.randn(data.shape[0])
         varlen_feature_columns = [VarLenSparseFeat('genres', len(
             key2index) + 1, max_len, 'mean',weight_name='genres_weight')]  # Notice : value 0 is for padding for sequence input feature
     else:
@@ -55,8 +54,9 @@ if __name__ == "__main__":
 
 
     # 3.generate input data for model
-    model_input = {name:data[name] for name in feature_names}#
+    model_input = {name:data[name] for name in sparse_features}#
     model_input["genres"] = genres_list
+    model_input["genres_weight"] =  np.random.randn(data.shape[0],max_len,1)
 
 
     # 4.Define Model,compile and train
