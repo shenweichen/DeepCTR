@@ -65,7 +65,7 @@ def get_test_data(sample_size=1000, sparse_feature_num=1, dense_feature_num=1, s
             2, 3, sample_size)
 
         model_input[prefix+"weighted_seq"] = s_input
-        model_input['weight'] = np.random.randn(SAMPLE_SIZE,3,1)
+        model_input['weight'] = np.random.randn(sample_size,3,1)
         model_input[prefix+"weighted_seq"+"_seq_length"] = s_len_input
 
 

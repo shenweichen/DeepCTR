@@ -12,7 +12,7 @@ from tests.utils import check_model, get_test_data, SAMPLE_SIZE
 def test_FGCNN(sparse_feature_num, dense_feature_num):
     model_name = "FGCNN"
 
-    sample_size = 32
+    sample_size = SAMPLE_SIZE
     x, y, feature_columns = get_test_data(
         sample_size, sparse_feature_num, dense_feature_num)
 
