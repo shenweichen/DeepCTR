@@ -39,19 +39,39 @@ def get_test_data(sample_size=1000, sparse_feature_num=1, dense_feature_num=1, s
 
 
 
-    model_input = []
+    model_input = {}
     sequence_input = []
     sequence_len_input = []
     for fc in feature_columns:
         if isinstance(fc,SparseFeat):
-            model_input.append(np.random.randint(0, fc.dimension, sample_size))
+            #model_input.append(np.random.randint(0, fc.dimension, sample_size))
+            model_input[fc.name]=np.random.randint(0, fc.dimension, sample_size)
         elif isinstance(fc,DenseFeat):
-            model_input.append(np.random.random(sample_size))
+            #model_input.append(np.random.random(sample_size))
+            model_input[fc.name] = np.random.random(sample_size)
         else:
             s_input, s_len_input = gen_sequence(
                 fc.dimension, fc.maxlen, sample_size)
-            sequence_input.append(s_input)
+            #sequence_input.append(s_input)
             sequence_len_input.append(s_len_input)
+            model_input[fc.name] = s_input
+            if include_length:
+               # dim = np.random.randint(1, 10)
+                #maxlen = np.random.randint(1, 10)
+                feature_columns.append(
+                    SparseFeat(prefix+'sequence_' + str(i)+'_seq_length', 1,embedding=False))
+                model_input[prefix+"sequence_"+str(i)+'_seq_length'] = s_len_input
+
+
+
+    if sequence_feature is not None and len(sequence_feature) > 0:
+        feature_columns.append(VarLenSparseFeat(prefix+"weighted_seq",2,3,weight_name="weight"))
+        s_input, s_len_input = gen_sequence(
+            2, 3, sample_size)
+        #sequence_input.append(s_input)
+        model_input[prefix+"weighted_seq"] = s_input
+        model_input['weight'] = s_len_input
+
 
 
 
@@ -60,17 +80,18 @@ def get_test_data(sample_size=1000, sparse_feature_num=1, dense_feature_num=1, s
     else:
         y = np.random.random(sample_size)
 
-    x = model_input+ sequence_input
-    if include_length:
-        for i, mode in enumerate(sequence_feature):
-            dim = np.random.randint(1, 10)
-            maxlen = np.random.randint(1, 10)
-            feature_columns.append(
-                SparseFeat(prefix+'sequence_' + str(i)+'_seq_length', 1,embedding=False))
+    #x = model_input+ sequence_input
+    # if include_length:
+    #     for i, mode in enumerate(sequence_feature):
+    #         dim = np.random.randint(1, 10)
+    #         maxlen = np.random.randint(1, 10)
+    #         feature_columns.append(
+    #             SparseFeat(prefix+'sequence_' + str(i)+'_seq_length', 1,embedding=False))
+    #         model_input[prefix+"sequence_"+str(i)+'_seq_length'] =
+    #
+    #     x += sequence_len_input
 
-        x += sequence_len_input
-
-    return x, y, feature_columns
+    return model_input, y, feature_columns
 
 
 def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,

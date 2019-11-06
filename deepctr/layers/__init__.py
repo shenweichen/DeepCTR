@@ -7,7 +7,7 @@ from .interaction import (CIN, FM, AFMLayer, BiInteractionPooling, CrossNet,
                           OutterProductLayer, FGCNNLayer,SENETLayer,BilinearInteraction)
 from .normalization import LayerNormalization
 from .sequence import (AttentionSequencePoolingLayer, BiasEncoding, BiLSTM,
-                       KMaxPooling, SequencePoolingLayer,
+                       KMaxPooling, SequencePoolingLayer,WeightedSequenceLayer,
                        Transformer, DynamicGRU)
 from .utils import NoMask, Hash,Linear
 
@@ -38,4 +38,5 @@ custom_objects = {'tf': tf,
                   'DynamicGRU': DynamicGRU,
                   'SENETLayer':SENETLayer,
                   'BilinearInteraction':BilinearInteraction,
+                  'WeightedSequenceLayer':WeightedSequenceLayer
                   }
