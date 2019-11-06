@@ -46,7 +46,7 @@ class SequencePoolingLayer(Layer):
         if mode not in ['sum', 'mean', 'max']:
             raise ValueError("mode must be sum or mean")
         self.mode = mode
-        self.eps = 1e-8
+        self.eps = tf.constant(1e-8,tf.float32)
         super(SequencePoolingLayer, self).__init__(**kwargs)
 
         self.supports_masking = supports_masking
@@ -85,7 +85,7 @@ class SequencePoolingLayer(Layer):
         hist = reduce_sum(hist, 1, keep_dims=False)
 
         if self.mode == "mean":
-            hist = div(hist, user_behavior_length + self.eps)
+            hist = div(hist, tf.cast(user_behavior_length,tf.float32) + self.eps)
 
         hist = tf.expand_dims(hist, axis=1)
         return hist
@@ -104,6 +104,83 @@ class SequencePoolingLayer(Layer):
         base_config = super(SequencePoolingLayer, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
+
+class WeightedSequenceLayer(Layer):
+    """The WeightedSequenceLayer is used to apply weight score on variable-length sequence feature/multi-value feature.
+
+      Input shape
+        - A list of two  tensor [seq_value,seq_len,seq_weight]
+
+        - seq_value is a 3D tensor with shape: ``(batch_size, T, embedding_size)``
+
+        - seq_len is a 2D tensor with shape : ``(batch_size, 1)``,indicate valid length of each sequence.
+
+        - seq_weight is a 3D tensor with shape: ``(batch_size, T, 1)``
+
+      Output shape
+        - 3D tensor with shape: ``(batch_size, T, embedding_size)``.
+
+      Arguments
+        - **weight_normalization**: bool.Whether normalize the weight socre before applying to sequence.
+
+        - **supports_masking**:If True,the input need to support masking.
+    """
+
+    def __init__(self,weight_normalization=False, supports_masking=False, **kwargs):
+        super(WeightedSequenceLayer, self).__init__(**kwargs)
+        self.weight_normalization = weight_normalization
+        self.supports_masking = supports_masking
+
+    def build(self, input_shape):
+        if not self.supports_masking:
+            self.seq_len_max = int(input_shape[0][1])
+        super(WeightedSequenceLayer, self).build(
+            input_shape)  # Be sure to call this somewhere!
+
+    def call(self, input_list, mask=None, **kwargs):
+        if self.supports_masking:
+            if mask is None:
+                raise ValueError(
+                    "When supports_masking=True,input must support masking")
+            key_input, value_input = input_list
+            mask = tf.expand_dims(mask[0], axis=2)
+        else:
+            key_input, key_length_input, value_input = input_list
+            mask = tf.sequence_mask(key_length_input,
+                                    self.seq_len_max, dtype=tf.bool)
+            mask = tf.transpose(mask, (0, 2, 1))
+
+        embedding_size = key_input.shape[-1]
+
+        if self.weight_normalization:
+            paddings = tf.ones_like(value_input) * (-2 ** 32 + 1)
+        else:
+            paddings = tf.zeros_like(value_input)
+        value_input = tf.where(mask, value_input, paddings)
+
+        if self.weight_normalization:
+           value_input = softmax(value_input,dim=1)
+
+
+        if len(value_input.shape) == 2:
+            value_input = tf.expand_dims(value_input, axis=2)
+            value_input = tf.tile(value_input, [1, 1, embedding_size])
+
+        return tf.multiply(key_input,value_input)
+
+    def compute_output_shape(self, input_shape):
+        return input_shape[0]
+
+    def compute_mask(self, inputs, mask):
+        if self.supports_masking:
+            return mask[0]
+        else:
+            return None
+
+    def get_config(self, ):
+        config = {'supports_masking': self.supports_masking}
+        base_config = super(WeightedSequenceLayer, self).get_config()
+        return dict(list(base_config.items()) + list(config.items()))
 
 class AttentionSequencePoolingLayer(Layer):
     """The Attentional sequence pooling operation used in DIN.
@@ -741,50 +818,3 @@ class KMaxPooling(Layer):
         return dict(list(base_config.items()) + list(config.items()))
 
 
-class SequenceMultiplyLayer(Layer):
-
-    def __init__(self, supports_masking, **kwargs):
-        super(SequenceMultiplyLayer, self).__init__(**kwargs)
-        self.supports_masking = supports_masking
-
-    def build(self, input_shape):
-        if not self.supports_masking:
-            self.seq_len_max = int(input_shape[0][1])
-        super(SequenceMultiplyLayer, self).build(
-            input_shape)  # Be sure to call this somewhere!
-
-    def call(self, input_list, mask=None, **kwargs):
-        if self.supports_masking:
-            if mask is None:
-                raise ValueError(
-                    "When supports_masking=True,input must support masking")
-            key_input, value_input = input_list
-            mask = tf.cast(mask[0], tf.float32)
-            mask = tf.expand_dims(mask, axis=2)
-        else:
-            key_input, key_length_input, value_input = input_list
-            mask = tf.sequence_mask(key_length_input,
-                                    self.seq_len_max, dtype=tf.float32)
-            mask = tf.transpose(mask, (0, 2, 1))
-
-        embedding_size = key_input.shape[-1]
-        mask = tf.tile(mask, [1, 1, embedding_size])
-        key_input *= mask
-        if len(tf.shape(value_input)) == 2:
-            value_input = tf.expand_dims(value_input, axis=2)
-            value_input = tf.tile(value_input, [1, 1, embedding_size])
-        return tf.multiply(key_input,value_input)
-
-    def compute_output_shape(self, input_shape):
-        return input_shape[0]
-
-    def compute_mask(self, inputs, mask):
-        if self.supports_masking:
-            return mask[0]
-        else:
-            return None
-
-    def get_config(self, ):
-        config = {'supports_masking': self.supports_masking}
-        base_config = super(SequenceMultiplyLayer, self).get_config()
-        return dict(list(base_config.items()) + list(config.items()))

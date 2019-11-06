@@ -42,6 +42,23 @@ def test_SequencePoolingLayer(mode, supports_masking, input_shape):
                    input_shape=input_shape, supports_masking=supports_masking)
 
 
+# @pytest.mark.parametrize(
+#
+#     'supports_masking,input_shape',
+#
+#     [( False, [(BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE), (BATCH_SIZE, 1),(BATCH_SIZE, 1)]), ( True, [(BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE),(BATCH_SIZE, 1)])
+#      ]
+#
+# )
+# def test_WeightedSequenceLayer(supports_masking, input_shape):
+#     # if version.parse(tf.__version__) >= version.parse('1.14.0') : #todo check further version
+#     #    return
+#     with CustomObjectScope({'WeightedSequenceLayer': sequence.WeightedSequenceLayer}):
+#         layer_test(sequence.WeightedSequenceLayer, kwargs={'supports_masking': supports_masking},
+#                    input_shape=input_shape, supports_masking=supports_masking)
+#
+
+
 @pytest.mark.parametrize(
 
     'merge_mode',

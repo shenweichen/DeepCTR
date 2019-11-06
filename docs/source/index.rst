@@ -24,7 +24,7 @@ Welcome to DeepCTR's documentation!
 .. _Issues: https://github.com/shenweichen/deepctr/issues
 
 .. |Chat| image:: https://img.shields.io/badge/chat-wechat-brightgreen?style=flat
-.. _Chat: ./#DisscussionGroup
+.. _Chat: ./#disscussiongroup
 
 DeepCTR is a **Easy-to-use** , **Modular** and **Extendible** package of deep-learning based CTR models along with lots of core components layer  which can be used to build your own custom model easily.It is compatible with **tensorflow 1.4+ and 2.0+**.You can use any complex model with ``model.fit()`` and ``model.predict()``.
 
@@ -34,16 +34,16 @@ You can read the latest code at https://github.com/shenweichen/DeepCTR
 
 News
 -----
+11/06/2019 : Add ``WeightedSequenceLayer`` and support `weighted sequence feature input <./Examples.html#multi-value-input-movielens>`_. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.6.3>`_
+
 10/03/2019 : Simplify the input logic(`examples <./Examples.html#classification-criteo>`_). `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.6.2>`_
 
 09/22/2019 : `DeepCTR-Torch <https://github.com/shenweichen/DeepCTR-Torch>`_ first version v0.1.0  is released on `PyPi <https://pypi.org/project/deepctr-torch/>`_ !
 
-08/02/2019 : Now DeepCTR is compatible with tensorflow `1.14` and `2.0.0`. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.6.0>`_
-
 DisscussionGroup
 -----------------------
 
-* 公众号：**浅梦的学习笔记**  wechat ID: **deepctrbot**
+公众号：**浅梦的学习笔记**  wechat ID: **deepctrbot**
 
 .. image:: ../pics/weichennote.png
 

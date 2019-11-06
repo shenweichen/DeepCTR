@@ -1,4 +1,5 @@
 # History
+- 11/06/2019 : [v0.6.3](https://github.com/shenweichen/DeepCTR/releases/tag/v0.6.3) released.Add `WeightedSequenceLayer` and support [weighted sequence feature input](./Examples.html#multi-value-input-movielens).
 - 10/03/2019 : [v0.6.2](https://github.com/shenweichen/DeepCTR/releases/tag/v0.6.2) released.Simplify the input logic.
 - 09/08/2019 : [v0.6.1](https://github.com/shenweichen/DeepCTR/releases/tag/v0.6.1) released.Fix bugs in `CCPM` and `DynamicGRU`.
 - 08/02/2019 : [v0.6.0](https://github.com/shenweichen/DeepCTR/releases/tag/v0.6.0) released.Now DeepCTR is compatible with tensorflow `1.14` and `2.0.0`. 

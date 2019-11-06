@@ -13,7 +13,7 @@ from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.layers import  Embedding, Input, Flatten
 from tensorflow.python.keras.regularizers import l2
 
-from .layers.sequence import SequencePoolingLayer, SequenceMultiplyLayer
+from .layers.sequence import SequencePoolingLayer, WeightedSequenceLayer
 from .layers.utils import Hash,concat_fun,Linear
 
 class SparseFeat(namedtuple('SparseFeat', ['name', 'dimension', 'use_hash', 'dtype','embedding_name','embedding'])):
@@ -28,7 +28,7 @@ class SparseFeat(namedtuple('SparseFeat', ['name', 'dimension', 'use_hash', 'dty
         return self.name.__hash__()
 
     def __eq__(self, other):
-        if self.name == other.name:
+        if self.name == other.name and self.embedding_name == other.embedding_name:
             return True
         return False
 
@@ -53,13 +53,13 @@ class DenseFeat(namedtuple('DenseFeat', ['name', 'dimension', 'dtype'])):
     def __repr__(self):
         return 'DenseFeat:'+self.name
 
-class VarLenSparseFeat(namedtuple('VarLenFeat', ['name', 'dimension', 'maxlen', 'combiner', 'use_hash', 'dtype','embedding_name','embedding'])):
+class VarLenSparseFeat(namedtuple('VarLenFeat', ['name', 'dimension', 'maxlen', 'combiner', 'use_hash', 'dtype','weight_name','embedding_name','embedding'])):
     __slots__ = ()
 
-    def __new__(cls, name, dimension, maxlen, combiner="mean", use_hash=False, dtype="float32", embedding_name=None,embedding=True):
+    def __new__(cls, name, dimension, maxlen,combiner="mean", use_hash=False, dtype="float32", weight_name=None,embedding_name=None,embedding=True):
         if embedding_name is None:
             embedding_name = name
-        return super(VarLenSparseFeat, cls).__new__(cls, name, dimension, maxlen, combiner, use_hash, dtype, embedding_name,embedding)
+        return super(VarLenSparseFeat, cls).__new__(cls, name, dimension, maxlen, combiner, use_hash, dtype,weight_name, embedding_name,embedding)
 
     def __hash__(self):
         return self.name.__hash__()
@@ -71,6 +71,7 @@ class VarLenSparseFeat(namedtuple('VarLenFeat', ['name', 'dimension', 'maxlen', 
 
     def __repr__(self):
         return 'VarLenSparseFeat:'+self.name
+
 
 def get_feature_names(feature_columns):
     features = build_input_features(feature_columns)
@@ -95,6 +96,9 @@ def build_input_features(feature_columns, mask_zero=True, prefix=''):
                 input_features[fc.name + "_seq_length"] = Input(shape=(
                     1,), name=prefix + 'seq_length_' + fc.name)
                 input_features[fc.name + "_seq_max_length"] = fc.maxlen
+            if fc.weight_name is not None:
+                input_features[fc.weight_name] = Input(shape=(fc.maxlen,1),name=prefix + fc.weight_name ,dtype="float32")
+
         else:
             raise TypeError("Invalid feature column type,got",type(fc))
 
@@ -201,7 +205,7 @@ def embedding_lookup(sparse_embedding_dict,sparse_input_dict,sparse_feature_colu
     for fc in sparse_feature_columns:
         feature_name = fc.name
         embedding_name = fc.embedding_name
-        if len(return_feat_list) == 0  or feature_name in return_feat_list and fc.embedding:
+        if (len(return_feat_list) == 0  or feature_name in return_feat_list ) and fc.embedding:
             if fc.use_hash:
                 lookup_idx = Hash(fc.dimension,mask_zero=(feature_name in mask_feat_list))(sparse_input_dict[feature_name])
             else:
@@ -221,7 +225,6 @@ def varlen_embedding_lookup(embedding_dict, sequence_input_dict, varlen_sparse_f
         else:
             lookup_idx = sequence_input_dict[feature_name]
         varlen_embedding_vec_dict[feature_name] = embedding_dict[embedding_name](lookup_idx)
-
     return varlen_embedding_vec_dict
 
 def get_varlen_pooling_list(embedding_dict, features, varlen_sparse_feature_columns):
@@ -231,11 +234,19 @@ def get_varlen_pooling_list(embedding_dict, features, varlen_sparse_feature_colu
         combiner = fc.combiner
         feature_length_name = feature_name + '_seq_length'
         if feature_length_name in features:
+            if fc.weight_name is not None:
+                seq_input =WeightedSequenceLayer()([embedding_dict[feature_name],features[feature_length_name],features[fc.weight_name]])
+            else:
+                seq_input = embedding_dict[feature_name]
             vec = SequencePoolingLayer(combiner, supports_masking=False)(
-            [embedding_dict[feature_name], features[feature_length_name]])
+            [seq_input, features[feature_length_name]])
         else:
+            if fc.weight_name is not None:
+                seq_input =WeightedSequenceLayer(supports_masking=True)([embedding_dict[feature_name],features[fc.weight_name]])
+            else:
+                seq_input = embedding_dict[feature_name]
             vec = SequencePoolingLayer(combiner, supports_masking=True)(
-            embedding_dict[feature_name])
+            seq_input)
         pooling_vec_list.append(vec)
     return pooling_vec_list
 
@@ -252,12 +263,12 @@ def get_varlen_multiply_list(embedding_dict, features, varlen_sparse_feature_col
             else:
                 raise TypeError("Invalid feature column type,got",type(value_feature))
             if key_feature_length_name in features:
-                varlen_vec = SequenceMultiplyLayer(supports_masking=False)(
+                varlen_vec = WeightedSequenceLayer()(
                     [embedding_dict[key_feature.name], features[key_feature_length_name], value_input])
                 vec = SequencePoolingLayer('sum', supports_masking=False)(
                     [varlen_vec, features[key_feature_length_name]])
             else:
-                varlen_vec = SequenceMultiplyLayer(supports_masking=True)(
+                varlen_vec = WeightedSequenceLayer(supports_masking=True)(
                     [embedding_dict[key_feature.name], value_input])
                 vec = SequencePoolingLayer('sum', supports_masking=True)( varlen_vec)
             multiply_vec_list.append(vec)
