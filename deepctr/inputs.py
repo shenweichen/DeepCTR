@@ -97,7 +97,7 @@ def build_input_features(feature_columns, mask_zero=True, prefix=''):
                     1,), name=prefix + 'seq_length_' + fc.name)
                 input_features[fc.name + "_seq_max_length"] = fc.maxlen
             if fc.weight_name is not None:
-                input_features[fc.weight_name] = Input(shape=(1,),name=prefix + fc.weight_name ,dtype="float32")
+                input_features[fc.weight_name] = Input(shape=(fc.maxlen,1),name=prefix + fc.weight_name ,dtype="float32")
 
         else:
             raise TypeError("Invalid feature column type,got",type(fc))
@@ -205,7 +205,7 @@ def embedding_lookup(sparse_embedding_dict,sparse_input_dict,sparse_feature_colu
     for fc in sparse_feature_columns:
         feature_name = fc.name
         embedding_name = fc.embedding_name
-        if len(return_feat_list) == 0  or feature_name in return_feat_list and fc.embedding:
+        if (len(return_feat_list) == 0  or feature_name in return_feat_list ) and fc.embedding:
             if fc.use_hash:
                 lookup_idx = Hash(fc.dimension,mask_zero=(feature_name in mask_feat_list))(sparse_input_dict[feature_name])
             else:

@@ -10,7 +10,7 @@ click-through rate. It has 13 integer features and
 ![image](../pics/criteo_sample.png)
 
 In this example,we simply normailize the dense feature between 0 and 1,you
-can try other transformation technique like log normalization or discretization.Then we use [`SparseFeat`]((./Features.html)) and [`DenseFeat`](./Features.html) to generate feature columns  for sparse features and dense features.
+can try other transformation technique like log normalization or discretization.Then we use [SparseFeat]((./Features.html#sparsefeat)) and [DenseFeat](./Features.html#densefeat) to generate feature columns  for sparse features and dense features.
 
 
 This example shows how to use ``DeepFM`` to solve a simple binary classification task. You can get the demo data [criteo_sample.txt](https://github.com/shenweichen/DeepCTR/tree/master/examples/criteo_sample.txt)
@@ -196,7 +196,7 @@ Here is a small fraction of data include  sparse fields and a multivalent field.
 There are 2 additional steps to use DeepCTR with sequence feature input.
 
 1. Generate the paded and encoded sequence feature  of sequence input feature(**value 0 is for padding**).
-2. Generate config of sequence feature with [`deepctr.inputs.VarLenSparseFeat`]((./Features.html))
+2. Generate config of sequence feature with [VarLenSparseFeat]((./Features.html#varlensparsefeat))
 
 
 This example shows how to use ``DeepFM`` with sequence(multi-value) feature. You can get the demo data 

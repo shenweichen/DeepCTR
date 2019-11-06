@@ -46,7 +46,7 @@ class SequencePoolingLayer(Layer):
         if mode not in ['sum', 'mean', 'max']:
             raise ValueError("mode must be sum or mean")
         self.mode = mode
-        self.eps = 1e-8
+        self.eps = tf.constant(1e-8,tf.float32)
         super(SequencePoolingLayer, self).__init__(**kwargs)
 
         self.supports_masking = supports_masking
@@ -85,7 +85,7 @@ class SequencePoolingLayer(Layer):
         hist = reduce_sum(hist, 1, keep_dims=False)
 
         if self.mode == "mean":
-            hist = div(hist, user_behavior_length + self.eps)
+            hist = div(hist, tf.cast(user_behavior_length,tf.float32) + self.eps)
 
         hist = tf.expand_dims(hist, axis=1)
         return hist
