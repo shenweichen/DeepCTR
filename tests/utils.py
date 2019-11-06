@@ -20,11 +20,27 @@ def gen_sequence(dim, max_len, sample_size):
     return np.array([np.random.randint(0, dim, max_len) for _ in range(sample_size)]), np.random.randint(1, max_len + 1, sample_size)
 
 
-def get_test_data(sample_size=1000, sparse_feature_num=1, dense_feature_num=1, sequence_feature=('sum', 'mean', 'max','weight'),
+def get_test_data(sample_size=1000, sparse_feature_num=1, dense_feature_num=1, sequence_feature=['sum', 'mean', 'max','weight'],
                   classification=True, include_length=False, hash_flag=False,prefix=''):
 
 
     feature_columns = []
+    model_input = {}
+
+
+    if 'weight'  in sequence_feature:
+        feature_columns.append(VarLenSparseFeat(prefix+"weighted_seq",2,3,weight_name=prefix+"weight"))
+        feature_columns.append(
+                    SparseFeat(prefix+"weighted_seq_seq_length", 1,embedding=False))
+
+        s_input, s_len_input = gen_sequence(
+            2, 3, sample_size)
+
+        model_input[prefix+"weighted_seq"] = s_input
+        model_input[prefix+'weight'] = np.random.randn(sample_size,3,1)
+        model_input[prefix+"weighted_seq"+"_seq_length"] = s_len_input
+        sequence_feature.pop(sequence_feature.index('weight'))
+
 
     for i in range(sparse_feature_num):
         dim = np.random.randint(1, 10)
@@ -39,7 +55,6 @@ def get_test_data(sample_size=1000, sparse_feature_num=1, dense_feature_num=1, s
 
 
 
-    model_input = {}
     for fc in feature_columns:
         if isinstance(fc,SparseFeat):
             model_input[fc.name]=np.random.randint(0, fc.dimension, sample_size)
@@ -56,17 +71,7 @@ def get_test_data(sample_size=1000, sparse_feature_num=1, dense_feature_num=1, s
 
 
 
-    if 'weight'  in sequence_feature:
-        feature_columns.append(VarLenSparseFeat(prefix+"weighted_seq",2,3,weight_name=prefix+"weight"))
-        feature_columns.append(
-                    SparseFeat(prefix+"weighted_seq_seq_length", 1,embedding=False))
 
-        s_input, s_len_input = gen_sequence(
-            2, 3, sample_size)
-
-        model_input[prefix+"weighted_seq"] = s_input
-        model_input[prefix+'weight'] = np.random.randn(sample_size,3,1)
-        model_input[prefix+"weighted_seq"+"_seq_length"] = s_len_input
 
 
     if classification:
