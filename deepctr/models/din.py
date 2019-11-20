@@ -7,7 +7,7 @@ Reference:
     [1] Zhou G, Zhu X, Song C, et al. Deep interest network for click-through rate prediction[C]//Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. ACM, 2018: 1059-1068. (https://arxiv.org/pdf/1706.06978.pdf)
 """
 
-
+from itertools import chain
 from tensorflow.python.keras.layers import Dense,Concatenate, Flatten
 from tensorflow.python.keras.models import Model
 
@@ -66,23 +66,26 @@ def DIN(dnn_feature_columns, history_feature_list, embedding_size=8, hist_len_ma
     inputs_list = list(features.values())
 
 
-    embedding_dict = create_embedding_matrix(dnn_feature_columns,l2_reg_embedding,init_std,seed,embedding_size, prefix="")
+    embedding_dict = create_embedding_matrix(dnn_feature_columns, l2_reg_embedding, init_std, seed, prefix="")
 
 
-    query_emb_list = embedding_lookup(embedding_dict,features,sparse_feature_columns,history_feature_list,history_feature_list)#query是单独的
-    keys_emb_list = embedding_lookup(embedding_dict, features, history_feature_columns, history_fc_names, history_fc_names)
-    dnn_input_emb_list = embedding_lookup(embedding_dict,features,sparse_feature_columns,mask_feat_list=history_feature_list)
+    query_emb_list = embedding_lookup(embedding_dict, features, sparse_feature_columns, history_feature_list,
+                                      history_feature_list,to_list=True)
+    keys_emb_list = embedding_lookup(embedding_dict, features, history_feature_columns, history_fc_names,
+                                     history_fc_names,to_list=True)
+    dnn_input_emb_list = embedding_lookup(embedding_dict, features, sparse_feature_columns,
+                                          mask_feat_list=history_feature_list,to_list=True)
     dense_value_list = get_dense_input(features, dense_feature_columns)
 
     sequence_embed_dict = varlen_embedding_lookup(embedding_dict,features,sparse_varlen_feature_columns)
-    sequence_embed_list = get_varlen_pooling_list(sequence_embed_dict, features, sparse_varlen_feature_columns)
+    sequence_embed_list = get_varlen_pooling_list(sequence_embed_dict, features, sparse_varlen_feature_columns,to_list=True)
+
     dnn_input_emb_list += sequence_embed_list
 
 
     keys_emb = concat_fun(keys_emb_list,mask=True)
     deep_input_emb = concat_fun(dnn_input_emb_list)
     query_emb = concat_fun(query_emb_list,mask=True)
-
     hist = AttentionSequencePoolingLayer(att_hidden_size, att_activation,
                                          weight_normalization=att_weight_normalization, supports_masking=True)([
         query_emb, keys_emb])

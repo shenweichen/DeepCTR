@@ -3,7 +3,7 @@ from sklearn.metrics import log_loss, roc_auc_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 
-from deepctr.models import DeepFM
+from deepctr.models import *
 from deepctr.inputs import  SparseFeat, DenseFeat, get_feature_names
 
 if __name__ == "__main__":
@@ -25,8 +25,8 @@ if __name__ == "__main__":
 
     # 2.count #unique features for each sparse field,and record dense feature field name
 
-    fixlen_feature_columns = [SparseFeat(feat, data[feat].nunique())
-                           for feat in sparse_features] + [DenseFeat(feat, 1,)
+    fixlen_feature_columns = [SparseFeat(feat, data[feat].nunique(),group_name= "a" if i <10 else "b")
+                           for i,feat in enumerate(sparse_features)] + [DenseFeat(feat, 1,)
                           for feat in dense_features]
 
     dnn_feature_columns = fixlen_feature_columns

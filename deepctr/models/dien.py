@@ -219,19 +219,20 @@ def DIEN(dnn_feature_columns, history_feature_list, embedding_size=8, hist_len_m
 
     inputs_list = list(features.values())
 
-    embedding_dict = create_embedding_matrix(dnn_feature_columns, l2_reg_embedding, init_std, seed, embedding_size,
-                                             prefix="",seq_mask_zero=False)
+    embedding_dict = create_embedding_matrix(dnn_feature_columns, l2_reg_embedding, init_std, seed, prefix="",
+                                             seq_mask_zero=False)
 
-    query_emb_list = embedding_lookup(embedding_dict, features, sparse_feature_columns, return_feat_list=history_feature_list,
-                                      )  # query是单独的
+    query_emb_list = embedding_lookup(embedding_dict, features, sparse_feature_columns,
+                                      return_feat_list=history_feature_list,to_list=True)
 
-    keys_emb_list = embedding_lookup(embedding_dict, features, history_feature_columns,return_feat_list=history_fc_names)
+    keys_emb_list = embedding_lookup(embedding_dict, features, history_feature_columns,
+                                     return_feat_list=history_fc_names,to_list=True)
     dnn_input_emb_list = embedding_lookup(embedding_dict, features, sparse_feature_columns,
-                                          mask_feat_list=history_feature_list)
+                                          mask_feat_list=history_feature_list,to_list=True)
     dense_value_list = get_dense_input(features, dense_feature_columns)
 
     sequence_embed_dict = varlen_embedding_lookup(embedding_dict, features, sparse_varlen_feature_columns)
-    sequence_embed_list = get_varlen_pooling_list(sequence_embed_dict, features, sparse_varlen_feature_columns)
+    sequence_embed_list = get_varlen_pooling_list(sequence_embed_dict, features, sparse_varlen_feature_columns,to_list=True)
     dnn_input_emb_list += sequence_embed_list
 
 
@@ -246,7 +247,8 @@ def DIEN(dnn_feature_columns, history_feature_list, embedding_size=8, hist_len_m
         #for i, feat in enumerate(history_feature_list):
         #    neg_user_behavior_input[feat] = Input(shape=(hist_len_max,), name='neg_seq_' + str(i) + '-' + feat)
 
-        neg_uiseq_embed_list = embedding_lookup(embedding_dict, features, neg_history_feature_columns, neg_history_fc_names,)
+        neg_uiseq_embed_list = embedding_lookup(embedding_dict, features, neg_history_feature_columns,
+                                                neg_history_fc_names,to_list=True)
             #get_embedding_vec_list(sparse_embedding_dict, neg_user_behavior_input, feature_columns["sparse"], history_feature_list, )
            # [sparse_embedding_dict[feat](
            # neg_user_behavior_input[feat]) for feat in seq_feature_list]

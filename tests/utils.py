@@ -15,6 +15,7 @@ from deepctr.inputs import SparseFeat, DenseFeat,VarLenSparseFeat
 from deepctr.layers import  custom_objects
 
 SAMPLE_SIZE=8
+VOCABULARY_SIZE = 4
 
 def gen_sequence(dim, max_len, sample_size):
     return np.array([np.random.randint(0, dim, max_len) for _ in range(sample_size)]), np.random.randint(1, max_len + 1, sample_size)
@@ -44,25 +45,25 @@ def get_test_data(sample_size=1000, sparse_feature_num=1, dense_feature_num=1, s
 
     for i in range(sparse_feature_num):
         dim = np.random.randint(1, 10)
-        feature_columns.append(SparseFeat(prefix+'sparse_feature_'+str(i), dim,hash_flag,tf.int32))
+        feature_columns.append(SparseFeat(prefix+'sparse_feature_'+str(i), dim,use_hash=hash_flag,dtype=tf.int32))
     for i in range(dense_feature_num):
-        feature_columns.append(DenseFeat(prefix+'dense_feature_'+str(i), 1,tf.float32))
+        feature_columns.append(DenseFeat(prefix+'dense_feature_'+str(i), 1,dtype=tf.float32))
     for i, mode in enumerate(sequence_feature):
         dim = np.random.randint(1, 10)
         maxlen = np.random.randint(1, 10)
         feature_columns.append(
-            VarLenSparseFeat(prefix+'sequence_' + str(i), dim, maxlen, mode))
+            VarLenSparseFeat(prefix+'sequence_' + str(i), dim, maxlen=maxlen, combiner=mode))
 
 
 
     for fc in feature_columns:
         if isinstance(fc,SparseFeat):
-            model_input[fc.name]=np.random.randint(0, fc.dimension, sample_size)
+            model_input[fc.name]=np.random.randint(0, fc.vocabulary_size, sample_size)
         elif isinstance(fc,DenseFeat):
             model_input[fc.name] = np.random.random(sample_size)
         else:
             s_input, s_len_input = gen_sequence(
-                fc.dimension, fc.maxlen, sample_size)
+                fc.vocabulary_size, fc.maxlen, sample_size)
             model_input[fc.name] = s_input
             if include_length:
                 feature_columns.append(

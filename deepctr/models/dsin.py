@@ -87,7 +87,7 @@ def DSIN(dnn_feature_columns, sess_feature_list, embedding_size=8, sess_max_coun
 
     user_sess_length = Input(shape=(1,), name='sess_length')
 
-    embedding_dict = {feat.embedding_name: Embedding(feat.dimension, embedding_size,
+    embedding_dict = {feat.embedding_name: Embedding(feat.vocabulary_size, embedding_size,
                                                      embeddings_initializer=RandomNormal(
                                                          mean=0.0, stddev=init_std, seed=seed),
                                                      embeddings_regularizer=l2(
@@ -98,9 +98,9 @@ def DSIN(dnn_feature_columns, sess_feature_list, embedding_size=8, sess_max_coun
                       enumerate(sparse_feature_columns)}
 
     query_emb_list = embedding_lookup(embedding_dict, features, sparse_feature_columns, sess_feature_list,
-                                      sess_feature_list)  # query是单独的
+                                      sess_feature_list,to_list=True)
     dnn_input_emb_list = embedding_lookup(embedding_dict, features, sparse_feature_columns,
-                                          mask_feat_list=sess_feature_list)
+                                          mask_feat_list=sess_feature_list,to_list=True)
     dense_value_list = get_dense_input(features, dense_feature_columns)
 
     query_emb = concat_fun(query_emb_list,mask=True)

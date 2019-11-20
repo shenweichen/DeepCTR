@@ -9,7 +9,7 @@ from .normalization import LayerNormalization
 from .sequence import (AttentionSequencePoolingLayer, BiasEncoding, BiLSTM,
                        KMaxPooling, SequencePoolingLayer,WeightedSequenceLayer,
                        Transformer, DynamicGRU)
-from .utils import NoMask, Hash,Linear
+from .utils import NoMask, Hash,Linear,Add
 
 custom_objects = {'tf': tf,
                   'InnerProductLayer': InnerProductLayer,
@@ -38,5 +38,6 @@ custom_objects = {'tf': tf,
                   'DynamicGRU': DynamicGRU,
                   'SENETLayer':SENETLayer,
                   'BilinearInteraction':BilinearInteraction,
-                  'WeightedSequenceLayer':WeightedSequenceLayer
+                  'WeightedSequenceLayer':WeightedSequenceLayer,
+                  'Add':Add
                   }

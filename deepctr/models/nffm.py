@@ -61,7 +61,7 @@ def NFFM(linear_feature_columns, dnn_feature_columns, embedding_size=4, dnn_hidd
     varlen_sparse_feature_columns = list(
         filter(lambda x: isinstance(x, VarLenSparseFeat), dnn_feature_columns)) if dnn_feature_columns else []
 
-    sparse_embedding = {fc_j.embedding_name: {fc_i.embedding_name: Embedding(fc_j.dimension, embedding_size,
+    sparse_embedding = {fc_j.embedding_name: {fc_i.embedding_name: Embedding(fc_j.vocabulary_size, embedding_size,
                                                                              embeddings_initializer=RandomNormal(
                                                                                  mean=0.0, stddev=0.0001, seed=seed),
                                                                              embeddings_regularizer=l2(
@@ -80,10 +80,10 @@ def NFFM(linear_feature_columns, dnn_feature_columns, embedding_size=4, dnn_hidd
     for fc_i, fc_j in itertools.combinations(sparse_feature_columns + varlen_sparse_feature_columns, 2):
         i_input = features[fc_i.name]
         if fc_i.use_hash:
-            i_input = Hash(fc_i.dimension)(i_input)
+            i_input = Hash(fc_i.vocabulary_size)(i_input)
         j_input = features[fc_j.name]
         if fc_j.use_hash:
-            j_input = Hash(fc_j.dimension)(j_input)
+            j_input = Hash(fc_j.vocabulary_size)(j_input)
 
         fc_i_embedding = feature_embedding(fc_i, fc_j, sparse_embedding, i_input)
         fc_j_embedding = feature_embedding(fc_j, fc_i, sparse_embedding, j_input)

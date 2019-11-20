@@ -6,8 +6,9 @@ Author:
 
 """
 
-from collections import OrderedDict, namedtuple
+from collections import OrderedDict, namedtuple,defaultdict
 from itertools import chain
+
 
 from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.layers import  Embedding, Input, Flatten
@@ -16,13 +17,16 @@ from tensorflow.python.keras.regularizers import l2
 from .layers.sequence import SequencePoolingLayer, WeightedSequenceLayer
 from .layers.utils import Hash,concat_fun,Linear
 
-class SparseFeat(namedtuple('SparseFeat', ['name', 'dimension', 'use_hash', 'dtype','embedding_name','embedding'])):
+DEFAULT_GROUP_NAME = "default_group"
+
+class SparseFeat(namedtuple('SparseFeat', ['name', 'vocabulary_size','embedding_size', 'use_hash', 'dtype','embedding_name','embedding','group_name'])):
     __slots__ = ()
 
-    def __new__(cls, name, dimension, use_hash=False, dtype="int32", embedding_name=None,embedding=True):
+    def __new__(cls, name, vocabulary_size, embedding_size=4, use_hash=False, dtype="int32", embedding_name=None,
+                embedding=True, group_name=DEFAULT_GROUP_NAME):
         if embedding and embedding_name is None:
             embedding_name = name
-        return super(SparseFeat, cls).__new__(cls, name, dimension, use_hash, dtype, embedding_name,embedding)
+        return super(SparseFeat, cls).__new__(cls, name, vocabulary_size, embedding_size,use_hash, dtype, embedding_name, embedding,group_name)
 
     def __hash__(self):
         return self.name.__hash__()
@@ -32,8 +36,8 @@ class SparseFeat(namedtuple('SparseFeat', ['name', 'dimension', 'use_hash', 'dty
             return True
         return False
 
-    def __repr__(self):
-        return 'SparseFeat:'+self.name
+    # def __repr__(self):
+    #     return 'SparseFeat:'+self.name
 
 class DenseFeat(namedtuple('DenseFeat', ['name', 'dimension', 'dtype'])):
     __slots__ = ()
@@ -50,16 +54,17 @@ class DenseFeat(namedtuple('DenseFeat', ['name', 'dimension', 'dtype'])):
             return True
         return False
 
-    def __repr__(self):
-        return 'DenseFeat:'+self.name
+    # def __repr__(self):
+    #     return 'DenseFeat:'+self.name
 
-class VarLenSparseFeat(namedtuple('VarLenFeat', ['name', 'dimension', 'maxlen', 'combiner', 'use_hash', 'dtype','weight_name','embedding_name','embedding'])):
+class VarLenSparseFeat(namedtuple('VarLenFeat', ['name', 'vocabulary_size', 'maxlen','embedding_size', 'combiner', 'use_hash', 'dtype','weight_name','embedding_name','embedding','group_name'])):
     __slots__ = ()
 
-    def __new__(cls, name, dimension, maxlen,combiner="mean", use_hash=False, dtype="float32", weight_name=None,embedding_name=None,embedding=True):
+    def __new__(cls, name, vocabulary_size, maxlen, embedding_size=4, combiner="mean", use_hash=False, dtype="float32",
+                weight_name=None, embedding_name=None, embedding=True, group_name=DEFAULT_GROUP_NAME):
         if embedding_name is None:
             embedding_name = name
-        return super(VarLenSparseFeat, cls).__new__(cls, name, dimension, maxlen, combiner, use_hash, dtype,weight_name, embedding_name,embedding)
+        return super(VarLenSparseFeat, cls).__new__(cls, name, vocabulary_size, maxlen, embedding_size,combiner, use_hash, dtype, weight_name, embedding_name, embedding,group_name)
 
     def __hash__(self):
         return self.name.__hash__()
@@ -69,8 +74,8 @@ class VarLenSparseFeat(namedtuple('VarLenFeat', ['name', 'dimension', 'maxlen', 
             return True
         return False
 
-    def __repr__(self):
-        return 'VarLenSparseFeat:'+self.name
+    # def __repr__(self):
+    #     return 'VarLenSparseFeat:'+self.name
 
 
 def get_feature_names(feature_columns):
@@ -105,46 +110,36 @@ def build_input_features(feature_columns, mask_zero=True, prefix=''):
     return input_features
 
 
-def create_embedding_dict(sparse_feature_columns, varlen_sparse_feature_columns, embedding_size, init_std, seed, l2_reg,
+def create_embedding_dict(sparse_feature_columns, varlen_sparse_feature_columns, init_std, seed, l2_reg,
                           prefix='sparse_', seq_mask_zero=True):
-    if embedding_size == 'auto':
-        print("Notice:Do not use auto embedding in models other than DCN")
-        sparse_embedding = {feat.embedding_name: Embedding(feat.dimension, 6 * int(pow(feat.dimension, 0.25)),
-                                                 embeddings_initializer=RandomNormal(
-                                                     mean=0.0, stddev=init_std, seed=seed),
-                                                 embeddings_regularizer=l2(l2_reg),
-                                                 name=prefix + '_emb_' + feat.name) for feat in
-                            sparse_feature_columns}
-    else:
-
-        sparse_embedding = {feat.embedding_name: Embedding(feat.dimension, embedding_size,
-                                                 embeddings_initializer=RandomNormal(
-                                                     mean=0.0, stddev=init_std, seed=seed),
-                                                 embeddings_regularizer=l2(
-                                                     l2_reg),
-                                                 name=prefix + '_emb_'  + feat.name) for feat in
-                            sparse_feature_columns}
+    sparse_embedding = {}
+    for feat in sparse_feature_columns:
+        if feat.embedding_size == "auto":
+            embedding_size = 6 * int(pow(feat.vocabulary_size, 0.25))
+        else:
+            embedding_size = feat.embedding_size
+        sparse_embedding[feat.embedding_name]=Embedding(feat.vocabulary_size, embedding_size,
+                                       embeddings_initializer=RandomNormal(
+                                           mean=0.0, stddev=init_std, seed=seed),
+                                       embeddings_regularizer=l2(l2_reg),
+                                       name=prefix + '_emb_' + feat.name)
 
     if varlen_sparse_feature_columns and len(varlen_sparse_feature_columns) > 0:
         for feat in varlen_sparse_feature_columns:
             # if feat.name not in sparse_embedding:
-            if embedding_size == "auto":
-                sparse_embedding[feat.embedding_name] = Embedding(feat.dimension, 6 * int(pow(feat.dimension, 0.25)),
-                                                        embeddings_initializer=RandomNormal(
-                                                            mean=0.0, stddev=init_std, seed=seed),
-                                                        embeddings_regularizer=l2(
-                                                            l2_reg),
-                                                        name=prefix + '_seq_emb_' + feat.name,
-                                                        mask_zero=seq_mask_zero)
 
+            if feat.embedding_size == "auto":
+                embedding_size = 6 * int(pow(feat.vocabulary_size, 0.25))
             else:
-                sparse_embedding[feat.embedding_name] = Embedding(feat.dimension, embedding_size,
-                                                        embeddings_initializer=RandomNormal(
-                                                            mean=0.0, stddev=init_std, seed=seed),
-                                                        embeddings_regularizer=l2(
-                                                            l2_reg),
-                                                        name=prefix + '_seq_emb_' + feat.name,
-                                                        mask_zero=seq_mask_zero)
+                embedding_size = feat.embedding_size
+
+            sparse_embedding[feat.embedding_name] = Embedding(feat.vocabulary_size, embedding_size,
+                                                    embeddings_initializer=RandomNormal(
+                                                        mean=0.0, stddev=init_std, seed=seed),
+                                                    embeddings_regularizer=l2(
+                                                        l2_reg),
+                                                    name=prefix + '_seq_emb_' + feat.name,
+                                                    mask_zero=seq_mask_zero)
     return sparse_embedding
 
 
@@ -166,20 +161,21 @@ def get_embedding_vec_list(embedding_dict, input_dict, sparse_feature_columns, r
 
 
 
-def create_embedding_matrix(feature_columns,l2_reg,init_std,seed,embedding_size, prefix="",seq_mask_zero=True):
+def create_embedding_matrix(feature_columns, l2_reg, init_std, seed, prefix="", seq_mask_zero=True):
     sparse_feature_columns = list(
         filter(lambda x: isinstance(x, SparseFeat) and x.embedding, feature_columns)) if feature_columns else []
     varlen_sparse_feature_columns = list(
         filter(lambda x: isinstance(x, VarLenSparseFeat) and x.embedding, feature_columns)) if feature_columns else []
-    sparse_emb_dict = create_embedding_dict(sparse_feature_columns, varlen_sparse_feature_columns, embedding_size, init_std, seed,
-                                                 l2_reg, prefix=prefix + 'sparse',seq_mask_zero=seq_mask_zero)
+    sparse_emb_dict = create_embedding_dict(sparse_feature_columns, varlen_sparse_feature_columns, init_std, seed,
+                                            l2_reg, prefix=prefix + 'sparse', seq_mask_zero=seq_mask_zero)
     return sparse_emb_dict
 
 def get_linear_logit(features, feature_columns, units=1, use_bias=False, init_std=0.0001, seed=1024, prefix='linear',
                      l2_reg=0):
 
-    linear_emb_list = [input_from_feature_columns(features,feature_columns,1,l2_reg,init_std,seed,prefix=prefix+str(i))[0] for i in range(units)]
-    _, dense_input_list = input_from_feature_columns(features,feature_columns,1,l2_reg,init_std,seed,prefix=prefix)
+    linear_emb_list = [input_from_feature_columns(features, feature_columns, l2_reg, init_std, seed,
+                                                       prefix=prefix + str(i))[0] for i in range(units)]
+    _, dense_input_list = input_from_feature_columns(features, feature_columns, l2_reg, init_std, seed, prefix=prefix)
 
     linear_logit_list = []
     for i in range(units):
@@ -200,20 +196,22 @@ def get_linear_logit(features, feature_columns, units=1, use_bias=False, init_st
 
     return concat_fun(linear_logit_list)
 
-def embedding_lookup(sparse_embedding_dict,sparse_input_dict,sparse_feature_columns,return_feat_list=(), mask_feat_list=()):
-    embedding_vec_list = []
+def embedding_lookup(sparse_embedding_dict, sparse_input_dict, sparse_feature_columns, return_feat_list=(),
+                     mask_feat_list=(), to_list=False):
+    group_embedding_dict = defaultdict(list)
     for fc in sparse_feature_columns:
         feature_name = fc.name
         embedding_name = fc.embedding_name
         if (len(return_feat_list) == 0  or feature_name in return_feat_list ) and fc.embedding:
             if fc.use_hash:
-                lookup_idx = Hash(fc.dimension,mask_zero=(feature_name in mask_feat_list))(sparse_input_dict[feature_name])
+                lookup_idx = Hash(fc.vocabulary_size,mask_zero=(feature_name in mask_feat_list))(sparse_input_dict[feature_name])
             else:
                 lookup_idx = sparse_input_dict[feature_name]
 
-            embedding_vec_list.append(sparse_embedding_dict[embedding_name](lookup_idx))
-
-    return embedding_vec_list
+            group_embedding_dict[fc.group_name].append(sparse_embedding_dict[embedding_name](lookup_idx))
+    if to_list:
+        return list(chain.from_iterable(group_embedding_dict.values()))
+    return group_embedding_dict
 
 def varlen_embedding_lookup(embedding_dict, sequence_input_dict, varlen_sparse_feature_columns):
     varlen_embedding_vec_dict = {}
@@ -221,14 +219,14 @@ def varlen_embedding_lookup(embedding_dict, sequence_input_dict, varlen_sparse_f
         feature_name = fc.name
         embedding_name = fc.embedding_name
         if fc.use_hash:
-            lookup_idx = Hash(fc.dimension, mask_zero=True)(sequence_input_dict[feature_name])
+            lookup_idx = Hash(fc.vocabulary_size, mask_zero=True)(sequence_input_dict[feature_name])
         else:
             lookup_idx = sequence_input_dict[feature_name]
         varlen_embedding_vec_dict[feature_name] = embedding_dict[embedding_name](lookup_idx)
     return varlen_embedding_vec_dict
 
-def get_varlen_pooling_list(embedding_dict, features, varlen_sparse_feature_columns):
-    pooling_vec_list = []
+def get_varlen_pooling_list(embedding_dict, features, varlen_sparse_feature_columns, to_list=False):
+    pooling_vec_list = defaultdict(list)
     for fc in varlen_sparse_feature_columns:
         feature_name = fc.name
         combiner = fc.combiner
@@ -247,7 +245,9 @@ def get_varlen_pooling_list(embedding_dict, features, varlen_sparse_feature_colu
                 seq_input = embedding_dict[feature_name]
             vec = SequencePoolingLayer(combiner, supports_masking=True)(
             seq_input)
-        pooling_vec_list.append(vec)
+        pooling_vec_list[fc.group_name].append(vec)
+        if to_list:
+            return chain.from_iterable(pooling_vec_list.values())
     return pooling_vec_list
 
 def get_varlen_multiply_list(embedding_dict, features, varlen_sparse_feature_columns_name_dict):
@@ -282,22 +282,25 @@ def get_dense_input(features,feature_columns):
     return dense_input_list
 
 
-def input_from_feature_columns(features,feature_columns, embedding_size, l2_reg, init_std, seed,prefix='',seq_mask_zero=True,support_dense=True):
+def input_from_feature_columns(features, feature_columns, l2_reg, init_std, seed, prefix='', seq_mask_zero=True,
+                               support_dense=True, support_group=False):
 
 
     sparse_feature_columns = list(filter(lambda x:isinstance(x,SparseFeat),feature_columns)) if feature_columns else []
     varlen_sparse_feature_columns = list(filter(lambda x: isinstance(x, VarLenSparseFeat), feature_columns)) if feature_columns else []
 
-    embedding_dict = create_embedding_matrix(feature_columns,l2_reg,init_std,seed,embedding_size, prefix=prefix,seq_mask_zero=seq_mask_zero)
-    sparse_embedding_list = embedding_lookup(
-        embedding_dict, features, sparse_feature_columns)
+    embedding_dict = create_embedding_matrix(feature_columns, l2_reg, init_std, seed, prefix=prefix,
+                                             seq_mask_zero=seq_mask_zero)
+    sparse_embedding_list = embedding_lookup(embedding_dict, features, sparse_feature_columns)
     dense_value_list = get_dense_input(features,feature_columns)
     if not support_dense and len(dense_value_list) >0:
         raise ValueError("DenseFeat is not supported in dnn_feature_columns")
 
     sequence_embed_dict = varlen_embedding_lookup(embedding_dict,features,varlen_sparse_feature_columns)
     sequence_embed_list = get_varlen_pooling_list(sequence_embed_dict, features, varlen_sparse_feature_columns)
-    sparse_embedding_list += sequence_embed_list
+    sparse_embedding_list.update(sequence_embed_list)
+    if not support_group:
+        sparse_embedding_list = list(sparse_embedding_list.values())[0]#todo check here
 
     return sparse_embedding_list, dense_value_list
 

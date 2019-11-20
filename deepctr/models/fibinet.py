@@ -43,9 +43,7 @@ def FiBiNET(linear_feature_columns, dnn_feature_columns, embedding_size=8, bilin
     inputs_list = list(features.values())
 
     sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
-                                                                         embedding_size,
-                                                                         l2_reg_embedding, init_std,
-                                                                         seed)
+                                                                         l2_reg_embedding, init_std, seed)
 
     senet_embedding_list = SENETLayer(
         reduction_ratio, seed)(sparse_embedding_list)

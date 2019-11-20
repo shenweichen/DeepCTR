@@ -53,14 +53,9 @@ def FGCNN(dnn_feature_columns, embedding_size=8, conv_kernel_width=(7, 7, 7, 7),
 
     inputs_list = list(features.values())
 
-    deep_emb_list, _ = input_from_feature_columns(features,dnn_feature_columns,
-                                                                              embedding_size,
-                                                                              l2_reg_embedding,init_std,
-                                                                              seed)
-    fg_deep_emb_list,_ = input_from_feature_columns(features,dnn_feature_columns,
-                                                                              embedding_size,
-                                                                              l2_reg_embedding,init_std,
-                                                                              seed,prefix='fg')
+    deep_emb_list, _ = input_from_feature_columns(features, dnn_feature_columns, l2_reg_embedding, init_std, seed)
+    fg_deep_emb_list,_ = input_from_feature_columns(features, dnn_feature_columns, l2_reg_embedding, init_std, seed,
+                                                    prefix='fg')
 
 
     fg_input = concat_fun(fg_deep_emb_list, axis=1)
