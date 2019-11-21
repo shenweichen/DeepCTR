@@ -44,6 +44,7 @@ def test_DIN():
 
     model = DIN(feature_columns, behavior_feature_list, hist_len_max=4, dnn_hidden_units=[4, 4, 4],
                 dnn_dropout=0.5)
+    #todo test dice
 
     check_model(model,model_name,x,y)
 
