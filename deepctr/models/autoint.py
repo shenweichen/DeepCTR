@@ -17,14 +17,13 @@ from ..layers.interaction import InteractingLayer
 from ..layers.utils import concat_fun
 
 
-def AutoInt(dnn_feature_columns, embedding_size=8, att_layer_num=3, att_embedding_size=8, att_head_num=2, att_res=True,
+def AutoInt(dnn_feature_columns, att_layer_num=3, att_embedding_size=8, att_head_num=2, att_res=True,
             dnn_hidden_units=(256, 256), dnn_activation='relu',
             l2_reg_dnn=0, l2_reg_embedding=1e-5, dnn_use_bn=False, dnn_dropout=0, init_std=0.0001, seed=1024,
             task='binary', ):
     """Instantiates the AutoInt Network architecture.
 
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
-    :param embedding_size: positive integer,sparse feature embedding_size
     :param att_layer_num: int.The InteractingLayer number to be used.
     :param att_embedding_size: int.The embedding size in multi-head self-attention network.
     :param att_head_num: int.The head number in multi-head  self-attention network.

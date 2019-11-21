@@ -13,13 +13,12 @@ from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import CrossNet
 
 
-def DCN(dnn_feature_columns, embedding_size='auto', cross_num=2, dnn_hidden_units=(128, 128,), l2_reg_embedding=1e-5,
+def DCN(dnn_feature_columns, cross_num=2, dnn_hidden_units=(128, 128,), l2_reg_embedding=1e-5,
         l2_reg_cross=1e-5, l2_reg_dnn=0, init_std=0.0001, seed=1024, dnn_dropout=0, dnn_use_bn=False,
         dnn_activation='relu', task='binary'):
     """Instantiates the Deep&Cross Network architecture.
 
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
-    :param embedding_size: positive int or str,sparse feature embedding_size.If set to "auto",it will be 6*pow(cardinality,025)
     :param cross_num: positive integet,cross layer number
     :param dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of DNN
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector

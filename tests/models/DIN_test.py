@@ -42,7 +42,7 @@ def test_DIN():
 
     x, y, feature_columns, behavior_feature_list = get_xy_fd(True)
 
-    model = DIN(feature_columns, behavior_feature_list, embedding_size=8, hist_len_max=4, dnn_hidden_units=[4, 4, 4],
+    model = DIN(feature_columns, behavior_feature_list, hist_len_max=4, dnn_hidden_units=[4, 4, 4],
                 dnn_dropout=0.5)
 
     check_model(model,model_name,x,y)

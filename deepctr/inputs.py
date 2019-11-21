@@ -300,8 +300,7 @@ def input_from_feature_columns(features, feature_columns, l2_reg, init_std, seed
     sequence_embed_list = get_varlen_pooling_list(sequence_embed_dict, features, varlen_sparse_feature_columns)
     sparse_embedding_list.update(sequence_embed_list)
     if not support_group:
-        sparse_embedding_list = list(sparse_embedding_list.values())[0]#todo check here
-
+        sparse_embedding_list = list(chain.from_iterable(sparse_embedding_list.values()))
     return sparse_embedding_list, dense_value_list
 
 

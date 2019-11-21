@@ -8,12 +8,13 @@ Reference:
 
 """
 
+from itertools import chain
 import tensorflow as tf
 
 from ..inputs import input_from_feature_columns, get_linear_logit,build_input_features,combined_dnn_input,DEFAULT_GROUP_NAME
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import FM
-from ..layers.utils import concat_fun,add_fun,Add
+from ..layers.utils import concat_fun,Add
 
 
 def DeepFM(linear_feature_columns, dnn_feature_columns, fm_group=[DEFAULT_GROUP_NAME], use_fm=True, dnn_hidden_units=(128, 128),
@@ -50,7 +51,7 @@ def DeepFM(linear_feature_columns, dnn_feature_columns, fm_group=[DEFAULT_GROUP_
 
     fm_logit = Add()([FM()(concat_fun(v, axis=1)) for k,v in group_embedding_dict.items() if k in fm_group])
 
-    dnn_input = combined_dnn_input(list(group_embedding_dict.values())[0],dense_value_list)
+    dnn_input = combined_dnn_input(list(chain.from_iterable(group_embedding_dict.values())),dense_value_list)
     dnn_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
                    dnn_use_bn, seed)(dnn_input)
     dnn_logit = tf.keras.layers.Dense(

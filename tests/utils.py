@@ -21,8 +21,9 @@ def gen_sequence(dim, max_len, sample_size):
     return np.array([np.random.randint(0, dim, max_len) for _ in range(sample_size)]), np.random.randint(1, max_len + 1, sample_size)
 
 
-def get_test_data(sample_size=1000, sparse_feature_num=1, dense_feature_num=1, sequence_feature=['sum', 'mean', 'max','weight'],
-                  classification=True, include_length=False, hash_flag=False,prefix=''):
+def get_test_data(sample_size=1000, embedding_size=4, sparse_feature_num=1, dense_feature_num=1,
+                  sequence_feature=['sum', 'mean', 'max', 'weight'], classification=True, include_length=False,
+                  hash_flag=False, prefix=''):
 
 
     feature_columns = []
@@ -30,7 +31,7 @@ def get_test_data(sample_size=1000, sparse_feature_num=1, dense_feature_num=1, s
 
 
     if 'weight'  in sequence_feature:
-        feature_columns.append(VarLenSparseFeat(prefix+"weighted_seq",2,3,weight_name=prefix+"weight"))
+        feature_columns.append(VarLenSparseFeat(prefix+"weighted_seq",2,3,embedding_size,weight_name=prefix+"weight"))
         feature_columns.append(
                     SparseFeat(prefix+"weighted_seq_seq_length", 1,embedding=False))
 
@@ -45,20 +46,20 @@ def get_test_data(sample_size=1000, sparse_feature_num=1, dense_feature_num=1, s
 
     for i in range(sparse_feature_num):
         dim = np.random.randint(1, 10)
-        feature_columns.append(SparseFeat(prefix+'sparse_feature_'+str(i), dim,use_hash=hash_flag,dtype=tf.int32))
+        feature_columns.append(SparseFeat(prefix+'sparse_feature_'+str(i), dim,embedding_size,use_hash=hash_flag,dtype=tf.int32))
     for i in range(dense_feature_num):
         feature_columns.append(DenseFeat(prefix+'dense_feature_'+str(i), 1,dtype=tf.float32))
     for i, mode in enumerate(sequence_feature):
         dim = np.random.randint(1, 10)
         maxlen = np.random.randint(1, 10)
         feature_columns.append(
-            VarLenSparseFeat(prefix+'sequence_' + str(i), dim, maxlen=maxlen, combiner=mode))
+            VarLenSparseFeat(prefix+'sequence_' + str(i), dim, maxlen=maxlen, embedding_size=embedding_size,combiner=mode))
 
 
 
     for fc in feature_columns:
         if isinstance(fc,SparseFeat):
-            model_input[fc.name]=np.random.randint(0, fc.vocabulary_size, sample_size)
+            model_input[fc.name]= np.random.randint(0, fc.vocabulary_size, sample_size)
         elif isinstance(fc,DenseFeat):
             model_input[fc.name] = np.random.random(sample_size)
         else:

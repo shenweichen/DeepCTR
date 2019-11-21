@@ -17,14 +17,13 @@ from ..layers.sequence import KMaxPooling
 from ..layers.utils import concat_fun
 
 
-def CCPM(linear_feature_columns, dnn_feature_columns, embedding_size=8, conv_kernel_width=(6, 5), conv_filters=(4, 4),
+def CCPM(linear_feature_columns, dnn_feature_columns, conv_kernel_width=(6, 5), conv_filters=(4, 4),
          dnn_hidden_units=(256,), l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_dnn=0, dnn_dropout=0,
          init_std=0.0001, seed=1024, task='binary'):
     """Instantiates the Convolutional Click Prediction Model architecture.
 
     :param linear_feature_columns: An iterable containing all the features used by linear part of the model.
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
-    :param embedding_size: positive integer,sparse feature embedding_size
     :param conv_kernel_width: list,list of positive integer or empty list,the width of filter in each conv layer.
     :param conv_filters: list,list of positive integer or empty list,the number of filters in each conv layer.
     :param dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of DNN.

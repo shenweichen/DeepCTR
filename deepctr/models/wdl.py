@@ -14,14 +14,13 @@ from ..inputs import build_input_features, get_linear_logit,input_from_feature_c
 from ..layers.core import PredictionLayer, DNN
 
 
-def WDL(linear_feature_columns, dnn_feature_columns, embedding_size=8, dnn_hidden_units=(128, 128), l2_reg_linear=1e-5,
+def WDL(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128), l2_reg_linear=1e-5,
         l2_reg_embedding=1e-5, l2_reg_dnn=0, init_std=0.0001, seed=1024, dnn_dropout=0, dnn_activation='relu',
         task='binary'):
     """Instantiates the Wide&Deep Learning architecture.
 
     :param linear_feature_columns: An iterable containing all the features used by linear part of the model.
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
-    :param embedding_size: positive integer,sparse feature embedding_size
     :param dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of DNN
     :param l2_reg_linear: float. L2 regularizer strength applied to wide part
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector

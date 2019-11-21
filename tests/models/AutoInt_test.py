@@ -14,7 +14,8 @@ def test_AutoInt(att_layer_num, dnn_hidden_units, sparse_feature_num):
         return
     model_name = "AutoInt"
     sample_size = SAMPLE_SIZE
-    x, y, feature_dim_dict = get_test_data(sample_size, sparse_feature_num, sparse_feature_num)
+    x, y, feature_dim_dict = get_test_data(sample_size, sparse_feature_num=sparse_feature_num,
+                                           dense_feature_num=sparse_feature_num)
 
     model = AutoInt(feature_dim_dict, att_layer_num=att_layer_num,
                     dnn_hidden_units=dnn_hidden_units, dnn_dropout=0.5, )
