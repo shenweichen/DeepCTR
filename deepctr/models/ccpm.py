@@ -14,7 +14,7 @@ import tensorflow as tf
 from ..inputs import input_from_feature_columns, get_linear_logit,build_input_features
 from ..layers.core import DNN, PredictionLayer
 from ..layers.sequence import KMaxPooling
-from ..layers.utils import concat_fun
+from ..layers.utils import concat_func, add_func
 
 
 def CCPM(linear_feature_columns, dnn_feature_columns, conv_kernel_width=(6, 5), conv_filters=(4, 4),
@@ -52,7 +52,7 @@ def CCPM(linear_feature_columns, dnn_feature_columns, conv_kernel_width=(6, 5), 
     n = len(sparse_embedding_list)
     l = len(conv_filters)
 
-    conv_input = concat_fun(sparse_embedding_list, axis=1)
+    conv_input = concat_func(sparse_embedding_list, axis=1)
     pooling_result = tf.keras.layers.Lambda(
         lambda x: tf.expand_dims(x, axis=3))(conv_input)
 
@@ -67,11 +67,12 @@ def CCPM(linear_feature_columns, dnn_feature_columns, conv_kernel_width=(6, 5), 
             k=min(k, int(conv_result.shape[1])), axis=1)(conv_result)
 
     flatten_result = tf.keras.layers.Flatten()(pooling_result)
-    final_logit = DNN(dnn_hidden_units, l2_reg=l2_reg_dnn,
+    dnn_out = DNN(dnn_hidden_units, l2_reg=l2_reg_dnn,
                       dropout_rate=dnn_dropout)(flatten_result)
-    final_logit = tf.keras.layers.Dense(1, use_bias=False)(final_logit)
+    dnn_logit = tf.keras.layers.Dense(1, use_bias=False)(dnn_out)
 
-    final_logit = tf.keras.layers.add([final_logit, linear_logit])
+    final_logit = add_func([dnn_logit,linear_logit])
+
     output = PredictionLayer(task)(final_logit)
     model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
     return model

@@ -14,7 +14,7 @@ from tensorflow.python.keras.layers import (Concatenate, Dense, Input, Permute, 
 from ..inputs import build_input_features, get_varlen_pooling_list,create_embedding_matrix,embedding_lookup,varlen_embedding_lookup,SparseFeat,DenseFeat,VarLenSparseFeat,get_dense_input,combined_dnn_input
 from ..layers.core import DNN, PredictionLayer
 from ..layers.sequence import AttentionSequencePoolingLayer, DynamicGRU
-from ..layers.utils import concat_fun,reduce_mean
+from ..layers.utils import concat_func,reduce_mean
 
 
 def auxiliary_loss(h_states, click_seq, noclick_seq, mask, stag=None):
@@ -236,9 +236,9 @@ def DIEN(dnn_feature_columns, history_feature_list, embedding_size=8, hist_len_m
     dnn_input_emb_list += sequence_embed_list
 
 
-    keys_emb = concat_fun(keys_emb_list)
-    deep_input_emb = concat_fun(dnn_input_emb_list)
-    query_emb = concat_fun(query_emb_list)
+    keys_emb = concat_func(keys_emb_list)
+    deep_input_emb = concat_func(dnn_input_emb_list)
+    query_emb = concat_func(query_emb_list)
 
 
 
@@ -252,7 +252,7 @@ def DIEN(dnn_feature_columns, history_feature_list, embedding_size=8, hist_len_m
             #get_embedding_vec_list(sparse_embedding_dict, neg_user_behavior_input, feature_columns["sparse"], history_feature_list, )
            # [sparse_embedding_dict[feat](
            # neg_user_behavior_input[feat]) for feat in seq_feature_list]
-        neg_concat_behavior = concat_fun(neg_uiseq_embed_list)
+        neg_concat_behavior = concat_func(neg_uiseq_embed_list)
 
     else:
         neg_concat_behavior = None

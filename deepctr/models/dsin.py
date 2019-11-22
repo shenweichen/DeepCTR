@@ -22,7 +22,7 @@ from ..inputs import (build_input_features,
 from ..layers.core import DNN, PredictionLayer
 from ..layers.sequence import (AttentionSequencePoolingLayer, BiasEncoding,
                                BiLSTM, Transformer)
-from ..layers.utils import NoMask, concat_fun
+from ..layers.utils import NoMask, concat_func
 
 
 def DSIN(dnn_feature_columns, sess_feature_list, embedding_size=8, sess_max_count=5, bias_encoding=False,
@@ -103,9 +103,9 @@ def DSIN(dnn_feature_columns, sess_feature_list, embedding_size=8, sess_max_coun
                                           mask_feat_list=sess_feature_list,to_list=True)
     dense_value_list = get_dense_input(features, dense_feature_columns)
 
-    query_emb = concat_fun(query_emb_list,mask=True)
+    query_emb = concat_func(query_emb_list, mask=True)
 
-    dnn_input_emb = Flatten()(concat_fun(dnn_input_emb_list))
+    dnn_input_emb = Flatten()(concat_func(dnn_input_emb_list))
 
     tr_input = sess_interest_division(embedding_dict, user_behavior_input_dict, sparse_feature_columns,
                                       sess_feature_list, sess_max_count, bias_encoding=bias_encoding)
@@ -157,7 +157,7 @@ def sess_interest_division(sparse_embedding_dict, user_behavior_input_dict, spar
                                                sparse_fg_list, sess_feture_list, sess_feture_list)
         # [sparse_embedding_dict[feat](user_behavior_input_dict[sess_name][feat]) for feat in
         #             sess_feture_list]
-        keys_emb = concat_fun(keys_emb_list,mask=True)
+        keys_emb = concat_func(keys_emb_list, mask=True)
         tr_input.append(keys_emb)
     if bias_encoding:
         tr_input = BiasEncoding(sess_max_count)(tr_input)
@@ -169,5 +169,5 @@ def sess_interest_extractor(tr_input, sess_max_count, TR):
     for i in range(sess_max_count):
         tr_out.append(TR(
             [tr_input[i], tr_input[i]]))
-    sess_fea = concat_fun(tr_out, axis=1)
+    sess_fea = concat_func(tr_out, axis=1)
     return sess_fea

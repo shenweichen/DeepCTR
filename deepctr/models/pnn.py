@@ -12,7 +12,7 @@ import tensorflow as tf
 from ..inputs import input_from_feature_columns,build_input_features,combined_dnn_input
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import InnerProductLayer, OutterProductLayer
-from ..layers.utils import concat_fun
+from ..layers.utils import concat_func
 
 
 def PNN(dnn_feature_columns, embedding_size=8, dnn_hidden_units=(128, 128), l2_reg_embedding=1e-5, l2_reg_dnn=0,
@@ -50,7 +50,7 @@ def PNN(dnn_feature_columns, embedding_size=8, dnn_hidden_units=(128, 128), l2_r
 
     # ipnn deep input
     linear_signal = tf.keras.layers.Reshape(
-        [len(sparse_embedding_list) * embedding_size])(concat_fun(sparse_embedding_list))
+        [len(sparse_embedding_list) * embedding_size])(concat_func(sparse_embedding_list))
 
     if use_inner and use_outter:
         deep_input = tf.keras.layers.Concatenate()(
@@ -65,12 +65,12 @@ def PNN(dnn_feature_columns, embedding_size=8, dnn_hidden_units=(128, 128), l2_r
         deep_input = linear_signal
 
     dnn_input = combined_dnn_input([deep_input],dense_value_list)
-    deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
+    dnn_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
                    False, seed)(dnn_input)
-    deep_logit = tf.keras.layers.Dense(
-        1, use_bias=False, activation=None)(deep_out)
+    dnn_logit = tf.keras.layers.Dense(
+        1, use_bias=False, activation=None)(dnn_out)
 
-    output = PredictionLayer(task)(deep_logit)
+    output = PredictionLayer(task)(dnn_logit)
 
     model = tf.keras.models.Model(inputs=inputs_list,
                                   outputs=output)

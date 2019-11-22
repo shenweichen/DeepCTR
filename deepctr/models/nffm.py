@@ -23,7 +23,7 @@ from ..inputs import (build_input_features, VarLenSparseFeat,
                       get_linear_logit, SparseFeat, get_dense_input, combined_dnn_input)
 from ..layers.core import DNN, PredictionLayer
 from ..layers.sequence import SequencePoolingLayer
-from ..layers.utils import concat_fun, Hash, NoMask
+from ..layers.utils import concat_func, Hash, NoMask, add_func
 
 
 def NFFM(linear_feature_columns, dnn_feature_columns, embedding_size=4, dnn_hidden_units=(128, 128),
@@ -94,21 +94,23 @@ def NFFM(linear_feature_columns, dnn_feature_columns, embedding_size=4, dnn_hidd
                 element_wise_prod, axis=-1))(element_wise_prod)
         embed_list.append(element_wise_prod)
 
-    ffm_out = tf.keras.layers.Flatten()(concat_fun(embed_list, axis=1))
+    ffm_out = tf.keras.layers.Flatten()(concat_func(embed_list, axis=1))
     if use_bn:
         ffm_out = tf.keras.layers.BatchNormalization()(ffm_out)
     dnn_input = combined_dnn_input([ffm_out], dense_value_list)
     dnn_out = DNN(dnn_hidden_units, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout)(dnn_input)
     dnn_logit = Dense(1, use_bias=False)(dnn_out)
 
-    if len(linear_feature_columns) > 0 and len(dnn_feature_columns) > 0:
-        final_logit = add([dnn_logit, linear_logit])
-    elif len(linear_feature_columns) > 0:
-        final_logit = linear_logit
-    elif len(dnn_feature_columns) > 0:
-        final_logit = dnn_logit
-    else:
-        raise NotImplementedError
+    # if len(linear_feature_columns) > 0 and len(dnn_feature_columns) > 0:
+    #     final_logit = add([dnn_logit, linear_logit])
+    # elif len(linear_feature_columns) > 0:
+    #     final_logit = linear_logit
+    # elif len(dnn_feature_columns) > 0:
+    #     final_logit = dnn_logit
+    # else:
+    #     raise NotImplementedError
+
+    final_logit = add_func([dnn_logit,linear_logit])
 
     output = PredictionLayer(task)(final_logit)
 

@@ -8,16 +8,19 @@ Reference:
 """
 import tensorflow as tf
 
-from ..inputs import input_from_feature_columns,build_input_features,combined_dnn_input
+from deepctr.layers.utils import add_func
+from ..inputs import input_from_feature_columns, build_input_features, combined_dnn_input, get_linear_logit
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import CrossNet
 
 
-def DCN(dnn_feature_columns, cross_num=2, dnn_hidden_units=(128, 128,), l2_reg_embedding=1e-5,
+def DCN(linear_feature_columns, dnn_feature_columns, cross_num=2, dnn_hidden_units=(128, 128,), l2_reg_linear=1e-5,
+        l2_reg_embedding=1e-5,
         l2_reg_cross=1e-5, l2_reg_dnn=0, init_std=0.0001, seed=1024, dnn_dropout=0, dnn_use_bn=False,
         dnn_activation='relu', task='binary'):
     """Instantiates the Deep&Cross Network architecture.
 
+    :param linear_feature_columns: An iterable containing all the features used by linear part of the model.
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
     :param cross_num: positive integet,cross layer number
     :param dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of DNN
@@ -41,7 +44,9 @@ def DCN(dnn_feature_columns, cross_num=2, dnn_hidden_units=(128, 128,), l2_reg_e
 
     sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
                                                                          l2_reg_embedding, init_std, seed)
-    dnn_input = combined_dnn_input(sparse_embedding_list,dense_value_list)
+    linear_logit = get_linear_logit(features, linear_feature_columns, init_std=init_std, seed=seed, prefix='linear',
+                                    l2_reg=l2_reg_linear)
+    dnn_input = combined_dnn_input(sparse_embedding_list, dense_value_list)
 
     if len(dnn_hidden_units) > 0 and cross_num > 0:  # Deep & Cross
         deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
@@ -59,6 +64,7 @@ def DCN(dnn_feature_columns, cross_num=2, dnn_hidden_units=(128, 128,), l2_reg_e
     else:  # Error
         raise NotImplementedError
 
+    final_logit = add_func([final_logit, linear_logit])
     output = PredictionLayer(task)(final_logit)
 
     model = tf.keras.models.Model(inputs=inputs_list, outputs=output)

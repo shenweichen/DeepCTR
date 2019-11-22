@@ -8,6 +8,7 @@ Reference:
 """
 import tensorflow as tf
 
+from deepctr.layers.utils import add_func
 from ..inputs import input_from_feature_columns, get_linear_logit,build_input_features,combined_dnn_input
 from ..layers.core import PredictionLayer, DNN
 
@@ -44,9 +45,10 @@ def FNN(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128)
     dnn_input = combined_dnn_input(sparse_embedding_list,dense_value_list)
     deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn,
                    dnn_dropout, False, seed)(dnn_input)
-    deep_logit = tf.keras.layers.Dense(
+    dnn_logit = tf.keras.layers.Dense(
         1, use_bias=False, activation=None)(deep_out)
-    final_logit = tf.keras.layers.add([deep_logit, linear_logit])
+    final_logit = add_func([dnn_logit,linear_logit])
+       # tf.keras.layers.add([deep_logit, linear_logit]) todo del
     output = PredictionLayer(task)(final_logit)
 
     model = tf.keras.models.Model(inputs=inputs_list,

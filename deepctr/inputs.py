@@ -12,9 +12,10 @@ from itertools import chain
 from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.layers import Embedding, Input, Flatten
 from tensorflow.python.keras.regularizers import l2
+import tensorflow as tf
 
 from .layers.sequence import SequencePoolingLayer, WeightedSequenceLayer
-from .layers.utils import Hash, concat_fun, Linear
+from .layers.utils import Hash, concat_func, Linear,add_func
 
 DEFAULT_GROUP_NAME = "default_group"
 
@@ -189,20 +190,21 @@ def get_linear_logit(features, feature_columns, units=1, use_bias=False, init_st
     for i in range(units):
 
         if len(linear_emb_list[0]) > 0 and len(dense_input_list) > 0:
-            sparse_input = concat_fun(linear_emb_list[i])
-            dense_input = concat_fun(dense_input_list)
+            sparse_input = concat_func(linear_emb_list[i])
+            dense_input = concat_func(dense_input_list)
             linear_logit = Linear(l2_reg, mode=2, use_bias=use_bias)([sparse_input, dense_input])
         elif len(linear_emb_list[0]) > 0:
-            sparse_input = concat_fun(linear_emb_list[i])
+            sparse_input = concat_func(linear_emb_list[i])
             linear_logit = Linear(l2_reg, mode=0, use_bias=use_bias)(sparse_input)
         elif len(dense_input_list) > 0:
-            dense_input = concat_fun(dense_input_list)
+            dense_input = concat_func(dense_input_list)
             linear_logit = Linear(l2_reg, mode=1, use_bias=use_bias)(dense_input)
         else:
-            raise NotImplementedError
+            #raise NotImplementedError
+            return add_func([])
         linear_logit_list.append(linear_logit)
 
-    return concat_fun(linear_logit_list)
+    return concat_func(linear_logit_list)
 
 
 def embedding_lookup(sparse_embedding_dict, sparse_input_dict, sparse_feature_columns, return_feat_list=(),
@@ -322,13 +324,13 @@ def input_from_feature_columns(features, feature_columns, l2_reg, init_std, seed
 
 def combined_dnn_input(sparse_embedding_list, dense_value_list):
     if len(sparse_embedding_list) > 0 and len(dense_value_list) > 0:
-        sparse_dnn_input = Flatten()(concat_fun(sparse_embedding_list))
-        dense_dnn_input = Flatten()(concat_fun(dense_value_list))
-        return concat_fun([sparse_dnn_input, dense_dnn_input])
+        sparse_dnn_input = Flatten()(concat_func(sparse_embedding_list))
+        dense_dnn_input = Flatten()(concat_func(dense_value_list))
+        return concat_func([sparse_dnn_input, dense_dnn_input])
     elif len(sparse_embedding_list) > 0:
-        return Flatten()(concat_fun(sparse_embedding_list))
+        return Flatten()(concat_func(sparse_embedding_list))
     elif len(dense_value_list) > 0:
-        return Flatten()(concat_fun(dense_value_list))
+        return Flatten()(concat_func(dense_value_list))
     else:
         raise NotImplementedError
 

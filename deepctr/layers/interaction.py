@@ -17,7 +17,7 @@ from tensorflow.python.keras.regularizers import l2
 from tensorflow.python.layers import utils
 
 from .activation import activation_layer
-from .utils import concat_fun,reduce_sum,softmax,reduce_mean
+from .utils import concat_func,reduce_sum,softmax,reduce_mean
 
 
 class AFMLayer(Layer):
@@ -843,7 +843,7 @@ class FGCNNLayer(Layer):
             new_feature_list.append(
                 tf.reshape(new_result, (-1, int(pooling_result.shape[1]) * new_filters, embedding_size)))
 
-        new_features = concat_fun(new_feature_list, axis=1)
+        new_features = concat_func(new_feature_list, axis=1)
         return new_features
 
     def compute_output_shape(self, input_shape):
@@ -943,7 +943,7 @@ Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
             raise ValueError(
                 "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
 
-        inputs = concat_fun(inputs, axis=1)
+        inputs = concat_func(inputs, axis=1)
         Z = reduce_mean(inputs, axis=-1,)
 
         A_1 = tf.nn.relu(self.tensordot([Z, self.W_1]))
@@ -1030,7 +1030,7 @@ Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
                  for v, w in zip(itertools.combinations(inputs, 2), self.W_list)]
         else:
             raise NotImplementedError
-        return concat_fun(p)
+        return concat_func(p)
 
     def compute_output_shape(self, input_shape):
         filed_size = len(input_shape)

@@ -116,7 +116,7 @@ class Linear(tf.keras.layers.Layer):
         return dict(list(base_config.items()) + list(config.items()))
 
 
-def concat_fun(inputs, axis=-1,mask=False):
+def concat_func(inputs, axis=-1, mask=False):
     if not mask:
         inputs = list(map(NoMask(), inputs))
     if len(inputs) == 1:
@@ -189,13 +189,6 @@ def softmax(logits, dim=-1, name=None):
     else:
         return tf.nn.softmax(logits, axis=dim, name=name)
 
-def add_fun(inputs):
-    if len(inputs)==0:
-        return tf.constant([0.0]);
-    if len(inputs)>1:
-        return tf.keras.layers.add(inputs)
-    return inputs[0]
-
 
 class Add(tf.keras.layers.Layer):
     def __init__(self, **kwargs):
@@ -214,4 +207,5 @@ class Add(tf.keras.layers.Layer):
             return tf.constant([0.0])
 
         return tf.keras.layers.add(inputs)
-
+def add_func(inputs):
+    return Add()(inputs)

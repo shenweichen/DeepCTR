@@ -14,7 +14,8 @@ import tensorflow as tf
 from ..inputs import input_from_feature_columns, get_linear_logit,build_input_features,DEFAULT_GROUP_NAME
 from ..layers.core import PredictionLayer
 from ..layers.interaction import AFMLayer, FM
-from ..layers.utils import concat_fun,Add
+from ..layers.utils import concat_func, add_func
+
 
 def AFM(linear_feature_columns, dnn_feature_columns, fm_group=DEFAULT_GROUP_NAME, use_attention=True, attention_factor=8,
         l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_att=1e-5, afm_dropout=0, init_std=0.0001, seed=1024,
@@ -47,14 +48,14 @@ def AFM(linear_feature_columns, dnn_feature_columns, fm_group=DEFAULT_GROUP_NAME
     linear_logit = get_linear_logit(features, linear_feature_columns, init_std=init_std, seed=seed, prefix='linear',
                                     l2_reg=l2_reg_linear)
 
-    #fm_input = concat_fun(sparse_embedding_list, axis=1)
+    #fm_input = concat_fun(sparse_embedding_list, axis=1) todo del
     if use_attention:
-        fm_logit = Add()([AFMLayer(attention_factor, l2_reg_att, afm_dropout,
+        fm_logit = add_func([AFMLayer(attention_factor, l2_reg_att, afm_dropout,
         seed)(list(v)) for k, v in group_embedding_dict.items() if k in fm_group])
     else:
-        fm_logit = Add()([FM()(concat_fun(v, axis=1)) for k,v in group_embedding_dict.items() if k in fm_group])
+        fm_logit = add_func([FM()(concat_func(v, axis=1)) for k, v in group_embedding_dict.items() if k in fm_group])
 
-    final_logit = tf.keras.layers.add([linear_logit, fm_logit])
+    final_logit = add_func([linear_logit,fm_logit])
     output = PredictionLayer(task)(final_logit)
 
     model = tf.keras.models.Model(inputs=inputs_list, outputs=output)

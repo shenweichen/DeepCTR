@@ -13,7 +13,7 @@ from tensorflow.python.keras.layers import Dense, add, Flatten
 from ..inputs import build_input_features, get_linear_logit, input_from_feature_columns, combined_dnn_input
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import SENETLayer, BilinearInteraction
-from ..layers.utils import concat_fun
+from ..layers.utils import concat_func, add_func
 
 
 def FiBiNET(linear_feature_columns, dnn_feature_columns, bilinear_type='interaction', reduction_ratio=3, dnn_hidden_units=(128, 128), l2_reg_linear=1e-5,
@@ -56,21 +56,21 @@ def FiBiNET(linear_feature_columns, dnn_feature_columns, bilinear_type='interact
                                     l2_reg=l2_reg_linear)
 
     dnn_input = combined_dnn_input(
-        [Flatten()(concat_fun([senet_bilinear_out, bilinear_out]))], dense_value_list)
+        [Flatten()(concat_func([senet_bilinear_out, bilinear_out]))], dense_value_list)
     dnn_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
                   False, seed)(dnn_input)
     dnn_logit = Dense(
         1, use_bias=False, activation=None)(dnn_out)
 
-    if len(linear_feature_columns) > 0 and len(dnn_feature_columns) > 0:  # linear + dnn
-        final_logit = add([linear_logit, dnn_logit])
-    elif len(linear_feature_columns) == 0:
-        final_logit = dnn_logit
-    elif len(dnn_feature_columns) == 0:
-        final_logit = linear_logit
-    else:
-        raise NotImplementedError
-
+    # if len(linear_feature_columns) > 0 and len(dnn_feature_columns) > 0:  # linear + dnn
+    #     final_logit = add([linear_logit, dnn_logit])
+    # elif len(linear_feature_columns) == 0:
+    #     final_logit = dnn_logit
+    # elif len(dnn_feature_columns) == 0:
+    #     final_logit = linear_logit
+    # else:
+    #     raise NotImplementedError
+    final_logit = add_func([linear_logit,dnn_logit])
     output = PredictionLayer(task)(final_logit)
 
     model = Model(inputs=inputs_list, outputs=output)
