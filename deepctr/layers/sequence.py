@@ -178,7 +178,7 @@ class WeightedSequenceLayer(Layer):
             return None
 
     def get_config(self, ):
-        config = {'supports_masking': self.supports_masking}
+        config = {'weight_normalization':self.weight_normalization,'supports_masking': self.supports_masking}
         base_config = super(WeightedSequenceLayer, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
