@@ -73,8 +73,9 @@ data[dense_features] = mms.fit_transform(data[dense_features])
 ### Step 3: Generate feature columns
 
 For sparse features, we transform them into dense vectors by embedding techniques.
-For dense numerical features, we concatenate them to the input tensors of fully connected layer.  
-And for varlen(multi-valued) sparse features,you can use [`VarlenSparseFeat`](./Features.html/#varlensparsefeat).[Examples](./Examples.html#multi-value-input-movielens) of using `VarlenSparseFeat`
+For dense numerical features, we concatenate them to the input tensors of fully connected layer. 
+
+And for varlen(multi-valued) sparse features,you can use [VarlenSparseFeat](./Features.html/#varlensparsefeat).[Examples](./Examples.html#multi-value-input-movielens) of using `VarlenSparseFeat`
 
 - Label Encoding
 ```python
