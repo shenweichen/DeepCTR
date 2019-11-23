@@ -48,7 +48,7 @@ def FNN(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128)
     dnn_logit = tf.keras.layers.Dense(
         1, use_bias=False, activation=None)(deep_out)
     final_logit = add_func([dnn_logit,linear_logit])
-       # tf.keras.layers.add([deep_logit, linear_logit]) todo del
+
     output = PredictionLayer(task)(final_logit)
 
     model = tf.keras.models.Model(inputs=inputs_list,

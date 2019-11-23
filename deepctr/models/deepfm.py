@@ -47,31 +47,14 @@ def DeepFM(linear_feature_columns, dnn_feature_columns, fm_group=[DEFAULT_GROUP_
 
     linear_logit = get_linear_logit(features, linear_feature_columns, init_std=init_std, seed=seed, prefix='linear',
                                     l2_reg=l2_reg_linear)
-    #if use_fm:
     fm_logit = add_func([FM()(concat_func(v, axis=1)) for k, v in group_embedding_dict.items() if k in fm_group])
-    # else:
-    #     fm_logit = add_func([])
 
-    #if len(dnn_hidden_units) > 0: todo del
     dnn_input = combined_dnn_input(list(chain.from_iterable(group_embedding_dict.values())),dense_value_list)
-    dnn_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
+    dnn_output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
                    dnn_use_bn, seed)(dnn_input)
     dnn_logit = tf.keras.layers.Dense(
-        1, use_bias=False, activation=None)(dnn_out)
-    # else:
-    #     dnn_logit = add_func([])
+        1, use_bias=False, activation=None)(dnn_output)
 
-
-    # if len(dnn_hidden_units) == 0 and use_fm == False:  # only linear todo del
-    #     final_logit = linear_logit
-    # elif len(dnn_hidden_units) == 0 and use_fm == True:  # linear + FM
-    #     final_logit = tf.keras.layers.add([linear_logit, fm_logit])
-    # elif len(dnn_hidden_units) > 0 and use_fm == False:  # linear +　Deep
-    #     final_logit = tf.keras.layers.add([linear_logit, dnn_logit])
-    # elif len(dnn_hidden_units) > 0 and use_fm == True:  # linear + FM + Deep
-    #     final_logit = tf.keras.layers.add([linear_logit, fm_logit, dnn_logit])
-    # else:
-    #     raise NotImplementedError
     final_logit = add_func([linear_logit,fm_logit,dnn_logit])
 
     output = PredictionLayer(task)(final_logit)

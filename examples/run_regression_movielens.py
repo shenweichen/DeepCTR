@@ -18,7 +18,7 @@ if __name__ == "__main__":
         lbe = LabelEncoder()
         data[feat] = lbe.fit_transform(data[feat])
     # 2.count #unique features for each sparse field
-    fixlen_feature_columns = [SparseFeat(feat, data[feat].nunique())
+    fixlen_feature_columns = [SparseFeat(feat, data[feat].nunique(),embedding_dim=4)
                               for feat in sparse_features]
     linear_feature_columns = fixlen_feature_columns
     dnn_feature_columns = fixlen_feature_columns

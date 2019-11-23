@@ -6,13 +6,13 @@ from deepctr.inputs import SparseFeat,VarLenSparseFeat,DenseFeat,get_feature_nam
 
 def get_xy_fd(hash_flag=False):
 
-    feature_columns = [SparseFeat('user', 3, use_hash=hash_flag),
-                       SparseFeat('gender', 2, use_hash=hash_flag),
-                       SparseFeat('item', 3 + 1, use_hash=hash_flag),
-                       SparseFeat('item_gender', 2 + 1, use_hash=hash_flag),
+    feature_columns = [SparseFeat('user', 3, embedding_dim=10,use_hash=hash_flag),
+                       SparseFeat('gender', 2, embedding_dim=4,use_hash=hash_flag),
+                       SparseFeat('item', 3 + 1, embedding_dim=4,use_hash=hash_flag),
+                       SparseFeat('item_gender', 2 + 1, embedding_dim=4,use_hash=hash_flag),
                        DenseFeat('score', 1)]
-    feature_columns += [VarLenSparseFeat('sess_0_item',maxlen=4,vocabulary_size=3+1,use_hash=hash_flag,embedding_name='item'),VarLenSparseFeat('sess_0_item_gender',maxlen=4,vocabulary_size=2+1,use_hash=hash_flag,embedding_name='item_gender')]
-    feature_columns += [VarLenSparseFeat('sess_1_item', maxlen= 4,vocabulary_size=3 + 1, use_hash=hash_flag, embedding_name='item'),VarLenSparseFeat('sess_1_item_gender', maxlen= 4,vocabulary_size=2 + 1, use_hash=hash_flag,embedding_name='item_gender')]
+    feature_columns += [VarLenSparseFeat('sess_0_item',maxlen=4,vocabulary_size=3+1,embedding_dim=4,use_hash=hash_flag,embedding_name='item'),VarLenSparseFeat('sess_0_item_gender',maxlen=4,vocabulary_size=2+1,embedding_dim=4,use_hash=hash_flag,embedding_name='item_gender')]
+    feature_columns += [VarLenSparseFeat('sess_1_item', maxlen= 4,vocabulary_size=3 + 1,embedding_dim=4, use_hash=hash_flag, embedding_name='item'),VarLenSparseFeat('sess_1_item_gender', maxlen= 4,vocabulary_size=2 + 1, embedding_dim=4,use_hash=hash_flag,embedding_name='item_gender')]
 
     behavior_feature_list = ["item", "item_gender"]
     uid = np.array([0, 1, 2])

@@ -6,10 +6,10 @@ from deepctr.inputs import SparseFeat,VarLenSparseFeat,DenseFeat,get_feature_nam
 
 def get_xy_fd():
 
-    feature_columns = [SparseFeat('user',3),SparseFeat(
-        'gender', 2), SparseFeat('item', 3 + 1), SparseFeat('item_gender', 2 + 1),DenseFeat('score', 1)]
-    feature_columns += [VarLenSparseFeat('hist_item', maxlen=4, vocabulary_size=3+1, embedding_name='item'),
-                        VarLenSparseFeat('hist_item_gender', maxlen=4,vocabulary_size=3+1, embedding_name='item_gender')]
+    feature_columns = [SparseFeat('user',3,embedding_dim=10),SparseFeat(
+        'gender', 2,embedding_dim=4), SparseFeat('item', 3 + 1,embedding_dim=8), SparseFeat('item_gender', 2 + 1,embedding_dim=4),DenseFeat('score', 1)]
+    feature_columns += [VarLenSparseFeat('hist_item', maxlen=4, vocabulary_size=3+1, embedding_dim=8,embedding_name='item'),
+                        VarLenSparseFeat('hist_item_gender', maxlen=4,vocabulary_size=3+1,embedding_dim=4, embedding_name='item_gender')]
 
     behavior_feature_list = ["item", "item_gender"]
     uid = np.array([0, 1, 2])

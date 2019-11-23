@@ -58,17 +58,6 @@ def xDeepFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(256, 
     dnn_logit = tf.keras.layers.Dense(
         1, use_bias=False, activation=None)(dnn_output)
 
-    # if len(dnn_hidden_units) == 0 and len(cin_layer_size) == 0:  # only linear todo del
-    #     final_logit = linear_logit
-    # elif len(dnn_hidden_units) == 0 and len(cin_layer_size) > 0:  # linear + CIN
-    #     final_logit = tf.keras.layers.add([linear_logit, exFM_logit])
-    # elif len(dnn_hidden_units) > 0 and len(cin_layer_size) == 0:  # linear +　Deep
-    #     final_logit = tf.keras.layers.add([linear_logit, deep_logit])
-    # elif len(dnn_hidden_units) > 0 and len(cin_layer_size) > 0:  # linear + CIN + Deep
-    #     final_logit = tf.keras.layers.add(
-    #         [linear_logit, deep_logit, exFM_logit])
-    # else:
-    #     raise NotImplementedError
     final_logit = add_func([linear_logit, dnn_logit])
 
     if len(cin_layer_size) > 0:

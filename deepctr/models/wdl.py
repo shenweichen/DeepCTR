@@ -52,15 +52,6 @@ def WDL(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128)
 
     final_logit = add_func([dnn_logit, linear_logit])
 
-    # if len(linear_feature_columns) > 0 and len(dnn_feature_columns) > 0:  # linear + dnn todo
-    #     final_logit = add([linear_logit,dnn_logit])
-    # elif len(linear_feature_columns) == 0:
-    #     final_logit = dnn_logit
-    # elif len(dnn_feature_columns) == 0:
-    #     final_logit = linear_logit
-    # else:
-    #     raise NotImplementedError
-
     output = PredictionLayer(task)(final_logit)
 
     model = Model(inputs=inputs_list, outputs=output)

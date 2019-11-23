@@ -28,16 +28,18 @@ class SparseFeat(namedtuple('SparseFeat',
                 group_name=DEFAULT_GROUP_NAME):
         if embedding_name is None:
             embedding_name = name
+        if embedding_dim == "auto":
+            embedding_dim =  6 * int(pow(vocabulary_size, 0.25))
         return super(SparseFeat, cls).__new__(cls, name, vocabulary_size, embedding_dim, use_hash, dtype,
                                               embedding_name, group_name)
 
     def __hash__(self):
         return self.name.__hash__()
 
-    def __eq__(self, other):
-        if self.name == other.name and self.embedding_name == other.embedding_name:
-            return True
-        return False
+    # def __eq__(self, other):
+    #     if self.name == other.name and self.embedding_name == other.embedding_name:
+    #         return True
+    #     return False
 
     # def __repr__(self):
     #     return 'SparseFeat:'+self.name
@@ -52,10 +54,10 @@ class DenseFeat(namedtuple('DenseFeat', ['name', 'dimension', 'dtype'])):
     def __hash__(self):
         return self.name.__hash__()
 
-    def __eq__(self, other):
-        if self.name == other.name:
-            return True
-        return False
+    # def __eq__(self, other):
+    #     if self.name == other.name:
+    #         return True
+    #     return False
 
     # def __repr__(self):
     #     return 'DenseFeat:'+self.name
@@ -70,16 +72,18 @@ class VarLenSparseFeat(namedtuple('VarLenFeat',
                 length_name=None, weight_name=None, embedding_name=None, group_name=DEFAULT_GROUP_NAME):
         if embedding_name is None:
             embedding_name = name
+        if embedding_dim == "auto":
+            embedding_dim =  6 * int(pow(vocabulary_size, 0.25))
         return super(VarLenSparseFeat, cls).__new__(cls, name, maxlen, vocabulary_size, embedding_dim, combiner,
                                                     use_hash, dtype, length_name,weight_name, embedding_name, group_name)
 
     def __hash__(self):
         return self.name.__hash__()
 
-    def __eq__(self, other):
-        if self.name == other.name:
-            return True
-        return False
+    # def __eq__(self, other):
+    #     if self.name == other.name:
+    #         return True
+    #     return False
 
     # def __repr__(self):
     #     return 'VarLenSparseFeat:'+self.name
@@ -106,10 +110,6 @@ def build_input_features(feature_columns, prefix=''):
         elif isinstance(fc, VarLenSparseFeat):
             input_features[fc.name] = Input(shape=(fc.maxlen,), name=prefix + fc.name,
                                             dtype=fc.dtype)
-            #if not mask_zero:
-                # input_features[fc.name + "_seq_length"] = Input(shape=(
-                #     1,), name=prefix + 'seq_length_' + fc.name)
-                #input_features[fc.name + "_seq_max_length"] = fc.maxlen#todo
             if fc.weight_name is not None:
                 input_features[fc.weight_name] = Input(shape=(fc.maxlen, 1), name=prefix + fc.weight_name,
                                                      dtype="float32")
@@ -124,28 +124,17 @@ def build_input_features(feature_columns, prefix=''):
 
 def create_embedding_dict(sparse_feature_columns, varlen_sparse_feature_columns, init_std, seed, l2_reg,
                           prefix='sparse_', seq_mask_zero=True):
-    sparse_embedding = {}
-    for feat in sparse_feature_columns:
-        if feat.embedding_dim == "auto":
-            embedding_dim = 6 * int(pow(feat.vocabulary_size, 0.25))
-        else:
-            embedding_dim = feat.embedding_dim
-        sparse_embedding[feat.embedding_name] = Embedding(feat.vocabulary_size, embedding_dim,
+    sparse_embedding = {feat.embedding_name:Embedding(feat.vocabulary_size, feat.embedding_dim,
                                                           embeddings_initializer=RandomNormal(
                                                               mean=0.0, stddev=init_std, seed=seed),
                                                           embeddings_regularizer=l2(l2_reg),
-                                                          name=prefix + '_emb_' + feat.name)
+                                                          name=prefix + '_emb_' + feat.embedding_name) for feat in sparse_feature_columns}
+
 
     if varlen_sparse_feature_columns and len(varlen_sparse_feature_columns) > 0:
         for feat in varlen_sparse_feature_columns:
             # if feat.name not in sparse_embedding:
-
-            if feat.embedding_dim == "auto":
-                embedding_dim = 6 * int(pow(feat.vocabulary_size, 0.25))
-            else:
-                embedding_dim = feat.embedding_dim
-
-            sparse_embedding[feat.embedding_name] = Embedding(feat.vocabulary_size, embedding_dim,
+            sparse_embedding[feat.embedding_name] = Embedding(feat.vocabulary_size, feat.embedding_dim,
                                                               embeddings_initializer=RandomNormal(
                                                                   mean=0.0, stddev=init_std, seed=seed),
                                                               embeddings_regularizer=l2(
@@ -265,31 +254,6 @@ def get_varlen_pooling_list(embedding_dict, features, varlen_sparse_feature_colu
         if to_list:
             return chain.from_iterable(pooling_vec_list.values())
     return pooling_vec_list
-
-
-def get_varlen_multiply_list(embedding_dict, features, varlen_sparse_feature_columns_name_dict):
-    multiply_vec_list = []
-    for key_feature in varlen_sparse_feature_columns_name_dict:
-        for value_feature in varlen_sparse_feature_columns_name_dict[key_feature]:
-            key_feature_length_name = key_feature.length_name# + '_seq_length'
-            if isinstance(value_feature, VarLenSparseFeat):
-                value_input = embedding_dict[value_feature.name]
-            elif isinstance(value_feature, DenseFeat):
-                value_input = features[value_feature.name]
-            else:
-                raise TypeError("Invalid feature column type,got", type(value_feature))
-            if key_feature_length_name is not None :# features:
-                varlen_vec = WeightedSequenceLayer()(
-                    [embedding_dict[key_feature.name], features[key_feature_length_name], value_input])
-                vec = SequencePoolingLayer('sum', supports_masking=False)(
-                    [varlen_vec, features[key_feature_length_name]])
-            else:
-                varlen_vec = WeightedSequenceLayer(supports_masking=True)(
-                    [embedding_dict[key_feature.name], value_input])
-                vec = SequencePoolingLayer('sum', supports_masking=True)(varlen_vec)
-            multiply_vec_list.append(vec)
-    return multiply_vec_list
-
 
 def get_dense_input(features, feature_columns):
     dense_feature_columns = list(filter(lambda x: isinstance(x, DenseFeat), feature_columns)) if feature_columns else []

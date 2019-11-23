@@ -22,7 +22,7 @@ from sklearn.metrics import log_loss, roc_auc_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 
-from deepctr.models import DeepFM
+from deepctr.models import *
 from deepctr.inputs import  SparseFeat, DenseFeat, get_feature_names
 
 if __name__ == "__main__":
@@ -44,8 +44,8 @@ if __name__ == "__main__":
 
     # 2.count #unique features for each sparse field,and record dense feature field name
 
-    fixlen_feature_columns = [SparseFeat(feat, data[feat].nunique())
-                           for feat in sparse_features] + [DenseFeat(feat, 1,)
+    fixlen_feature_columns = [SparseFeat(feat, vocabulary_size=data[feat].nunique(),embedding_dim=4)
+                           for i,feat in enumerate(sparse_features)] + [DenseFeat(feat, 1,)
                           for feat in dense_features]
 
     dnn_feature_columns = fixlen_feature_columns
@@ -100,7 +100,7 @@ if __name__ == "__main__":
 
     # 2.set hashing space for each sparse field,and record dense feature field name
 
-    fixlen_feature_columns = [SparseFeat(feat, 1000, use_hash=True, dtype='string')  # since the input is string
+    fixlen_feature_columns = [SparseFeat(feat, vocabulary_size=1000,embedding_dim=4, use_hash=True, dtype='string')  # since the input is string
                               for feat in sparse_features] + [DenseFeat(feat, 1, )
                           for feat in dense_features]
 
@@ -161,7 +161,7 @@ if __name__ == "__main__":
         lbe = LabelEncoder()
         data[feat] = lbe.fit_transform(data[feat])
     # 2.count #unique features for each sparse field
-    fixlen_feature_columns = [SparseFeat(feat, data[feat].nunique())
+    fixlen_feature_columns = [SparseFeat(feat, data[feat].nunique(),embedding_dim=4)
                               for feat in sparse_features]
     linear_feature_columns = fixlen_feature_columns
     dnn_feature_columns = fixlen_feature_columns
@@ -241,16 +241,16 @@ if __name__ == "__main__":
 
     # 2.count #unique features for each sparse field and generate feature config for sequence feature
 
-    fixlen_feature_columns = [SparseFeat(feat, data[feat].nunique())
+    fixlen_feature_columns = [SparseFeat(feat, data[feat].nunique(),embedding_dim=4)
                         for feat in sparse_features]
 
     use_weighted_sequence = False
     if use_weighted_sequence:
         varlen_feature_columns = [VarLenSparseFeat('genres', maxlen= max_len,vocabulary_size=len(
-            key2index) + 1, combiner='mean',weight_name='genres_weight')]  # Notice : value 0 is for padding for sequence input feature
+            key2index) + 1,embedding_dim=4, combiner='mean',weight_name='genres_weight')]  # Notice : value 0 is for padding for sequence input feature
     else:
         varlen_feature_columns = [VarLenSparseFeat('genres', maxlen=max_len,vocabulary_size= len(
-            key2index) + 1, combiner='mean',weight_name=None)]  # Notice : value 0 is for padding for sequence input feature
+            key2index) + 1,embedding_dim=4, combiner='mean',weight_name=None)]  # Notice : value 0 is for padding for sequence input feature
 
     linear_feature_columns = fixlen_feature_columns + varlen_feature_columns
     dnn_feature_columns = fixlen_feature_columns + varlen_feature_columns
@@ -301,9 +301,9 @@ if __name__ == "__main__":
 
     # 2.set hashing space for each sparse field and generate feature config for sequence feature
 
-    fixlen_feature_columns = [SparseFeat(feat, data[feat].nunique() * 5, use_hash=True, dtype='string')
+    fixlen_feature_columns = [SparseFeat(feat, data[feat].nunique() * 5,embedding_dim=4, use_hash=True, dtype='string')
                               for feat in sparse_features]
-    varlen_feature_columns = [VarLenSparseFeat('genres', maxlen=max_len,vocabulary_size=100,combiner= 'mean', use_hash=True,
+    varlen_feature_columns = [VarLenSparseFeat('genres', maxlen=max_len,vocabulary_size=100,embedding_dim=4,combiner= 'mean', use_hash=True,
                                                dtype="string")]  # Notice : value 0 is for padding for sequence input feature
     linear_feature_columns = fixlen_feature_columns + varlen_feature_columns
     dnn_feature_columns = fixlen_feature_columns + varlen_feature_columns
@@ -319,5 +319,4 @@ if __name__ == "__main__":
     model.compile("adam", "mse", metrics=['mse'], )
     history = model.fit(model_input, data[target].values,
                         batch_size=256, epochs=10, verbose=2, validation_split=0.2, )
-
 ```

@@ -54,9 +54,6 @@ def NFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128)
     dnn_logit = tf.keras.layers.Dense(
         1, use_bias=False, activation=None)(dnn_output)
 
-
-    #if len(dnn_hidden_units) > 0: todo del
-    #    final_logit = tf.keras.layers.add([final_logit, deep_logit])
     final_logit = add_func([linear_logit,dnn_logit])
 
     output = PredictionLayer(task)(final_logit)

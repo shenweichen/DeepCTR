@@ -15,11 +15,10 @@ def  test_DeepFM(use_fm, hidden_size, sparse_feature_num):
     x, y, feature_columns = get_test_data(sample_size, sparse_feature_num=sparse_feature_num,
                                           dense_feature_num=sparse_feature_num)
 
-    model = DeepFM(feature_columns,feature_columns, dnn_hidden_units=hidden_size, dnn_dropout=0.5)
+    model = DeepFM(feature_columns,feature_columns, dnn_hidden_units=hidden_size,fm_group='asdas', dnn_dropout=0.5)
 
     check_model(model, model_name, x, y)
 
 
 if __name__ == "__main__":
-    #test_DeepFM(False,(),2)
     pass

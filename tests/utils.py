@@ -63,7 +63,6 @@ def get_test_data(sample_size=1000, embedding_size=4, sparse_feature_num=1, dens
             s_input, s_len_input = gen_sequence(
                 fc.vocabulary_size, fc.maxlen, sample_size)
             model_input[fc.name] = s_input
-            combiner = fc.combiner
             if include_length:
                 fc.length_name = prefix+"sequence_"+str(i)+'_seq_length'
                 model_input[prefix+"sequence_"+str(i)+'_seq_length'] = s_len_input

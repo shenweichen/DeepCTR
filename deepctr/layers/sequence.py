@@ -460,7 +460,6 @@ class Transformer(Layer):
         self.supports_masking = supports_masking
 
     def build(self, input_shape):
-
         embedding_size = int(input_shape[0][-1])
         if self.num_units != embedding_size:
             raise ValueError(
