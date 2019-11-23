@@ -8,7 +8,7 @@ Reference:
 """
 import tensorflow as tf
 
-from deepctr.layers.utils import add_func
+from ..layers.utils import add_func
 from ..inputs import input_from_feature_columns, build_input_features, combined_dnn_input, get_linear_logit
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import CrossNet
@@ -53,14 +53,17 @@ def DCN(linear_feature_columns, dnn_feature_columns, cross_num=2, dnn_hidden_uni
                        dnn_use_bn, seed)(dnn_input)
         cross_out = CrossNet(cross_num, l2_reg=l2_reg_cross)(dnn_input)
         stack_out = tf.keras.layers.Concatenate()([cross_out, deep_out])
-        final_logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(stack_out)
+        final_logit = tf.keras.layers.Dense(
+            1, use_bias=False, activation=None)(stack_out)
     elif len(dnn_hidden_units) > 0:  # Only Deep
         deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
                        dnn_use_bn, seed)(dnn_input)
-        final_logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(deep_out)
+        final_logit = tf.keras.layers.Dense(
+            1, use_bias=False, activation=None)(deep_out)
     elif cross_num > 0:  # Only Cross
         cross_out = CrossNet(cross_num, l2_reg=l2_reg_cross)(dnn_input)
-        final_logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(cross_out)
+        final_logit = tf.keras.layers.Dense(
+            1, use_bias=False, activation=None)(cross_out)
     else:  # Error
         raise NotImplementedError
 

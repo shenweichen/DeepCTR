@@ -8,10 +8,9 @@ Reference:
 """
 import tensorflow as tf
 
-from deepctr.layers.utils import add_func
-from ..inputs import input_from_feature_columns, get_linear_logit,build_input_features,combined_dnn_input
+from ..layers.utils import add_func
+from ..inputs import input_from_feature_columns, get_linear_logit, build_input_features, combined_dnn_input
 from ..layers.core import PredictionLayer, DNN
-
 
 
 def FNN(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128),
@@ -32,7 +31,8 @@ def FNN(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128)
     :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
     :return: A Keras model instance.
     """
-    features = build_input_features(linear_feature_columns + dnn_feature_columns)
+    features = build_input_features(
+        linear_feature_columns + dnn_feature_columns)
 
     inputs_list = list(features.values())
 
@@ -42,12 +42,12 @@ def FNN(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128)
     linear_logit = get_linear_logit(features, linear_feature_columns, init_std=init_std, seed=seed, prefix='linear',
                                     l2_reg=l2_reg_linear)
 
-    dnn_input = combined_dnn_input(sparse_embedding_list,dense_value_list)
+    dnn_input = combined_dnn_input(sparse_embedding_list, dense_value_list)
     deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn,
                    dnn_dropout, False, seed)(dnn_input)
     dnn_logit = tf.keras.layers.Dense(
         1, use_bias=False, activation=None)(deep_out)
-    final_logit = add_func([dnn_logit,linear_logit])
+    final_logit = add_func([dnn_logit, linear_logit])
 
     output = PredictionLayer(task)(final_logit)
 

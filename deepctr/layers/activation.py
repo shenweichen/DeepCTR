@@ -40,12 +40,12 @@ class Dice(Layer):
         self.bn = tf.keras.layers.BatchNormalization(
             axis=self.axis, epsilon=self.epsilon, center=False, scale=False)
         self.alphas = self.add_weight(shape=(input_shape[-1],), initializer=Zeros(
-        ), dtype=tf.float32, name= 'dice_alpha')  # name='alpha_'+self.name
+        ), dtype=tf.float32, name='dice_alpha')  # name='alpha_'+self.name
         super(Dice, self).build(input_shape)  # Be sure to call this somewhere!
         self.uses_learning_phase = True
 
-    def call(self, inputs,training=None,**kwargs):
-        inputs_normed = self.bn(inputs,training=training)
+    def call(self, inputs, training=None, **kwargs):
+        inputs_normed = self.bn(inputs, training=training)
         # tf.layers.batch_normalization(
         # inputs, axis=self.axis, epsilon=self.epsilon, center=False, scale=False)
         x_p = tf.sigmoid(inputs_normed)
@@ -59,9 +59,10 @@ class Dice(Layer):
         base_config = super(Dice, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
+
 def activation_layer(activation):
     if activation == "dice" or activation == "Dice":
-        act_layer =  Dice()
+        act_layer = Dice()
     elif (isinstance(activation, str)) or (sys.version_info.major == 2 and isinstance(activation, (str, unicode))):
         act_layer = tf.keras.layers.Activation(activation)
     elif issubclass(activation, Layer):

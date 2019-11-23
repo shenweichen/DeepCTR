@@ -80,7 +80,7 @@ def AutoInt(linear_feature_columns, dnn_feature_columns, att_layer_num=3, att_em
     else:  # Error
         raise NotImplementedError
 
-    final_logit = add_func([final_logit,linear_logit])
+    final_logit = add_func([final_logit, linear_logit])
     output = PredictionLayer(task)(final_logit)
 
     model = tf.keras.models.Model(inputs=inputs_list, outputs=output)

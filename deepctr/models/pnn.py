@@ -9,7 +9,7 @@ Reference:
 
 import tensorflow as tf
 
-from ..inputs import input_from_feature_columns,build_input_features,combined_dnn_input
+from ..inputs import input_from_feature_columns, build_input_features, combined_dnn_input
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import InnerProductLayer, OutterProductLayer
 from ..layers.utils import concat_func
@@ -45,7 +45,8 @@ def PNN(dnn_feature_columns, embedding_size=8, dnn_hidden_units=(128, 128), l2_r
 
     sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
                                                                          l2_reg_embedding, init_std, seed)
-    inner_product = tf.keras.layers.Flatten()(InnerProductLayer()(sparse_embedding_list))
+    inner_product = tf.keras.layers.Flatten()(
+        InnerProductLayer()(sparse_embedding_list))
     outter_product = OutterProductLayer(kernel_type)(sparse_embedding_list)
 
     # ipnn deep input
@@ -64,9 +65,9 @@ def PNN(dnn_feature_columns, embedding_size=8, dnn_hidden_units=(128, 128), l2_r
     else:
         deep_input = linear_signal
 
-    dnn_input = combined_dnn_input([deep_input],dense_value_list)
+    dnn_input = combined_dnn_input([deep_input], dense_value_list)
     dnn_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
-                   False, seed)(dnn_input)
+                  False, seed)(dnn_input)
     dnn_logit = tf.keras.layers.Dense(
         1, use_bias=False, activation=None)(dnn_out)
 

@@ -8,10 +8,10 @@ Reference:
 """
 import tensorflow as tf
 
-from ..inputs import input_from_feature_columns, get_linear_logit,build_input_features,combined_dnn_input
+from ..inputs import input_from_feature_columns, get_linear_logit, build_input_features, combined_dnn_input
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import CIN
-from ..layers.utils import concat_func,add_func
+from ..layers.utils import concat_func, add_func
 
 
 def xDeepFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(256, 256),
@@ -39,8 +39,8 @@ def xDeepFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(256, 
     :return: A Keras model instance.
     """
 
-
-    features = build_input_features(linear_feature_columns + dnn_feature_columns)
+    features = build_input_features(
+        linear_feature_columns + dnn_feature_columns)
 
     inputs_list = list(features.values())
 
@@ -52,9 +52,9 @@ def xDeepFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(256, 
 
     fm_input = concat_func(sparse_embedding_list, axis=1)
 
-    dnn_input = combined_dnn_input(sparse_embedding_list,dense_value_list)
+    dnn_input = combined_dnn_input(sparse_embedding_list, dense_value_list)
     dnn_output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
-                   dnn_use_bn, seed)(dnn_input)
+                     dnn_use_bn, seed)(dnn_input)
     dnn_logit = tf.keras.layers.Dense(
         1, use_bias=False, activation=None)(dnn_output)
 
@@ -64,9 +64,7 @@ def xDeepFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(256, 
         exFM_out = CIN(cin_layer_size, cin_activation,
                        cin_split_half, l2_reg_cin, seed)(fm_input)
         exFM_logit = tf.keras.layers.Dense(1, activation=None, )(exFM_out)
-        final_logit = add_func([final_logit,exFM_logit])
-
-
+        final_logit = add_func([final_logit, exFM_logit])
 
     output = PredictionLayer(task)(final_logit)
 

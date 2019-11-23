@@ -8,7 +8,7 @@ Reference:
 """
 import tensorflow as tf
 
-from ..inputs import input_from_feature_columns, get_linear_logit, build_input_features,combined_dnn_input
+from ..inputs import input_from_feature_columns, get_linear_logit, build_input_features, combined_dnn_input
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import BiInteractionPooling
 from ..layers.utils import concat_func, add_func
@@ -34,7 +34,8 @@ def NFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128)
     :return: A Keras model instance.
     """
 
-    features = build_input_features(linear_feature_columns + dnn_feature_columns)
+    features = build_input_features(
+        linear_feature_columns + dnn_feature_columns)
 
     inputs_list = list(features.values())
 
@@ -48,13 +49,13 @@ def NFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128)
     bi_out = BiInteractionPooling()(fm_input)
     if bi_dropout:
         bi_out = tf.keras.layers.Dropout(bi_dropout)(bi_out, training=None)
-    dnn_input = combined_dnn_input([bi_out],dense_value_list)
+    dnn_input = combined_dnn_input([bi_out], dense_value_list)
     dnn_output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
-                   False, seed)(dnn_input)
+                     False, seed)(dnn_input)
     dnn_logit = tf.keras.layers.Dense(
         1, use_bias=False, activation=None)(dnn_output)
 
-    final_logit = add_func([linear_logit,dnn_logit])
+    final_logit = add_func([linear_logit, dnn_logit])
 
     output = PredictionLayer(task)(final_logit)
 

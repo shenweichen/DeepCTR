@@ -10,7 +10,7 @@ Reference:
 from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.layers import Dense
 
-from ..inputs import build_input_features, get_linear_logit,input_from_feature_columns,combined_dnn_input
+from ..inputs import build_input_features, get_linear_logit, input_from_feature_columns, combined_dnn_input
 from ..layers.core import PredictionLayer, DNN
 from ..layers.utils import add_func
 
@@ -34,7 +34,8 @@ def WDL(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128)
     :return: A Keras model instance.
     """
 
-    features = build_input_features(linear_feature_columns + dnn_feature_columns)
+    features = build_input_features(
+        linear_feature_columns + dnn_feature_columns)
 
     inputs_list = list(features.values())
 
