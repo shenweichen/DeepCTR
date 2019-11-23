@@ -8,8 +8,8 @@ def get_xy_fd():
 
     feature_columns = [SparseFeat('user',3),SparseFeat(
         'gender', 2), SparseFeat('item', 3 + 1), SparseFeat('item_gender', 2 + 1),DenseFeat('score', 1)]
-    feature_columns += [VarLenSparseFeat('hist_item',3+1, maxlen=4, embedding_name='item'),
-                        VarLenSparseFeat('hist_item_gender',3+1, maxlen=4, embedding_name='item_gender')]
+    feature_columns += [VarLenSparseFeat('hist_item', maxlen=4, vocabulary_size=3+1, embedding_name='item'),
+                        VarLenSparseFeat('hist_item_gender', maxlen=4,vocabulary_size=3+1, embedding_name='item_gender')]
 
     behavior_feature_list = ["item", "item_gender"]
     uid = np.array([0, 1, 2])
@@ -30,7 +30,7 @@ def get_xy_fd():
 
 if __name__ == "__main__":
     x, y, feature_columns, behavior_feature_list = get_xy_fd()
-    model = DIN(feature_columns, behavior_feature_list, hist_len_max=4, )
+    model = DIN(feature_columns, behavior_feature_list)
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
     history = model.fit(x, y, verbose=1, epochs=10, validation_split=0.5)

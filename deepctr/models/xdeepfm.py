@@ -52,19 +52,11 @@ def xDeepFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(256, 
 
     fm_input = concat_func(sparse_embedding_list, axis=1)
 
-    if len(cin_layer_size) > 0:
-        exFM_out = CIN(cin_layer_size, cin_activation,
-                       cin_split_half, l2_reg_cin, seed)(fm_input)
-        exFM_logit = tf.keras.layers.Dense(1, activation=None, )(exFM_out)
-    else:
-        exFM_logit = add_func([])
-
     dnn_input = combined_dnn_input(sparse_embedding_list,dense_value_list)
-
-    dnn_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
+    dnn_output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
                    dnn_use_bn, seed)(dnn_input)
     dnn_logit = tf.keras.layers.Dense(
-        1, use_bias=False, activation=None)(dnn_out)
+        1, use_bias=False, activation=None)(dnn_output)
 
     # if len(dnn_hidden_units) == 0 and len(cin_layer_size) == 0:  # only linear todo del
     #     final_logit = linear_logit
@@ -77,7 +69,16 @@ def xDeepFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(256, 
     #         [linear_logit, deep_logit, exFM_logit])
     # else:
     #     raise NotImplementedError
-    final_logit = add_func([linear_logit, exFM_logit, dnn_logit])
+    final_logit = add_func([linear_logit, dnn_logit])
+
+    if len(cin_layer_size) > 0:
+        exFM_out = CIN(cin_layer_size, cin_activation,
+                       cin_split_half, l2_reg_cin, seed)(fm_input)
+        exFM_logit = tf.keras.layers.Dense(1, activation=None, )(exFM_out)
+        final_logit = add_func([final_logit,exFM_logit])
+
+
+
     output = PredictionLayer(task)(final_logit)
 
     model = tf.keras.models.Model(inputs=inputs_list, outputs=output)

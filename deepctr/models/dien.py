@@ -143,7 +143,7 @@ def interest_evolution(concat_behavior, deep_input_item, user_behavior_length, g
     return hist, aux_loss_1
 
 
-def DIEN(dnn_feature_columns, history_feature_list, embedding_size=8, hist_len_max=16,
+def DIEN(dnn_feature_columns, history_feature_list, embedding_size=8,
          gru_type="GRU", use_negsampling=False, alpha=1.0, use_bn=False, dnn_hidden_units=(200, 80),
          dnn_activation='relu',
          att_hidden_units=(64, 16), att_activation="dice", att_weight_normalization=True,
@@ -153,7 +153,6 @@ def DIEN(dnn_feature_columns, history_feature_list, embedding_size=8, hist_len_m
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
     :param history_feature_list: list,to indicate  sequence sparse field
     :param embedding_size: positive integer,sparse feature embedding_size.
-    :param hist_len_max: positive int, to indicate the max length of seq input
     :param gru_type: str,can be GRU AIGRU AUGRU AGRU
     :param use_negsampling: bool, whether or not use negtive sampling
     :param alpha: float ,weight of auxiliary_loss

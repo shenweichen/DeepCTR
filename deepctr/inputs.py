@@ -62,15 +62,15 @@ class DenseFeat(namedtuple('DenseFeat', ['name', 'dimension', 'dtype'])):
 
 
 class VarLenSparseFeat(namedtuple('VarLenFeat',
-                                  ['name', 'vocabulary_size', 'maxlen', 'embedding_dim', 'combiner', 'use_hash',
+                                  ['name', 'maxlen', 'vocabulary_size', 'embedding_dim', 'combiner', 'use_hash',
                                    'dtype','length_name' ,'weight_name', 'embedding_name', 'group_name'])):
     __slots__ = ()
 
-    def __new__(cls, name, vocabulary_size, maxlen, embedding_dim=4, combiner="mean", use_hash=False, dtype="float32",
+    def __new__(cls, name, maxlen, vocabulary_size, embedding_dim=4, combiner="mean", use_hash=False, dtype="float32",
                 length_name=None, weight_name=None, embedding_name=None, group_name=DEFAULT_GROUP_NAME):
         if embedding_name is None:
             embedding_name = name
-        return super(VarLenSparseFeat, cls).__new__(cls, name, vocabulary_size, maxlen, embedding_dim, combiner,
+        return super(VarLenSparseFeat, cls).__new__(cls, name, maxlen, vocabulary_size, embedding_dim, combiner,
                                                     use_hash, dtype, length_name,weight_name, embedding_name, group_name)
 
     def __hash__(self):

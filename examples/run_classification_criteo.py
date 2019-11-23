@@ -41,7 +41,7 @@ if __name__ == "__main__":
     test_model_input = {name:test[name] for name in feature_names}
 
     # 4.Define Model,train,predict and evaluate
-    model = xDeepFM(linear_feature_columns, dnn_feature_columns, task='binary')
+    model = DeepFM(linear_feature_columns, dnn_feature_columns, task='binary')
     model.compile("adam", "binary_crossentropy",
                   metrics=['binary_crossentropy'], )
 

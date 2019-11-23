@@ -34,7 +34,7 @@ def test_FGCNN_without_seq(sparse_feature_num, dense_feature_num):
     x, y, feature_columns = get_test_data(sample_size, sparse_feature_num=sparse_feature_num,
                                           dense_feature_num=dense_feature_num, sequence_feature=())
 
-    model = FGCNN(feature_columns, conv_kernel_width=(), conv_filters=(
+    model = FGCNN(feature_columns, feature_columns, conv_kernel_width=(), conv_filters=(
     ), new_maps=(), pooling_width=(), dnn_hidden_units=(32,), dnn_dropout=0.5, )
     # TODO: add model_io check
     check_model(model, model_name, x, y, check_model_io=False)

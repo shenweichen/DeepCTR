@@ -31,10 +31,7 @@ def get_test_data(sample_size=1000, embedding_size=4, sparse_feature_num=1, dens
 
 
     if 'weight'  in sequence_feature:
-        feature_columns.append(VarLenSparseFeat(prefix+"weighted_seq",2,3,embedding_size,length_name=prefix+"weighted_seq"+"_seq_length",weight_name=prefix+"weight"))
-        #feature_columns.append(
-        #            SparseFeat(prefix+"weighted_seq_seq_length", 1,embedding=False))
-
+        feature_columns.append(VarLenSparseFeat(prefix+"weighted_seq",maxlen=3,vocabulary_size=2,embedding_dim=embedding_size,length_name=prefix+"weighted_seq"+"_seq_length",weight_name=prefix+"weight"))
         s_input, s_len_input = gen_sequence(
             2, 3, sample_size)
 
@@ -53,7 +50,7 @@ def get_test_data(sample_size=1000, embedding_size=4, sparse_feature_num=1, dens
         dim = np.random.randint(1, 10)
         maxlen = np.random.randint(1, 10)
         feature_columns.append(
-            VarLenSparseFeat(prefix +'sequence_' + mode, dim, maxlen=maxlen, embedding_dim=embedding_size, combiner=mode))
+            VarLenSparseFeat(prefix +'sequence_' + mode, maxlen=maxlen,vocabulary_size=dim,  embedding_dim=embedding_size, combiner=mode))
 
 
 
@@ -68,11 +65,7 @@ def get_test_data(sample_size=1000, embedding_size=4, sparse_feature_num=1, dens
             model_input[fc.name] = s_input
             combiner = fc.combiner
             if include_length:
-                #feature_columns.append(
-                #    SparseFeat(prefix+'sequence_' + str(i)+'_seq_length', 1,embedding=False))
                 fc.length_name = prefix+"sequence_"+str(i)+'_seq_length'
-                # feature_columns.append(
-                #     DenseFeat(prefix+'sequence_' + str(i)+'_seq_length', 1))
                 model_input[prefix+"sequence_"+str(i)+'_seq_length'] = s_len_input
 
 

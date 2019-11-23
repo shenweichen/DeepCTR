@@ -17,7 +17,7 @@ from ..layers.sequence import AttentionSequencePoolingLayer
 from ..layers.utils import concat_func, NoMask
 
 
-def DIN(dnn_feature_columns, history_feature_list, hist_len_max=16, dnn_use_bn=False,
+def DIN(dnn_feature_columns, history_feature_list, dnn_use_bn=False,
         dnn_hidden_units=(200, 80), dnn_activation='relu', att_hidden_size=(80, 40), att_activation="dice",
         att_weight_normalization=False, l2_reg_dnn=0, l2_reg_embedding=1e-6, dnn_dropout=0, init_std=0.0001, seed=1024,
         task='binary'):
@@ -25,7 +25,6 @@ def DIN(dnn_feature_columns, history_feature_list, hist_len_max=16, dnn_use_bn=F
 
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
     :param history_feature_list: list,to indicate  sequence sparse field
-    :param hist_len_max: positive int, to indicate the max length of seq input
     :param dnn_use_bn: bool. Whether use BatchNormalization before activation or not in deep net
     :param dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of deep net
     :param dnn_activation: Activation function to use in deep net

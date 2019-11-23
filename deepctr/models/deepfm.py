@@ -17,7 +17,7 @@ from ..layers.interaction import FM
 from ..layers.utils import concat_func, Add, add_func
 
 
-def DeepFM(linear_feature_columns, dnn_feature_columns, fm_group=[DEFAULT_GROUP_NAME], use_fm=True, dnn_hidden_units=(128, 128),
+def DeepFM(linear_feature_columns, dnn_feature_columns, fm_group=[DEFAULT_GROUP_NAME], dnn_hidden_units=(128, 128),
            l2_reg_linear=0.00001, l2_reg_embedding=0.00001, l2_reg_dnn=0, init_std=0.0001, seed=1024, dnn_dropout=0,
            dnn_activation='relu', dnn_use_bn=False, task='binary'):
     """Instantiates the DeepFM Network architecture.
@@ -25,7 +25,6 @@ def DeepFM(linear_feature_columns, dnn_feature_columns, fm_group=[DEFAULT_GROUP_
     :param linear_feature_columns: An iterable containing all the features used by linear part of the model.
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
     :param fm_group: list, group_name of features that will be used to do feature interactions.
-    :param use_fm: bool,use FM part or not
     :param dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of DNN
     :param l2_reg_linear: float. L2 regularizer strength applied to linear part
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
@@ -48,16 +47,19 @@ def DeepFM(linear_feature_columns, dnn_feature_columns, fm_group=[DEFAULT_GROUP_
 
     linear_logit = get_linear_logit(features, linear_feature_columns, init_std=init_std, seed=seed, prefix='linear',
                                     l2_reg=l2_reg_linear)
-    if use_fm:
-        fm_logit = add_func([FM()(concat_func(v, axis=1)) for k, v in group_embedding_dict.items() if k in fm_group])
-    else:
-        fm_logit = add_func([])
+    #if use_fm:
+    fm_logit = add_func([FM()(concat_func(v, axis=1)) for k, v in group_embedding_dict.items() if k in fm_group])
+    # else:
+    #     fm_logit = add_func([])
 
+    #if len(dnn_hidden_units) > 0: todo del
     dnn_input = combined_dnn_input(list(chain.from_iterable(group_embedding_dict.values())),dense_value_list)
     dnn_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
                    dnn_use_bn, seed)(dnn_input)
     dnn_logit = tf.keras.layers.Dense(
         1, use_bias=False, activation=None)(dnn_out)
+    # else:
+    #     dnn_logit = add_func([])
 
 
     # if len(dnn_hidden_units) == 0 and use_fm == False:  # only linear todo del

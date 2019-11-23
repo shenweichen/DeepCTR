@@ -2,9 +2,9 @@
 
 ## Overview
 
-With the great success of deep learning,DNN-based techniques have been widely used in CTR estimation task.
+With the great success of deep learning,DNN-based techniques have been widely used in CTR prediction task.
 
-DNN based CTR estimation models consists of the following 4 modules:
+DNN based CTR prediction models usually have following 4 modules:
 `Input,Embedding,Low-order&High-order Feature Extractor,Prediction`
 
 - Input&Embedding
@@ -23,14 +23,15 @@ DNN based CTR estimation models consists of the following 4 modules:
 
 ## Feature Columns
 ### SparseFeat
-``SparseFeat`` is a namedtuple with signature ``SparseFeat(name, dimension, use_hash, dtype, embedding_name,embedding)``
+``SparseFeat`` is a namedtuple with signature ``SparseFeat(name, vocabulary_size, embedding_dim, use_hash, dtype,embedding_name, group_name)``
 
 - name : feature name
-- dimension : number of unique feature values for sprase feature,hashing space when hash_flag=True, any value for dense feature.
-- use_hash : defualt `False`.If `True` the input will be hashed to space of size `dimension`.
+- vocabulary_size : number of unique feature values for sprase feature or hashing space when `use_hash=True`
+- embedding_dim : embedding dimension
+- use_hash : defualt `False`.If `True` the input will be hashed to space of size `vocabulary_size`.
 - dtype : default `float32`.dtype of input tensor.
-- embedding_name : default `None`. If None, the embedding_name` will be same as `name`.
-- embedding : default `True`.If `False`, the feature will not be embeded to a dense vector.
+- embedding_name : default `None`. If None, the embedding_name will be same as `name`.
+- group_name : feature group of this feature.
 
 ### DenseFeat
 ``DenseFeat`` is a namedtuple with signature ``DenseFeat(name, dimension, dtype)``
@@ -41,17 +42,19 @@ DNN based CTR estimation models consists of the following 4 modules:
 
 ### VarLenSparseFeat
 
-``VarLenSparseFeat`` is a namedtuple with signature ``VarLenSparseFeat(name, dimension, maxlen, combiner, use_hash, dtype, weight_name,embedding_name,embedding)``
+``VarLenSparseFeat`` is a namedtuple with signature ``VarLenSparseFeat(name, maxlen, vocabulary_size, embedding_dim, combiner,use_hash, dtype, length_name,weight_name, embedding_name, group_name)``
 
-- name : feature name,if it is already used in sparse_feature_dim,then a shared embedding mechanism will be used.
-- dimension : number of unique feature values
+- name : feature name
 - maxlen : maximum length of this feature for all samples
+- vocabulary_size : number of unique feature values for sprase feature or hashing space when `use_hash=True`
+- embedding_dim : embedding dimension
 - combiner : pooling method,can be ``sum``,``mean`` or ``max``
-- use_hash : defualt `False`.if `True` the input will be hashed to space of size `dimension`.
+- use_hash : defualt `False`.if `True` the input will be hashed to space of size `vocabulary_size`.
 - dtype : default `float32`.dtype of input tensor.
+- length_name : feature length name,if `None`, value 0 in feature is for padding.
 - weight_name : default `None`. If not None, the sequence feature will be multiplyed by the feature whose name is `weight_name`.
 - embedding_name : default `None`. If None, the `embedding_name` will be same as `name`.
-- embedding : default `True`.If `False`, the feature will not be embeded to a dense vector.
+- group_name : feature group of this feature.
 
 ## Models
 

@@ -204,7 +204,7 @@ class Add(tf.keras.layers.Layer):
         if len(inputs) == 1  :
             return inputs[0]
         if len(inputs) == 0:
-            return tf.constant([0.0])
+            return tf.constant([[0.0]])
 
         return tf.keras.layers.add(inputs)
 def add_func(inputs):
