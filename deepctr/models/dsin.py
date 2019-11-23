@@ -25,7 +25,7 @@ from ..layers.sequence import (AttentionSequencePoolingLayer, BiasEncoding,
 from ..layers.utils import NoMask, concat_func
 
 
-def DSIN(dnn_feature_columns, sess_feature_list, embedding_size=8, sess_max_count=5, bias_encoding=False,
+def DSIN(dnn_feature_columns, sess_feature_list, sess_max_count=5, bias_encoding=False,
          att_embedding_size=1, att_head_num=8, dnn_hidden_units=(200, 80), dnn_activation='sigmoid', dnn_dropout=0,
          dnn_use_bn=False, l2_reg_dnn=0, l2_reg_embedding=1e-6, init_std=0.0001, seed=1024, task='binary',
          ):
@@ -33,7 +33,6 @@ def DSIN(dnn_feature_columns, sess_feature_list, embedding_size=8, sess_max_coun
 
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
     :param sess_feature_list: list,to indicate  sequence sparse field
-    :param embedding_size: positive integer,sparse feature embedding_size.
     :param sess_max_count: positive int, to indicate the max number of sessions
     :param sess_len_max: positive int, to indicate the max length of each session
     :param bias_encoding: bool. Whether use bias encoding or postional encoding
@@ -52,10 +51,12 @@ def DSIN(dnn_feature_columns, sess_feature_list, embedding_size=8, sess_max_coun
 
     """
 
-    if (att_embedding_size * att_head_num != len(sess_feature_list) * embedding_size):
+    hist_emb_size = sum(map(lambda fc:fc.embedding_dim,filter(lambda fc:fc.name in sess_feature_list,dnn_feature_columns)))
+
+    if (att_embedding_size * att_head_num != hist_emb_size):
         raise ValueError(
-            "len(session_feature_lsit) * embedding_size must equal to att_embedding_size * att_head_num ,got %d * %d != %d *%d" % (
-                len(sess_feature_list), embedding_size, att_embedding_size, att_head_num))
+            "hist_emb_size must equal to att_embedding_size * att_head_num ,got %d != %d *%d" % (
+                hist_emb_size, att_embedding_size, att_head_num))
 
     features = build_input_features(dnn_feature_columns)
 
@@ -87,7 +88,7 @@ def DSIN(dnn_feature_columns, sess_feature_list, embedding_size=8, sess_max_coun
 
     user_sess_length = Input(shape=(1,), name='sess_length')
 
-    embedding_dict = {feat.embedding_name: Embedding(feat.vocabulary_size, embedding_size,
+    embedding_dict = {feat.embedding_name: Embedding(feat.vocabulary_size, feat.embedding_dim,
                                                      embeddings_initializer=RandomNormal(
                                                          mean=0.0, stddev=init_std, seed=seed),
                                                      embeddings_regularizer=l2(
@@ -120,7 +121,7 @@ def DSIN(dnn_feature_columns, sess_feature_list, embedding_size=8, sess_max_coun
                                                              supports_masking=False)(
         [query_emb, sess_fea, user_sess_length])
 
-    lstm_outputs = BiLSTM(len(sess_feature_list) * embedding_size,
+    lstm_outputs = BiLSTM(hist_emb_size,
                           layers=2, res_layers=0, dropout_rate=0.2, )(sess_fea)
     lstm_attention_layer = AttentionSequencePoolingLayer(att_hidden_units=(64, 16), weight_normalization=True)(
         [query_emb, lstm_outputs, user_sess_length])

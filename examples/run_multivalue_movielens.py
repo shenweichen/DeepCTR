@@ -65,4 +65,3 @@ if __name__ == "__main__":
     model.compile("adam", "mse", metrics=['mse'], )
     history = model.fit(model_input, data[target].values,
                         batch_size=256, epochs=10, verbose=2, validation_split=0.2, )
-

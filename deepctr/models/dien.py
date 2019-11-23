@@ -98,7 +98,7 @@ def auxiliary_net(in_, stag='auxiliary_net'):
 
 
 def interest_evolution(concat_behavior, deep_input_item, user_behavior_length, gru_type="GRU", use_neg=False,
-                       neg_concat_behavior=None, embedding_size=8, att_hidden_size=(64, 16), att_activation='sigmoid',
+                       neg_concat_behavior=None,att_hidden_size=(64, 16), att_activation='sigmoid',
                        att_weight_normalization=False, ):
     if gru_type not in ["GRU", "AIGRU", "AGRU", "AUGRU"]:
         raise ValueError("gru_type error ")
@@ -143,7 +143,7 @@ def interest_evolution(concat_behavior, deep_input_item, user_behavior_length, g
     return hist, aux_loss_1
 
 
-def DIEN(dnn_feature_columns, history_feature_list, embedding_size=8,
+def DIEN(dnn_feature_columns, history_feature_list,
          gru_type="GRU", use_negsampling=False, alpha=1.0, use_bn=False, dnn_hidden_units=(200, 80),
          dnn_activation='relu',
          att_hidden_units=(64, 16), att_activation="dice", att_weight_normalization=True,
@@ -152,7 +152,6 @@ def DIEN(dnn_feature_columns, history_feature_list, embedding_size=8,
 
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
     :param history_feature_list: list,to indicate  sequence sparse field
-    :param embedding_size: positive integer,sparse feature embedding_size.
     :param gru_type: str,can be GRU AIGRU AUGRU AGRU
     :param use_negsampling: bool, whether or not use negtive sampling
     :param alpha: float ,weight of auxiliary_loss
@@ -257,7 +256,7 @@ def DIEN(dnn_feature_columns, history_feature_list, embedding_size=8,
         neg_concat_behavior = None
     hist, aux_loss_1 = interest_evolution(keys_emb, query_emb, user_behavior_length, gru_type=gru_type,
                                           use_neg=use_negsampling, neg_concat_behavior=neg_concat_behavior,
-                                          embedding_size=embedding_size, att_hidden_size=att_hidden_units,
+                                          att_hidden_size=att_hidden_units,
                                           att_activation=att_activation,
                                           att_weight_normalization=att_weight_normalization, )
 

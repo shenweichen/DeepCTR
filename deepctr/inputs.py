@@ -161,7 +161,7 @@ def get_embedding_vec_list(embedding_dict, input_dict, sparse_feature_columns, r
         feat_name = fg.name
         if len(return_feat_list) == 0 or feat_name in return_feat_list:
             if fg.use_hash:
-                lookup_idx = Hash(fg.dimension, mask_zero=(feat_name in mask_feat_list))(input_dict[feat_name])
+                lookup_idx = Hash(fg.vocabulary_size, mask_zero=(feat_name in mask_feat_list))(input_dict[feat_name])
             else:
                 lookup_idx = input_dict[feat_name]
 
