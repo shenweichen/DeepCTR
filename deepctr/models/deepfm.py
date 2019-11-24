@@ -14,7 +14,7 @@ import tensorflow as tf
 from ..inputs import input_from_feature_columns, get_linear_logit, build_input_features, combined_dnn_input, DEFAULT_GROUP_NAME
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import FM
-from ..layers.utils import concat_func, Add, add_func
+from ..layers.utils import concat_func, add_func
 
 
 def DeepFM(linear_feature_columns, dnn_feature_columns, fm_group=[DEFAULT_GROUP_NAME], dnn_hidden_units=(128, 128),

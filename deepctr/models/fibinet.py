@@ -8,7 +8,7 @@ Reference:
 """
 
 from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.layers import Dense, add, Flatten
+from tensorflow.python.keras.layers import Dense, Flatten
 
 from ..inputs import build_input_features, get_linear_logit, input_from_feature_columns, combined_dnn_input
 from ..layers.core import PredictionLayer, DNN
@@ -62,14 +62,6 @@ def FiBiNET(linear_feature_columns, dnn_feature_columns, bilinear_type='interact
     dnn_logit = Dense(
         1, use_bias=False, activation=None)(dnn_out)
 
-    # if len(linear_feature_columns) > 0 and len(dnn_feature_columns) > 0:  # linear + dnn
-    #     final_logit = add([linear_logit, dnn_logit])
-    # elif len(linear_feature_columns) == 0:
-    #     final_logit = dnn_logit
-    # elif len(dnn_feature_columns) == 0:
-    #     final_logit = linear_logit
-    # else:
-    #     raise NotImplementedError
     final_logit = add_func([linear_logit,dnn_logit])
     output = PredictionLayer(task)(final_logit)
 

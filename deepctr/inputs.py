@@ -12,7 +12,6 @@ from itertools import chain
 from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.layers import Embedding, Input, Flatten
 from tensorflow.python.keras.regularizers import l2
-import tensorflow as tf
 
 from .layers.sequence import SequencePoolingLayer, WeightedSequenceLayer
 from .layers.utils import Hash, concat_func, Linear,add_func

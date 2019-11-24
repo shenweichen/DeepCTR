@@ -59,7 +59,7 @@ Usually we have two methods to encode the sparse categorical feature for embeddi
     ```
   - Do feature hashing on the fly in training process 
 
-    We can do feature hashing through setting `use_hash=True` in `SparseFeat` or `VarlenSparseFeat` in Step3.
+    We can do feature hashing by setting `use_hash=True` in `SparseFeat` or `VarlenSparseFeat` in Step3.
 
 
 And for dense numerical features,they are usually  discretized to buckets,here we use normalization.
@@ -75,18 +75,19 @@ data[dense_features] = mms.fit_transform(data[dense_features])
 For sparse features, we transform them into dense vectors by embedding techniques.
 For dense numerical features, we concatenate them to the input tensors of fully connected layer. 
 
-And for varlen(multi-valued) sparse features,you can use [VarlenSparseFeat](./Features.html#varlensparsefeat).[Examples](./Examples.html#multi-value-input-movielens) of using `VarlenSparseFeat`
+And for varlen(multi-valued) sparse features,you can use [VarlenSparseFeat](./Features.html#varlensparsefeat).  Visit [examples](./Examples.html#multi-value-input-movielens) of using `VarlenSparseFeat`
 
 - Label Encoding
 ```python
-sparse_feature_columns = [SparseFeat(feat, data[feat].nunique())
-                        for feat in sparse_features]
+sparse_feature_columns = [SparseFeat(feat, vocabulary_size=data[feat].nunique(),embedding_dim=4)
+                           for i,feat in enumerate(sparse_features)]
 dense_feature_columns = [DenseFeat(feat, 1)
                       for feat in dense_features]
 ```
 - Feature Hashing on the fly
 ```python
-sparse_feature_columns = [SparseFeat(feat, dimension=1e6,use_hash=True) for feat in sparse_features]#The dimension can be set according to data
+sparse_feature_columns = [SparseFeat(feat, vocabulary_size=1e6,embedding_dim=4,use_hash=True)
+                           for i,feat in enumerate(sparse_features)]#The dimension can be set according to data
 dense_feature_columns = [DenseFeat(feat, 1)
                       for feat in dense_features]
 ```

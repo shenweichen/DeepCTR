@@ -34,7 +34,7 @@ You can read the latest code at https://github.com/shenweichen/DeepCTR
 
 News
 -----
-11/24/2019 : Refactor `feature columns <./Features.html#feature-columns>`_ . Different features can use different ``embedding_dim``. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.7.0>`_
+11/24/2019 : Refactor `feature columns <./Features.html#feature-columns>`_ . Different features can use different ``embedding_dim`` and  group-wise interaction is available by setting ``group_name``. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.7.0>`_
 
 11/06/2019 : Add ``WeightedSequenceLayer`` and support `weighted sequence feature input <./Examples.html#multi-value-input-movielens>`_. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.6.3>`_
 

@@ -241,15 +241,10 @@ def DIEN(dnn_feature_columns, history_feature_list,
 
 
     if use_negsampling:
-        #neg_user_behavior_input = OrderedDict()
-        #for i, feat in enumerate(history_feature_list):
-        #    neg_user_behavior_input[feat] = Input(shape=(hist_len_max,), name='neg_seq_' + str(i) + '-' + feat)
 
         neg_uiseq_embed_list = embedding_lookup(embedding_dict, features, neg_history_feature_columns,
                                                 neg_history_fc_names,to_list=True)
-            #get_embedding_vec_list(sparse_embedding_dict, neg_user_behavior_input, feature_columns["sparse"], history_feature_list, )
-           # [sparse_embedding_dict[feat](
-           # neg_user_behavior_input[feat]) for feat in seq_feature_list]
+
         neg_concat_behavior = concat_func(neg_uiseq_embed_list)
 
     else:

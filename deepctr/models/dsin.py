@@ -22,7 +22,7 @@ from ..inputs import (build_input_features,
 from ..layers.core import DNN, PredictionLayer
 from ..layers.sequence import (AttentionSequencePoolingLayer, BiasEncoding,
                                BiLSTM, Transformer)
-from ..layers.utils import NoMask, concat_func
+from ..layers.utils import concat_func
 
 
 def DSIN(dnn_feature_columns, sess_feature_list, sess_max_count=5, bias_encoding=False,
@@ -53,10 +53,10 @@ def DSIN(dnn_feature_columns, sess_feature_list, sess_max_count=5, bias_encoding
 
     hist_emb_size = sum(map(lambda fc:fc.embedding_dim,filter(lambda fc:fc.name in sess_feature_list,dnn_feature_columns)))
 
-    # if (att_embedding_size * att_head_num != hist_emb_size):
-    #     raise ValueError(
-    #         "hist_emb_size must equal to att_embedding_size * att_head_num ,got %d != %d *%d" % (
-    #             hist_emb_size, att_embedding_size, att_head_num))
+    if (att_embedding_size * att_head_num != hist_emb_size):
+        raise ValueError(
+            "hist_emb_size must equal to att_embedding_size * att_head_num ,got %d != %d *%d" % (
+                hist_emb_size, att_embedding_size, att_head_num))
 
     features = build_input_features(dnn_feature_columns)
 
