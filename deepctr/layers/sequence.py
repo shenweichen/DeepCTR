@@ -178,7 +178,7 @@ class WeightedSequenceLayer(Layer):
             return None
 
     def get_config(self, ):
-        config = {'supports_masking': self.supports_masking}
+        config = {'weight_normalization':self.weight_normalization,'supports_masking': self.supports_masking}
         base_config = super(WeightedSequenceLayer, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
@@ -460,7 +460,6 @@ class Transformer(Layer):
         self.supports_masking = supports_masking
 
     def build(self, input_shape):
-
         embedding_size = int(input_shape[0][-1])
         if self.num_units != embedding_size:
             raise ValueError(

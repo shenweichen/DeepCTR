@@ -11,7 +11,7 @@ from tensorflow.python.keras.models import Model
 
 from ..layers.core import PredictionLayer
 from ..inputs import build_input_features,get_linear_logit
-from ..layers.utils import concat_fun
+from ..layers.utils import concat_func
 
 def MLR(region_feature_columns, base_feature_columns=None, region_num=4,
         l2_reg_linear=1e-5,
@@ -60,8 +60,8 @@ def MLR(region_feature_columns, base_feature_columns=None, region_num=4,
 
 def get_region_score(features,feature_columns, region_number, l2_reg, init_std, seed,prefix='region_',seq_mask_zero=True):
 
-    region_logit =concat_fun([get_linear_logit(features, feature_columns, init_std=init_std, seed=seed + i,
-                                               prefix=prefix + str(i + 1), l2_reg=l2_reg) for i in range(region_number)])
+    region_logit =concat_func([get_linear_logit(features, feature_columns, init_std=init_std, seed=seed + i,
+                                                prefix=prefix + str(i + 1), l2_reg=l2_reg) for i in range(region_number)])
     return Activation('softmax')(region_logit)
 
 def get_learner_score(features,feature_columns, region_number, l2_reg, init_std, seed,prefix='learner_',seq_mask_zero=True,task='binary'):
@@ -70,5 +70,5 @@ def get_learner_score(features,feature_columns, region_number, l2_reg, init_std,
                          l2_reg=l2_reg)) for i in
                     range(region_number)]
 
-    return concat_fun(region_score)
+    return concat_func(region_score)
 

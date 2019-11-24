@@ -8,22 +8,21 @@ Reference:
 """
 
 from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.layers import Dense, add, Flatten
+from tensorflow.python.keras.layers import Dense, Flatten
 
 from ..inputs import build_input_features, get_linear_logit, input_from_feature_columns, combined_dnn_input
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import SENETLayer, BilinearInteraction
-from ..layers.utils import concat_fun
+from ..layers.utils import concat_func, add_func
 
 
-def FiBiNET(linear_feature_columns, dnn_feature_columns, embedding_size=8, bilinear_type='interaction', reduction_ratio=3, dnn_hidden_units=(128, 128), l2_reg_linear=1e-5,
+def FiBiNET(linear_feature_columns, dnn_feature_columns, bilinear_type='interaction', reduction_ratio=3, dnn_hidden_units=(128, 128), l2_reg_linear=1e-5,
             l2_reg_embedding=1e-5, l2_reg_dnn=0, init_std=0.0001, seed=1024, dnn_dropout=0, dnn_activation='relu',
             task='binary'):
     """Instantiates the Feature Importance and Bilinear feature Interaction NETwork architecture.
 
     :param linear_feature_columns: An iterable containing all the features used by linear part of the model.
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
-    :param embedding_size: positive integer,sparse feature embedding_size
     :param bilinear_type: str,bilinear function type used in Bilinear Interaction Layer,can be ``'all'`` , ``'each'`` or ``'interaction'``
     :param reduction_ratio: integer in [1,inf), reduction ratio used in SENET Layer
     :param dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of DNN
@@ -43,9 +42,7 @@ def FiBiNET(linear_feature_columns, dnn_feature_columns, embedding_size=8, bilin
     inputs_list = list(features.values())
 
     sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
-                                                                         embedding_size,
-                                                                         l2_reg_embedding, init_std,
-                                                                         seed)
+                                                                         l2_reg_embedding, init_std, seed)
 
     senet_embedding_list = SENETLayer(
         reduction_ratio, seed)(sparse_embedding_list)
@@ -59,21 +56,13 @@ def FiBiNET(linear_feature_columns, dnn_feature_columns, embedding_size=8, bilin
                                     l2_reg=l2_reg_linear)
 
     dnn_input = combined_dnn_input(
-        [Flatten()(concat_fun([senet_bilinear_out, bilinear_out]))], dense_value_list)
+        [Flatten()(concat_func([senet_bilinear_out, bilinear_out]))], dense_value_list)
     dnn_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
                   False, seed)(dnn_input)
     dnn_logit = Dense(
         1, use_bias=False, activation=None)(dnn_out)
 
-    if len(linear_feature_columns) > 0 and len(dnn_feature_columns) > 0:  # linear + dnn
-        final_logit = add([linear_logit, dnn_logit])
-    elif len(linear_feature_columns) == 0:
-        final_logit = dnn_logit
-    elif len(dnn_feature_columns) == 0:
-        final_logit = linear_logit
-    else:
-        raise NotImplementedError
-
+    final_logit = add_func([linear_logit,dnn_logit])
     output = PredictionLayer(task)(final_logit)
 
     model = Model(inputs=inputs_list, outputs=output)

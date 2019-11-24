@@ -11,7 +11,8 @@ from ..utils import check_model, get_test_data,SAMPLE_SIZE
 def test_AFM(use_attention, sparse_feature_num, dense_feature_num):
     model_name = "AFM"
     sample_size = SAMPLE_SIZE
-    x, y, feature_columns = get_test_data(sample_size, sparse_feature_num, dense_feature_num)
+    x, y, feature_columns = get_test_data(sample_size, sparse_feature_num=sparse_feature_num,
+                                          dense_feature_num=dense_feature_num)
 
     model = AFM(feature_columns, feature_columns, use_attention=use_attention, afm_dropout=0.5)
 

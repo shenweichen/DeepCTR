@@ -7,17 +7,16 @@ Reference:
     [1] Zhou G, Zhu X, Song C, et al. Deep interest network for click-through rate prediction[C]//Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. ACM, 2018: 1059-1068. (https://arxiv.org/pdf/1706.06978.pdf)
 """
 
-
 from tensorflow.python.keras.layers import Dense,Concatenate, Flatten
 from tensorflow.python.keras.models import Model
 
 from ..inputs import  build_input_features,create_embedding_matrix,SparseFeat,VarLenSparseFeat,DenseFeat,embedding_lookup,get_dense_input,varlen_embedding_lookup,get_varlen_pooling_list,combined_dnn_input
 from ..layers.core import DNN, PredictionLayer
 from ..layers.sequence import AttentionSequencePoolingLayer
-from ..layers.utils import concat_fun, NoMask
+from ..layers.utils import concat_func, NoMask
 
 
-def DIN(dnn_feature_columns, history_feature_list, embedding_size=8, hist_len_max=16, dnn_use_bn=False,
+def DIN(dnn_feature_columns, history_feature_list, dnn_use_bn=False,
         dnn_hidden_units=(200, 80), dnn_activation='relu', att_hidden_size=(80, 40), att_activation="dice",
         att_weight_normalization=False, l2_reg_dnn=0, l2_reg_embedding=1e-6, dnn_dropout=0, init_std=0.0001, seed=1024,
         task='binary'):
@@ -25,8 +24,6 @@ def DIN(dnn_feature_columns, history_feature_list, embedding_size=8, hist_len_ma
 
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
     :param history_feature_list: list,to indicate  sequence sparse field
-    :param embedding_size: positive integer,sparse feature embedding_size.
-    :param hist_len_max: positive int, to indicate the max length of seq input
     :param dnn_use_bn: bool. Whether use BatchNormalization before activation or not in deep net
     :param dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of deep net
     :param dnn_activation: Activation function to use in deep net
@@ -66,23 +63,26 @@ def DIN(dnn_feature_columns, history_feature_list, embedding_size=8, hist_len_ma
     inputs_list = list(features.values())
 
 
-    embedding_dict = create_embedding_matrix(dnn_feature_columns,l2_reg_embedding,init_std,seed,embedding_size, prefix="")
+    embedding_dict = create_embedding_matrix(dnn_feature_columns, l2_reg_embedding, init_std, seed, prefix="")
 
 
-    query_emb_list = embedding_lookup(embedding_dict,features,sparse_feature_columns,history_feature_list,history_feature_list)#query是单独的
-    keys_emb_list = embedding_lookup(embedding_dict, features, history_feature_columns, history_fc_names, history_fc_names)
-    dnn_input_emb_list = embedding_lookup(embedding_dict,features,sparse_feature_columns,mask_feat_list=history_feature_list)
+    query_emb_list = embedding_lookup(embedding_dict, features, sparse_feature_columns, history_feature_list,
+                                      history_feature_list,to_list=True)
+    keys_emb_list = embedding_lookup(embedding_dict, features, history_feature_columns, history_fc_names,
+                                     history_fc_names,to_list=True)
+    dnn_input_emb_list = embedding_lookup(embedding_dict, features, sparse_feature_columns,
+                                          mask_feat_list=history_feature_list,to_list=True)
     dense_value_list = get_dense_input(features, dense_feature_columns)
 
     sequence_embed_dict = varlen_embedding_lookup(embedding_dict,features,sparse_varlen_feature_columns)
-    sequence_embed_list = get_varlen_pooling_list(sequence_embed_dict, features, sparse_varlen_feature_columns)
+    sequence_embed_list = get_varlen_pooling_list(sequence_embed_dict, features, sparse_varlen_feature_columns,to_list=True)
+
     dnn_input_emb_list += sequence_embed_list
 
 
-    keys_emb = concat_fun(keys_emb_list,mask=True)
-    deep_input_emb = concat_fun(dnn_input_emb_list)
-    query_emb = concat_fun(query_emb_list,mask=True)
-
+    keys_emb = concat_func(keys_emb_list, mask=True)
+    deep_input_emb = concat_func(dnn_input_emb_list)
+    query_emb = concat_func(query_emb_list, mask=True)
     hist = AttentionSequencePoolingLayer(att_hidden_size, att_activation,
                                          weight_normalization=att_weight_normalization, supports_masking=True)([
         query_emb, keys_emb])

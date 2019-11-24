@@ -16,7 +16,8 @@ def test_FNN(sparse_feature_num, dense_feature_num):
     model_name = "FNN"
 
     sample_size = SAMPLE_SIZE
-    x, y, feature_columns = get_test_data(sample_size, sparse_feature_num, dense_feature_num)
+    x, y, feature_columns = get_test_data(sample_size, sparse_feature_num=sparse_feature_num,
+                                          dense_feature_num=dense_feature_num)
 
     model = FNN(feature_columns,feature_columns, dnn_hidden_units=[32, 32], dnn_dropout=0.5)
     check_model(model, model_name, x, y)

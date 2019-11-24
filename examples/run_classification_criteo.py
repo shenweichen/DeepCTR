@@ -25,8 +25,8 @@ if __name__ == "__main__":
 
     # 2.count #unique features for each sparse field,and record dense feature field name
 
-    fixlen_feature_columns = [SparseFeat(feat, data[feat].nunique())
-                           for feat in sparse_features] + [DenseFeat(feat, 1,)
+    fixlen_feature_columns = [SparseFeat(feat, vocabulary_size=data[feat].nunique(),embedding_dim=4)
+                           for i,feat in enumerate(sparse_features)] + [DenseFeat(feat, 1,)
                           for feat in dense_features]
 
     dnn_feature_columns = fixlen_feature_columns

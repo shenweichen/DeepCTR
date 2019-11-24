@@ -42,7 +42,7 @@ target = ['label']
 ### Step 2: Simple preprocessing
 
 
-Usually there are two simple way to encode the sparse categorical feature for embedding
+Usually we have two methods to encode the sparse categorical feature for embedding
 
 - Label Encoding: map the features to integer value from 0 ~ len(#unique) - 1
   ```python
@@ -50,7 +50,7 @@ Usually there are two simple way to encode the sparse categorical feature for em
       lbe = LabelEncoder()
       data[feat] = lbe.fit_transform(data[feat])
   ```
-- Hash Encoding: map the features to a fix range,like 0 ~ 9999.Here is 2 way to do that:
+- Hash Encoding: map the features to a fix range,like 0 ~ 9999.We have 2 methods to do that:
   - Do feature hashing before training
     ```python
     for feat in sparse_features:
@@ -59,7 +59,7 @@ Usually there are two simple way to encode the sparse categorical feature for em
     ```
   - Do feature hashing on the fly in training process 
 
-    We can do feature hasing throug setting `use_hash=True` in `SparseFeat` or `VarlenSparseFeat` in Step3.
+    We can do feature hashing by setting `use_hash=True` in `SparseFeat` or `VarlenSparseFeat` in Step3.
 
 
 And for dense numerical features,they are usually  discretized to buckets,here we use normalization.
@@ -73,18 +73,21 @@ data[dense_features] = mms.fit_transform(data[dense_features])
 ### Step 3: Generate feature columns
 
 For sparse features, we transform them into dense vectors by embedding techniques.
-For dense numerical features, we concatenate them to the input tensors of fully connected layer.
+For dense numerical features, we concatenate them to the input tensors of fully connected layer. 
+
+And for varlen(multi-valued) sparse features,you can use [VarlenSparseFeat](./Features.html#varlensparsefeat).  Visit [examples](./Examples.html#multi-value-input-movielens) of using `VarlenSparseFeat`
 
 - Label Encoding
 ```python
-sparse_feature_columns = [SparseFeat(feat, data[feat].nunique())
-                        for feat in sparse_features]
+sparse_feature_columns = [SparseFeat(feat, vocabulary_size=data[feat].nunique(),embedding_dim=4)
+                           for i,feat in enumerate(sparse_features)]
 dense_feature_columns = [DenseFeat(feat, 1)
                       for feat in dense_features]
 ```
 - Feature Hashing on the fly
 ```python
-sparse_feature_columns = [SparseFeat(feat, dimension=1e6,use_hash=True) for feat in sparse_features]#The dimension can be set according to data
+sparse_feature_columns = [SparseFeat(feat, vocabulary_size=1e6,embedding_dim=4,use_hash=True)
+                           for i,feat in enumerate(sparse_features)]#The dimension can be set according to data
 dense_feature_columns = [DenseFeat(feat, 1)
                       for feat in dense_features]
 ```

@@ -11,19 +11,20 @@ Reference:
 """
 import tensorflow as tf
 
-from ..inputs import input_from_feature_columns, get_linear_logit,build_input_features
+from ..inputs import input_from_feature_columns, get_linear_logit, build_input_features, DEFAULT_GROUP_NAME
 from ..layers.core import PredictionLayer
 from ..layers.interaction import AFMLayer, FM
-from ..layers.utils import concat_fun
+from ..layers.utils import concat_func, add_func
 
-def AFM(linear_feature_columns, dnn_feature_columns, embedding_size=8, use_attention=True, attention_factor=8,
+
+def AFM(linear_feature_columns, dnn_feature_columns, fm_group=DEFAULT_GROUP_NAME, use_attention=True, attention_factor=8,
         l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_att=1e-5, afm_dropout=0, init_std=0.0001, seed=1024,
         task='binary'):
     """Instantiates the Attentional Factorization Machine architecture.
 
     :param linear_feature_columns: An iterable containing all the features used by linear part of the model.
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
-    :param embedding_size: positive integer,sparse feature embedding_size
+    :param fm_group: list, group_name of features that will be used to do feature interactions.
     :param use_attention: bool,whether use attention or not,if set to ``False``.it is the same as **standard Factorization Machine**
     :param attention_factor: positive integer,units in attention net
     :param l2_reg_linear: float. L2 regularizer strength applied to linear part
@@ -36,26 +37,25 @@ def AFM(linear_feature_columns, dnn_feature_columns, embedding_size=8, use_atten
     :return: A Keras model instance.
     """
 
-
-    features = build_input_features(linear_feature_columns + dnn_feature_columns)
+    features = build_input_features(
+        linear_feature_columns + dnn_feature_columns)
 
     inputs_list = list(features.values())
 
-    sparse_embedding_list, _ = input_from_feature_columns(features,dnn_feature_columns,embedding_size,
-                                                                                               l2_reg_embedding, init_std,
-                                                                                               seed,support_dense=False)
+    group_embedding_dict, _ = input_from_feature_columns(features, dnn_feature_columns, l2_reg_embedding, init_std,
+                                                         seed, support_dense=False, support_group=True)
 
     linear_logit = get_linear_logit(features, linear_feature_columns, init_std=init_std, seed=seed, prefix='linear',
                                     l2_reg=l2_reg_linear)
 
-    fm_input = concat_fun(sparse_embedding_list, axis=1)
     if use_attention:
-        fm_logit = AFMLayer(attention_factor, l2_reg_att, afm_dropout,
-        seed)(sparse_embedding_list,)
+        fm_logit = add_func([AFMLayer(attention_factor, l2_reg_att, afm_dropout,
+                                      seed)(list(v)) for k, v in group_embedding_dict.items() if k in fm_group])
     else:
-        fm_logit = FM()(fm_input)
+        fm_logit = add_func([FM()(concat_func(v, axis=1))
+                             for k, v in group_embedding_dict.items() if k in fm_group])
 
-    final_logit = tf.keras.layers.add([linear_logit, fm_logit])
+    final_logit = add_func([linear_logit, fm_logit])
     output = PredictionLayer(task)(final_logit)
 
     model = tf.keras.models.Model(inputs=inputs_list, outputs=output)

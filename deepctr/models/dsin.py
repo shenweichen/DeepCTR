@@ -22,10 +22,10 @@ from ..inputs import (build_input_features,
 from ..layers.core import DNN, PredictionLayer
 from ..layers.sequence import (AttentionSequencePoolingLayer, BiasEncoding,
                                BiLSTM, Transformer)
-from ..layers.utils import NoMask, concat_fun
+from ..layers.utils import concat_func
 
 
-def DSIN(dnn_feature_columns, sess_feature_list, embedding_size=8, sess_max_count=5, bias_encoding=False,
+def DSIN(dnn_feature_columns, sess_feature_list, sess_max_count=5, bias_encoding=False,
          att_embedding_size=1, att_head_num=8, dnn_hidden_units=(200, 80), dnn_activation='sigmoid', dnn_dropout=0,
          dnn_use_bn=False, l2_reg_dnn=0, l2_reg_embedding=1e-6, init_std=0.0001, seed=1024, task='binary',
          ):
@@ -33,7 +33,6 @@ def DSIN(dnn_feature_columns, sess_feature_list, embedding_size=8, sess_max_coun
 
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
     :param sess_feature_list: list,to indicate  sequence sparse field
-    :param embedding_size: positive integer,sparse feature embedding_size.
     :param sess_max_count: positive int, to indicate the max number of sessions
     :param sess_len_max: positive int, to indicate the max length of each session
     :param bias_encoding: bool. Whether use bias encoding or postional encoding
@@ -52,10 +51,12 @@ def DSIN(dnn_feature_columns, sess_feature_list, embedding_size=8, sess_max_coun
 
     """
 
-    if (att_embedding_size * att_head_num != len(sess_feature_list) * embedding_size):
+    hist_emb_size = sum(map(lambda fc:fc.embedding_dim,filter(lambda fc:fc.name in sess_feature_list,dnn_feature_columns)))
+
+    if (att_embedding_size * att_head_num != hist_emb_size):
         raise ValueError(
-            "len(session_feature_lsit) * embedding_size must equal to att_embedding_size * att_head_num ,got %d * %d != %d *%d" % (
-                len(sess_feature_list), embedding_size, att_embedding_size, att_head_num))
+            "hist_emb_size must equal to att_embedding_size * att_head_num ,got %d != %d *%d" % (
+                hist_emb_size, att_embedding_size, att_head_num))
 
     features = build_input_features(dnn_feature_columns)
 
@@ -87,7 +88,7 @@ def DSIN(dnn_feature_columns, sess_feature_list, embedding_size=8, sess_max_coun
 
     user_sess_length = Input(shape=(1,), name='sess_length')
 
-    embedding_dict = {feat.embedding_name: Embedding(feat.dimension, embedding_size,
+    embedding_dict = {feat.embedding_name: Embedding(feat.vocabulary_size, feat.embedding_dim,
                                                      embeddings_initializer=RandomNormal(
                                                          mean=0.0, stddev=init_std, seed=seed),
                                                      embeddings_regularizer=l2(
@@ -98,14 +99,14 @@ def DSIN(dnn_feature_columns, sess_feature_list, embedding_size=8, sess_max_coun
                       enumerate(sparse_feature_columns)}
 
     query_emb_list = embedding_lookup(embedding_dict, features, sparse_feature_columns, sess_feature_list,
-                                      sess_feature_list)  # query是单独的
+                                      sess_feature_list,to_list=True)
     dnn_input_emb_list = embedding_lookup(embedding_dict, features, sparse_feature_columns,
-                                          mask_feat_list=sess_feature_list)
+                                          mask_feat_list=sess_feature_list,to_list=True)
     dense_value_list = get_dense_input(features, dense_feature_columns)
 
-    query_emb = concat_fun(query_emb_list,mask=True)
+    query_emb = concat_func(query_emb_list, mask=True)
 
-    dnn_input_emb = Flatten()(concat_fun(dnn_input_emb_list))
+    dnn_input_emb = Flatten()(concat_func(dnn_input_emb_list))
 
     tr_input = sess_interest_division(embedding_dict, user_behavior_input_dict, sparse_feature_columns,
                                       sess_feature_list, sess_max_count, bias_encoding=bias_encoding)
@@ -120,7 +121,7 @@ def DSIN(dnn_feature_columns, sess_feature_list, embedding_size=8, sess_max_coun
                                                              supports_masking=False)(
         [query_emb, sess_fea, user_sess_length])
 
-    lstm_outputs = BiLSTM(len(sess_feature_list) * embedding_size,
+    lstm_outputs = BiLSTM(hist_emb_size,
                           layers=2, res_layers=0, dropout_rate=0.2, )(sess_fea)
     lstm_attention_layer = AttentionSequencePoolingLayer(att_hidden_units=(64, 16), weight_normalization=True)(
         [query_emb, lstm_outputs, user_sess_length])
@@ -157,7 +158,7 @@ def sess_interest_division(sparse_embedding_dict, user_behavior_input_dict, spar
                                                sparse_fg_list, sess_feture_list, sess_feture_list)
         # [sparse_embedding_dict[feat](user_behavior_input_dict[sess_name][feat]) for feat in
         #             sess_feture_list]
-        keys_emb = concat_fun(keys_emb_list,mask=True)
+        keys_emb = concat_func(keys_emb_list, mask=True)
         tr_input.append(keys_emb)
     if bias_encoding:
         tr_input = BiasEncoding(sess_max_count)(tr_input)
@@ -169,5 +170,5 @@ def sess_interest_extractor(tr_input, sess_max_count, TR):
     for i in range(sess_max_count):
         tr_out.append(TR(
             [tr_input[i], tr_input[i]]))
-    sess_fea = concat_fun(tr_out, axis=1)
+    sess_fea = concat_func(tr_out, axis=1)
     return sess_fea

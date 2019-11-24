@@ -1,19 +1,22 @@
 import numpy as np
 
+from deepctr.inputs import SparseFeat, DenseFeat, VarLenSparseFeat, get_feature_names
 from deepctr.models.dsin import DSIN
-from deepctr.inputs import SparseFeat,DenseFeat,VarLenSparseFeat,get_feature_names
 from ..utils import check_model
 
 
 def get_xy_fd(hash_flag=False):
-
-    feature_columns = [SparseFeat('user', 3, hash_flag),
-                       SparseFeat('gender', 2, hash_flag),
-                       SparseFeat('item', 3 + 1, hash_flag),
-                       SparseFeat('item_gender', 2 + 1, hash_flag),
+    feature_columns = [SparseFeat('user', 3, use_hash=hash_flag),
+                       SparseFeat('gender', 2, use_hash=hash_flag),
+                       SparseFeat('item', 3 + 1, use_hash=hash_flag),
+                       SparseFeat('item_gender', 2 + 1, use_hash=hash_flag),
                        DenseFeat('score', 1)]
-    feature_columns += [VarLenSparseFeat('sess_0_item',3+1,4,use_hash=hash_flag,embedding_name='item'),VarLenSparseFeat('sess_0_item_gender',2+1,4,use_hash=hash_flag,embedding_name='item_gender')]
-    feature_columns += [VarLenSparseFeat('sess_1_item', 3 + 1, 4, use_hash=hash_flag, embedding_name='item'),VarLenSparseFeat('sess_1_item_gender', 2 + 1, 4, use_hash=hash_flag,embedding_name='item_gender')]
+    feature_columns += [
+        VarLenSparseFeat('sess_0_item', maxlen=4, vocabulary_size=3 + 1, use_hash=hash_flag, embedding_name='item'),
+        VarLenSparseFeat('sess_0_item_gender', maxlen=4, vocabulary_size=2 + 1,  use_hash=hash_flag, embedding_name='item_gender')]
+    feature_columns += [
+        VarLenSparseFeat('sess_1_item', maxlen=4, vocabulary_size=3 + 1, use_hash=hash_flag, embedding_name='item'),
+        VarLenSparseFeat('sess_1_item_gender', maxlen=4, vocabulary_size=2 + 1,  use_hash=hash_flag, embedding_name='item_gender')]
 
     behavior_feature_list = ["item", "item_gender"]
     uid = np.array([0, 1, 2])
@@ -34,8 +37,8 @@ def get_xy_fd(hash_flag=False):
                     'sess_0_item': sess1_iid, 'sess_0_item_gender': sess1_igender, 'score': score,
                     'sess_1_item': sess2_iid, 'sess_1_item_gender': sess2_igender, }
 
-    x = {name:feature_dict[name] for name in get_feature_names(feature_columns)}
-    x["sess_length"]= sess_number
+    x = {name: feature_dict[name] for name in get_feature_names(feature_columns)}
+    x["sess_length"] = sess_number
 
     y = [1, 0, 1]
     return x, y, feature_columns, behavior_feature_list
@@ -46,7 +49,7 @@ def test_DSIN():
 
     x, y, feature_columns, behavior_feature_list = get_xy_fd(True)
 
-    model = DSIN(feature_columns, behavior_feature_list, sess_max_count=2, embedding_size=4,
+    model = DSIN(feature_columns, behavior_feature_list, sess_max_count=2,
                  dnn_hidden_units=[4, 4, 4], dnn_dropout=0.5, )
     check_model(model, model_name, x, y)
 

@@ -11,11 +11,10 @@ Reference:
 """
 import tensorflow as tf
 
-from ..inputs import build_input_features, input_from_feature_columns
+from ..inputs import build_input_features, input_from_feature_columns, get_linear_logit
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import InnerProductLayer, FGCNNLayer
-from ..layers.utils import concat_fun
-
+from ..layers.utils import concat_func, add_func
 
 
 def unstack(input_tensor):
@@ -23,19 +22,21 @@ def unstack(input_tensor):
     return tf.unstack(input_, input_.shape[1], 1)
 
 
-def FGCNN(dnn_feature_columns, embedding_size=8, conv_kernel_width=(7, 7, 7, 7), conv_filters=(14, 16, 18, 20),
+def FGCNN(linear_feature_columns,dnn_feature_columns, conv_kernel_width=(7, 7, 7, 7), conv_filters=(14, 16, 18, 20),
           new_maps=(3, 3, 3, 3),
-          pooling_width=(2, 2, 2, 2), dnn_hidden_units=(128,), l2_reg_embedding=1e-5, l2_reg_dnn=0, dnn_dropout=0,
+          pooling_width=(2, 2, 2, 2), dnn_hidden_units=(128,),l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_dnn=0, dnn_dropout=0,
           init_std=0.0001, seed=1024,
           task='binary', ):
     """Instantiates the Feature Generation by Convolutional Neural Network architecture.
 
-    :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.    :param embedding_size: positive integer,sparse feature embedding_size
+    :param linear_feature_columns: An iterable containing all the features used by linear part of the model.
+    :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
     :param conv_kernel_width: list,list of positive integer or empty list,the width of filter in each conv layer.
     :param conv_filters: list,list of positive integer or empty list,the number of filters in each conv layer.
     :param new_maps: list, list of positive integer or empty list, the feature maps of generated features.
     :param pooling_width: list, list of positive integer or empty list,the width of pooling layer.
     :param dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of deep net.
+    :param l2_reg_linear: float. L2 regularizer strength applied to linear part
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
     :param l2_reg_dnn: float. L2 regularizer strength applied to DNN
     :param dnn_dropout: float in [0,1), the probability we will drop out a given DNN coordinate.
@@ -53,23 +54,21 @@ def FGCNN(dnn_feature_columns, embedding_size=8, conv_kernel_width=(7, 7, 7, 7),
 
     inputs_list = list(features.values())
 
-    deep_emb_list, _ = input_from_feature_columns(features,dnn_feature_columns,
-                                                                              embedding_size,
-                                                                              l2_reg_embedding,init_std,
-                                                                              seed)
-    fg_deep_emb_list,_ = input_from_feature_columns(features,dnn_feature_columns,
-                                                                              embedding_size,
-                                                                              l2_reg_embedding,init_std,
-                                                                              seed,prefix='fg')
+    linear_logit = get_linear_logit(features, linear_feature_columns, init_std=init_std, seed=seed, prefix='linear',
+                                    l2_reg=l2_reg_linear)
+
+    deep_emb_list, _ = input_from_feature_columns(features, dnn_feature_columns, l2_reg_embedding, init_std, seed)
+    fg_deep_emb_list,_ = input_from_feature_columns(features, dnn_feature_columns, l2_reg_embedding, init_std, seed,
+                                                    prefix='fg')
 
 
-    fg_input = concat_fun(fg_deep_emb_list, axis=1)
-    origin_input = concat_fun(deep_emb_list, axis=1)
+    fg_input = concat_func(fg_deep_emb_list, axis=1)
+    origin_input = concat_func(deep_emb_list, axis=1)
 
     if len(conv_filters) > 0:
         new_features = FGCNNLayer(
             conv_filters, conv_kernel_width, new_maps, pooling_width)(fg_input)
-        combined_input = concat_fun([origin_input, new_features], axis=1)
+        combined_input = concat_func([origin_input, new_features], axis=1)
     else:
         combined_input = origin_input
     inner_product = tf.keras.layers.Flatten()(InnerProductLayer()(
@@ -81,6 +80,8 @@ def FGCNN(dnn_feature_columns, embedding_size=8, conv_kernel_width=(7, 7, 7, 7),
     final_logit = DNN(dnn_hidden_units, dropout_rate=dnn_dropout,
                       l2_reg=l2_reg_dnn)(dnn_input)
     final_logit = tf.keras.layers.Dense(1, use_bias=False)(final_logit)
+
+    final_logit = add_func([final_logit,linear_logit])
     output = PredictionLayer(task)(final_logit)
 
     model = tf.keras.models.Model(inputs=inputs_list, outputs=output)

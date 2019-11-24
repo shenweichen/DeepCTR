@@ -24,9 +24,9 @@ if __name__ == "__main__":
 
     # 2.set hashing space for each sparse field and generate feature config for sequence feature
 
-    fixlen_feature_columns = [SparseFeat(feat, data[feat].nunique() * 5, use_hash=True, dtype='string')
+    fixlen_feature_columns = [SparseFeat(feat, data[feat].nunique() * 5,embedding_dim=4, use_hash=True, dtype='string')
                               for feat in sparse_features]
-    varlen_feature_columns = [VarLenSparseFeat('genres', 100, max_len, 'mean', use_hash=True,
+    varlen_feature_columns = [VarLenSparseFeat('genres', maxlen=max_len,vocabulary_size=100,embedding_dim=4,combiner= 'mean', use_hash=True,
                                                dtype="string")]  # Notice : value 0 is for padding for sequence input feature
     linear_feature_columns = fixlen_feature_columns + varlen_feature_columns
     dnn_feature_columns = fixlen_feature_columns + varlen_feature_columns

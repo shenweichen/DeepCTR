@@ -147,6 +147,8 @@ class DNN(Layer):
         super(DNN, self).__init__(**kwargs)
 
     def build(self, input_shape):
+        # if len(self.hidden_units) == 0:
+        #     raise ValueError("hidden_units is empty")
         input_size = input_shape[-1]
         hidden_units = [int(input_size)] + list(self.hidden_units)
         self.kernels = [self.add_weight(name='kernel' + str(i),

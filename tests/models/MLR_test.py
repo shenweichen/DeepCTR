@@ -16,9 +16,12 @@ from ..utils import check_model, SAMPLE_SIZE,get_test_data
 )
 def test_MLRs(region_sparse, region_dense, base_sparse, base_dense, bias_sparse, bias_dense):
     model_name = "MLRs"
-    region_x,y,region_feature_columns = get_test_data(SAMPLE_SIZE,region_sparse,region_dense,prefix='region')
-    base_x, y, base_feature_columns = get_test_data(SAMPLE_SIZE, region_sparse, region_dense, prefix='base')
-    bias_x, y, bias_feature_columns = get_test_data(SAMPLE_SIZE, region_sparse, region_dense, prefix='bias')
+    region_x,y,region_feature_columns = get_test_data(SAMPLE_SIZE, sparse_feature_num=region_sparse,
+                                                      dense_feature_num=region_dense, prefix='region')
+    base_x, y, base_feature_columns = get_test_data(SAMPLE_SIZE, sparse_feature_num=region_sparse,
+                                                    dense_feature_num=region_dense, prefix='base')
+    bias_x, y, bias_feature_columns = get_test_data(SAMPLE_SIZE, sparse_feature_num=region_sparse,
+                                                    dense_feature_num=region_dense, prefix='bias')
 
 
 
@@ -30,9 +33,12 @@ def test_MLRs(region_sparse, region_dense, base_sparse, base_dense, bias_sparse,
 
 def test_MLR():
     model_name = "MLR"
-    region_x,y,region_feature_columns = get_test_data(SAMPLE_SIZE,3,3,prefix='region')
-    base_x, y, base_feature_columns = get_test_data(SAMPLE_SIZE, 3, 3, prefix='base')
-    bias_x, y, bias_feature_columns = get_test_data(SAMPLE_SIZE, 3, 3, prefix='bias')
+    region_x,y,region_feature_columns = get_test_data(SAMPLE_SIZE, sparse_feature_num=3, dense_feature_num=3,
+                                                      prefix='region')
+    base_x, y, base_feature_columns = get_test_data(SAMPLE_SIZE, sparse_feature_num=3, dense_feature_num=3,
+                                                    prefix='base')
+    bias_x, y, bias_feature_columns = get_test_data(SAMPLE_SIZE, sparse_feature_num=3, dense_feature_num=3,
+                                                    prefix='bias')
 
 
 
