@@ -66,7 +66,7 @@ class LocalActivationUnit(Layer):
         if input_shape[0][-1] != input_shape[1][-1] or input_shape[0][1] != 1:
             raise ValueError('A `LocalActivationUnit` layer requires '
                              'inputs of a two inputs with shape (None,1,embedding_size) and (None,T,embedding_size)'
-                             'Got different shapes: %s,%s' % (input_shape))
+                             'Got different shapes: %s,%s' % (input_shape[0],input_shape[1]))
         size = 4 * \
                int(input_shape[0][-1]
                    ) if len(self.hidden_units) == 0 else self.hidden_units[-1]

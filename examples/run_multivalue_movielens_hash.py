@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 from tensorflow.python.keras.preprocessing.sequence import pad_sequences
 
+from deepctr.inputs import SparseFeat, VarLenSparseFeat, get_feature_names
 from deepctr.models import DeepFM
-from deepctr.inputs import SparseFeat, VarLenSparseFeat,get_feature_names
 
 if __name__ == "__main__":
     data = pd.read_csv("./movielens_sample.txt")
@@ -24,20 +24,22 @@ if __name__ == "__main__":
 
     # 2.set hashing space for each sparse field and generate feature config for sequence feature
 
-    fixlen_feature_columns = [SparseFeat(feat, data[feat].nunique() * 5,embedding_dim=4, use_hash=True, dtype='string')
+    fixlen_feature_columns = [SparseFeat(feat, data[feat].nunique() * 5, embedding_dim=4, use_hash=True, dtype='string')
                               for feat in sparse_features]
-    varlen_feature_columns = [VarLenSparseFeat('genres', maxlen=max_len,vocabulary_size=100,embedding_dim=4,combiner= 'mean', use_hash=True,
-                                               dtype="string")]  # Notice : value 0 is for padding for sequence input feature
+    varlen_feature_columns = [
+        VarLenSparseFeat(SparseFeat('genres', vocabulary_size=100, embedding_dim=4, use_hash=True, dtype="string"),
+                         maxlen=max_len, combiner='mean',
+                         )]  # Notice : value 0 is for padding for sequence input feature
     linear_feature_columns = fixlen_feature_columns + varlen_feature_columns
     dnn_feature_columns = fixlen_feature_columns + varlen_feature_columns
     feature_names = get_feature_names(linear_feature_columns + dnn_feature_columns)
 
     # 3.generate input data for model
-    model_input = {name:data[name] for name in feature_names}
+    model_input = {name: data[name] for name in feature_names}
     model_input['genres'] = genres_list
 
     # 4.Define Model,compile and train
-    model = DeepFM(linear_feature_columns,dnn_feature_columns, task='regression')
+    model = DeepFM(linear_feature_columns, dnn_feature_columns, task='regression')
 
     model.compile("adam", "mse", metrics=['mse'], )
     history = model.fit(model_input, data[target].values,

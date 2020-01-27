@@ -31,7 +31,7 @@ def get_test_data(sample_size=1000, embedding_size=4, sparse_feature_num=1, dens
 
 
     if 'weight'  in sequence_feature:
-        feature_columns.append(VarLenSparseFeat(prefix+"weighted_seq",maxlen=3,vocabulary_size=2,embedding_dim=embedding_size,length_name=prefix+"weighted_seq"+"_seq_length",weight_name=prefix+"weight"))
+        feature_columns.append(VarLenSparseFeat(SparseFeat(prefix+"weighted_seq",vocabulary_size=2,embedding_dim=embedding_size),maxlen=3,length_name=prefix+"weighted_seq"+"_seq_length",weight_name=prefix+"weight"))
         s_input, s_len_input = gen_sequence(
             2, 3, sample_size)
 
@@ -50,7 +50,7 @@ def get_test_data(sample_size=1000, embedding_size=4, sparse_feature_num=1, dens
         dim = np.random.randint(1, 10)
         maxlen = np.random.randint(1, 10)
         feature_columns.append(
-            VarLenSparseFeat(prefix +'sequence_' + mode, maxlen=maxlen,vocabulary_size=dim,  embedding_dim=embedding_size, combiner=mode))
+            VarLenSparseFeat(SparseFeat(prefix +'sequence_' + mode,vocabulary_size=dim,  embedding_dim=embedding_size), maxlen=maxlen, combiner=mode))
 
 
 
