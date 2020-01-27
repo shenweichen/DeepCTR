@@ -42,19 +42,14 @@ DNN based CTR prediction models usually have following 4 modules:
 
 ### VarLenSparseFeat
 
-``VarLenSparseFeat`` is a namedtuple with signature ``VarLenSparseFeat(name, maxlen, vocabulary_size, embedding_dim, combiner,use_hash, dtype, length_name,weight_name, embedding_name, group_name)``
+``VarLenSparseFeat`` is a namedtuple with signature ``VarLenSparseFeat(sparsefeat, maxlen, combiner, length_name, weight_name,weight_norm)``
 
-- name : feature name
+- sparsefeat : a instance of `SparseFeat`
 - maxlen : maximum length of this feature for all samples
-- vocabulary_size : number of unique feature values for sprase feature or hashing space when `use_hash=True`
-- embedding_dim : embedding dimension
 - combiner : pooling method,can be ``sum``,``mean`` or ``max``
-- use_hash : defualt `False`.if `True` the input will be hashed to space of size `vocabulary_size`.
-- dtype : default `float32`.dtype of input tensor.
 - length_name : feature length name,if `None`, value 0 in feature is for padding.
 - weight_name : default `None`. If not None, the sequence feature will be multiplyed by the feature whose name is `weight_name`.
-- embedding_name : default `None`. If None, the `embedding_name` will be same as `name`.
-- group_name : feature group of this feature.
+- weight_norm : default `True`. Whether normalize the weight score or not.
 
 ## Models
 

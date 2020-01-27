@@ -37,56 +37,41 @@ class SparseFeat(namedtuple('SparseFeat',
         return self.name.__hash__()
 
 
-# class VarLenSparseFeat(namedtuple('VarLenSparseFeat',
-#                                   ['name', 'maxlen', 'vocabulary_size', 'embedding_dim', 'combiner', 'use_hash',
-#                                    'dtype', 'length_name', 'weight_name', 'embedding_name', 'group_name'])):
-#     __slots__ = ()
-#
-#     def __new__(cls, name, maxlen, vocabulary_size, embedding_dim=4, combiner="mean", use_hash=False, dtype="float32",
-#                 length_name=None, weight_name=None, embedding_name=None, group_name=DEFAULT_GROUP_NAME):
-#         if embedding_name is None:
-#             embedding_name = name
-#         if embedding_dim == "auto":
-#             embedding_dim = 6 * int(pow(vocabulary_size, 0.25))
-#         return super(VarLenSparseFeat, cls).__new__(cls, name, maxlen, vocabulary_size, embedding_dim, combiner,
-#                                                     use_hash, dtype, length_name, weight_name, embedding_name,
-#                                                     group_name)
-#
-#     def __hash__(self):
-#         return self.name.__hash__()
-
-
 class VarLenSparseFeat(namedtuple('VarLenSparseFeat',
-                                  ['SparseFeat', 'maxlen', 'combiner','length_name', 'weight_name'])):
+                                  ['sparsefeat', 'maxlen', 'combiner', 'length_name', 'weight_name', 'weight_norm'])):
     __slots__ = ()
 
-    def __new__(cls, SparseFeat, maxlen, combiner="mean", length_name=None, weight_name=None, ):
-
-        return super(VarLenSparseFeat, cls).__new__(cls, SparseFeat, maxlen, combiner, length_name, weight_name)
+    def __new__(cls, sparsefeat, maxlen, combiner="mean", length_name=None, weight_name=None, weight_norm=True):
+        return super(VarLenSparseFeat, cls).__new__(cls, sparsefeat, maxlen, combiner, length_name, weight_name,
+                                                    weight_norm)
 
     @property
     def name(self):
-        return self.SparseFeat.name
+        return self.sparsefeat.name
+
     @property
     def vocabulary_size(self):
-        return self.SparseFeat.vocabulary_size
+        return self.sparsefeat.vocabulary_size
+
     @property
     def embedding_dim(self):
-        return self.SparseFeat.embedding_dim
+        return self.sparsefeat.embedding_dim
+
     @property
     def use_hash(self):
-        return self.SparseFeat.use_hash
+        return self.sparsefeat.use_hash
+
     @property
     def dtype(self):
-        return self.SparseFeat.dtype
+        return self.sparsefeat.dtype
 
     @property
     def embedding_name(self):
-        return self.SparseFeat.embedding_name
+        return self.sparsefeat.embedding_name
+
     @property
     def group_name(self):
-        return self.SparseFeat.group_name
-
+        return self.sparsefeat.group_name
 
     def __hash__(self):
         return self.name.__hash__()
@@ -195,8 +180,9 @@ def get_linear_logit(features, feature_columns, units=1, use_bias=False, init_st
     for i in range(len(feature_columns)):
         if isinstance(feature_columns[i], SparseFeat):
             feature_columns[i] = feature_columns[i]._replace(embedding_dim=1)
-        if isinstance(feature_columns[i],VarLenSparseFeat):
-            feature_columns[i] = feature_columns[i]._replace(SparseFeat=feature_columns[i].SparseFeat._replace(embedding_dim=1))
+        if isinstance(feature_columns[i], VarLenSparseFeat):
+            feature_columns[i] = feature_columns[i]._replace(
+                SparseFeat=feature_columns[i].SparseFeat._replace(embedding_dim=1))
 
     linear_emb_list = [input_from_feature_columns(features, feature_columns, l2_reg, init_std, seed,
                                                   prefix=prefix + str(i))[0] for i in range(units)]
@@ -263,7 +249,7 @@ def get_varlen_pooling_list(embedding_dict, features, varlen_sparse_feature_colu
         feature_length_name = fc.length_name
         if feature_length_name is not None:
             if fc.weight_name is not None:
-                seq_input = WeightedSequenceLayer()(
+                seq_input = WeightedSequenceLayer(weight_normalization=fc.weight_norm)(
                     [embedding_dict[feature_name], features[feature_length_name], features[fc.weight_name]])
             else:
                 seq_input = embedding_dict[feature_name]
@@ -271,7 +257,7 @@ def get_varlen_pooling_list(embedding_dict, features, varlen_sparse_feature_colu
                 [seq_input, features[feature_length_name]])
         else:
             if fc.weight_name is not None:
-                seq_input = WeightedSequenceLayer(supports_masking=True)(
+                seq_input = WeightedSequenceLayer(weight_normalization=fc.weight_norm, supports_masking=True)(
                     [embedding_dict[feature_name], features[fc.weight_name]])
             else:
                 seq_input = embedding_dict[feature_name]

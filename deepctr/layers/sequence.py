@@ -121,7 +121,7 @@ class WeightedSequenceLayer(Layer):
         - 3D tensor with shape: ``(batch_size, T, embedding_size)``.
 
       Arguments
-        - **weight_normalization**: bool.Whether normalize the weight socre before applying to sequence.
+        - **weight_normalization**: bool.Whether normalize the weight score before applying to sequence.
 
         - **supports_masking**:If True,the input need to support masking.
     """
