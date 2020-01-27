@@ -126,7 +126,7 @@ class WeightedSequenceLayer(Layer):
         - **supports_masking**:If True,the input need to support masking.
     """
 
-    def __init__(self,weight_normalization=False, supports_masking=False, **kwargs):
+    def __init__(self,weight_normalization=True, supports_masking=False, **kwargs):
         super(WeightedSequenceLayer, self).__init__(**kwargs)
         self.weight_normalization = weight_normalization
         self.supports_masking = supports_masking
