@@ -182,7 +182,7 @@ def get_linear_logit(features, feature_columns, units=1, use_bias=False, init_st
             feature_columns[i] = feature_columns[i]._replace(embedding_dim=1)
         if isinstance(feature_columns[i], VarLenSparseFeat):
             feature_columns[i] = feature_columns[i]._replace(
-                SparseFeat=feature_columns[i].SparseFeat._replace(embedding_dim=1))
+                sparsefeat=feature_columns[i].sparsefeat._replace(embedding_dim=1))
 
     linear_emb_list = [input_from_feature_columns(features, feature_columns, l2_reg, init_std, seed,
                                                   prefix=prefix + str(i))[0] for i in range(units)]
