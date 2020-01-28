@@ -14,12 +14,13 @@ from tensorflow.python.keras.layers import LSTM, Lambda, Layer
 
 from .core import LocalActivationUnit
 from .normalization import LayerNormalization
+
 if tf.__version__ >= '2.0.0':
     from ..contrib.rnn_v2 import dynamic_rnn
 else:
     from ..contrib.rnn import dynamic_rnn
 from ..contrib.utils import QAAttGRUCell, VecAttGRUCell
-from .utils import reduce_sum,reduce_max,div,softmax,reduce_mean
+from .utils import reduce_sum, reduce_max, div, softmax, reduce_mean
 
 
 class SequencePoolingLayer(Layer):
@@ -46,7 +47,7 @@ class SequencePoolingLayer(Layer):
         if mode not in ['sum', 'mean', 'max']:
             raise ValueError("mode must be sum or mean")
         self.mode = mode
-        self.eps = tf.constant(1e-8,tf.float32)
+        self.eps = tf.constant(1e-8, tf.float32)
         super(SequencePoolingLayer, self).__init__(**kwargs)
 
         self.supports_masking = supports_masking
@@ -63,7 +64,7 @@ class SequencePoolingLayer(Layer):
                 raise ValueError(
                     "When supports_masking=True,input must support masking")
             uiseq_embed_list = seq_value_len_list
-            mask = tf.cast(mask,tf.float32)#                tf.to_float(mask)
+            mask = tf.cast(mask, tf.float32)  # tf.to_float(mask)
             user_behavior_length = reduce_sum(mask, axis=-1, keep_dims=True)
             mask = tf.expand_dims(mask, axis=2)
         else:
@@ -85,7 +86,7 @@ class SequencePoolingLayer(Layer):
         hist = reduce_sum(hist, 1, keep_dims=False)
 
         if self.mode == "mean":
-            hist = div(hist, tf.cast(user_behavior_length,tf.float32) + self.eps)
+            hist = div(hist, tf.cast(user_behavior_length, tf.float32) + self.eps)
 
         hist = tf.expand_dims(hist, axis=1)
         return hist
@@ -126,7 +127,7 @@ class WeightedSequenceLayer(Layer):
         - **supports_masking**:If True,the input need to support masking.
     """
 
-    def __init__(self,weight_normalization=True, supports_masking=False, **kwargs):
+    def __init__(self, weight_normalization=True, supports_masking=False, **kwargs):
         super(WeightedSequenceLayer, self).__init__(**kwargs)
         self.weight_normalization = weight_normalization
         self.supports_masking = supports_masking
@@ -159,14 +160,13 @@ class WeightedSequenceLayer(Layer):
         value_input = tf.where(mask, value_input, paddings)
 
         if self.weight_normalization:
-           value_input = softmax(value_input,dim=1)
-
+            value_input = softmax(value_input, dim=1)
 
         if len(value_input.shape) == 2:
             value_input = tf.expand_dims(value_input, axis=2)
             value_input = tf.tile(value_input, [1, 1, embedding_size])
 
-        return tf.multiply(key_input,value_input)
+        return tf.multiply(key_input, value_input)
 
     def compute_output_shape(self, input_shape):
         return input_shape[0]
@@ -178,9 +178,10 @@ class WeightedSequenceLayer(Layer):
             return None
 
     def get_config(self, ):
-        config = {'weight_normalization':self.weight_normalization,'supports_masking': self.supports_masking}
+        config = {'weight_normalization': self.weight_normalization, 'supports_masking': self.supports_masking}
         base_config = super(WeightedSequenceLayer, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
+
 
 class AttentionSequencePoolingLayer(Layer):
     """The Attentional sequence pooling operation used in DIN.
@@ -463,7 +464,8 @@ class Transformer(Layer):
         embedding_size = int(input_shape[0][-1])
         if self.num_units != embedding_size:
             raise ValueError(
-                "att_embedding_size * head_num must equal the last dimension size of inputs,got %d * %d != %d" % (self.att_embedding_size,self.head_num,embedding_size))
+                "att_embedding_size * head_num must equal the last dimension size of inputs,got %d * %d != %d" % (
+                self.att_embedding_size, self.head_num, embedding_size))
         self.seq_len_max = int(input_shape[0][-2])
         self.W_Query = self.add_weight(name='query', shape=[embedding_size, self.att_embedding_size * self.head_num],
                                        dtype=tf.float32,
@@ -543,10 +545,10 @@ class Transformer(Layer):
         if self.blinding:
             try:
                 outputs = tf.matrix_set_diag(outputs, tf.ones_like(outputs)[
-                                                  :, :, 0] * (-2 ** 32 + 1))
+                                                      :, :, 0] * (-2 ** 32 + 1))
             except:
                 outputs = tf.compat.v1.matrix_set_diag(outputs, tf.ones_like(outputs)[
-                                                      :, :, 0] * (-2 ** 32 + 1))
+                                                                :, :, 0] * (-2 ** 32 + 1))
 
         outputs -= reduce_max(outputs, axis=-1, keep_dims=True)
         outputs = softmax(outputs)
@@ -595,6 +597,7 @@ class Transformer(Layer):
                   'blinding': self.blinding}
         base_config = super(Transformer, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
+
 
 def positional_encoding(inputs,
                         pos_embedding_trainable=True,
@@ -815,5 +818,3 @@ class KMaxPooling(Layer):
         config = {'k': self.k, 'axis': self.axis}
         base_config = super(KMaxPooling, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
-
-
