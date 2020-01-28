@@ -13,8 +13,8 @@ def get_xy_fd(use_neg=False, hash_flag=False):
                        SparseFeat('item_gender', 2+1,embedding_dim=4,use_hash=hash_flag),
                        DenseFeat('score', 1)]
 
-    feature_columns += [VarLenSparseFeat('hist_item',maxlen=4,vocabulary_size=3+1,embedding_dim=8,  embedding_name='item',length_name="seq_length"),
-                        VarLenSparseFeat('hist_item_gender', maxlen=4,vocabulary_size=3+1,embedding_dim=4, embedding_name='item_gender',length_name="seq_length")]
+    feature_columns += [VarLenSparseFeat(SparseFeat('hist_item', vocabulary_size=3 + 1,embedding_dim=8,embedding_name='item'),maxlen=4,length_name="seq_length"),
+                        VarLenSparseFeat(SparseFeat('hist_item_gender', 2 + 1,embedding_dim=4, embedding_name='item_gender'), maxlen=4,length_name="seq_length")]
 
     behavior_feature_list = ["item","item_gender"]
     uid = np.array([0, 1, 2])
@@ -35,8 +35,11 @@ def get_xy_fd(use_neg=False, hash_flag=False):
     if use_neg:
         feature_dict['neg_hist_item'] = np.array([[1, 2, 3, 0], [1, 2, 3, 0], [1, 2, 0, 0]])
         feature_dict['neg_hist_item_gender'] = np.array([[1, 1, 2, 0], [2, 1, 1, 0], [2, 1, 0, 0]])
-        feature_columns += [VarLenSparseFeat('neg_hist_item', maxlen=4,vocabulary_size=3+1,embedding_dim=8, embedding_name='item',length_name="seq_length"),
-                        VarLenSparseFeat('neg_hist_item_gender', maxlen=4, vocabulary_size=3+1,embedding_dim=4,embedding_name='item_gender',length_name="seq_length")]
+        feature_columns += [
+            VarLenSparseFeat(SparseFeat('neg_hist_item', vocabulary_size=3 + 1, embedding_dim=8, embedding_name='item'),
+                             maxlen=4, length_name="seq_length"),
+            VarLenSparseFeat(SparseFeat('neg_hist_item_gender', 2 + 1, embedding_dim=4, embedding_name='item_gender'),
+                             maxlen=4, length_name="seq_length")]
 
     x = {name:feature_dict[name] for name in get_feature_names(feature_columns)}
     y = [1, 0, 1]

@@ -11,8 +11,8 @@ def get_xy_fd(hash_flag=False):
 
     feature_columns = [SparseFeat('user',3),SparseFeat(
         'gender', 2), SparseFeat('item', 3 + 1), SparseFeat('item_gender', 2 + 1),DenseFeat('score', 1)]
-    feature_columns += [VarLenSparseFeat('hist_item', maxlen=4, vocabulary_size=3+1, embedding_name='item'),
-                        VarLenSparseFeat('hist_item_gender', maxlen=4,vocabulary_size=3+1, embedding_name='item_gender')]
+    feature_columns += [VarLenSparseFeat(SparseFeat('hist_item', vocabulary_size=3 + 1,embedding_dim=8,embedding_name='item'), maxlen=4),
+                        VarLenSparseFeat(SparseFeat('hist_item_gender', 2 + 1,embedding_dim=4, embedding_name='item_gender'), maxlen=4)]
 
     behavior_feature_list = ["item", "item_gender"]
     uid = np.array([0, 1, 2])
