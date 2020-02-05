@@ -31,7 +31,7 @@ from tensorflow.python.keras.optimizers import Adam,Adagrad
 from tensorflow.python.keras.callbacks import EarlyStopping
 
 model = deepctr.models.DeepFM(linear_feature_columns,dnn_feature_columns)
-model.compile(Adagrad('0.0808'),'binary_crossentropy',metrics=['binary_crossentropy'])
+model.compile(Adagrad(0.1024),'binary_crossentropy',metrics=['binary_crossentropy'])
 
 es = EarlyStopping(monitor='val_binary_crossentropy')
 history = model.fit(model_input, data[target].values,batch_size=256, epochs=10, verbose=2, validation_split=0.2,callbacks=[es] )

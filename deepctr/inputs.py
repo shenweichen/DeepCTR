@@ -264,8 +264,8 @@ def get_varlen_pooling_list(embedding_dict, features, varlen_sparse_feature_colu
             vec = SequencePoolingLayer(combiner, supports_masking=True)(
                 seq_input)
         pooling_vec_list[fc.group_name].append(vec)
-        if to_list:
-            return chain.from_iterable(pooling_vec_list.values())
+    if to_list:
+        return chain.from_iterable(pooling_vec_list.values())
     return pooling_vec_list
 
 
