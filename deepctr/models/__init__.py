@@ -8,6 +8,7 @@ from .din import DIN
 from .fnn import FNN
 from .mlr import MLR
 from .onn import ONN
+from .onn import ONN as NFFM
 from .nfm import NFM
 from .pnn import PNN
 from .wdl import WDL
