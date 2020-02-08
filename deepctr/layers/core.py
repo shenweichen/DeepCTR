@@ -66,7 +66,7 @@ class LocalActivationUnit(Layer):
         if input_shape[0][-1] != input_shape[1][-1] or input_shape[0][1] != 1:
             raise ValueError('A `LocalActivationUnit` layer requires '
                              'inputs of a two inputs with shape (None,1,embedding_size) and (None,T,embedding_size)'
-                             'Got different shapes: %s,%s' % (input_shape[0],input_shape[1]))
+                             'Got different shapes: %s,%s' % (input_shape[0], input_shape[1]))
         size = 4 * \
                int(input_shape[0][-1]
                    ) if len(self.hidden_units) == 0 else self.hidden_units[-1]
@@ -77,9 +77,9 @@ class LocalActivationUnit(Layer):
         self.bias = self.add_weight(
             shape=(1,), initializer=Zeros(), name="bias")
         self.dnn = DNN(self.hidden_units, self.activation, self.l2_reg,
-                      self.dropout_rate, self.use_bn, seed=self.seed)
+                       self.dropout_rate, self.use_bn, seed=self.seed)
 
-        self.dense = tf.keras.layers.Lambda(lambda x:tf.nn.bias_add(tf.tensordot(
+        self.dense = tf.keras.layers.Lambda(lambda x: tf.nn.bias_add(tf.tensordot(
             x[0], x[1], axes=(-1, 0)), x[2]))
 
         super(LocalActivationUnit, self).build(
@@ -97,7 +97,7 @@ class LocalActivationUnit(Layer):
 
         att_out = self.dnn(att_input, training=training)
 
-        attention_score = self.dense([att_out,self.kernel,self.bias])
+        attention_score = self.dense([att_out, self.kernel, self.bias])
 
         return attention_score
 
@@ -165,7 +165,8 @@ class DNN(Layer):
         if self.use_bn:
             self.bn_layers = [tf.keras.layers.BatchNormalization() for _ in range(len(self.hidden_units))]
 
-        self.dropout_layers = [tf.keras.layers.Dropout(self.dropout_rate,seed=self.seed+i) for i in range(len(self.hidden_units))]
+        self.dropout_layers = [tf.keras.layers.Dropout(self.dropout_rate, seed=self.seed + i) for i in
+                               range(len(self.hidden_units))]
 
         self.activation_layers = [activation_layer(self.activation) for _ in range(len(self.hidden_units))]
 
@@ -186,7 +187,7 @@ class DNN(Layer):
 
             fc = self.activation_layers[i](fc)
 
-            fc = self.dropout_layers[i](fc,training = training)
+            fc = self.dropout_layers[i](fc, training=training)
             deep_input = fc
 
         return deep_input

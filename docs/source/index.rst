@@ -34,11 +34,11 @@ You can read the latest code at https://github.com/shenweichen/DeepCTR
 
 News
 -----
+02/08/2020 : Fix some bugs. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.7.2>`_
+
 01/28/2020 : Simplify `VarLenSparseFeat <./Features.html#varlensparsefeat>`_ ,support setting weight_normalization.Fix problem of embedding size of ``SparseFeat`` in ``linear_feature_columns``. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.7.1>`_
 
 11/24/2019 : Refactor `feature columns <./Features.html#feature-columns>`_ . Different features can use different ``embedding_dim`` and  group-wise interaction is available by setting ``group_name``. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.7.0>`_
-
-11/06/2019 : Add ``WeightedSequenceLayer`` and support `weighted sequence feature input <./Examples.html#multi-value-input-movielens>`_. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.6.3>`_
 
 DisscussionGroup
 -----------------------

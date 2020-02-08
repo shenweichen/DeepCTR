@@ -1,4 +1,5 @@
 # History
+- 02/08/2020 : [v0.7.2](https://github.com/shenweichen/DeepCTR/releases/tag/v0.7.2) released.Fix some bugs.
 - 01/28/2020 : [v0.7.1](https://github.com/shenweichen/DeepCTR/releases/tag/v0.7.1) released.Simplify [VarLenSparseFeat](./Features.html#varlensparsefeat),support setting weight_normalization.Fix problem of embedding size of `SparseFeat` in `linear_feature_columns`.
 - 11/24/2019 : [v0.7.0](https://github.com/shenweichen/DeepCTR/releases/tag/v0.7.0) released.Refactor [feature columns](./Features.html#feature-columns).Different features can use different `embedding_dim` and group-wise interaction is available by setting `group_name`.
 - 11/06/2019 : [v0.6.3](https://github.com/shenweichen/DeepCTR/releases/tag/v0.6.3) released.Add `WeightedSequenceLayer` and support [weighted sequence feature input](./Examples.html#multi-value-input-movielens).

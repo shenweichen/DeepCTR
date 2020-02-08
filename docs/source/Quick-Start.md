@@ -79,17 +79,16 @@ And for varlen(multi-valued) sparse features,you can use [VarlenSparseFeat](./Fe
 
 - Label Encoding
 ```python
-sparse_feature_columns = [SparseFeat(feat, vocabulary_size=data[feat].nunique(),embedding_dim=4)
-                           for i,feat in enumerate(sparse_features)]
-dense_feature_columns = [DenseFeat(feat, 1)
+fixlen_feature_columns = [SparseFeat(feat, vocabulary_size=data[feat].nunique(),embedding_dim=4)
+                       for i,feat in enumerate(sparse_features)] + [DenseFeat(feat, 1,)
                       for feat in dense_features]
+
 ```
 - Feature Hashing on the fly
 ```python
-sparse_feature_columns = [SparseFeat(feat, vocabulary_size=1e6,embedding_dim=4,use_hash=True)
-                           for i,feat in enumerate(sparse_features)]#The dimension can be set according to data
-dense_feature_columns = [DenseFeat(feat, 1)
-                      for feat in dense_features]
+fixlen_feature_columns = [SparseFeat(feat, vocabulary_size=1e6,embedding_dim=4, use_hash=True, dtype='string')  # since the input is string
+                              for feat in sparse_features] + [DenseFeat(feat, 1, )
+                          for feat in dense_features]
 ```
 - generate feature columns
 ```python
