@@ -85,15 +85,15 @@ class Linear(tf.keras.layers.Layer):
             self.kernel = self.add_weight(
                 'linear_kernel',
                 shape=[int(input_shape[-1]), 1],
-                initializer=glorot_normal(),
-                regularizer=l2(self.l2_reg),
+                initializer=tf.keras.initializers.glorot_normal(),
+                regularizer=tf.keras.regularizers.l2(self.l2_reg),
                 trainable=True)
         elif self.mode == 2 :
             self.kernel = self.add_weight(
                 'linear_kernel',
                 shape=[int(input_shape[1][-1]), 1],
-                initializer=glorot_normal(),
-                regularizer=l2(self.l2_reg),
+                initializer=tf.keras.initializers.glorot_normal(),
+                regularizer=tf.keras.regularizers.l2(self.l2_reg),
                 trainable=True)
 
         super(Linear, self).build(input_shape)  # Be sure to call this somewhere!
