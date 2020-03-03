@@ -34,7 +34,7 @@ You can read the latest code at https://github.com/shenweichen/DeepCTR
 
 News
 -----
-03/03/2020 : Fix the inconsistency of prediction results when the model is loaded with trained weights. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.7.3>`_
+03/04/2020 : Fix the inconsistency of prediction results when the model is loaded with trained weights. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.7.3>`_
 
 02/08/2020 : Fix some bugs. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.7.2>`_
 
