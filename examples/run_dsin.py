@@ -9,37 +9,37 @@ def get_xy_fd(hash_flag=False):
     feature_columns = [SparseFeat('user', 3, embedding_dim=10, use_hash=hash_flag),
                        SparseFeat('gender', 2, embedding_dim=4, use_hash=hash_flag),
                        SparseFeat('item', 3 + 1, embedding_dim=4, use_hash=hash_flag),
-                       SparseFeat('item_gender', 2 + 1, embedding_dim=4, use_hash=hash_flag),
-                       DenseFeat('score', 1)]
+                       SparseFeat('cate_id', 2 + 1, embedding_dim=4, use_hash=hash_flag),
+                       DenseFeat('pay_score', 1)]
     feature_columns += [
         VarLenSparseFeat(SparseFeat('sess_0_item', 3 + 1, embedding_dim=4, use_hash=hash_flag, embedding_name='item'),
                          maxlen=4), VarLenSparseFeat(
-            SparseFeat('sess_0_item_gender', 2 + 1, embedding_dim=4, use_hash=hash_flag, embedding_name='item_gender'),
+            SparseFeat('sess_0_cate_id', 2 + 1, embedding_dim=4, use_hash=hash_flag, embedding_name='cate_id'),
             maxlen=4)]
     feature_columns += [
         VarLenSparseFeat(SparseFeat('sess_1_item', 3 + 1, embedding_dim=4, use_hash=hash_flag, embedding_name='item'),
                          maxlen=4), VarLenSparseFeat(
-            SparseFeat('sess_1_item_gender', 2 + 1, embedding_dim=4, use_hash=hash_flag, embedding_name='item_gender'),
+            SparseFeat('sess_1_cate_id', 2 + 1, embedding_dim=4, use_hash=hash_flag, embedding_name='cate_id'),
             maxlen=4)]
 
-    behavior_feature_list = ["item", "item_gender"]
+    behavior_feature_list = ["item", "cate_id"]
     uid = np.array([0, 1, 2])
     ugender = np.array([0, 1, 0])
     iid = np.array([1, 2, 3])  # 0 is mask value
-    igender = np.array([1, 2, 1])  # 0 is mask value
+    cateid = np.array([1, 2, 1])  # 0 is mask value
     score = np.array([0.1, 0.2, 0.3])
 
     sess1_iid = np.array([[1, 2, 3, 0], [1, 2, 3, 0], [0, 0, 0, 0]])
-    sess1_igender = np.array([[1, 1, 2, 0], [2, 1, 1, 0], [0, 0, 0, 0]])
+    sess1_cate_id = np.array([[1, 1, 2, 0], [2, 1, 1, 0], [0, 0, 0, 0]])
 
     sess2_iid = np.array([[1, 2, 3, 0], [0, 0, 0, 0], [0, 0, 0, 0]])
-    sess2_igender = np.array([[1, 1, 2, 0], [0, 0, 0, 0], [0, 0, 0, 0]])
+    sess2_cate_id = np.array([[1, 1, 2, 0], [0, 0, 0, 0], [0, 0, 0, 0]])
 
     sess_number = np.array([2, 1, 0])
 
-    feature_dict = {'user': uid, 'gender': ugender, 'item': iid, 'item_gender': igender,
-                    'sess_0_item': sess1_iid, 'sess_0_item_gender': sess1_igender, 'score': score,
-                    'sess_1_item': sess2_iid, 'sess_1_item_gender': sess2_igender, }
+    feature_dict = {'user': uid, 'gender': ugender, 'item': iid, 'cate_id': cateid,
+                    'sess_0_item': sess1_iid, 'sess_0_cate_id': sess1_cate_id, 'pay_score': score,
+                    'sess_1_item': sess2_iid, 'sess_1_cate_id': sess2_cate_id, }
 
     x = {name: feature_dict[name] for name in get_feature_names(feature_columns)}
     x["sess_length"] = sess_number
