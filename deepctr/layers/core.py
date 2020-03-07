@@ -296,6 +296,7 @@ class MMOELayer(Layer):
         expert_out = tf.reshape(expert_out, [-1, self.output_dim, self.num_experts])
         for i in range(self.num_tasks):
             gate_out = tf.tensordot(inputs, self.gate_kernels[i], axes=(-1,0))
+            gate_out = tf.nn.softmax(gate_out)
             gate_out = tf.tile(tf.expand_dims(gate_out, axis=1), [1, self.output_dim, 1])
             output = tf.reduce_sum(tf.multiply(expert_out, gate_out), axis=2)
             outputs.append(output)
