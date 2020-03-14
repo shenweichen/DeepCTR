@@ -1042,3 +1042,123 @@ Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
         config = {'bilinear_type': self.bilinear_type, 'seed': self.seed}
         base_config = super(BilinearInteraction, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
+
+
+class FieldWiseBiInteraction(Layer):
+    """Field-Wise Bi-Interaction Layer used in FLEN,compress the
+     pairwise element-wise product of features into one single vector.
+
+      Input shape
+        - A list of 3D tensor with shape:``(batch_size,field_size,embedding_size)``.
+
+      Output shape
+        - 2D tensor with shape: ``(batch_size,embedding_size)``.
+     
+      Arguments
+        - **use_bias** : Boolean, if use bias.
+        - **l2_reg** : Float, l2 regularization coefficient.
+        - **seed** : A Python integer to use as random seed.
+     
+      References
+        [1] hen W, Zhan L, Ci Y, Lin C https://arxiv.org/pdf/1911.04690
+    """
+    def __init__(self, l2_reg=1e-5, seed=1024, **kwargs):
+
+        self.l2_reg = l2_reg
+        self.seed = seed
+
+        super(FieldWiseBiInteraction, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+
+        if not isinstance(input_shape, list) or len(input_shape) < 2:
+            raise ValueError(
+                'A `Field-Wise Bi-Interaction` layer should be called '
+                'on a list of at least 2 inputs')
+
+        self.num_fields = len(input_shape)
+        embedding_size = input_shape[0][-1]
+
+        self.kernel_inter = self.add_weight(
+            name='kernel_inter',
+            shape=(int(self.num_fields * (self.num_fields - 1) / 2), 1),
+            initializer=glorot_normal(seed=self.seed),
+            regularizer=l2(self.l2_reg),
+            trainable=True)
+        self.bias_inter = self.add_weight(name='bias_inter',
+                                          shape=(embedding_size),
+                                          initializer=Zeros(),
+                                          trainable=True)
+        self.kernel_intra = self.add_weight(
+            name='kernel_intra',
+            shape=(self.num_fields, 1),
+            initializer=glorot_normal(seed=self.seed),
+            regularizer=l2(self.l2_reg),
+            trainable=True)
+        self.bias_intra = self.add_weight(name='bias_intra',
+                                          shape=(embedding_size),
+                                          initializer=Zeros(),
+                                          trainable=True)
+
+        super(FieldWiseBiInteraction,
+              self).build(input_shape)  # Be sure to call this somewhere!
+
+    def call(self, inputs, **kwargs):
+
+        if K.ndim(inputs[0]) != 3:
+            raise ValueError(
+                "Unexpected inputs dimensions %d, expect to be 3 dimensions" %
+                (K.ndim(inputs)))
+
+        field_wise_embeds_list = inputs
+
+        # MF module
+        field_wise_vectors = tf.concat([
+            reduce_sum(field_i_vectors, axis=1, keep_dims=True)
+            for field_i_vectors in field_wise_embeds_list
+        ], 1)
+
+        left = []
+        right = []
+        for i in range(self.num_fields):
+            for j in range(i + 1, self.num_fields):
+                left.append(i)
+                right.append(j)
+
+        embeddings_left = tf.gather(params=field_wise_vectors,
+                                    indices=left,
+                                    axis=1)
+        embeddings_right = tf.gather(params=field_wise_vectors,
+                                     indices=right,
+                                     axis=1)
+
+        embeddings_prod = embeddings_left * embeddings_right
+        field_weighted_embedding = embeddings_prod * self.kernel_inter
+        h_mf = reduce_sum(field_weighted_embedding, axis=1)
+        h_mf = tf.nn.bias_add(h_mf, self.bias_inter)
+
+        # FM module
+        square_of_sum_list = [
+            tf.square(reduce_sum(field_i_vectors, axis=1, keep_dims=True))
+            for field_i_vectors in field_wise_embeds_list
+        ]
+        sum_of_square_list = [
+            reduce_sum(field_i_vectors * field_i_vectors,
+                       axis=1,
+                       keep_dims=True)
+            for field_i_vectors in field_wise_embeds_list
+        ]
+
+        field_fm = tf.concat([
+            square_of_sum - sum_of_square for square_of_sum, sum_of_square in
+            zip(square_of_sum_list, sum_of_square_list)
+        ], 1)
+
+        h_fm = reduce_sum(field_fm * self.kernel_intra, axis=1)
+
+        h_fm = tf.nn.bias_add(h_fm, self.bias_intra)
+
+        return h_mf + h_fm
+
+    def compute_output_shape(self, input_shape):
+        return (None, input_shape[0][-1])
