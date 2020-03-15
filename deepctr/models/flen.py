@@ -59,9 +59,7 @@ def FLEN(linear_feature_columns,
         init_std,
         seed,
         support_group=True)
-    print(group_embedding_dict)
 
-    # S
     linear_logit = get_linear_logit(features,
                                     linear_feature_columns,
                                     init_std=init_std,

@@ -34,11 +34,12 @@ You can read the latest code at https://github.com/shenweichen/DeepCTR
 
 News
 -----
+
+03/15/2020 : Add `FLEN <./Features.html#fgcnn-feature-generation-by-convolutional-neural-network>`_ and `FieldWiseBiInteraction <./Features.html#fgcnn-feature-generation-by-convolutional-neural-network>`_ . `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.7.4>`_
+
 03/04/2020 : Fix the inconsistency of prediction results when the model is loaded with trained weights. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.7.3>`_
 
 02/08/2020 : Fix some bugs. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.7.2>`_
-
-01/28/2020 : Simplify `VarLenSparseFeat <./Features.html#varlensparsefeat>`_ ,support setting weight_normalization.Fix problem of embedding size of ``SparseFeat`` in ``linear_feature_columns``. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.7.1>`_
 
 DisscussionGroup
 -----------------------

@@ -264,6 +264,17 @@ Feature Importance and Bilinear feature Interaction NETwork is proposed to dynam
 
 [Huang T, Zhang Z, Zhang J. FiBiNET: Combining Feature Importance and Bilinear feature Interaction for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1905.09433, 2019.](https://arxiv.org/pdf/1905.09433.pdf)
 
+### FLEN(Field-Leveraged Embedding Network)
+
+A large-scale CTR prediction model with efficient usage of field information to alleviate gradient coupling problem.
+
+[**FLEN Model API**](./deepctr.models.flen.html)  
+
+[FLEN example](https://github.com/shenweichen/DeepCTR/tree/master/examples/run_flen.py)
+
+![FLEN](../pics/FLEN.png)
+
+[Chen W, Zhan L, Ci Y, Lin C. FLEN: Leveraging Field for Scalable CTR Prediction[J]. arXiv preprint arXiv:1911.04690, 2019.](https://arxiv.org/pdf/1911.04690.pdf)
 
 ## Layers
 
