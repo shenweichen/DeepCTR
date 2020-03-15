@@ -17,7 +17,7 @@ from tensorflow.python.keras.regularizers import l2
 from tensorflow.python.layers import utils
 
 from .activation import activation_layer
-from .utils import concat_func,reduce_sum,softmax,reduce_mean
+from .utils import concat_func, reduce_sum, softmax, reduce_mean
 
 
 class AFMLayer(Layer):
@@ -235,7 +235,7 @@ class CIN(Layer):
                                                 shape=[1, self.field_nums[-1]
                                                        * self.field_nums[0], size],
                                                 dtype=tf.float32, initializer=glorot_uniform(
-                                                    seed=self.seed + i),
+                    seed=self.seed + i),
                                                 regularizer=l2(self.l2_reg)))
 
             self.bias.append(self.add_weight(name='bias' + str(i), shape=[size], dtype=tf.float32,
@@ -906,11 +906,10 @@ class SENETLayer(Layer):
         - **seed** : A Python integer to use as random seed.
 
       References
-        - [FiBiNET: Combining Feature Importance and Bilinear feature Interaction for Click-Through Rate Prediction
-Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
+        - [FiBiNET: Combining Feature Importance and Bilinear feature Interaction for Click-Through Rate Prediction](https://arxiv.org/pdf/1905.09433.pdf)
     """
 
-    def __init__(self, reduction_ratio=3,  seed=1024, **kwargs):
+    def __init__(self, reduction_ratio=3, seed=1024, **kwargs):
         self.reduction_ratio = reduction_ratio
 
         self.seed = seed
@@ -924,7 +923,7 @@ Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
 
         self.filed_size = len(input_shape)
         self.embedding_size = input_shape[0][-1]
-        reduction_size = max(1, self.filed_size//self.reduction_ratio)
+        reduction_size = max(1, self.filed_size // self.reduction_ratio)
 
         self.W_1 = self.add_weight(shape=(
             self.filed_size, reduction_size), initializer=glorot_normal(seed=self.seed), name="W_1")
@@ -944,7 +943,7 @@ Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
                 "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
 
         inputs = concat_func(inputs, axis=1)
-        Z = reduce_mean(inputs, axis=-1,)
+        Z = reduce_mean(inputs, axis=-1, )
 
         A_1 = tf.nn.relu(self.tensordot([Z, self.W_1]))
         A_2 = tf.nn.relu(self.tensordot([A_1, self.W_2]))
@@ -957,7 +956,7 @@ Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
         return input_shape
 
     def compute_mask(self, inputs, mask=None):
-        return [None]*self.filed_size
+        return [None] * self.filed_size
 
     def get_config(self, ):
         config = {'reduction_ratio': self.reduction_ratio, 'seed': self.seed}
@@ -980,8 +979,7 @@ class BilinearInteraction(Layer):
         - **seed** : A Python integer to use as random seed.
 
       References
-        - [FiBiNET: Combining Feature Importance and Bilinear feature Interaction for Click-Through Rate Prediction
-Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
+        - [FiBiNET: Combining Feature Importance and Bilinear feature Interaction for Click-Through Rate Prediction](https://arxiv.org/pdf/1905.09433.pdf)
 
     """
 
@@ -1003,10 +1001,11 @@ Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
                 seed=self.seed), name="bilinear_weight")
         elif self.bilinear_type == "each":
             self.W_list = [self.add_weight(shape=(embedding_size, embedding_size), initializer=glorot_normal(
-                seed=self.seed), name="bilinear_weight"+str(i)) for i in range(len(input_shape)-1)]
+                seed=self.seed), name="bilinear_weight" + str(i)) for i in range(len(input_shape) - 1)]
         elif self.bilinear_type == "interaction":
             self.W_list = [self.add_weight(shape=(embedding_size, embedding_size), initializer=glorot_normal(
-                seed=self.seed), name="bilinear_weight"+str(i)+'_'+str(j)) for i, j in itertools.combinations(range(len(input_shape)), 2)]
+                seed=self.seed), name="bilinear_weight" + str(i) + '_' + str(j)) for i, j in
+                           itertools.combinations(range(len(input_shape)), 2)]
         else:
             raise NotImplementedError
 
@@ -1036,7 +1035,7 @@ Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
         filed_size = len(input_shape)
         embedding_size = input_shape[0][-1]
 
-        return (None, 1, filed_size*(filed_size-1)//2 * embedding_size)
+        return (None, 1, filed_size * (filed_size - 1) // 2 * embedding_size)
 
     def get_config(self, ):
         config = {'bilinear_type': self.bilinear_type, 'seed': self.seed}
@@ -1056,15 +1055,15 @@ class FieldWiseBiInteraction(Layer):
      
       Arguments
         - **use_bias** : Boolean, if use bias.
-        - **l2_reg** : Float, l2 regularization coefficient.
         - **seed** : A Python integer to use as random seed.
-     
-      References
-        [1] hen W, Zhan L, Ci Y, Lin C https://arxiv.org/pdf/1911.04690
-    """
-    def __init__(self, l2_reg=1e-5, seed=1024, **kwargs):
 
-        self.l2_reg = l2_reg
+      References
+        - [FLEN: Leveraging Field for Scalable CTR Prediction](https://arxiv.org/pdf/1911.04690)
+
+    """
+
+    def __init__(self,use_bias=True, seed=1024, **kwargs):
+        self.use_bias = use_bias
         self.seed = seed
 
         super(FieldWiseBiInteraction, self).__init__(**kwargs)
@@ -1079,26 +1078,26 @@ class FieldWiseBiInteraction(Layer):
         self.num_fields = len(input_shape)
         embedding_size = input_shape[0][-1]
 
-        self.kernel_inter = self.add_weight(
-            name='kernel_inter',
+        self.kernel_mf = self.add_weight(
+            name='kernel_mf',
             shape=(int(self.num_fields * (self.num_fields - 1) / 2), 1),
-            initializer=glorot_normal(seed=self.seed),
-            regularizer=l2(self.l2_reg),
+            initializer=tf.keras.initializers.Ones(),
+            regularizer=None,
             trainable=True)
-        self.bias_inter = self.add_weight(name='bias_inter',
-                                          shape=(embedding_size),
-                                          initializer=Zeros(),
-                                          trainable=True)
-        self.kernel_intra = self.add_weight(
-            name='kernel_intra',
+
+        self.kernel_fm = self.add_weight(
+            name='kernel_fm',
             shape=(self.num_fields, 1),
-            initializer=glorot_normal(seed=self.seed),
-            regularizer=l2(self.l2_reg),
+            initializer=tf.keras.initializers.Constant(value=0.5),
+            regularizer=None,
             trainable=True)
-        self.bias_intra = self.add_weight(name='bias_intra',
-                                          shape=(embedding_size),
-                                          initializer=Zeros(),
-                                          trainable=True)
+        if self.use_bias:
+            self.bias_mf = self.add_weight(name='bias_mf',
+                                           shape=(embedding_size),
+                                           initializer=Zeros())
+            self.bias_fm = self.add_weight(name='bias_fm',
+                                           shape=(embedding_size),
+                                           initializer=Zeros())
 
         super(FieldWiseBiInteraction,
               self).build(input_shape)  # Be sure to call this somewhere!
@@ -1120,10 +1119,10 @@ class FieldWiseBiInteraction(Layer):
 
         left = []
         right = []
-        for i in range(self.num_fields):
-            for j in range(i + 1, self.num_fields):
-                left.append(i)
-                right.append(j)
+
+        for i, j in itertools.combinations(list(range(self.num_fields)), 2):
+            left.append(i)
+            right.append(j)
 
         embeddings_left = tf.gather(params=field_wise_vectors,
                                     indices=left,
@@ -1133,9 +1132,10 @@ class FieldWiseBiInteraction(Layer):
                                      axis=1)
 
         embeddings_prod = embeddings_left * embeddings_right
-        field_weighted_embedding = embeddings_prod * self.kernel_inter
+        field_weighted_embedding = embeddings_prod * self.kernel_mf
         h_mf = reduce_sum(field_weighted_embedding, axis=1)
-        h_mf = tf.nn.bias_add(h_mf, self.bias_inter)
+        if self.use_bias:
+            h_mf = tf.nn.bias_add(h_mf, self.bias_mf)
 
         # FM module
         square_of_sum_list = [
@@ -1154,11 +1154,16 @@ class FieldWiseBiInteraction(Layer):
             zip(square_of_sum_list, sum_of_square_list)
         ], 1)
 
-        h_fm = reduce_sum(field_fm * self.kernel_intra, axis=1)
-
-        h_fm = tf.nn.bias_add(h_fm, self.bias_intra)
+        h_fm = reduce_sum(field_fm * self.kernel_fm, axis=1)
+        if self.use_bias:
+            h_fm = tf.nn.bias_add(h_fm, self.bias_fm)
 
         return h_mf + h_fm
 
     def compute_output_shape(self, input_shape):
         return (None, input_shape[0][-1])
+
+    def get_config(self, ):
+        config = {'use_bias': self.use_bias, 'seed': self.seed}
+        base_config = super(FieldWiseBiInteraction, self).get_config()
+        return dict(list(base_config.items()) + list(config.items()))

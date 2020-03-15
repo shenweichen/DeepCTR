@@ -6,7 +6,7 @@ from ..utils import check_model, get_test_data,SAMPLE_SIZE
 
 @pytest.mark.parametrize(
     'use_inner, use_outter,sparse_feature_num',
-    [(True, True, 1), (True, False, 2), (False, True, 3), (False, False, 1)
+    [(True, True, 3), (False, False, 1)
      ]
 )
 def test_PNN(use_inner, use_outter, sparse_feature_num):

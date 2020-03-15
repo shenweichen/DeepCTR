@@ -26,14 +26,14 @@ def get_xy_fd(hash_flag=False):
     uid = np.array([0, 1, 2])
     ugender = np.array([0, 1, 0])
     iid = np.array([1, 2, 3])  # 0 is mask value
-    cateid = np.array([1, 2, 1])  # 0 is mask value
+    cateid = np.array([1, 2, 2])  # 0 is mask value
     score = np.array([0.1, 0.2, 0.3])
 
-    sess1_iid = np.array([[1, 2, 3, 0], [1, 2, 3, 0], [0, 0, 0, 0]])
-    sess1_cate_id = np.array([[1, 1, 2, 0], [2, 1, 1, 0], [0, 0, 0, 0]])
+    sess1_iid = np.array([[1, 2, 3, 0], [3, 2, 1, 0], [0, 0, 0, 0]])
+    sess1_cate_id = np.array([[1, 2, 2, 0], [2, 2, 1, 0], [0, 0, 0, 0]])
 
     sess2_iid = np.array([[1, 2, 3, 0], [0, 0, 0, 0], [0, 0, 0, 0]])
-    sess2_cate_id = np.array([[1, 1, 2, 0], [0, 0, 0, 0], [0, 0, 0, 0]])
+    sess2_cate_id = np.array([[1, 2, 2, 0], [0, 0, 0, 0], [0, 0, 0, 0]])
 
     sess_number = np.array([2, 1, 0])
 
