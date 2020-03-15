@@ -122,7 +122,7 @@ class Linear(tf.keras.layers.Layer):
         return None
 
     def get_config(self, ):
-        config = {'mode': self.mode, 'l2_reg': self.l2_reg}
+        config = {'mode': self.mode, 'l2_reg': self.l2_reg,'use_bias':self.use_bias}
         base_config = super(Linear, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 

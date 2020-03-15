@@ -8,6 +8,7 @@ Author:
 
 from collections import OrderedDict, namedtuple, defaultdict
 from itertools import chain
+from copy import copy
 
 from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.layers import Embedding, Input, Flatten
@@ -177,7 +178,7 @@ def create_embedding_matrix(feature_columns, l2_reg, init_std, seed, prefix="", 
 
 def get_linear_logit(features, feature_columns, units=1, use_bias=False, init_std=0.0001, seed=1024, prefix='linear',
                      l2_reg=0):
-    linear_feature_columns = feature_columns.copy()
+    linear_feature_columns = copy(feature_columns)
     for i in range(len(linear_feature_columns)):
         if isinstance(linear_feature_columns[i], SparseFeat):
             linear_feature_columns[i] = linear_feature_columns[i]._replace(embedding_dim=1)
