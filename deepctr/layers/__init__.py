@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 from .activation import Dice
-from .core import DNN, LocalActivationUnit, PredictionLayer, MMOELayer
+from .core import DNN, LocalActivationUnit, PredictionLayer, MMOELayer, MultiLossLayer
 from .interaction import (CIN, FM, AFMLayer, BiInteractionPooling, CrossNet,
                           InnerProductLayer, InteractingLayer,
                           OutterProductLayer, FGCNNLayer,SENETLayer,BilinearInteraction)
@@ -40,5 +40,6 @@ custom_objects = {'tf': tf,
                   'BilinearInteraction':BilinearInteraction,
                   'WeightedSequenceLayer':WeightedSequenceLayer,
                   'Add':Add,
-                  'MMOELayer':MMOELayer
+                  'MMOELayer':MMOELayer,
+                  'MultiLossLayer':MultiLossLayer
                   }
