@@ -6,7 +6,7 @@ from ..utils import check_model, get_test_data,SAMPLE_SIZE
 
 @pytest.mark.parametrize(
     'cross_num,hidden_size,sparse_feature_num',
-    [( 0, (32,), 2), ( 1, (), 1), ( 1, (32,), 3)
+    [( 0, (8,), 2), ( 1, (), 1), ( 1, (8,), 3)
      ]
 )
 def test_DCN( cross_num, hidden_size, sparse_feature_num):
