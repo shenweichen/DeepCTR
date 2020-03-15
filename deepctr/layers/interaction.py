@@ -1060,11 +1060,10 @@ class FieldWiseBiInteraction(Layer):
         - **seed** : A Python integer to use as random seed.
      
       References
-        [1] hen W, Zhan L, Ci Y, Lin C https://arxiv.org/pdf/1911.04690
-    """
-    def __init__(self, l2_reg=1e-5, seed=1024, **kwargs):
+        - [FLEN: Leveraging Field for Scalable CTR Prediction](https://arxiv.org/pdf/1911.04690)
 
-        self.l2_reg = l2_reg
+    """
+    def __init__(self,  seed=1024, **kwargs):
         self.seed = seed
 
         super(FieldWiseBiInteraction, self).__init__(**kwargs)
@@ -1079,26 +1078,24 @@ class FieldWiseBiInteraction(Layer):
         self.num_fields = len(input_shape)
         embedding_size = input_shape[0][-1]
 
-        self.kernel_inter = self.add_weight(
-            name='kernel_inter',
+        self.kernel_mf = self.add_weight(
+            name='kernel_mf',
             shape=(int(self.num_fields * (self.num_fields - 1) / 2), 1),
-            initializer=glorot_normal(seed=self.seed),
-            regularizer=l2(self.l2_reg),
+            initializer=tf.keras.initializers.Ones(),
+            regularizer=None,
             trainable=True)
-        self.bias_inter = self.add_weight(name='bias_inter',
-                                          shape=(embedding_size),
-                                          initializer=Zeros(),
-                                          trainable=True)
-        self.kernel_intra = self.add_weight(
-            name='kernel_intra',
+        self.bias_mf = self.add_weight(name='bias_mf',
+                                       shape=(embedding_size),
+                                       initializer=Zeros())
+        self.kernel_fm = self.add_weight(
+            name='kernel_fm',
             shape=(self.num_fields, 1),
-            initializer=glorot_normal(seed=self.seed),
-            regularizer=l2(self.l2_reg),
+            initializer=tf.keras.initializers.Constant(value=0.5),
+            regularizer=None,
             trainable=True)
-        self.bias_intra = self.add_weight(name='bias_intra',
-                                          shape=(embedding_size),
-                                          initializer=Zeros(),
-                                          trainable=True)
+        self.bias_fm = self.add_weight(name='bias_fm',
+                                       shape=(embedding_size),
+                                       initializer=Zeros())
 
         super(FieldWiseBiInteraction,
               self).build(input_shape)  # Be sure to call this somewhere!
@@ -1120,10 +1117,10 @@ class FieldWiseBiInteraction(Layer):
 
         left = []
         right = []
-        for i in range(self.num_fields):
-            for j in range(i + 1, self.num_fields):
-                left.append(i)
-                right.append(j)
+
+        for i, j in itertools.combinations(list(range(self.num_fields)), 2):
+            left.append(i)
+            right.append(j)
 
         embeddings_left = tf.gather(params=field_wise_vectors,
                                     indices=left,
@@ -1133,9 +1130,9 @@ class FieldWiseBiInteraction(Layer):
                                      axis=1)
 
         embeddings_prod = embeddings_left * embeddings_right
-        field_weighted_embedding = embeddings_prod * self.kernel_inter
+        field_weighted_embedding = embeddings_prod * self.kernel_mf
         h_mf = reduce_sum(field_weighted_embedding, axis=1)
-        h_mf = tf.nn.bias_add(h_mf, self.bias_inter)
+        h_mf = tf.nn.bias_add(h_mf, self.bias_mf)
 
         # FM module
         square_of_sum_list = [
@@ -1154,9 +1151,9 @@ class FieldWiseBiInteraction(Layer):
             zip(square_of_sum_list, sum_of_square_list)
         ], 1)
 
-        h_fm = reduce_sum(field_fm * self.kernel_intra, axis=1)
+        h_fm = reduce_sum(field_fm * self.kernel_fm, axis=1)
 
-        h_fm = tf.nn.bias_add(h_fm, self.bias_intra)
+        h_fm = tf.nn.bias_add(h_fm, self.bias_fm)
 
         return h_mf + h_fm
 

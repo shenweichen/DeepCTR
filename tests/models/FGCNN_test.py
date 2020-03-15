@@ -13,7 +13,7 @@ def test_FGCNN(sparse_feature_num, dense_feature_num):
     model_name = "FGCNN"
 
     sample_size = SAMPLE_SIZE
-    x, y, feature_columns = get_test_data(sample_size, embedding_size=8,sparse_feature_num=sparse_feature_num,
+    x, y, feature_columns = get_test_data(sample_size, embedding_size=8, sparse_feature_num=sparse_feature_num,
                                           dense_feature_num=dense_feature_num)
 
     model = FGCNN(feature_columns,feature_columns, conv_kernel_width=(3,2), conv_filters=(2, 1), new_maps=(

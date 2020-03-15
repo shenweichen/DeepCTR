@@ -11,7 +11,7 @@ from tensorflow.python.keras import backend as K
 from tensorflow.python.keras.layers import Input, Masking
 from tensorflow.python.keras.models import Model, load_model, save_model
 
-from deepctr.inputs import SparseFeat, DenseFeat, VarLenSparseFeat
+from deepctr.inputs import SparseFeat, DenseFeat, VarLenSparseFeat,DEFAULT_GROUP_NAME
 from deepctr.layers import custom_objects
 
 SAMPLE_SIZE = 8
@@ -25,7 +25,7 @@ def gen_sequence(dim, max_len, sample_size):
 
 def get_test_data(sample_size=1000, embedding_size=4, sparse_feature_num=1, dense_feature_num=1,
                   sequence_feature=['sum', 'mean', 'max', 'weight'], classification=True, include_length=False,
-                  hash_flag=False, prefix=''):
+                  hash_flag=False, prefix='', use_group=False):
     feature_columns = []
     model_input = {}
 
@@ -43,9 +43,14 @@ def get_test_data(sample_size=1000, embedding_size=4, sparse_feature_num=1, dens
         sequence_feature.pop(sequence_feature.index('weight'))
 
     for i in range(sparse_feature_num):
+        if use_group:
+            group_name = str(i%3)
+        else:
+            group_name = DEFAULT_GROUP_NAME
         dim = np.random.randint(1, 10)
         feature_columns.append(
-            SparseFeat(prefix + 'sparse_feature_' + str(i), dim, embedding_size, use_hash=hash_flag, dtype=tf.int32))
+            SparseFeat(prefix + 'sparse_feature_' + str(i), dim, embedding_size, use_hash=hash_flag, dtype=tf.int32,group_name=group_name))
+
     for i in range(dense_feature_num):
         feature_columns.append(DenseFeat(prefix + 'dense_feature_' + str(i), 1, dtype=tf.float32))
     for i, mode in enumerate(sequence_feature):
