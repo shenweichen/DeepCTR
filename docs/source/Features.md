@@ -272,7 +272,7 @@ A large-scale CTR prediction model with efficient usage of field information to 
 
 [FLEN example](https://github.com/shenweichen/DeepCTR/tree/master/examples/run_flen.py)
 
-![FLEN](../pics/FLEN.png)
+![FLEN](../pics/FLEN.jpg)
 
 [Chen W, Zhan L, Ci Y, Lin C. FLEN: Leveraging Field for Scalable CTR Prediction[J]. arXiv preprint arXiv:1911.04690, 2019.](https://arxiv.org/pdf/1911.04690.pdf)
 
