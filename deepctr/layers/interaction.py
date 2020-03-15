@@ -979,8 +979,7 @@ class BilinearInteraction(Layer):
         - **seed** : A Python integer to use as random seed.
 
       References
-        - [FiBiNET: Combining Feature Importance and Bilinear feature Interaction for Click-Through Rate Prediction
-Tongwen](https://arxiv.org/pdf/1905.09433.pdf)
+        - [FiBiNET: Combining Feature Importance and Bilinear feature Interaction for Click-Through Rate Prediction](https://arxiv.org/pdf/1905.09433.pdf)
 
     """
 
@@ -1057,7 +1056,7 @@ class FieldWiseBiInteraction(Layer):
       Arguments
         - **use_bias** : Boolean, if use bias.
         - **seed** : A Python integer to use as random seed.
-     
+
       References
         - [FLEN: Leveraging Field for Scalable CTR Prediction](https://arxiv.org/pdf/1911.04690)
 
@@ -1163,3 +1162,8 @@ class FieldWiseBiInteraction(Layer):
 
     def compute_output_shape(self, input_shape):
         return (None, input_shape[0][-1])
+
+    def get_config(self, ):
+        config = {'use_bias': self.use_bias, 'seed': self.seed}
+        base_config = super(FieldWiseBiInteraction, self).get_config()
+        return dict(list(base_config.items()) + list(config.items()))
