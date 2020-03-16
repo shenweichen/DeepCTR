@@ -20,4 +20,5 @@ DeepCTR Models API
    ONN<deepctr.models.onn>
    FGCNN<deepctr.models.fgcnn>
    FiBiNET<deepctr.models.fibinet>
+   FLEN<deepctr.models.flen>
    

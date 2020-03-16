@@ -4,7 +4,8 @@ from .activation import Dice
 from .core import DNN, LocalActivationUnit, PredictionLayer, MMOELayer, MultiLossLayer
 from .interaction import (CIN, FM, AFMLayer, BiInteractionPooling, CrossNet,
                           InnerProductLayer, InteractingLayer,
-                          OutterProductLayer, FGCNNLayer,SENETLayer,BilinearInteraction)
+                          OutterProductLayer, FGCNNLayer,SENETLayer,BilinearInteraction,
+                          FieldWiseBiInteraction)
 from .normalization import LayerNormalization
 from .sequence import (AttentionSequencePoolingLayer, BiasEncoding, BiLSTM,
                        KMaxPooling, SequencePoolingLayer,WeightedSequenceLayer,
@@ -41,5 +42,6 @@ custom_objects = {'tf': tf,
                   'WeightedSequenceLayer':WeightedSequenceLayer,
                   'Add':Add,
                   'MMOELayer':MMOELayer,
-                  'MultiLossLayer':MultiLossLayer
+                  'MultiLossLayer':MultiLossLayer,
+                  'FieldWiseBiInteraction':FieldWiseBiInteraction
                   }

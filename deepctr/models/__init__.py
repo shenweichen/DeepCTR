@@ -17,7 +17,8 @@ from .fgcnn import FGCNN
 from .dsin import DSIN
 from .fibinet import FiBiNET
 from .mmoe import MMOE
+from .flen import FLEN
 
 __all__ = ["AFM", "CCPM","DCN", "MLR",  "DeepFM",
-           "MLR", "NFM", "DIN", "DIEN", "FNN", "PNN", "WDL", "xDeepFM", "AutoInt", "ONN", "FGCNN", "DSIN", "FiBiNET",
+           "MLR", "NFM", "DIN", "DIEN", "FNN", "PNN", "WDL", "xDeepFM", "AutoInt", "ONN", "FGCNN", "DSIN", "FiBiNET", 'FLEN',
            "MMOE"]

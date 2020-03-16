@@ -8,6 +8,7 @@ Author:
 
 from collections import OrderedDict, namedtuple, defaultdict
 from itertools import chain
+from copy import copy
 
 from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.layers import Embedding, Input, Flatten
@@ -177,16 +178,17 @@ def create_embedding_matrix(feature_columns, l2_reg, init_std, seed, prefix="", 
 
 def get_linear_logit(features, feature_columns, units=1, use_bias=False, init_std=0.0001, seed=1024, prefix='linear',
                      l2_reg=0):
-    for i in range(len(feature_columns)):
-        if isinstance(feature_columns[i], SparseFeat):
-            feature_columns[i] = feature_columns[i]._replace(embedding_dim=1)
-        if isinstance(feature_columns[i], VarLenSparseFeat):
-            feature_columns[i] = feature_columns[i]._replace(
-                sparsefeat=feature_columns[i].sparsefeat._replace(embedding_dim=1))
+    linear_feature_columns = copy(feature_columns)
+    for i in range(len(linear_feature_columns)):
+        if isinstance(linear_feature_columns[i], SparseFeat):
+            linear_feature_columns[i] = linear_feature_columns[i]._replace(embedding_dim=1)
+        if isinstance(linear_feature_columns[i], VarLenSparseFeat):
+            linear_feature_columns[i] = linear_feature_columns[i]._replace(
+                sparsefeat=linear_feature_columns[i].sparsefeat._replace(embedding_dim=1))
 
-    linear_emb_list = [input_from_feature_columns(features, feature_columns, l2_reg, init_std, seed,
+    linear_emb_list = [input_from_feature_columns(features, linear_feature_columns, l2_reg, init_std, seed,
                                                   prefix=prefix + str(i))[0] for i in range(units)]
-    _, dense_input_list = input_from_feature_columns(features, feature_columns, l2_reg, init_std, seed, prefix=prefix)
+    _, dense_input_list = input_from_feature_columns(features, linear_feature_columns, l2_reg, init_std, seed, prefix=prefix)
 
     linear_logit_list = []
     for i in range(units):

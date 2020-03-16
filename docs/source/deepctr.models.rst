@@ -23,6 +23,7 @@ Submodules
    deepctr.models.pnn
    deepctr.models.wdl
    deepctr.models.xdeepfm
+   deepctr.models.flen
 
 Module contents
 ---------------
