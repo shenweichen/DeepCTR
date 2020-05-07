@@ -92,8 +92,8 @@ fixlen_feature_columns = [SparseFeat(feat, vocabulary_size=1e6,embedding_dim=4, 
 ```
 - generate feature columns
 ```python
-dnn_feature_columns = sparse_feature_columns + dense_feature_columns
-linear_feature_columns = sparse_feature_columns + dense_feature_columns
+dnn_feature_columns = fixlen_feature_columns
+linear_feature_columns = fixlen_feature_columns
 
 feature_names = get_feature_names(linear_feature_columns + dnn_feature_columns)
 
