@@ -1,4 +1,6 @@
 # History
+
+- 05/17/2020 : [v0.7.5](https://github.com/shenweichen/DeepCTR/releases/tag/v0.7.5) released.Fix numerical instability in `LayerNormalization`.
 - 03/15/2020 : [v0.7.4](https://github.com/shenweichen/DeepCTR/releases/tag/v0.7.4) released.Add [FLEN](./Features.html#flen-field-leveraged-embedding-network) and `FieldWiseBiInteraction`.
 - 03/04/2020 : [v0.7.3](https://github.com/shenweichen/DeepCTR/releases/tag/v0.7.3) released.Fix the inconsistency of prediction results when the model is loaded with trained weights.
 - 02/08/2020 : [v0.7.2](https://github.com/shenweichen/DeepCTR/releases/tag/v0.7.2) released.Fix some bugs.
