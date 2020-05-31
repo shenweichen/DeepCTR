@@ -1,5 +1,3 @@
-import sys
-sys.path.append('E:\Python\DeepCTR')
 import numpy as np
 
 from deepctr.models import DIN
