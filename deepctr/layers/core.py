@@ -20,7 +20,8 @@ class LocalActivationUnit(Layer):
     user interests varies adaptively given different candidate items.
 
       Input shape
-        - A list of two 3D tensor with shape:  ``(batch_size, 1, embedding_size)`` and ``(batch_size, T, embedding_size)``
+        - A list of two 3D tensor with shape:  ``(batch_size, 1, embedding_size)``,
+          ``(batch_size, T, embedding_size)`` and ``(batch_size, T, embedding_size)``
 
       Output shape
         - 3D tensor with shape: ``(batch_size, T, 1)``.
@@ -38,11 +39,13 @@ class LocalActivationUnit(Layer):
 
         - **seed**: A Python integer to use as random seed.
 
+        - **use_context**: bool. Whether use context information to build query.
+
       References
         - [Zhou G, Zhu X, Song C, et al. Deep interest network for click-through rate prediction[C]//Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. ACM, 2018: 1059-1068.](https://arxiv.org/pdf/1706.06978.pdf)
     """
 
-    def __init__(self, hidden_units=(64, 32), activation='sigmoid', l2_reg=0, dropout_rate=0, use_bn=False, seed=1024,
+    def __init__(self, hidden_units=(64, 32), activation='sigmoid', l2_reg=0, dropout_rate=0, use_bn=False, seed=1024, use_context=False,
                  **kwargs):
         self.hidden_units = hidden_units
         self.activation = activation
@@ -50,14 +53,22 @@ class LocalActivationUnit(Layer):
         self.dropout_rate = dropout_rate
         self.use_bn = use_bn
         self.seed = seed
+        self.use_context = use_context
         super(LocalActivationUnit, self).__init__(**kwargs)
         self.supports_masking = True
 
     def build(self, input_shape):
+        if self.use_context:
+            if not isinstance(input_shape, list) or len(input_shape) != 3:
+                raise ValueError('When use_context is True a `LocalActivationUnit` layer should be called '
+                                'on a list of 3 inputs')
+            if len(input_shape[1]) != len(input_shape[2]):
+                raise ValueError("The dimensions of keys and context should be the same")
 
-        if not isinstance(input_shape, list) or len(input_shape) != 2:
-            raise ValueError('A `LocalActivationUnit` layer should be called '
-                             'on a list of 2 inputs')
+        else:
+            if not isinstance(input_shape, list) or len(input_shape) != 2:
+                raise ValueError('A `LocalActivationUnit` layer should be called '
+                                'on a list of 2 inputs')
 
         if len(input_shape[0]) != 3 or len(input_shape[1]) != 3:
             raise ValueError("Unexpected inputs dimensions %d and %d, expect to be 3 dimensions" % (
@@ -82,15 +93,25 @@ class LocalActivationUnit(Layer):
         self.dense = tf.keras.layers.Lambda(lambda x: tf.nn.bias_add(tf.tensordot(
             x[0], x[1], axes=(-1, 0)), x[2]))
 
+        if self.use_context:
+            self.dnn_query = DNN((input_shape[1][-1],), self.activation, self.l2_reg,
+            self.dropout_rate, self.use_bn, seed=self.seed, name='dmr_align')
         super(LocalActivationUnit, self).build(
             input_shape)  # Be sure to call this somewhere!
 
     def call(self, inputs, training=None, **kwargs):
+        if self.use_context:
+            query, keys, context = inputs
 
-        query, keys = inputs
+        else:
+            query, keys = inputs
 
         keys_len = keys.get_shape()[1]
         queries = K.repeat_elements(query, keys_len, 1)
+
+        if self.use_context:
+            queries = tf.concat([queries, context], axis=-1)
+            queries = self.dnn_query(queries, training=training)
 
         att_input = tf.concat(
             [queries, keys, queries - keys, queries * keys], axis=-1)
@@ -109,7 +130,8 @@ class LocalActivationUnit(Layer):
 
     def get_config(self, ):
         config = {'activation': self.activation, 'hidden_units': self.hidden_units,
-                  'l2_reg': self.l2_reg, 'dropout_rate': self.dropout_rate, 'use_bn': self.use_bn, 'seed': self.seed}
+                  'l2_reg': self.l2_reg, 'dropout_rate': self.dropout_rate, 'use_bn': self.use_bn, 'seed': self.seed,
+                  'use_context': self.use_context}
         base_config = super(LocalActivationUnit, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 

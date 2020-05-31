@@ -1,3 +1,5 @@
+import sys
+sys.path.append('E:\Python\DeepCTR')
 import numpy as np
 
 from deepctr.models import DIN
@@ -11,7 +13,7 @@ def get_xy_fd():
     feature_columns += [VarLenSparseFeat(SparseFeat('hist_item_id', vocabulary_size=3 + 1,embedding_dim=8,embedding_name='item_id'), maxlen=4),
                         VarLenSparseFeat(SparseFeat('hist_cate_id', 2 + 1,embedding_dim=4, embedding_name='cate_id'), maxlen=4)]
 
-    behavior_feature_list = ["item", "cate_id"]
+    behavior_feature_list = ["item_id", "cate_id"]
     uid = np.array([0, 1, 2])
     ugender = np.array([0, 1, 0])
     iid = np.array([1, 2, 3])  # 0 is mask value
@@ -24,7 +26,7 @@ def get_xy_fd():
     feature_dict = {'user': uid, 'gender': ugender, 'item_id': iid, 'cate_id': cate_id,
                     'hist_item_id': hist_iid, 'hist_cate_id': hist_cate_id, 'pay_score': pay_score}
     x = {name:feature_dict[name] for name in get_feature_names(feature_columns)}
-    y = [1, 0, 1]
+    y = np.array([1, 0, 1])
     return x, y, feature_columns, behavior_feature_list
 
 
@@ -34,3 +36,4 @@ if __name__ == "__main__":
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
     history = model.fit(x, y, verbose=1, epochs=10, validation_split=0.5)
+    
