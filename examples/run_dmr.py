@@ -102,7 +102,7 @@ def get_xy_fd():
                          maxlen=max_len)
     ]
 
-    data = pd.read_csv('E:\Python\DeepCTR\examples\\alimama_sample.txt')
+    data = pd.read_csv('.\\alimama_sample.txt')
     cont_btag_mask = list(
         map(lambda x: x.startswith('cont_btag'), data.columns.values))
     his_cate_mask = list(
