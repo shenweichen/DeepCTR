@@ -128,7 +128,7 @@ def interest_evolution(concat_behavior, deep_input_item, user_behavior_length, g
 
     else:  # AIGRU AGRU AUGRU
 
-        scores = AttentionSequencePoolingLayer(att_hidden_units=att_hidden_size, att_activation=att_activation,
+        hist, scores = AttentionSequencePoolingLayer(att_hidden_units=att_hidden_size, att_activation=att_activation,
                                                weight_normalization=att_weight_normalization, return_score=True)([
             deep_input_item, rnn_outputs, user_behavior_length])
 

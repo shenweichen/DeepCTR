@@ -212,7 +212,7 @@ class AttentionSequencePoolingLayer(Layer):
 
         - **supports_masking**:If True,the input need to support masking.
 
-        - **self.supports_context**:If True,the input should include context.
+        - **supports_context**:If True,the input should include context.
 
       References
         - [Zhou G, Zhu X, Song C, et al. Deep interest network for click-through rate prediction[C]//Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. ACM, 2018: 1059-1068.](https://arxiv.org/pdf/1706.06978.pdf)
@@ -317,13 +317,17 @@ class AttentionSequencePoolingLayer(Layer):
                     "When supports_masking=True,input must support masking")
             if self.supports_context:
                 queries, keys, context = inputs
-                key_masks = tf.expand_dims(mask[-1], axis=1)
             else:
                 queries, keys = inputs
-                key_masks = tf.expand_dims(mask[-1], axis=1)
+
+            key_masks = tf.expand_dims(mask[-1], axis=1)
 
         else:
-            queries, keys, keys_length, context = inputs
+
+            if self.supports_context:
+                queries, keys, keys_length, context = inputs
+            else:
+                queries, keys, keys_length = inputs
             hist_len = keys.get_shape()[1]
             key_masks = tf.sequence_mask(keys_length, hist_len)
 

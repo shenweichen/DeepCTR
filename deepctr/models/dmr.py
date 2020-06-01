@@ -1,10 +1,10 @@
 # -*- coding:utf-8 -*-
 """
 Author:
-    Weichen Shen,wcshen1994@163.com
+    Tingyi Tan,5636374@qq.com
 
 Reference:
-    [1] Zhou G, Zhu X, Song C, et al. Deep interest network for click-through rate prediction[C]//Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. ACM, 2018: 1059-1068. (https://arxiv.org/pdf/1706.06978.pdf)
+    [1] Ze Lyu, Yu Dong, Chengfu Huo, Weijun Ren. Deep Match to Rank Model for Personalized Click-Through Rate Prediction. https://github.com/lvze92/DMR
 """
 import tensorflow as tf
 from tensorflow.python.keras.layers import Dense, Concatenate, Flatten, Lambda
