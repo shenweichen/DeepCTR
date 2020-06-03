@@ -74,12 +74,12 @@ def get_xy_fd():
     ]
 
     feature_columns += [
-        VarLenSparseFeat(SparseFeat('his_cate',
+        VarLenSparseFeat(SparseFeat('hist_cate',
                                     cate_size,
                                     embedding_dim=main_embedding_size,
                                     embedding_name='cate'),
                          maxlen=max_len),
-        VarLenSparseFeat(SparseFeat('his_brand',
+        VarLenSparseFeat(SparseFeat('hist_brand',
                                     brand_size,
                                     embedding_dim=main_embedding_size,
                                     embedding_name='brand'),
@@ -105,9 +105,9 @@ def get_xy_fd():
     data = pd.read_csv('.\\alimama_sample.txt')
     cont_btag_mask = list(
         map(lambda x: x.startswith('cont_btag'), data.columns.values))
-    his_cate_mask = list(
+    hist_cate_mask = list(
         map(lambda x: x.startswith('his_cate'), data.columns.values))
-    his_brand_mask = list(
+    hist_brand_mask = list(
         map(lambda x: x.startswith('his_brand'), data.columns.values))
 
     behavior_feature_list = ['btag', 'cate', 'brand', 'position']
@@ -130,9 +130,9 @@ def get_xy_fd():
         'cont_btag': data.iloc[:, cont_btag_mask].values,
         'cont_btag_dm': data.iloc[:, cont_btag_mask].values,
         'cate': data['cate_id'],
-        'his_cate': data.iloc[:, his_cate_mask].values,
+        'hist_cate': data.iloc[:, hist_cate_mask].values,
         'brand': data['brand'],
-        'his_brand': data.iloc[:, his_brand_mask].values,
+        'hist_brand': data.iloc[:, hist_brand_mask].values,
         'price': data['price'],
         'cont_position': cont_position,
         'cont_position_dm': cont_position,

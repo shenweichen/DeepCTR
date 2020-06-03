@@ -66,7 +66,7 @@ def DMR(dnn_feature_columns,
     context_feature_columns = []
     context_dm_feature_columns = []
     sparse_varlen_feature_columns = []
-    history_fc_names = list(map(lambda x: "his_" + x, history_feature_list))
+    history_fc_names = list(map(lambda x: "hist_" + x, history_feature_list))
     context_fc_names = list(map(lambda x: "cont_" + x, history_feature_list))
     context_dm_fc_names = list(map(lambda x: "cont_" + x + "_dm", history_feature_list))
 
@@ -88,7 +88,6 @@ def DMR(dnn_feature_columns,
                                              init_std,
                                              seed,
                                              prefix="")
-
     query_emb_list = embedding_lookup(embedding_dict,
                                       features,
                                       sparse_feature_columns,
