@@ -56,6 +56,9 @@ if __name__ == "__main__":
     model = DIEN(feature_columns, behavior_feature_list,
                  dnn_hidden_units=[4, 4, 4], dnn_dropout=0.6, gru_type="AUGRU", use_negsampling=True)
 
+    print(model.input)
+    print(model.output)
+
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
     history = model.fit(x, y, verbose=1, epochs=10, validation_split=0.5)

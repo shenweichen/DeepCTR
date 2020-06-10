@@ -10,6 +10,7 @@ Reference:
 
 import tensorflow as tf
 from tensorflow.python.keras.layers import (Concatenate, Dense, Input, Permute, multiply)
+from collections import OrderedDict
 
 from ..inputs import build_input_features, get_varlen_pooling_list,create_embedding_matrix,embedding_lookup,varlen_embedding_lookup,SparseFeat,DenseFeat,VarLenSparseFeat,get_dense_input,combined_dnn_input
 from ..layers.core import DNN, PredictionLayer
@@ -117,11 +118,7 @@ def interest_evolution(concat_behavior, deep_input_item, user_behavior_length, g
     if gru_type == "GRU":
         rnn_outputs2 = DynamicGRU(embedding_size, return_sequence=True,
                                   name="gru2")([rnn_outputs, user_behavior_length])
-        # attention_score = AttentionSequencePoolingLayer(hidden_size=att_hidden_size, activation=att_activation, weight_normalization=att_weight_normalization, return_score=True)([
-        #     deep_input_item, rnn_outputs2, user_behavior_length])
-        # outputs = Lambda(lambda x: tf.matmul(x[0], x[1]))(
-        #     [attention_score, rnn_outputs2])
-        # hist = outputs
+
         hist = AttentionSequencePoolingLayer(att_hidden_units=att_hidden_size, att_activation=att_activation,
                                              weight_normalization=att_weight_normalization, return_score=False)([
             deep_input_item, rnn_outputs2, user_behavior_length])
@@ -170,25 +167,6 @@ def DIEN(dnn_feature_columns, history_feature_list,
     :return: A Keras model instance.
 
     """
-    # check_feature_config_dict(feature_columns)
-    #
-    # sparse_input, dense_input, user_behavior_input, user_behavior_length = get_input(
-    #     feature_columns, seq_feature_list, hist_len_max)
-    # sparse_embedding_dict = {feat.name: Embedding(feat.dimension, embedding_size,
-    #                                               embeddings_initializer=RandomNormal(
-    #                                                   mean=0.0, stddev=init_std, seed=seed),
-    #                                               embeddings_regularizer=l2(
-    #                                                   l2_reg_embedding),
-    #                                               name='sparse_emb_' + str(i) + '-' + feat.name) for i, feat in
-    #                          enumerate(feature_columns["sparse"])}
-    #
-    # query_emb_list = get_embedding_vec_list(sparse_embedding_dict, sparse_input, feature_columns["sparse"], return_feat_list=seq_feature_list)
-    # keys_emb_list = get_embedding_vec_list(sparse_embedding_dict, user_behavior_input, feature_columns['sparse'], return_feat_list=seq_feature_list)
-    # deep_input_emb_list = get_embedding_vec_list(sparse_embedding_dict, sparse_input, feature_columns['sparse'])
-    #
-    # query_emb = concat_fun(query_emb_list)
-    # keys_emb = concat_fun(keys_emb_list)
-    # deep_input_emb = concat_fun(deep_input_emb_list)
 
     features = build_input_features(dnn_feature_columns)
 
@@ -238,14 +216,19 @@ def DIEN(dnn_feature_columns, history_feature_list,
     deep_input_emb = concat_func(dnn_input_emb_list)
     query_emb = concat_func(query_emb_list)
 
-
+    model_input_list = inputs_list
 
     if use_negsampling:
+        neg_user_history_input = OrderedDict()
+        for fc in neg_history_feature_columns:
+            neg_user_history_input[fc] = Input(shape=(fc.maxlen,), name=fc.name)
 
         neg_uiseq_embed_list = embedding_lookup(embedding_dict, features, neg_history_feature_columns,
                                                 neg_history_fc_names,to_list=True)
 
         neg_concat_behavior = concat_func(neg_uiseq_embed_list)
+
+        model_input_list += list(neg_user_history_input.values())
 
     else:
         neg_concat_behavior = None
@@ -264,13 +247,6 @@ def DIEN(dnn_feature_columns, history_feature_list,
                  dnn_dropout, use_bn, seed)(dnn_input)
     final_logit = Dense(1, use_bias=False)(output)
     output = PredictionLayer(task)(final_logit)
-
-    #model_input_list = get_inputs_list(
-    #    [sparse_input, dense_input, user_behavior_input])
-    model_input_list = inputs_list
-
-    #if use_negsampling:
-    #    model_input_list += list(neg_user_behavior_input.values())
 
     model_input_list += [user_behavior_length]
 
