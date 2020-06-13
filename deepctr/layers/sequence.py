@@ -360,7 +360,7 @@ class AttentionSequencePoolingLayer(Layer):
             outputs._uses_learning_phase = training is not None
 
         if self.return_score:
-            return outputs, scores
+            return [outputs, scores]
 
         return outputs
 
@@ -372,7 +372,10 @@ class AttentionSequencePoolingLayer(Layer):
             return (None, 1, input_shape[0][-1])
 
     def compute_mask(self, inputs, mask):
-        return None
+        if self.return_score:
+            return [None, None]
+        else:
+            return None
 
     def get_config(self, ):
 
