@@ -1204,7 +1204,7 @@ class FwFM(Layer):
 
         if input_shape[1] != self.num_fields:
             raise ValueError("Mismatch in number of fields {} and \
-                 concatenated embeddings dims {}".format(self.num_fields, input_shape[2]))
+                 concatenated embeddings dims {}".format(self.num_fields, input_shape[1]))
 
         self.field_strengths = self.add_weight(name='field_pair_strengths',
                                                shape=(self.num_fields, self.num_fields),
