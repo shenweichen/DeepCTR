@@ -5,7 +5,7 @@ from ..utils import check_model, get_test_data, SAMPLE_SIZE
 
 @pytest.mark.parametrize(
     'hidden_size,sparse_feature_num',
-    [((2,), 0),
+    [((2,), 1),
      ((), 1),
      ]
 )
