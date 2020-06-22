@@ -1241,3 +1241,12 @@ class FwFM(Layer):
 
     def compute_output_shape(self, input_shape):
         return (None, 1)
+
+    def get_config(self):
+        config = super().get_config().copy()
+        config.update({
+            'num_fields': self.num_fields,
+            'initializer': self.initializer,
+            'regularizer': self.regularizer,
+        })
+        return config
