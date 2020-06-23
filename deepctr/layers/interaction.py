@@ -13,10 +13,8 @@ import tensorflow as tf
 from tensorflow.python.keras import backend as K
 from tensorflow.python.keras.initializers import (Zeros, glorot_normal,
                                                   glorot_uniform, TruncatedNormal)
-from tensorflow.python.keras.initializers import serialize as init_serialize
 from tensorflow.python.keras.layers import Layer
 from tensorflow.python.keras.regularizers import l2
-from tensorflow.python.keras.regularizers import serialize as reg_serialize
 from tensorflow.python.keras.backend import batch_dot
 from tensorflow.python.layers import utils
 

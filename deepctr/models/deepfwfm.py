@@ -11,7 +11,6 @@ Reference:
 
 from itertools import chain
 import tensorflow as tf
-from tensorflow.python.keras.regularizers import l2
 
 from ..inputs import input_from_feature_columns, get_linear_logit, build_input_features, combined_dnn_input, DEFAULT_GROUP_NAME
 from ..layers.core import PredictionLayer, DNN
