@@ -1184,18 +1184,15 @@ class FwFM(Layer):
 
       Arguments
         - **num_fields** : integer for number of fields
-        - **initializer** : initializer for the field strength parameters of FwFM
-        - **regularizer** : regularizer for the field strength parameters of FwFM
+        - **regularizer** : L2 regularizer weight for the field strength parameters of FwFM
 
       References
         - [Field-weighted Factorization Machines for Click-Through Rate Prediction in Display Advertising]
         https://arxiv.org/pdf/1806.03514.pdf
     """
 
-    def __init__(self, num_fields=4, initializer=TruncatedNormal(),
-                 regularizer=l2(0.000001), **kwargs):
+    def __init__(self, num_fields=4, regularizer=0.000001, **kwargs):
         self.num_fields = num_fields
-        self.initializer = initializer
         self.regularizer = regularizer
         super(FwFM, self).__init__(**kwargs)
 
@@ -1210,8 +1207,8 @@ class FwFM(Layer):
 
         self.field_strengths = self.add_weight(name='field_pair_strengths',
                                                shape=(self.num_fields, self.num_fields),
-                                               initializer=self.initializer,
-                                               regularizer=self.regularizer,
+                                               initializer=TruncatedNormal(),
+                                               regularizer=l2(self.regularizer),
                                                trainable=True)
 
         super(FwFM, self).build(input_shape)  # Be sure to call this somewhere!
@@ -1248,7 +1245,6 @@ class FwFM(Layer):
         config = super(FwFM, self).get_config().copy()
         config.update({
             'num_fields': self.num_fields,
-            'initializer': init_serialize(self.initializer),
-            'regularizer': reg_serialize(self.regularizer),
+            'regularizer': self.regularizer
         })
         return config
