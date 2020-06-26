@@ -174,7 +174,7 @@ eval_result = model.evaluate(test_model_input)
 print(eval_result)
 ```
 
-You can check the full code [here](./Examples.html#classification-criteo).
+You can check the full code [here](./Examples.html#estimator-with-tfrecord-classification-criteo).
 
 
 
