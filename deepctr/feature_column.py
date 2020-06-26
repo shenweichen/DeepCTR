@@ -5,11 +5,12 @@ from itertools import chain
 from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.layers import Input
 
-from .inputs import DEFAULT_GROUP_NAME, create_embedding_matrix, embedding_lookup, get_dense_input, \
-    varlen_embedding_lookup, get_varlen_pooling_list, mergeDict
+from .inputs import create_embedding_matrix, embedding_lookup, get_dense_input, varlen_embedding_lookup, \
+    get_varlen_pooling_list, mergeDict
 from .layers import Linear
 from .layers.utils import concat_func, add_func
 
+DEFAULT_GROUP_NAME = "default_group"
 
 class SparseFeat(namedtuple('SparseFeat',
                             ['name', 'vocabulary_size', 'embedding_dim', 'use_hash', 'dtype', 'embeddings_initializer','embedding_name',
@@ -157,6 +158,9 @@ def get_linear_logit(features, feature_columns, units=1, use_bias=False, seed=10
         linear_logit_list.append(linear_logit)
 
     return concat_func(linear_logit_list)
+
+
+DEFAULT_GROUP_NAME = "default_group"
 
 
 def input_from_feature_columns(features, feature_columns, l2_reg, seed, prefix='', seq_mask_zero=True,

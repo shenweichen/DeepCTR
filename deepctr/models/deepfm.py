@@ -11,7 +11,7 @@ Reference:
 from itertools import chain
 import tensorflow as tf
 
-from ..feature_column import build_input_features, get_linear_logit, input_from_feature_columns,DEFAULT_GROUP_NAME
+from ..feature_column import build_input_features, get_linear_logit, DEFAULT_GROUP_NAME, input_from_feature_columns
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import FM
 from ..layers.utils import concat_func, add_func, combined_dnn_input

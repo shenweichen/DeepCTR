@@ -45,7 +45,10 @@ if __name__ == "__main__":
     feature_description = {k: tf.FixedLenFeature(dtype=tf.int64, shape=1) for k in sparse_features}
     feature_description.update(
         {k: tf.FixedLenFeature(dtype=tf.float32, shape=1) for k in dense_features})
+
+    #feature_description = tf.feature_column.make_parse_example_spec(linear_feature_columns+dnn_feature_columns)
     feature_description['label'] = tf.FixedLenFeature(dtype=tf.float32, shape=1)
+
 
     train_model_input = input_fn_tfrecord('./criteo_sample.tr.tfrecords',feature_description,'label',batch_size=256,num_epochs=1)
     test_model_input = input_fn_tfrecord('./criteo_sample.te.tfrecords', feature_description, 'label',batch_size=2**14,num_epochs=1)

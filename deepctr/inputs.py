@@ -12,11 +12,9 @@ from itertools import chain
 from tensorflow.python.keras.layers import Embedding
 from tensorflow.python.keras.regularizers import l2
 
-from .feature_column import SparseFeat, VarLenSparseFeat, DenseFeat
+from . import feature_column as fc
 from .layers.sequence import SequencePoolingLayer, WeightedSequenceLayer
 from .layers.utils import Hash
-
-DEFAULT_GROUP_NAME = "default_group"
 
 
 def get_inputs_list(inputs):
@@ -64,9 +62,9 @@ def get_embedding_vec_list(embedding_dict, input_dict, sparse_feature_columns, r
 
 def create_embedding_matrix(feature_columns, l2_reg, seed, prefix="", seq_mask_zero=True):
     sparse_feature_columns = list(
-        filter(lambda x: isinstance(x, SparseFeat), feature_columns)) if feature_columns else []
+        filter(lambda x: isinstance(x, fc.SparseFeat), feature_columns)) if feature_columns else []
     varlen_sparse_feature_columns = list(
-        filter(lambda x: isinstance(x, VarLenSparseFeat), feature_columns)) if feature_columns else []
+        filter(lambda x: isinstance(x, fc.VarLenSparseFeat), feature_columns)) if feature_columns else []
     sparse_emb_dict = create_embedding_dict(sparse_feature_columns, varlen_sparse_feature_columns, seed,
                                             l2_reg, prefix=prefix + 'sparse', seq_mask_zero=seq_mask_zero)
     return sparse_emb_dict
@@ -133,7 +131,7 @@ def get_varlen_pooling_list(embedding_dict, features, varlen_sparse_feature_colu
 
 
 def get_dense_input(features, feature_columns):
-    dense_feature_columns = list(filter(lambda x: isinstance(x, DenseFeat), feature_columns)) if feature_columns else []
+    dense_feature_columns = list(filter(lambda x: isinstance(x, fc.DenseFeat), feature_columns)) if feature_columns else []
     dense_input_list = []
     for fc in dense_feature_columns:
         dense_input_list.append(features[fc.name])
@@ -146,3 +144,5 @@ def mergeDict(a, b):
     for k, v in b.items():
         c[k].extend(v)
     return c
+
+
