@@ -9,7 +9,10 @@ def get_linear_logit(features, linear_feature_columns,l2_reg_linear=0):
         if not linear_feature_columns:
             linear_logits = tf.Variable([[0.0]], name='bias_weights')
         else:
-            linear_logits = tf.feature_column.linear_model(features, linear_feature_columns)
+            if tf.__version__ >= '2.0.0':
+                linear_logits = tf.compat.v1.feature_column.linear_model(features, linear_feature_columns)
+            else:
+                linear_logits = tf.feature_column.linear_model(features, linear_feature_columns)
             if l2_reg_linear > 0:
                 for var in  tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, LINEAR_SCOPE_NAME)[:-1]:
                         tf.losses.add_loss(tf.nn.l2_loss(var, name=var.name.split(":")[0] + "_l2loss"),

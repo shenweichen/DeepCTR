@@ -30,6 +30,7 @@ DNN based CTR prediction models usually have following 4 modules:
 - embedding_dim : embedding dimension
 - use_hash : defualt `False`.If `True` the input will be hashed to space of size `vocabulary_size`.
 - dtype : default `float32`.dtype of input tensor.
+- embeddings_initializer : initializer for the `embeddings` matrix.
 - embedding_name : default `None`. If None, the embedding_name will be same as `name`.
 - group_name : feature group of this feature.
 

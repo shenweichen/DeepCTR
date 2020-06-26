@@ -7,4 +7,6 @@ from .deepfwfm import DeepFwFMEstimator
 from .fibinet import FiBiNETEstimator
 from .fnn import FNNEstimator
 from .nfm import NFMEstimator
+from .pnn import PNNEstimator
 from .wdl import WDLEstimator
+from .xdeepfm import xDeepFMEstimator

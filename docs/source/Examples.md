@@ -82,8 +82,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 
 from deepctr.models import DeepFM
-from deepctr.inputs import   get_feature_names
-from deepctr.feature_column import SparseFeat, DenseFeat
+from deepctr.feature_column import SparseFeat, DenseFeat,get_feature_names
 
 if __name__ == "__main__":
     data = pd.read_csv('./criteo_sample.txt')
@@ -148,8 +147,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
 from deepctr.models import DeepFM
-from deepctr.inputs import  get_feature_names
-from deepctr.feature_column import SparseFeat
+from deepctr.feature_column import SparseFeat,get_feature_names
 
 if __name__ == "__main__":
 
@@ -211,8 +209,7 @@ from sklearn.preprocessing import LabelEncoder
 from tensorflow.python.keras.preprocessing.sequence import pad_sequences
 
 from deepctr.models import DeepFM
-from deepctr.inputs import   get_feature_names
-from deepctr.feature_column import SparseFeat, VarLenSparseFeat
+from deepctr.feature_column import SparseFeat, VarLenSparseFeat,get_feature_names
 
 
 def split(x):
@@ -282,8 +279,7 @@ import numpy as np
 import pandas as pd
 from tensorflow.python.keras.preprocessing.sequence import pad_sequences
 
-from deepctr.inputs import   get_feature_names
-from deepctr.feature_column import SparseFeat, VarLenSparseFeat
+from deepctr.feature_column import SparseFeat, VarLenSparseFeat,get_feature_names
 from deepctr.models import DeepFM
 
 if __name__ == "__main__":
