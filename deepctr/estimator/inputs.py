@@ -20,8 +20,15 @@ def input_fn_pandas(df, features, label=None, batch_size=256, num_epochs=1, shuf
         y = df[label]
     else:
         y = None
+    if tf.__version__ >= "2.0.0":
+        return tf.compat.v1.estimator.inputs.pandas_input_fn(df[features], y, batch_size=batch_size,
+                                                             num_epochs=num_epochs,
+                                                             shuffle=shuffle, queue_capacity=queue_capacity,
+                                                             num_threads=num_threads)
+
     return tf.estimator.inputs.pandas_input_fn(df[features], y, batch_size=batch_size, num_epochs=num_epochs,
                                                shuffle=shuffle, queue_capacity=queue_capacity, num_threads=num_threads)
+
 
 
 def input_fn_tfrecord(filenames,feature_description,label=None,batch_size=256, num_epochs=1, shuffle=False,num_parallel_calls=10):

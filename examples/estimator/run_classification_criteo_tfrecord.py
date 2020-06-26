@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 
 from deepctr.estimator.inputs import input_fn_tfrecord
-from deepctr.estimator.models.wdl import WDL
+from deepctr.estimator.models.wdl import WDLEstimator
 
 if __name__ == "__main__":
     data = pd.read_csv('../criteo_sample.txt')
@@ -54,7 +54,7 @@ if __name__ == "__main__":
     test_model_input = input_fn_tfrecord('./criteo_sample.te.tfrecords', feature_description, 'label',batch_size=2**14,num_epochs=1)
 
     # 4.Define Model,train,predict and evaluate
-    model = WDL(linear_feature_columns, dnn_feature_columns,l2_reg_dnn=0,l2_reg_embedding=0.0,l2_reg_linear=1e-5)
+    model = WDLEstimator(linear_feature_columns, dnn_feature_columns, l2_reg_dnn=0, l2_reg_embedding=0.0, l2_reg_linear=1e-5)
 
     model.train(train_model_input)
     eval_result = model.evaluate(test_model_input)

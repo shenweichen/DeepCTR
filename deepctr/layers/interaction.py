@@ -124,7 +124,7 @@ class AFMLayer(Layer):
         attention_output = reduce_sum(
             self.normalized_att_score * bi_interaction, axis=1)
 
-        attention_output = self.dropout(attention_output)  # training
+        attention_output = self.dropout(attention_output,training=training)  # training
 
         afm_out = self.tensordot([attention_output, self.projection_p])
         return afm_out

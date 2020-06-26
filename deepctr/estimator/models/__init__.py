@@ -1,1 +1,2 @@
-from .wdl import WDL
+from .afm import AFMEstimator
+from .wdl import WDLEstimator
