@@ -23,7 +23,7 @@ DNN based CTR prediction models usually have following 4 modules:
 
 ## Feature Columns
 ### SparseFeat
-``SparseFeat`` is a namedtuple with signature ``SparseFeat(name, vocabulary_size, embedding_dim, use_hash, dtype,embedding_name, group_name)``
+``SparseFeat`` is a namedtuple with signature ``SparseFeat(name, vocabulary_size, embedding_dim, use_hash, dtype, embeddings_initializer, embedding_name, group_name, trainable)``
 
 - name : feature name
 - vocabulary_size : number of unique feature values for sprase feature or hashing space when `use_hash=True`

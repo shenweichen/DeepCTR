@@ -4,8 +4,11 @@ from tensorflow.python.estimator.canned.optimizers import get_optimizer_instance
 
 LINEAR_SCOPE_NAME = 'linear'
 DNN_SCOPE_NAME = 'dnn'
+
+
 def _summary_key(head_name, val):
     return '%s/%s' % (val, head_name) if head_name else val
+
 
 class Head(_Head):
 
@@ -33,27 +36,28 @@ class Head(_Head):
         predictions = to_float(predictions)
 
         with name_scope(None, 'metrics', (labels, logits, predictions,
-                                             unweighted_loss, weights)):
+                                          unweighted_loss, weights)):
             metric_ops = {
                 _summary_key(self._name, "prediction/mean"): get_metrics().mean(predictions, weights=weights,
-                                                                             name="prediction/mean"),
+                                                                                name="prediction/mean"),
                 _summary_key(self._name, "label/mean"): get_metrics().mean(labels, weights=weights, name="label/mean"),
             }
             if self._task == "binary":
                 metric_ops[_summary_key(self._name, "binary_crossentropy")] = get_metrics().mean(unweighted_loss,
-                                                                                              weights=weights,
-                                                                                              name="binary_crossentropy")
+                                                                                                 weights=weights,
+                                                                                                 name="binary_crossentropy")
                 metric_ops[_summary_key(self._name, "AUC")] = get_metrics().auc(labels, predictions, weights=weights,
-                                                                             name="AUC")
+                                                                                name="AUC")
             else:
                 metric_ops[_summary_key(self._name, "mse")] = get_metrics().mean(unweighted_loss, weights=weights,
-                                                                              name="mse")
+                                                                                 name="mse")
 
                 metric_ops[_summary_key(self._name, "MSE")] = get_metrics().mean_squared_error(labels, predictions,
-                                                                                            weights=weights, name="MSE")
+                                                                                               weights=weights,
+                                                                                               name="MSE")
                 metric_ops[_summary_key(self._name, "MAE")] = get_metrics().mean_absolute_error(labels, predictions,
-                                                                                             weights=weights,
-                                                                                             name="MAE")
+                                                                                                weights=weights,
+                                                                                                name="MAE")
             return metric_ops
 
     def create_loss(self, features, mode, logits, labels):
@@ -114,7 +118,7 @@ def deepctr_model_fn(features, mode, logits, labels, task, linear_optimizer, dnn
     #     linear_optimizer.iterations = tf.train.get_or_create_global_step()
 
     linear_optimizer = get_optimizer_instance(linear_optimizer, 0.005)
-    dnn_optimizer   =  get_optimizer_instance(dnn_optimizer, 0.01)
+    dnn_optimizer = get_optimizer_instance(dnn_optimizer, 0.01)
     train_op_fn = get_train_op_fn(linear_optimizer, dnn_optimizer)
 
     head = Head(task)
@@ -144,9 +148,11 @@ def get_train_op_fn(linear_optimizer, dnn_optimizer):
 
         train_op = tf.group(*train_ops)
         with tf.control_dependencies([train_op]):
-            return tf.assign_add(global_step, 1).op if tf.__version__ < "2.0.0" else tf.compat.v1.assign_add(global_step, 1).op
+            return tf.assign_add(global_step, 1).op if tf.__version__ < "2.0.0" else tf.compat.v1.assign_add(
+                global_step, 1).op
 
     return _train_op_fn
+
 
 def variable_scope(name_or_scope):
     if tf.__version__ < "2.0.0":
@@ -154,23 +160,27 @@ def variable_scope(name_or_scope):
     else:
         return tf.compat.v1.variable_scope(name_or_scope)
 
+
 def name_scope(name, default_name=None, values=None):
     if tf.__version__ < "2.0.0":
-        return tf.name_scope(name,default_name,values)
+        return tf.name_scope(name, default_name, values)
     else:
-        return tf.compat.v1.name_scope(name,default_name,values)
+        return tf.compat.v1.name_scope(name, default_name, values)
+
 
 def get_collection(key, scope=None):
     if tf.__version__ < "2.0.0":
-        return tf.get_collection(key,scope=scope)
+        return tf.get_collection(key, scope=scope)
     else:
-        return tf.compat.v1.get_collection(key,scope=scope)
+        return tf.compat.v1.get_collection(key, scope=scope)
+
 
 def get_GraphKeys():
     if tf.__version__ < "2.0.0":
         return tf.GraphKeys
     else:
         return tf.compat.v1.GraphKeys
+
 
 def get_losses():
     if tf.__version__ < "2.0.0":
@@ -179,11 +189,12 @@ def get_losses():
         return tf.compat.v1.losses
 
 
-def input_layer(features,feature_columns):
+def input_layer(features, feature_columns):
     if tf.__version__ < "2.0.0":
         return tf.feature_column.input_layer(features, feature_columns)
     else:
         return tf.compat.v1.feature_column.input_layer(features, feature_columns)
+
 
 def get_metrics():
     if tf.__version__ < "2.0.0":
@@ -192,8 +203,8 @@ def get_metrics():
         return tf.compat.v1.metrics
 
 
-def to_float(x,name="ToFloat"):
+def to_float(x, name="ToFloat"):
     if tf.__version__ < "2.0.0":
-        return tf.to_float(x,name)
+        return tf.to_float(x, name)
     else:
-        return tf.compat.v1.to_float(x,name)
+        return tf.compat.v1.to_float(x, name)

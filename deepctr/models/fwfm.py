@@ -18,10 +18,10 @@ from ..layers.interaction import FwFM
 from ..layers.utils import concat_func, add_func, combined_dnn_input
 
 
-def DeepFwFM(linear_feature_columns, dnn_feature_columns, fm_group=[DEFAULT_GROUP_NAME], dnn_hidden_units=(128, 128),
-             l2_reg_linear=0.00001, l2_reg_embedding=0.00001, l2_reg_field_strength=0.00001, l2_reg_dnn=0,
-             seed=1024, dnn_dropout=0, dnn_activation='relu', dnn_use_bn=False, task='binary'):
-    """Instantiates the DeepFwFM Network architecture.
+def FwFM(linear_feature_columns, dnn_feature_columns, fm_group=[DEFAULT_GROUP_NAME], dnn_hidden_units=(128, 128),
+         l2_reg_linear=0.00001, l2_reg_embedding=0.00001, l2_reg_field_strength=0.00001, l2_reg_dnn=0,
+         seed=1024, dnn_dropout=0, dnn_activation='relu', dnn_use_bn=False, task='binary'):
+    """Instantiates the FwFM Network architecture.
 
     :param linear_feature_columns: An iterable containing all the features used by linear part of the model.
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.

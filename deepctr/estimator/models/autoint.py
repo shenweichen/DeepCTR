@@ -12,18 +12,18 @@ Reference:
 import tensorflow as tf
 
 from ..feature_column import get_linear_logit, input_from_feature_columns
-from ..utils import deepctr_model_fn,DNN_SCOPE_NAME,variable_scope
-from ...layers.core import  DNN
+from ..utils import deepctr_model_fn, DNN_SCOPE_NAME, variable_scope
+from ...layers.core import DNN
 from ...layers.interaction import InteractingLayer
 from ...layers.utils import concat_func, combined_dnn_input
 
 
 def AutoIntEstimator(linear_feature_columns, dnn_feature_columns, att_layer_num=3, att_embedding_size=8, att_head_num=2,
-            att_res=True,
-            dnn_hidden_units=(256, 256), dnn_activation='relu', l2_reg_linear=1e-5,
-            l2_reg_embedding=1e-5, l2_reg_dnn=0, dnn_use_bn=False, dnn_dropout=0, seed=1024,
-            task='binary', model_dir=None, config=None, linear_optimizer='Ftrl',
-                 dnn_optimizer='Adagrad'):
+                     att_res=True,
+                     dnn_hidden_units=(256, 256), dnn_activation='relu', l2_reg_linear=1e-5,
+                     l2_reg_embedding=1e-5, l2_reg_dnn=0, dnn_use_bn=False, dnn_dropout=0, seed=1024,
+                     task='binary', model_dir=None, config=None, linear_optimizer='Ftrl',
+                     dnn_optimizer='Adagrad'):
     """Instantiates the AutoInt Network architecture.
 
     :param linear_feature_columns: An iterable containing all the features used by linear part of the model.
@@ -52,10 +52,11 @@ def AutoIntEstimator(linear_feature_columns, dnn_feature_columns, att_layer_num=
     :return: A Tensorflow Estimator  instance.
 
     """
+
     def _model_fn(features, labels, mode, config):
         train_flag = (mode == tf.estimator.ModeKeys.TRAIN)
 
-        linear_logits = get_linear_logit(features, linear_feature_columns,l2_reg_linear=l2_reg_linear)
+        linear_logits = get_linear_logit(features, linear_feature_columns, l2_reg_linear=l2_reg_linear)
 
         with variable_scope(DNN_SCOPE_NAME):
             sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
@@ -71,13 +72,13 @@ def AutoIntEstimator(linear_feature_columns, dnn_feature_columns, att_layer_num=
 
             if len(dnn_hidden_units) > 0 and att_layer_num > 0:  # Deep & Interacting Layer
                 deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
-                               dnn_use_bn, seed)(dnn_input,training=train_flag)
+                               dnn_use_bn, seed)(dnn_input, training=train_flag)
                 stack_out = tf.keras.layers.Concatenate()([att_output, deep_out])
                 final_logit = tf.keras.layers.Dense(
                     1, use_bias=False, activation=None)(stack_out)
             elif len(dnn_hidden_units) > 0:  # Only Deep
                 deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
-                               dnn_use_bn, seed)(dnn_input,training=train_flag)
+                               dnn_use_bn, seed)(dnn_input, training=train_flag)
                 final_logit = tf.keras.layers.Dense(
                     1, use_bias=False, activation=None)(deep_out)
             elif att_layer_num > 0:  # Only Interacting Layer

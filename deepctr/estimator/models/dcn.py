@@ -9,7 +9,7 @@ Reference:
 import tensorflow as tf
 
 from ..feature_column import get_linear_logit, input_from_feature_columns
-from ..utils import deepctr_model_fn, DNN_SCOPE_NAME,variable_scope
+from ..utils import deepctr_model_fn, DNN_SCOPE_NAME, variable_scope
 from ...layers.core import DNN
 from ...layers.interaction import CrossNet
 from ...layers.utils import combined_dnn_input

@@ -10,17 +10,17 @@ import tensorflow as tf
 
 from ..feature_column import get_linear_logit, input_from_feature_columns
 from ..utils import deepctr_model_fn, DNN_SCOPE_NAME, variable_scope
-from ...layers.core import PredictionLayer, DNN
+from ...layers.core import DNN
 from ...layers.interaction import CIN
 from ...layers.utils import concat_func, add_func, combined_dnn_input
 
 
 def xDeepFMEstimator(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(256, 256),
-            cin_layer_size=(128, 128,), cin_split_half=True, cin_activation='relu', l2_reg_linear=0.00001,
-            l2_reg_embedding=0.00001, l2_reg_dnn=0, l2_reg_cin=0, seed=1024, dnn_dropout=0,
-            dnn_activation='relu', dnn_use_bn=False, task='binary', model_dir=None, config=None,
-                 linear_optimizer='Ftrl',
-                 dnn_optimizer='Adagrad'):
+                     cin_layer_size=(128, 128,), cin_split_half=True, cin_activation='relu', l2_reg_linear=0.00001,
+                     l2_reg_embedding=0.00001, l2_reg_dnn=0, l2_reg_cin=0, seed=1024, dnn_dropout=0,
+                     dnn_activation='relu', dnn_use_bn=False, task='binary', model_dir=None, config=None,
+                     linear_optimizer='Ftrl',
+                     dnn_optimizer='Adagrad'):
     """Instantiates the xDeepFM architecture.
 
     :param linear_feature_columns: An iterable containing all the features used by linear part of the model.
@@ -63,7 +63,7 @@ def xDeepFMEstimator(linear_feature_columns, dnn_feature_columns, dnn_hidden_uni
 
             dnn_input = combined_dnn_input(sparse_embedding_list, dense_value_list)
             dnn_output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
-                             dnn_use_bn, seed)(dnn_input,training=train_flag)
+                             dnn_use_bn, seed)(dnn_input, training=train_flag)
             dnn_logit = tf.keras.layers.Dense(
                 1, use_bias=False, activation=None)(dnn_output)
 
@@ -71,7 +71,7 @@ def xDeepFMEstimator(linear_feature_columns, dnn_feature_columns, dnn_hidden_uni
 
             if len(cin_layer_size) > 0:
                 exFM_out = CIN(cin_layer_size, cin_activation,
-                               cin_split_half, l2_reg_cin, seed)(fm_input,training=train_flag)
+                               cin_split_half, l2_reg_cin, seed)(fm_input, training=train_flag)
                 exFM_logit = tf.keras.layers.Dense(1, activation=None, )(exFM_out)
                 logits_list.append(exFM_logit)
 
@@ -80,4 +80,3 @@ def xDeepFMEstimator(linear_feature_columns, dnn_feature_columns, dnn_hidden_uni
         return deepctr_model_fn(features, mode, logits, labels, task, linear_optimizer, dnn_optimizer)
 
     return tf.estimator.Estimator(_model_fn, model_dir=model_dir, config=config)
-

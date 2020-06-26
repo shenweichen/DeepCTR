@@ -11,18 +11,17 @@ Reference:
 """
 import tensorflow as tf
 
-from ..feature_column import  get_linear_logit, input_from_feature_columns
-from ..utils import deepctr_model_fn,DNN_SCOPE_NAME,variable_scope
-
+from ..feature_column import get_linear_logit, input_from_feature_columns
+from ..utils import deepctr_model_fn, DNN_SCOPE_NAME, variable_scope
 from ...layers.core import DNN
 from ...layers.sequence import KMaxPooling
 from ...layers.utils import concat_func
 
 
 def CCPMEstimator(linear_feature_columns, dnn_feature_columns, conv_kernel_width=(6, 5), conv_filters=(4, 4),
-         dnn_hidden_units=(256,), l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_dnn=0, dnn_dropout=0,
-         seed=1024, task='binary', model_dir=None, config=None, linear_optimizer='Ftrl',
-                 dnn_optimizer='Adagrad'):
+                  dnn_hidden_units=(256,), l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_dnn=0, dnn_dropout=0,
+                  seed=1024, task='binary', model_dir=None, config=None, linear_optimizer='Ftrl',
+                  dnn_optimizer='Adagrad'):
     """Instantiates the Convolutional Click Prediction Model architecture.
 
     :param linear_feature_columns: An iterable containing all the features used by linear part of the model.
@@ -55,7 +54,7 @@ def CCPMEstimator(linear_feature_columns, dnn_feature_columns, conv_kernel_width
     def _model_fn(features, labels, mode, config):
         train_flag = (mode == tf.estimator.ModeKeys.TRAIN)
 
-        linear_logits = get_linear_logit(features, linear_feature_columns,l2_reg_linear=l2_reg_linear)
+        linear_logits = get_linear_logit(features, linear_feature_columns, l2_reg_linear=l2_reg_linear)
 
         with variable_scope(DNN_SCOPE_NAME):
             sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
@@ -80,7 +79,7 @@ def CCPMEstimator(linear_feature_columns, dnn_feature_columns, conv_kernel_width
 
             flatten_result = tf.keras.layers.Flatten()(pooling_result)
             dnn_out = DNN(dnn_hidden_units, l2_reg=l2_reg_dnn,
-                          dropout_rate=dnn_dropout)(flatten_result,training=train_flag)
+                          dropout_rate=dnn_dropout)(flatten_result, training=train_flag)
             dnn_logit = tf.keras.layers.Dense(1, use_bias=False)(dnn_out)
 
         logits = linear_logits + dnn_logit
@@ -88,4 +87,3 @@ def CCPMEstimator(linear_feature_columns, dnn_feature_columns, conv_kernel_width
         return deepctr_model_fn(features, mode, logits, labels, task, linear_optimizer, dnn_optimizer)
 
     return tf.estimator.Estimator(_model_fn, model_dir=model_dir, config=config)
-

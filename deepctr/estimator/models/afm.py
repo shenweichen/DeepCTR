@@ -12,7 +12,7 @@ Reference:
 import tensorflow as tf
 
 from ..feature_column import get_linear_logit, input_from_feature_columns
-from ..utils import deepctr_model_fn,DNN_SCOPE_NAME,variable_scope
+from ..utils import deepctr_model_fn, DNN_SCOPE_NAME, variable_scope
 from ...layers.interaction import AFMLayer, FM
 from ...layers.utils import concat_func
 
@@ -48,7 +48,7 @@ def AFMEstimator(linear_feature_columns, dnn_feature_columns, use_attention=True
     def _model_fn(features, labels, mode, config):
         train_flag = (mode == tf.estimator.ModeKeys.TRAIN)
 
-        linear_logits = get_linear_logit(features, linear_feature_columns,l2_reg_linear=l2_reg_linear)
+        linear_logits = get_linear_logit(features, linear_feature_columns, l2_reg_linear=l2_reg_linear)
 
         with variable_scope(DNN_SCOPE_NAME):
             sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
@@ -56,7 +56,7 @@ def AFMEstimator(linear_feature_columns, dnn_feature_columns, use_attention=True
             if use_attention:
 
                 fm_logit = AFMLayer(attention_factor, l2_reg_att, afm_dropout,
-                                              seed)(sparse_embedding_list,training=train_flag)
+                                    seed)(sparse_embedding_list, training=train_flag)
             else:
                 fm_logit = FM()(concat_func(sparse_embedding_list, axis=1))
 
@@ -64,4 +64,4 @@ def AFMEstimator(linear_feature_columns, dnn_feature_columns, use_attention=True
 
         return deepctr_model_fn(features, mode, logits, labels, task, linear_optimizer, dnn_optimizer)
 
-    return tf.estimator.Estimator(_model_fn, model_dir=model_dir,config=config)
+    return tf.estimator.Estimator(_model_fn, model_dir=model_dir, config=config)

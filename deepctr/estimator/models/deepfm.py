@@ -10,18 +10,18 @@ Reference:
 
 import tensorflow as tf
 
-from ..feature_column import  get_linear_logit, input_from_feature_columns
-from ..utils import deepctr_model_fn, DNN_SCOPE_NAME,variable_scope
-
+from ..feature_column import get_linear_logit, input_from_feature_columns
+from ..utils import deepctr_model_fn, DNN_SCOPE_NAME, variable_scope
 from ...layers.core import DNN
 from ...layers.interaction import FM
 from ...layers.utils import concat_func, combined_dnn_input
 
 
 def DeepFMEstimator(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128),
-           l2_reg_linear=0.00001, l2_reg_embedding=0.00001, l2_reg_dnn=0, seed=1024, dnn_dropout=0,
-           dnn_activation='relu', dnn_use_bn=False, task='binary',model_dir=None, config=None, linear_optimizer='Ftrl',
-                 dnn_optimizer='Adagrad'):
+                    l2_reg_linear=0.00001, l2_reg_embedding=0.00001, l2_reg_dnn=0, seed=1024, dnn_dropout=0,
+                    dnn_activation='relu', dnn_use_bn=False, task='binary', model_dir=None, config=None,
+                    linear_optimizer='Ftrl',
+                    dnn_optimizer='Adagrad'):
     """Instantiates the DeepFM Network architecture.
 
     :param linear_feature_columns: An iterable containing all the features used by linear part of the model.
@@ -62,11 +62,11 @@ def DeepFMEstimator(linear_feature_columns, dnn_feature_columns, dnn_hidden_unit
             fm_logit = FM()(concat_func(sparse_embedding_list, axis=1))
 
             dnn_output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
-                             dnn_use_bn, seed)(dnn_input,training=train_flag)
+                             dnn_use_bn, seed)(dnn_input, training=train_flag)
             dnn_logit = tf.keras.layers.Dense(
                 1, use_bias=False, activation=None)(dnn_output)
 
-        logits = linear_logits + fm_logit+dnn_logit
+        logits = linear_logits + fm_logit + dnn_logit
 
         return deepctr_model_fn(features, mode, logits, labels, task, linear_optimizer, dnn_optimizer)
 
