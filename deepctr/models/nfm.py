@@ -15,7 +15,7 @@ from ..layers.utils import concat_func, add_func, combined_dnn_input
 
 
 def NFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128),
-        l2_reg_embedding=1e-5, l2_reg_linear=1e-5, l2_reg_dnn=0, init_std=0.0001, seed=1024, bi_dropout=0,
+        l2_reg_embedding=1e-5, l2_reg_linear=1e-5, l2_reg_dnn=0, seed=1024, bi_dropout=0,
         dnn_dropout=0, dnn_activation='relu', task='binary'):
     """Instantiates the Neural Factorization Machine architecture.
 
@@ -25,7 +25,6 @@ def NFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128)
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
     :param l2_reg_linear: float. L2 regularizer strength applied to linear part.
     :param l2_reg_dnn: float . L2 regularizer strength applied to DNN
-    :param init_std: float,to use as the initialize std of embedding vector
     :param seed: integer ,to use as random seed.
     :param biout_dropout: When not ``None``, the probability we will drop out the output of BiInteractionPooling Layer.
     :param dnn_dropout: float in [0,1), the probability we will drop out a given DNN coordinate.
@@ -42,7 +41,7 @@ def NFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128)
     sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
                                                                          l2_reg_embedding, seed)
 
-    linear_logit = get_linear_logit(features, linear_feature_columns, init_std=init_std, seed=seed, prefix='linear',
+    linear_logit = get_linear_logit(features, linear_feature_columns, seed=seed, prefix='linear',
                                     l2_reg=l2_reg_linear)
 
     fm_input = concat_func(sparse_embedding_list, axis=1)

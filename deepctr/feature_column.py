@@ -2,8 +2,8 @@ from collections import namedtuple, OrderedDict
 from copy import copy
 from itertools import chain
 
-from tensorflow import RandomNormal
-from tensorflow.python.keras import Input
+from tensorflow.python.keras.initializers import RandomNormal
+from tensorflow.python.keras.layers import Input
 
 from .inputs import DEFAULT_GROUP_NAME, create_embedding_matrix, embedding_lookup, get_dense_input, \
     varlen_embedding_lookup, get_varlen_pooling_list, mergeDict
@@ -124,7 +124,7 @@ def build_input_features(feature_columns, prefix=''):
     return input_features
 
 
-def get_linear_logit(features, feature_columns, units=1, use_bias=False, init_std=0.0001, seed=1024, prefix='linear',
+def get_linear_logit(features, feature_columns, units=1, use_bias=False, seed=1024, prefix='linear',
                      l2_reg=0):
     linear_feature_columns = copy(feature_columns)
     for i in range(len(linear_feature_columns)):
@@ -134,9 +134,9 @@ def get_linear_logit(features, feature_columns, units=1, use_bias=False, init_st
             linear_feature_columns[i] = linear_feature_columns[i]._replace(
                 sparsefeat=linear_feature_columns[i].sparsefeat._replace(embedding_dim=1))
 
-    linear_emb_list = [input_from_feature_columns(features, linear_feature_columns, l2_reg, init_std, seed,
+    linear_emb_list = [input_from_feature_columns(features, linear_feature_columns, l2_reg, seed,
                                                   prefix=prefix + str(i))[0] for i in range(units)]
-    _, dense_input_list = input_from_feature_columns(features, linear_feature_columns, l2_reg, init_std, seed, prefix=prefix)
+    _, dense_input_list = input_from_feature_columns(features, linear_feature_columns, l2_reg, seed, prefix=prefix)
 
     linear_logit_list = []
     for i in range(units):

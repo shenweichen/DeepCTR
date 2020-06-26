@@ -149,7 +149,7 @@ def DIEN(dnn_feature_columns, history_feature_list,
          gru_type="GRU", use_negsampling=False, alpha=1.0, use_bn=False, dnn_hidden_units=(200, 80),
          dnn_activation='relu',
          att_hidden_units=(64, 16), att_activation="dice", att_weight_normalization=True,
-         l2_reg_dnn=0, l2_reg_embedding=1e-6, dnn_dropout=0, init_std=0.0001, seed=1024, task='binary'):
+         l2_reg_dnn=0, l2_reg_embedding=1e-6, dnn_dropout=0, seed=1024, task='binary'):
     """Instantiates the Deep Interest Evolution Network architecture.
 
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
@@ -172,25 +172,6 @@ def DIEN(dnn_feature_columns, history_feature_list,
     :return: A Keras model instance.
 
     """
-    # check_feature_config_dict(feature_columns)
-    #
-    # sparse_input, dense_input, user_behavior_input, user_behavior_length = get_input(
-    #     feature_columns, seq_feature_list, hist_len_max)
-    # sparse_embedding_dict = {feat.name: Embedding(feat.dimension, embedding_size,
-    #                                               embeddings_initializer=RandomNormal(
-    #                                                   mean=0.0, stddev=init_std, seed=seed),
-    #                                               embeddings_regularizer=l2(
-    #                                                   l2_reg_embedding),
-    #                                               name='sparse_emb_' + str(i) + '-' + feat.name) for i, feat in
-    #                          enumerate(feature_columns["sparse"])}
-    #
-    # query_emb_list = get_embedding_vec_list(sparse_embedding_dict, sparse_input, feature_columns["sparse"], return_feat_list=seq_feature_list)
-    # keys_emb_list = get_embedding_vec_list(sparse_embedding_dict, user_behavior_input, feature_columns['sparse'], return_feat_list=seq_feature_list)
-    # deep_input_emb_list = get_embedding_vec_list(sparse_embedding_dict, sparse_input, feature_columns['sparse'])
-    #
-    # query_emb = concat_fun(query_emb_list)
-    # keys_emb = concat_fun(keys_emb_list)
-    # deep_input_emb = concat_fun(deep_input_emb_list)
 
     features = build_input_features(dnn_feature_columns)
 

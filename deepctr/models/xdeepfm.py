@@ -16,7 +16,7 @@ from ..layers.utils import concat_func, add_func, combined_dnn_input
 
 def xDeepFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(256, 256),
             cin_layer_size=(128, 128,), cin_split_half=True, cin_activation='relu', l2_reg_linear=0.00001,
-            l2_reg_embedding=0.00001, l2_reg_dnn=0, l2_reg_cin=0, init_std=0.0001, seed=1024, dnn_dropout=0,
+            l2_reg_embedding=0.00001, l2_reg_dnn=0, l2_reg_cin=0, seed=1024, dnn_dropout=0,
             dnn_activation='relu', dnn_use_bn=False, task='binary'):
     """Instantiates the xDeepFM architecture.
 
@@ -30,7 +30,6 @@ def xDeepFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(256, 
     :param l2_reg_embedding: L2 regularizer strength applied to embedding vector
     :param l2_reg_dnn: L2 regularizer strength applied to deep net
     :param l2_reg_cin: L2 regularizer strength applied to CIN.
-    :param init_std: float,to use as the initialize std of embedding vector
     :param seed: integer ,to use as random seed.
     :param dnn_dropout: float in [0,1), the probability we will drop out a given DNN coordinate.
     :param dnn_activation: Activation function to use in DNN
@@ -47,7 +46,7 @@ def xDeepFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(256, 
     sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
                                                                          l2_reg_embedding, seed)
 
-    linear_logit = get_linear_logit(features, linear_feature_columns, init_std=init_std, seed=seed, prefix='linear',
+    linear_logit = get_linear_logit(features, linear_feature_columns, seed=seed, prefix='linear',
                                     l2_reg=l2_reg_linear)
 
     fm_input = concat_func(sparse_embedding_list, axis=1)
