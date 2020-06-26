@@ -322,3 +322,117 @@ if __name__ == "__main__":
     history = model.fit(model_input, data[target].values,
                         batch_size=256, epochs=10, verbose=2, validation_split=0.2, )
 ```
+
+## Estimator with TFRecord: Classification Criteo 
+
+This example shows how to use ``DeepFMEstimator`` to solve a simple binary classification task. You can get the demo data [criteo_sample.tr.tfrecords](https://github.com/shenweichen/DeepCTR/tree/master/examples/criteo_sample.tr.tfrecords) and [criteo_sample.te.tfrecords](https://github.com/shenweichen/DeepCTR/tree/master/examples/criteo_sample.te.tfrecords)
+and run the following codes.
+
+```python
+import tensorflow as tf
+
+from deepctr.estimator.inputs import input_fn_tfrecord
+from deepctr.estimator.models import DeepFMEstimator
+
+if __name__ == "__main__":
+
+    # 1.generate feature_column for linear part and dnn part
+
+    sparse_features = ['C' + str(i) for i in range(1, 27)]
+    dense_features = ['I' + str(i) for i in range(1, 14)]
+
+    dnn_feature_columns = []
+    linear_feature_columns = []
+
+    for i, feat in enumerate(sparse_features):
+        dnn_feature_columns.append(tf.feature_column.embedding_column(
+            tf.feature_column.categorical_column_with_identity(feat, 100), 4))
+        linear_feature_columns.append(tf.feature_column.categorical_column_with_identity(feat, 100))
+    for feat in dense_features:
+        dnn_feature_columns.append(tf.feature_column.numeric_column(feat))
+        linear_feature_columns.append(tf.feature_column.numeric_column(feat))
+
+    # 2.generate input data for model
+
+    feature_description = {k: tf.FixedLenFeature(dtype=tf.int64, shape=1) for k in sparse_features}
+    feature_description.update(
+        {k: tf.FixedLenFeature(dtype=tf.float32, shape=1) for k in dense_features})
+    feature_description['label'] = tf.FixedLenFeature(dtype=tf.float32, shape=1)
+
+    train_model_input = input_fn_tfrecord('./criteo_sample.tr.tfrecords',feature_description,'label',batch_size=256,num_epochs=1)
+    test_model_input = input_fn_tfrecord('./criteo_sample.te.tfrecords', feature_description, 'label',batch_size=2**14,num_epochs=1)
+
+    # 3.Define Model,train,predict and evaluate
+    model = DeepFMEstimator(linear_feature_columns, dnn_feature_columns, l2_reg_dnn=0, l2_reg_embedding=0.0, l2_reg_linear=1e-5)
+
+    model.train(train_model_input)
+    eval_result = model.evaluate(test_model_input)
+
+    print(eval_result)
+
+```
+
+## Estimator with Pandas DataFrame: Classification Criteo 
+This example shows how to use ``DeepFMEstimator`` to solve a simple binary classification task. You can get the demo data [criteo_sample.txt](https://github.com/shenweichen/DeepCTR/tree/master/examples/criteo_sample.txt)
+and run the following codes.
+
+```python
+import pandas as pd
+import tensorflow as tf
+from sklearn.metrics import log_loss, roc_auc_score
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder, MinMaxScaler
+
+from deepctr.estimator.inputs import input_fn_pandas
+from deepctr.estimator import DeepFMEstimator
+
+if __name__ == "__main__":
+    data = pd.read_csv('../criteo_sample.txt')
+
+    sparse_features = ['C' + str(i) for i in range(1, 27)]
+    dense_features = ['I' + str(i) for i in range(1, 14)]
+
+    data[sparse_features] = data[sparse_features].fillna('-1', )
+    data[dense_features] = data[dense_features].fillna(0, )
+    target = ['label']
+
+    # 1.Label Encoding for sparse features,and do simple Transformation for dense features
+    for feat in sparse_features:
+        lbe = LabelEncoder()
+        data[feat] = lbe.fit_transform(data[feat])
+    mms = MinMaxScaler(feature_range=(0, 1))
+    data[dense_features] = mms.fit_transform(data[dense_features])
+
+    # 2.count #unique features for each sparse field,and record dense feature field name
+
+    dnn_feature_columns = []
+    linear_feature_columns = []
+
+    for i, feat in enumerate(sparse_features):
+        dnn_feature_columns.append(tf.feature_column.embedding_column(
+            tf.feature_column.categorical_column_with_identity(feat, data[feat].nunique()), 4))
+        linear_feature_columns.append(tf.feature_column.categorical_column_with_identity(feat, data[feat].nunique()))
+    for feat in dense_features:
+        dnn_feature_columns.append(tf.feature_column.numeric_column(feat))
+        linear_feature_columns.append(tf.feature_column.numeric_column(feat))
+
+    # 3.generate input data for model
+
+    train, test = train_test_split(data, test_size=0.2)
+
+    # Not setting default value for continuous feature. filled with mean.
+
+    train_model_input = input_fn_pandas(train,sparse_features+dense_features,'label')
+    test_model_input = input_fn_pandas(test,sparse_features+dense_features,None)
+
+    # 4.Define Model,train,predict and evaluate
+    model = DeepFMEstimator(linear_feature_columns, dnn_feature_columns)
+
+    model.train(train_model_input)
+    pred_ans_iter = model.predict(test_model_input)
+    pred_ans = list(map(lambda x:x['pred'],pred_ans_iter))
+    #
+    print("test LogLoss", round(log_loss(test[target].values, pred_ans), 4))
+    print("test AUC", round(roc_auc_score(test[target].values, pred_ans), 4))
+
+```
