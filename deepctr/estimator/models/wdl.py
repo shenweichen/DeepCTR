@@ -14,10 +14,9 @@ from ..utils import deepctr_model_fn, DNN_SCOPE_NAME
 from ..feature_column import get_linear_logit, input_from_feature_columns
 from ...layers import DNN,combined_dnn_input
 
-
 def WDL(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128), l2_reg_linear=1e-5,
         l2_reg_embedding=1e-5, l2_reg_dnn=0, seed=1024, dnn_dropout=0, dnn_activation='relu',
-        task='binary', config=None, linear_optimizer=tf.train.FtrlOptimizer(0.005),
+        task='binary', model_dir=None,config=None, linear_optimizer=tf.train.FtrlOptimizer(0.005),
         dnn_optimizer=tf.train.AdagradOptimizer(learning_rate=0.01)):
     """Instantiates the Wide&Deep Learning architecture.
 
@@ -31,6 +30,14 @@ def WDL(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128)
     :param dnn_dropout: float in [0,1), the probability we will drop out a given DNN coordinate.
     :param dnn_activation: Activation function to use in DNN
     :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
+    :param model_dir: Directory to save model parameters, graph and etc. This can
+        also be used to load checkpoints from the directory into a estimator
+        to continue training a previously saved model.
+    :param config: tf.RunConfig object to configure the runtime settings.
+    :param linear_optimizer: An instance of `tf.Optimizer` used to apply gradients to
+        the linear part of the model. Defaults to FTRL optimizer.
+    :param dnn_optimizer: An instance of `tf.Optimizer` used to apply gradients to
+        the deep part of the model. Defaults to Adagrad optimizer.
     :return: A Tensorflow Estimator  instance.
     """
 
@@ -52,4 +59,4 @@ def WDL(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128)
 
         return deepctr_model_fn(features, mode, logits, labels, task, linear_optimizer, dnn_optimizer)
 
-    return tf.estimator.Estimator(_model_fn, config=config)
+    return tf.estimator.Estimator(_model_fn, model_dir=model_dir,config=config)

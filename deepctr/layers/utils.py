@@ -6,7 +6,7 @@ Author:
 
 """
 import tensorflow as tf
-from tensorflow.python.keras._impl.keras.layers import Flatten
+from tensorflow.python.keras.layers import Flatten
 
 
 class NoMask(tf.keras.layers.Layer):
