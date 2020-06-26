@@ -112,10 +112,6 @@ class Head(_Head):
 
 
 def deepctr_model_fn(features, mode, logits, labels, task, linear_optimizer, dnn_optimizer):
-    # if dnn_logits is not None:
-    #     dnn_optimizer.iterations = tf.train.get_or_create_global_step()
-    # else:
-    #     linear_optimizer.iterations = tf.train.get_or_create_global_step()
 
     linear_optimizer = get_optimizer_instance(linear_optimizer, 0.005)
     dnn_optimizer = get_optimizer_instance(dnn_optimizer, 0.01)

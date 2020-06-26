@@ -35,7 +35,7 @@ You can read the latest code at https://github.com/shenweichen/DeepCTR
 News
 -----
 
-06/27/2020 : Support ``Tensorflow Estimator``,add new model ``FwFM``. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.0>`_
+06/27/2020 : Support ``Tensorflow Estimator`` for large scale data and distributed training.Support different initializers for different embedding weights and loading pretrained embeddings.Add new model ``FwFM``. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.0>`_
 
 05/17/2020 : Fix numerical instability in ``LayerNormalization``. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.7.5>`_
 
