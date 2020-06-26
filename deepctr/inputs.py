@@ -25,24 +25,26 @@ def get_inputs_list(inputs):
 def create_embedding_dict(sparse_feature_columns, varlen_sparse_feature_columns, seed, l2_reg,
                           prefix='sparse_', seq_mask_zero=True):
 
-
     sparse_embedding = {}
     for feat in sparse_feature_columns:
-        sparse_embedding[feat.embedding_name] = Embedding(feat.vocabulary_size, feat.embedding_dim,
+        emb = Embedding(feat.vocabulary_size, feat.embedding_dim,
                                                        embeddings_initializer=feat.embeddings_initializer,
                                                        embeddings_regularizer=l2(l2_reg),
                                                        name=prefix + '_emb_' + feat.embedding_name)
-
+        emb.trainable = feat.trainable
+        sparse_embedding[feat.embedding_name] = emb
 
     if varlen_sparse_feature_columns and len(varlen_sparse_feature_columns) > 0:
         for feat in varlen_sparse_feature_columns:
             # if feat.name not in sparse_embedding:
-            sparse_embedding[feat.embedding_name] = Embedding(feat.vocabulary_size, feat.embedding_dim,
+            emb = Embedding(feat.vocabulary_size, feat.embedding_dim,
                                                               embeddings_initializer=feat.embeddings_initializer,
                                                               embeddings_regularizer=l2(
                                                                   l2_reg),
                                                               name=prefix + '_seq_emb_' + feat.name,
                                                               mask_zero=seq_mask_zero)
+            emb.trainable = feat.trainable
+            sparse_embedding[feat.embedding_name] = emb
     return sparse_embedding
 
 

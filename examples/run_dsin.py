@@ -43,7 +43,7 @@ def get_xy_fd(hash_flag=False):
 
     x = {name: feature_dict[name] for name in get_feature_names(feature_columns)}
     x["sess_length"] = sess_number
-    y = [1, 0, 1]
+    y = np.array([1, 0, 1])
     return x, y, feature_columns, behavior_feature_list
 
 

@@ -14,11 +14,11 @@ DEFAULT_GROUP_NAME = "default_group"
 
 class SparseFeat(namedtuple('SparseFeat',
                             ['name', 'vocabulary_size', 'embedding_dim', 'use_hash', 'dtype', 'embeddings_initializer','embedding_name',
-                             'group_name'])):
+                             'group_name','trainable'])):
     __slots__ = ()
 
     def __new__(cls, name, vocabulary_size, embedding_dim=4, use_hash=False, dtype="int32",embeddings_initializer=None, embedding_name=None,
-                group_name=DEFAULT_GROUP_NAME):
+                group_name=DEFAULT_GROUP_NAME,trainable=True):
 
         if embedding_dim == "auto":
             embedding_dim = 6 * int(pow(vocabulary_size, 0.25))
@@ -29,7 +29,7 @@ class SparseFeat(namedtuple('SparseFeat',
             embedding_name = name
 
         return super(SparseFeat, cls).__new__(cls, name, vocabulary_size, embedding_dim, use_hash, dtype,embeddings_initializer,
-                                              embedding_name, group_name)
+                                              embedding_name, group_name,trainable)
 
     def __hash__(self):
         return self.name.__hash__()
@@ -73,6 +73,9 @@ class VarLenSparseFeat(namedtuple('VarLenSparseFeat',
     @property
     def group_name(self):
         return self.sparsefeat.group_name
+    @property
+    def trainable(self):
+        return self.sparsefeat.trainable
 
     def __hash__(self):
         return self.name.__hash__()

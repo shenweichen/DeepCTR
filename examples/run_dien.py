@@ -44,7 +44,7 @@ def get_xy_fd(use_neg=False, hash_flag=False):
                              maxlen=4, length_name="seq_length")]
 
     x = {name: feature_dict[name] for name in get_feature_names(feature_columns)}
-    y = [1, 0, 1]
+    y = np.array([1, 0, 1])
     return x, y, feature_columns, behavior_feature_list
 
 

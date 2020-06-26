@@ -24,7 +24,7 @@ def get_xy_fd():
     feature_dict = {'user': uid, 'gender': ugender, 'item_id': iid, 'cate_id': cate_id,
                     'hist_item_id': hist_iid, 'hist_cate_id': hist_cate_id, 'pay_score': pay_score}
     x = {name:feature_dict[name] for name in get_feature_names(feature_columns)}
-    y = [1, 0, 1]
+    y = np.array([1, 0, 1])
     return x, y, feature_columns, behavior_feature_list
 
 

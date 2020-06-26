@@ -33,6 +33,7 @@ DNN based CTR prediction models usually have following 4 modules:
 - embeddings_initializer : initializer for the `embeddings` matrix.
 - embedding_name : default `None`. If None, the embedding_name will be same as `name`.
 - group_name : feature group of this feature.
+- trainable: default `True`.Whether or not the embedding is trainable.
 
 ### DenseFeat
 ``DenseFeat`` is a namedtuple with signature ``DenseFeat(name, dimension, dtype)``
