@@ -11,10 +11,10 @@ Reference:
 
 import tensorflow as tf
 
-from ..inputs import input_from_feature_columns, build_input_features, combined_dnn_input, get_linear_logit
+from ..feature_column import build_input_features, get_linear_logit, input_from_feature_columns
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import InteractingLayer
-from ..layers.utils import concat_func, add_func
+from ..layers.utils import concat_func, add_func, combined_dnn_input
 
 
 def AutoInt(linear_feature_columns, dnn_feature_columns, att_layer_num=3, att_embedding_size=8, att_head_num=2,

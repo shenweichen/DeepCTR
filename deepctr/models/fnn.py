@@ -8,8 +8,8 @@ Reference:
 """
 import tensorflow as tf
 
-from ..layers.utils import add_func
-from ..inputs import input_from_feature_columns, get_linear_logit, build_input_features, combined_dnn_input
+from ..layers.utils import add_func, combined_dnn_input
+from ..feature_column import build_input_features, get_linear_logit, input_from_feature_columns
 from ..layers.core import PredictionLayer, DNN
 
 

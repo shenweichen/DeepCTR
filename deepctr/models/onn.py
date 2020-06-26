@@ -19,11 +19,11 @@ from tensorflow.python.keras.layers import (Dense, Embedding, Lambda,
 from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.regularizers import l2
 
-from ..inputs import (build_input_features, VarLenSparseFeat,
-                      get_linear_logit, SparseFeat, get_dense_input, combined_dnn_input)
+from ..inputs import (get_dense_input)
+from ..feature_column import SparseFeat, VarLenSparseFeat, build_input_features, get_linear_logit
 from ..layers.core import DNN, PredictionLayer
 from ..layers.sequence import SequencePoolingLayer
-from ..layers.utils import concat_func, Hash, NoMask, add_func
+from ..layers.utils import concat_func, Hash, NoMask, add_func, combined_dnn_input
 
 
 def ONN(linear_feature_columns, dnn_feature_columns, embedding_size=4, dnn_hidden_units=(128, 128),

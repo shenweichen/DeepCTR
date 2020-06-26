@@ -25,7 +25,8 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 from sklearn.model_selection import train_test_split
 from deepctr.models import DeepFM
-from deepctr.inputs import  SparseFeat, DenseFeat,get_feature_names
+from deepctr.inputs import    get_feature_names
+from deepctr.feature_column import SparseFeat, DenseFeat
 
 data = pd.read_csv('./criteo_sample.txt')
 

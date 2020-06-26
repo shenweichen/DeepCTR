@@ -9,10 +9,10 @@ Reference:
 
 import tensorflow as tf
 
-from ..inputs import input_from_feature_columns, build_input_features, combined_dnn_input
+from ..feature_column import build_input_features, input_from_feature_columns
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import InnerProductLayer, OutterProductLayer
-from ..layers.utils import concat_func
+from ..layers.utils import concat_func, combined_dnn_input
 
 
 def PNN(dnn_feature_columns, dnn_hidden_units=(128, 128), l2_reg_embedding=1e-5, l2_reg_dnn=0, init_std=0.0001,

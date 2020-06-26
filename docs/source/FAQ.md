@@ -87,7 +87,8 @@ item_id_emb = embedding_dict['item_id']
 ## 5. How to add a long dense feature vector as a input to the model?
 ```python
 from deepctr.models import DeepFM
-from deepctr.inputs import DenseFeat,SparseFeat,get_feature_names
+from deepctr.inputs import  get_feature_names
+from deepctr.feature_column import SparseFeat, DenseFeat
 import numpy as np
 
 feature_columns = [SparseFeat('user_id',120,),SparseFeat('item_id',60,),DenseFeat("pic_vec",5)]

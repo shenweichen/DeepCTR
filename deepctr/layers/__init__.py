@@ -10,7 +10,7 @@ from .normalization import LayerNormalization
 from .sequence import (AttentionSequencePoolingLayer, BiasEncoding, BiLSTM,
                        KMaxPooling, SequencePoolingLayer,WeightedSequenceLayer,
                        Transformer, DynamicGRU)
-from .utils import NoMask, Hash,Linear,Add
+from .utils import NoMask, Hash,Linear,Add,combined_dnn_input
 
 custom_objects = {'tf': tf,
                   'InnerProductLayer': InnerProductLayer,

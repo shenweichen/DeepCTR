@@ -11,7 +11,8 @@ from tensorflow.python.keras import backend as K
 from tensorflow.python.keras.layers import Input, Masking
 from tensorflow.python.keras.models import Model, load_model, save_model
 
-from deepctr.inputs import SparseFeat, DenseFeat, VarLenSparseFeat,DEFAULT_GROUP_NAME
+from deepctr.inputs import DEFAULT_GROUP_NAME
+from deepctr.feature_column import SparseFeat, VarLenSparseFeat, DenseFeat
 from deepctr.layers import custom_objects
 
 SAMPLE_SIZE = 8

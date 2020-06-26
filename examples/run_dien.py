@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 
-from deepctr.inputs import SparseFeat, DenseFeat, VarLenSparseFeat, get_feature_names
+from deepctr.feature_column import SparseFeat, VarLenSparseFeat, DenseFeat,get_feature_names
 from deepctr.models import DIEN
 
 
