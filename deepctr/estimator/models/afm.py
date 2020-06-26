@@ -54,6 +54,7 @@ def AFMEstimator(linear_feature_columns, dnn_feature_columns, use_attention=True
             sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
                                                                                  l2_reg_embedding=l2_reg_embedding)
             if use_attention:
+
                 fm_logit = AFMLayer(attention_factor, l2_reg_att, afm_dropout,
                                               seed)(sparse_embedding_list,training=train_flag)
             else:

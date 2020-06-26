@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 
 from deepctr.estimator.inputs import input_fn_pandas
-from deepctr.estimator import AFMEstimator
+from deepctr.estimator import DeepFMEstimator
 
 if __name__ == "__main__":
     data = pd.read_csv('../criteo_sample.txt')
@@ -47,7 +47,7 @@ if __name__ == "__main__":
     test_model_input = input_fn_pandas(test,sparse_features+dense_features,None)
 
     # 4.Define Model,train,predict and evaluate
-    model = AFMEstimator(linear_feature_columns, dnn_feature_columns)
+    model = DeepFMEstimator(linear_feature_columns, dnn_feature_columns)
 
     model.train(train_model_input)
     pred_ans_iter = model.predict(test_model_input)

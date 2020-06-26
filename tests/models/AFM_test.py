@@ -35,8 +35,8 @@ def test_AFMEstimator(use_attention, sparse_feature_num, dense_feature_num):
     model_name = "AFM"
     sample_size = SAMPLE_SIZE
 
-    linear_feature_columns, dnn_feature_columns, input_fn = get_test_data_estimator(sample_size, sparse_feature_num,
-                                                                                    dense_feature_num)
+    linear_feature_columns, dnn_feature_columns, input_fn = get_test_data_estimator(sample_size, sparse_feature_num=sparse_feature_num,
+                                                                                    dense_feature_num=dense_feature_num)
     model = AFMEstimator(linear_feature_columns, dnn_feature_columns, use_attention=use_attention, afm_dropout=0.5)
     check_estimator(model, input_fn)
 

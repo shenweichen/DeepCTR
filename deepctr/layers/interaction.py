@@ -58,6 +58,8 @@ class AFMLayer(Layer):
     def build(self, input_shape):
 
         if not isinstance(input_shape, list) or len(input_shape) < 2:
+            #input_shape = input_shape[0]
+            #if not isinstance(input_shape, list) or len(input_shape) < 2:
             raise ValueError('A `AttentionalFM` layer should be called '
                              'on a list of at least 2 inputs')
 
