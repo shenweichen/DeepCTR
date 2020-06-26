@@ -23,7 +23,7 @@ def get_inputs_list(inputs):
     return list(chain(*list(map(lambda x: x.values(), filter(lambda x: x is not None, inputs)))))
 
 
-def create_embedding_dict(sparse_feature_columns, varlen_sparse_feature_columns, init_std, seed, l2_reg,
+def create_embedding_dict(sparse_feature_columns, varlen_sparse_feature_columns, seed, l2_reg,
                           prefix='sparse_', seq_mask_zero=True):
 
 
@@ -62,12 +62,12 @@ def get_embedding_vec_list(embedding_dict, input_dict, sparse_feature_columns, r
     return embedding_vec_list
 
 
-def create_embedding_matrix(feature_columns, l2_reg, init_std, seed, prefix="", seq_mask_zero=True):
+def create_embedding_matrix(feature_columns, l2_reg, seed, prefix="", seq_mask_zero=True):
     sparse_feature_columns = list(
         filter(lambda x: isinstance(x, SparseFeat), feature_columns)) if feature_columns else []
     varlen_sparse_feature_columns = list(
         filter(lambda x: isinstance(x, VarLenSparseFeat), feature_columns)) if feature_columns else []
-    sparse_emb_dict = create_embedding_dict(sparse_feature_columns, varlen_sparse_feature_columns, init_std, seed,
+    sparse_emb_dict = create_embedding_dict(sparse_feature_columns, varlen_sparse_feature_columns, seed,
                                             l2_reg, prefix=prefix + 'sparse', seq_mask_zero=seq_mask_zero)
     return sparse_emb_dict
 

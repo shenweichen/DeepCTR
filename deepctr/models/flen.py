@@ -56,7 +56,6 @@ def FLEN(linear_feature_columns,
         features,
         dnn_feature_columns,
         l2_reg_embedding,
-        init_std,
         seed,
         support_group=True)
 

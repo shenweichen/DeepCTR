@@ -45,7 +45,7 @@ def DeepFM(linear_feature_columns, dnn_feature_columns, fm_group=[DEFAULT_GROUP_
     inputs_list = list(features.values())
 
     group_embedding_dict, dense_value_list = input_from_feature_columns(features, dnn_feature_columns, l2_reg_embedding,
-                                                                        init_std, seed, support_group=True)
+                                                                         seed, support_group=True)
 
     linear_logit = get_linear_logit(features, linear_feature_columns, init_std=init_std, seed=seed, prefix='linear',
                                     l2_reg=l2_reg_linear)

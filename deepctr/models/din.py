@@ -64,7 +64,7 @@ def DIN(dnn_feature_columns, history_feature_list, dnn_use_bn=False,
     inputs_list = list(features.values())
 
 
-    embedding_dict = create_embedding_matrix(dnn_feature_columns, l2_reg_embedding, init_std, seed, prefix="")
+    embedding_dict = create_embedding_matrix(dnn_feature_columns, l2_reg_embedding, seed, prefix="")
 
 
     query_emb_list = embedding_lookup(embedding_dict, features, sparse_feature_columns, history_feature_list,

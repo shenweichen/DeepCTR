@@ -43,7 +43,7 @@ def AFM(linear_feature_columns, dnn_feature_columns, fm_group=DEFAULT_GROUP_NAME
 
     inputs_list = list(features.values())
 
-    group_embedding_dict, _ = input_from_feature_columns(features, dnn_feature_columns, l2_reg_embedding, init_std,
+    group_embedding_dict, _ = input_from_feature_columns(features, dnn_feature_columns, l2_reg_embedding,
                                                          seed, support_dense=False, support_group=True)
 
     linear_logit = get_linear_logit(features, linear_feature_columns, init_std=init_std, seed=seed, prefix='linear',

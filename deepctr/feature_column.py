@@ -159,14 +159,14 @@ def get_linear_logit(features, feature_columns, units=1, use_bias=False, init_st
     return concat_func(linear_logit_list)
 
 
-def input_from_feature_columns(features, feature_columns, l2_reg, init_std, seed, prefix='', seq_mask_zero=True,
+def input_from_feature_columns(features, feature_columns, l2_reg, seed, prefix='', seq_mask_zero=True,
                                support_dense=True, support_group=False):
     sparse_feature_columns = list(
         filter(lambda x: isinstance(x, SparseFeat), feature_columns)) if feature_columns else []
     varlen_sparse_feature_columns = list(
         filter(lambda x: isinstance(x, VarLenSparseFeat), feature_columns)) if feature_columns else []
 
-    embedding_matrix_dict = create_embedding_matrix(feature_columns, l2_reg, init_std, seed, prefix=prefix,
+    embedding_matrix_dict = create_embedding_matrix(feature_columns, l2_reg, seed, prefix=prefix,
                                                     seq_mask_zero=seq_mask_zero)
     group_sparse_embedding_dict = embedding_lookup(embedding_matrix_dict, features, sparse_feature_columns)
     dense_value_list = get_dense_input(features, feature_columns)
