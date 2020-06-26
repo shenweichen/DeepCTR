@@ -17,6 +17,7 @@ from .fgcnn import FGCNN
 from .dsin import DSIN
 from .fibinet import FiBiNET
 from .flen import FLEN
+from .deepfwfm import DeepFwFM
 
-__all__ = ["AFM", "CCPM","DCN", "MLR",  "DeepFM",
-           "MLR", "NFM", "DIN", "DIEN", "FNN", "PNN", "WDL", "xDeepFM", "AutoInt", "ONN", "FGCNN", "DSIN", "FiBiNET", 'FLEN']
+__all__ = ["AFM", "CCPM","DCN", "MLR",  "DeepFM", "MLR", "NFM", "DIN", "DIEN", "FNN", "PNN",
+           "WDL", "xDeepFM", "AutoInt", "ONN", "FGCNN", "DSIN", "FiBiNET", 'FLEN', "DeepFwFM"]
