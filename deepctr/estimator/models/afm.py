@@ -12,7 +12,7 @@ Reference:
 import tensorflow as tf
 
 from ..feature_column import get_linear_logit, input_from_feature_columns
-from ..utils import deepctr_model_fn,DNN_SCOPE_NAME
+from ..utils import deepctr_model_fn,DNN_SCOPE_NAME,variable_scope
 from ...layers.interaction import AFMLayer, FM
 from ...layers.utils import concat_func
 
@@ -50,7 +50,7 @@ def AFMEstimator(linear_feature_columns, dnn_feature_columns, use_attention=True
 
         linear_logits = get_linear_logit(features, linear_feature_columns,l2_reg_linear=l2_reg_linear)
 
-        with tf.variable_scope(DNN_SCOPE_NAME):
+        with variable_scope(DNN_SCOPE_NAME):
             sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
                                                                                  l2_reg_embedding=l2_reg_embedding)
             if use_attention:

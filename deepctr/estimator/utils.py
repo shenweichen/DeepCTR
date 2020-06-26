@@ -148,5 +148,9 @@ def get_train_op_fn(linear_optimizer, dnn_optimizer):
 
     return _train_op_fn
 
-
+def variable_scope(name_or_scope):
+    if tf.__version__ >= "2.0.0":
+        return tf.compat.v1.variable_scope(name_or_scope)
+    else:
+        return tf.variable_scope(name_or_scope)
 

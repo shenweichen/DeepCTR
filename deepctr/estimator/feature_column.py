@@ -1,11 +1,11 @@
 import tensorflow as tf
 from tensorflow.python.feature_column.feature_column import _EmbeddingColumn
 
-from .utils import LINEAR_SCOPE_NAME
+from .utils import LINEAR_SCOPE_NAME,variable_scope
 
 
 def get_linear_logit(features, linear_feature_columns,l2_reg_linear=0):
-    with tf.variable_scope(LINEAR_SCOPE_NAME):
+    with variable_scope(LINEAR_SCOPE_NAME):
         if not linear_feature_columns:
             linear_logits = tf.Variable([[0.0]], name='bias_weights')
         else:

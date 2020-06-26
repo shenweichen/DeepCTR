@@ -40,6 +40,10 @@ def FiBiNET(linear_feature_columns, dnn_feature_columns, bilinear_type='interact
 
     inputs_list = list(features.values())
 
+
+    linear_logit = get_linear_logit(features, linear_feature_columns, seed=seed, prefix='linear',
+                                    l2_reg=l2_reg_linear)
+
     sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
                                                                          l2_reg_embedding, seed)
 
@@ -51,8 +55,7 @@ def FiBiNET(linear_feature_columns, dnn_feature_columns, bilinear_type='interact
     bilinear_out = BilinearInteraction(
         bilinear_type=bilinear_type, seed=seed)(sparse_embedding_list)
 
-    linear_logit = get_linear_logit(features, linear_feature_columns, seed=seed, prefix='linear',
-                                    l2_reg=l2_reg_linear)
+
 
     dnn_input = combined_dnn_input(
         [Flatten()(concat_func([senet_bilinear_out, bilinear_out]))], dense_value_list)

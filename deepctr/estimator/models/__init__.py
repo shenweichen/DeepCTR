@@ -3,4 +3,8 @@ from .autoint import AutoIntEstimator
 from .ccpm import CCPMEstimator
 from .dcn import DCNEstimator
 from .deepfm import DeepFMEstimator
+from .deepfwfm import DeepFwFMEstimator
+from .fibinet import FiBiNETEstimator
+from .fnn import FNNEstimator
+from .nfm import NFMEstimator
 from .wdl import WDLEstimator

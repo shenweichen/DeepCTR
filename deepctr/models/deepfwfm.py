@@ -44,12 +44,14 @@ def DeepFwFM(linear_feature_columns, dnn_feature_columns, fm_group=[DEFAULT_GROU
 
     inputs_list = list(features.values())
 
+    linear_logit = get_linear_logit(features, linear_feature_columns, seed=seed, prefix='linear',
+                                    l2_reg=l2_reg_linear)
+
     group_embedding_dict, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
                                                                         l2_reg_embedding, seed,
                                                                         support_group=True)
 
-    linear_logit = get_linear_logit(features, linear_feature_columns, seed=seed, prefix='linear',
-                                    l2_reg=l2_reg_linear)
+
 
     fwfm_logit = add_func([FwFM(num_fields=len(v), regularizer=l2_reg_field_strength)
                            (concat_func(v, axis=1)) for k, v in group_embedding_dict.items() if k in fm_group])
