@@ -38,11 +38,11 @@ def WDL(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128)
 
     inputs_list = list(features.values())
 
-    sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
-                                                                         l2_reg_embedding, seed)
-
     linear_logit = get_linear_logit(features, linear_feature_columns, seed=seed, prefix='linear',
                                     l2_reg=l2_reg_linear)
+
+    sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
+                                                                         l2_reg_embedding, seed)
 
     dnn_input = combined_dnn_input(sparse_embedding_list, dense_value_list)
     dnn_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,

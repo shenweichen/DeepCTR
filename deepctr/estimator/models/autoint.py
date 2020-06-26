@@ -11,17 +11,19 @@ Reference:
 
 import tensorflow as tf
 
-from ..feature_column import build_input_features, get_linear_logit, input_from_feature_columns
-from ..layers.core import PredictionLayer, DNN
-from ..layers.interaction import InteractingLayer
-from ..layers.utils import concat_func, add_func, combined_dnn_input
+from ..feature_column import get_linear_logit, input_from_feature_columns
+from ..utils import deepctr_model_fn,DNN_SCOPE_NAME
+from ...layers.core import  DNN
+from ...layers.interaction import InteractingLayer
+from ...layers.utils import concat_func, combined_dnn_input
 
 
-def AutoInt(linear_feature_columns, dnn_feature_columns, att_layer_num=3, att_embedding_size=8, att_head_num=2,
+def AutoIntEstimator(linear_feature_columns, dnn_feature_columns, att_layer_num=3, att_embedding_size=8, att_head_num=2,
             att_res=True,
             dnn_hidden_units=(256, 256), dnn_activation='relu', l2_reg_linear=1e-5,
             l2_reg_embedding=1e-5, l2_reg_dnn=0, dnn_use_bn=False, dnn_dropout=0, seed=1024,
-            task='binary', ):
+            task='binary', model_dir=None, config=None, linear_optimizer='Ftrl',
+                 dnn_optimizer='Adagrad'):
     """Instantiates the AutoInt Network architecture.
 
     :param linear_feature_columns: An iterable containing all the features used by linear part of the model.
@@ -39,49 +41,53 @@ def AutoInt(linear_feature_columns, dnn_feature_columns, att_layer_num=3, att_em
     :param dnn_dropout: float in [0,1), the probability we will drop out a given DNN coordinate.
     :param seed: integer ,to use as random seed.
     :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
-    :return: A Keras model instance.
+    :param model_dir: Directory to save model parameters, graph and etc. This can
+        also be used to load checkpoints from the directory into a estimator
+        to continue training a previously saved model.
+    :param config: tf.RunConfig object to configure the runtime settings.
+    :param linear_optimizer: An instance of `tf.Optimizer` used to apply gradients to
+        the linear part of the model. Defaults to FTRL optimizer.
+    :param dnn_optimizer: An instance of `tf.Optimizer` used to apply gradients to
+        the deep part of the model. Defaults to Adagrad optimizer.
+    :return: A Tensorflow Estimator  instance.
+
     """
+    def _model_fn(features, labels, mode, config):
+        train_flag = (mode == tf.estimator.ModeKeys.TRAIN)
 
-    if len(dnn_hidden_units) <= 0 and att_layer_num <= 0:
-        raise ValueError("Either hidden_layer or att_layer_num must > 0")
+        linear_logits = get_linear_logit(features, linear_feature_columns,l2_reg_linear=l2_reg_linear)
 
-    features = build_input_features(dnn_feature_columns)
-    inputs_list = list(features.values())
+        with tf.variable_scope(DNN_SCOPE_NAME):
+            sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
+                                                                                 l2_reg_embedding=l2_reg_embedding)
+            att_input = concat_func(sparse_embedding_list, axis=1)
 
-    sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
-                                                                         l2_reg_embedding, seed)
-    linear_logit = get_linear_logit(features, linear_feature_columns, seed=seed, prefix='linear',
-                                    l2_reg=l2_reg_linear)
+            for _ in range(att_layer_num):
+                att_input = InteractingLayer(
+                    att_embedding_size, att_head_num, att_res)(att_input)
+            att_output = tf.keras.layers.Flatten()(att_input)
 
-    att_input = concat_func(sparse_embedding_list, axis=1)
+            dnn_input = combined_dnn_input(sparse_embedding_list, dense_value_list)
 
-    for _ in range(att_layer_num):
-        att_input = InteractingLayer(
-            att_embedding_size, att_head_num, att_res)(att_input)
-    att_output = tf.keras.layers.Flatten()(att_input)
+            if len(dnn_hidden_units) > 0 and att_layer_num > 0:  # Deep & Interacting Layer
+                deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
+                               dnn_use_bn, seed)(dnn_input,training=train_flag)
+                stack_out = tf.keras.layers.Concatenate()([att_output, deep_out])
+                final_logit = tf.keras.layers.Dense(
+                    1, use_bias=False, activation=None)(stack_out)
+            elif len(dnn_hidden_units) > 0:  # Only Deep
+                deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
+                               dnn_use_bn, seed)(dnn_input,training=train_flag)
+                final_logit = tf.keras.layers.Dense(
+                    1, use_bias=False, activation=None)(deep_out)
+            elif att_layer_num > 0:  # Only Interacting Layer
+                final_logit = tf.keras.layers.Dense(
+                    1, use_bias=False, activation=None)(att_output)
+            else:  # Error
+                raise NotImplementedError
 
-    dnn_input = combined_dnn_input(sparse_embedding_list, dense_value_list)
+        logits = linear_logits + final_logit
 
-    if len(dnn_hidden_units) > 0 and att_layer_num > 0:  # Deep & Interacting Layer
-        deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
-                       dnn_use_bn, seed)(dnn_input)
-        stack_out = tf.keras.layers.Concatenate()([att_output, deep_out])
-        final_logit = tf.keras.layers.Dense(
-            1, use_bias=False, activation=None)(stack_out)
-    elif len(dnn_hidden_units) > 0:  # Only Deep
-        deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
-                       dnn_use_bn, seed)(dnn_input)
-        final_logit = tf.keras.layers.Dense(
-            1, use_bias=False, activation=None)(deep_out)
-    elif att_layer_num > 0:  # Only Interacting Layer
-        final_logit = tf.keras.layers.Dense(
-            1, use_bias=False, activation=None)(att_output)
-    else:  # Error
-        raise NotImplementedError
+        return deepctr_model_fn(features, mode, logits, labels, task, linear_optimizer, dnn_optimizer)
 
-    final_logit = add_func([final_logit, linear_logit])
-    output = PredictionLayer(task)(final_logit)
-
-    model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
-
-    return model
+    return tf.estimator.Estimator(_model_fn, model_dir=model_dir, config=config)

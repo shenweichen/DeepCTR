@@ -355,7 +355,7 @@ def check_model(model, model_name, x, y, check_model_io=True):
 
     print(model_name + " test pass!")
 
-def get_test_date_estimator(sample_size=1000, embedding_size=4, sparse_feature_num=1, dense_feature_num=1,classification=True):
+def get_test_data_estimator(sample_size=1000, embedding_size=4, sparse_feature_num=1, dense_feature_num=1, classification=True):
 
     x = {}
     dnn_feature_columns = []
@@ -377,8 +377,11 @@ def get_test_date_estimator(sample_size=1000, embedding_size=4, sparse_feature_n
         y = np.random.randint(0, 2, sample_size)
     else:
         y = np.random.random(sample_size)
+    if tf.__version__ >= "2.0.0":
+        input_fn = tf.compat.v1.estimator.inputs.numpy_input_fn(x, y, shuffle=False)
+    else:
+        input_fn = tf.estimator.inputs.numpy_input_fn(x, y, shuffle=False)
 
-    input_fn = tf.estimator.inputs.numpy_input_fn(x,y,shuffle=False)
     return linear_feature_columns,dnn_feature_columns,input_fn
 
 def check_estimator(model,input_fn):

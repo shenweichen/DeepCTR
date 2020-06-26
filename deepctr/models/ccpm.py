@@ -44,10 +44,12 @@ def CCPM(linear_feature_columns, dnn_feature_columns, conv_kernel_width=(6, 5), 
         linear_feature_columns + dnn_feature_columns)
     inputs_list = list(features.values())
 
-    sparse_embedding_list, _ = input_from_feature_columns(features, dnn_feature_columns, l2_reg_embedding,
-                                                          seed, support_dense=False)
     linear_logit = get_linear_logit(features, linear_feature_columns, seed=seed,
                                     l2_reg=l2_reg_linear)
+
+    sparse_embedding_list, _ = input_from_feature_columns(features, dnn_feature_columns, l2_reg_embedding,
+                                                          seed, support_dense=False)
+
 
     n = len(sparse_embedding_list)
     l = len(conv_filters)

@@ -48,10 +48,12 @@ def AutoInt(linear_feature_columns, dnn_feature_columns, att_layer_num=3, att_em
     features = build_input_features(dnn_feature_columns)
     inputs_list = list(features.values())
 
-    sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
-                                                                         l2_reg_embedding, seed)
     linear_logit = get_linear_logit(features, linear_feature_columns, seed=seed, prefix='linear',
                                     l2_reg=l2_reg_linear)
+
+    sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
+                                                                         l2_reg_embedding, seed)
+
 
     att_input = concat_func(sparse_embedding_list, axis=1)
 
@@ -70,7 +72,7 @@ def AutoInt(linear_feature_columns, dnn_feature_columns, att_layer_num=3, att_em
             1, use_bias=False, activation=None)(stack_out)
     elif len(dnn_hidden_units) > 0:  # Only Deep
         deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
-                       dnn_use_bn, seed)(dnn_input)
+                       dnn_use_bn, seed)(dnn_input,)
         final_logit = tf.keras.layers.Dense(
             1, use_bias=False, activation=None)(deep_out)
     elif att_layer_num > 0:  # Only Interacting Layer

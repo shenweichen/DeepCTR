@@ -11,15 +11,18 @@ Reference:
 """
 import tensorflow as tf
 
-from ..feature_column import build_input_features, get_linear_logit, input_from_feature_columns
-from ..layers.core import DNN, PredictionLayer
-from ..layers.sequence import KMaxPooling
-from ..layers.utils import concat_func, add_func
+from ..feature_column import  get_linear_logit, input_from_feature_columns
+from ..utils import deepctr_model_fn,DNN_SCOPE_NAME
+
+from ...layers.core import DNN
+from ...layers.sequence import KMaxPooling
+from ...layers.utils import concat_func
 
 
-def CCPM(linear_feature_columns, dnn_feature_columns, conv_kernel_width=(6, 5), conv_filters=(4, 4),
+def CCPMEstimator(linear_feature_columns, dnn_feature_columns, conv_kernel_width=(6, 5), conv_filters=(4, 4),
          dnn_hidden_units=(256,), l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_dnn=0, dnn_dropout=0,
-         seed=1024, task='binary'):
+         seed=1024, task='binary', model_dir=None, config=None, linear_optimizer='Ftrl',
+                 dnn_optimizer='Adagrad'):
     """Instantiates the Convolutional Click Prediction Model architecture.
 
     :param linear_feature_columns: An iterable containing all the features used by linear part of the model.
@@ -33,46 +36,56 @@ def CCPM(linear_feature_columns, dnn_feature_columns, conv_kernel_width=(6, 5), 
     :param dnn_dropout: float in [0,1), the probability we will drop out a given DNN coordinate.
     :param init_std: float,to use as the initialize std of embedding vector
     :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
-    :return: A Keras model instance.
+    :param model_dir: Directory to save model parameters, graph and etc. This can
+        also be used to load checkpoints from the directory into a estimator
+        to continue training a previously saved model.
+    :param config: tf.RunConfig object to configure the runtime settings.
+    :param linear_optimizer: An instance of `tf.Optimizer` used to apply gradients to
+        the linear part of the model. Defaults to FTRL optimizer.
+    :param dnn_optimizer: An instance of `tf.Optimizer` used to apply gradients to
+        the deep part of the model. Defaults to Adagrad optimizer.
+    :return: A Tensorflow Estimator  instance.
+
     """
 
     if len(conv_kernel_width) != len(conv_filters):
         raise ValueError(
             "conv_kernel_width must have same element with conv_filters")
 
-    features = build_input_features(
-        linear_feature_columns + dnn_feature_columns)
-    inputs_list = list(features.values())
+    def _model_fn(features, labels, mode, config):
+        train_flag = (mode == tf.estimator.ModeKeys.TRAIN)
 
-    sparse_embedding_list, _ = input_from_feature_columns(features, dnn_feature_columns, l2_reg_embedding,
-                                                          seed, support_dense=False)
-    linear_logit = get_linear_logit(features, linear_feature_columns, seed=seed,
-                                    l2_reg=l2_reg_linear)
+        linear_logits = get_linear_logit(features, linear_feature_columns,l2_reg_linear=l2_reg_linear)
 
-    n = len(sparse_embedding_list)
-    l = len(conv_filters)
+        with tf.variable_scope(DNN_SCOPE_NAME):
+            sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
+                                                                                 l2_reg_embedding=l2_reg_embedding)
+            n = len(sparse_embedding_list)
+            l = len(conv_filters)
 
-    conv_input = concat_func(sparse_embedding_list, axis=1)
-    pooling_result = tf.keras.layers.Lambda(
-        lambda x: tf.expand_dims(x, axis=3))(conv_input)
+            conv_input = concat_func(sparse_embedding_list, axis=1)
+            pooling_result = tf.keras.layers.Lambda(
+                lambda x: tf.expand_dims(x, axis=3))(conv_input)
 
-    for i in range(1, l + 1):
-        filters = conv_filters[i - 1]
-        width = conv_kernel_width[i - 1]
-        k = max(1, int((1 - pow(i / l, l - i)) * n)) if i < l else 3
+            for i in range(1, l + 1):
+                filters = conv_filters[i - 1]
+                width = conv_kernel_width[i - 1]
+                k = max(1, int((1 - pow(i / l, l - i)) * n)) if i < l else 3
 
-        conv_result = tf.keras.layers.Conv2D(filters=filters, kernel_size=(width, 1), strides=(1, 1), padding='same',
-                                             activation='tanh', use_bias=True, )(pooling_result)
-        pooling_result = KMaxPooling(
-            k=min(k, int(conv_result.shape[1])), axis=1)(conv_result)
+                conv_result = tf.keras.layers.Conv2D(filters=filters, kernel_size=(width, 1), strides=(1, 1),
+                                                     padding='same',
+                                                     activation='tanh', use_bias=True, )(pooling_result)
+                pooling_result = KMaxPooling(
+                    k=min(k, int(conv_result.shape[1])), axis=1)(conv_result)
 
-    flatten_result = tf.keras.layers.Flatten()(pooling_result)
-    dnn_out = DNN(dnn_hidden_units, l2_reg=l2_reg_dnn,
-                  dropout_rate=dnn_dropout)(flatten_result)
-    dnn_logit = tf.keras.layers.Dense(1, use_bias=False)(dnn_out)
+            flatten_result = tf.keras.layers.Flatten()(pooling_result)
+            dnn_out = DNN(dnn_hidden_units, l2_reg=l2_reg_dnn,
+                          dropout_rate=dnn_dropout)(flatten_result,training=train_flag)
+            dnn_logit = tf.keras.layers.Dense(1, use_bias=False)(dnn_out)
 
-    final_logit = add_func([dnn_logit, linear_logit])
+        logits = linear_logits + dnn_logit
 
-    output = PredictionLayer(task)(final_logit)
-    model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
-    return model
+        return deepctr_model_fn(features, mode, logits, labels, task, linear_optimizer, dnn_optimizer)
+
+    return tf.estimator.Estimator(_model_fn, model_dir=model_dir, config=config)
+

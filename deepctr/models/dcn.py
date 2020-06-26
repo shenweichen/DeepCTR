@@ -41,10 +41,12 @@ def DCN(linear_feature_columns, dnn_feature_columns, cross_num=2, dnn_hidden_uni
     features = build_input_features(dnn_feature_columns)
     inputs_list = list(features.values())
 
-    sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
-                                                                         l2_reg_embedding, seed)
     linear_logit = get_linear_logit(features, linear_feature_columns, seed=seed, prefix='linear',
                                     l2_reg=l2_reg_linear)
+
+    sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
+                                                                         l2_reg_embedding, seed)
+
     dnn_input = combined_dnn_input(sparse_embedding_list, dense_value_list)
 
     if len(dnn_hidden_units) > 0 and cross_num > 0:  # Deep & Cross

@@ -8,18 +8,20 @@ Reference:
 
 """
 
-from itertools import chain
 import tensorflow as tf
 
-from ..feature_column import build_input_features, get_linear_logit, DEFAULT_GROUP_NAME, input_from_feature_columns
-from ..layers.core import PredictionLayer, DNN
-from ..layers.interaction import FM
-from ..layers.utils import concat_func, add_func, combined_dnn_input
+from ..feature_column import  get_linear_logit, input_from_feature_columns
+from ..utils import deepctr_model_fn, DNN_SCOPE_NAME
+
+from ...layers.core import DNN
+from ...layers.interaction import FM
+from ...layers.utils import concat_func, combined_dnn_input
 
 
-def DeepFM(linear_feature_columns, dnn_feature_columns, fm_group=[DEFAULT_GROUP_NAME], dnn_hidden_units=(128, 128),
+def DeepFMEstimator(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128),
            l2_reg_linear=0.00001, l2_reg_embedding=0.00001, l2_reg_dnn=0, seed=1024, dnn_dropout=0,
-           dnn_activation='relu', dnn_use_bn=False, task='binary'):
+           dnn_activation='relu', dnn_use_bn=False, task='binary',model_dir=None, config=None, linear_optimizer='Ftrl',
+                 dnn_optimizer='Adagrad'):
     """Instantiates the DeepFM Network architecture.
 
     :param linear_feature_columns: An iterable containing all the features used by linear part of the model.
@@ -34,31 +36,38 @@ def DeepFM(linear_feature_columns, dnn_feature_columns, fm_group=[DEFAULT_GROUP_
     :param dnn_activation: Activation function to use in DNN
     :param dnn_use_bn: bool. Whether use BatchNormalization before activation or not in DNN
     :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
-    :return: A Keras model instance.
+    :param model_dir: Directory to save model parameters, graph and etc. This can
+        also be used to load checkpoints from the directory into a estimator
+        to continue training a previously saved model.
+    :param config: tf.RunConfig object to configure the runtime settings.
+    :param linear_optimizer: An instance of `tf.Optimizer` used to apply gradients to
+        the linear part of the model. Defaults to FTRL optimizer.
+    :param dnn_optimizer: An instance of `tf.Optimizer` used to apply gradients to
+        the deep part of the model. Defaults to Adagrad optimizer.
+    :return: A Tensorflow Estimator  instance.
+
     """
 
-    features = build_input_features(
-        linear_feature_columns + dnn_feature_columns)
+    def _model_fn(features, labels, mode, config):
+        train_flag = (mode == tf.estimator.ModeKeys.TRAIN)
 
-    inputs_list = list(features.values())
+        linear_logits = get_linear_logit(features, linear_feature_columns, l2_reg_linear=l2_reg_linear)
 
-    group_embedding_dict, dense_value_list = input_from_feature_columns(features, dnn_feature_columns, l2_reg_embedding,
-                                                                         seed, support_group=True)
+        with tf.variable_scope(DNN_SCOPE_NAME):
+            sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
+                                                                                 l2_reg_embedding=l2_reg_embedding)
 
-    linear_logit = get_linear_logit(features, linear_feature_columns, seed=seed, prefix='linear',
-                                    l2_reg=l2_reg_linear)
-    fm_logit = add_func([FM()(concat_func(v, axis=1))
-                         for k, v in group_embedding_dict.items() if k in fm_group])
+            dnn_input = combined_dnn_input(sparse_embedding_list, dense_value_list)
 
-    dnn_input = combined_dnn_input(list(chain.from_iterable(
-        group_embedding_dict.values())), dense_value_list)
-    dnn_output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
-                     dnn_use_bn, seed)(dnn_input)
-    dnn_logit = tf.keras.layers.Dense(
-        1, use_bias=False, activation=None)(dnn_output)
+            fm_logit = FM()(concat_func(sparse_embedding_list, axis=1))
 
-    final_logit = add_func([linear_logit, fm_logit, dnn_logit])
+            dnn_output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
+                             dnn_use_bn, seed)(dnn_input,training=train_flag)
+            dnn_logit = tf.keras.layers.Dense(
+                1, use_bias=False, activation=None)(dnn_output)
 
-    output = PredictionLayer(task)(final_logit)
-    model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
-    return model
+        logits = linear_logits + fm_logit+dnn_logit
+
+        return deepctr_model_fn(features, mode, logits, labels, task, linear_optimizer, dnn_optimizer)
+
+    return tf.estimator.Estimator(_model_fn, model_dir=model_dir, config=config)

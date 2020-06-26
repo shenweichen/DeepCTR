@@ -4,7 +4,7 @@ import tensorflow as tf
 from packaging import version
 from deepctr.models import WDL
 from deepctr.estimator import WDLEstimator
-from ..utils import check_model, check_estimator,SAMPLE_SIZE, get_test_data, get_test_date_estimator
+from ..utils import check_model, check_estimator,SAMPLE_SIZE, get_test_data, get_test_data_estimator
 
 
 @pytest.mark.parametrize(
@@ -36,7 +36,7 @@ def test_WDLEstimator(sparse_feature_num,dense_feature_num):
     model_name = "WDL"
     sample_size = SAMPLE_SIZE
 
-    linear_feature_columns,dnn_feature_columns,input_fn = get_test_date_estimator(sample_size,sparse_feature_num,dense_feature_num)
+    linear_feature_columns,dnn_feature_columns,input_fn = get_test_data_estimator(sample_size, sparse_feature_num, dense_feature_num)
     model = WDLEstimator(linear_feature_columns, dnn_feature_columns,
                 dnn_hidden_units=[4, 4], dnn_dropout=0.5)
     check_estimator(model,input_fn)
