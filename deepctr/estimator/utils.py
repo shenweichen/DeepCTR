@@ -1,5 +1,6 @@
 import tensorflow as tf
 from tensorflow.python.estimator.canned.head import _Head
+from tensorflow.python.estimator.canned.optimizers import get_optimizer_instance
 
 LINEAR_SCOPE_NAME = 'linear'
 DNN_SCOPE_NAME = 'dnn'
@@ -112,6 +113,8 @@ def deepctr_model_fn(features, mode, logits, labels, task, linear_optimizer, dnn
     # else:
     #     linear_optimizer.iterations = tf.train.get_or_create_global_step()
 
+    linear_optimizer = get_optimizer_instance(linear_optimizer, 0.005)
+    dnn_optimizer   =  get_optimizer_instance(dnn_optimizer, 0.01)
     train_op_fn = get_train_op_fn(linear_optimizer, dnn_optimizer)
 
     head = Head(task)
