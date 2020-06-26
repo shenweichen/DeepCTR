@@ -3,7 +3,7 @@ import pytest
 from deepctr.models import CCPM
 from deepctr.estimator import CCPMEstimator
 import tensorflow as tf
-from tests.utils import check_model, get_test_data, SAMPLE_SIZE,check_estimator,get_test_data_estimator
+from tests.utils import check_model, get_test_data, SAMPLE_SIZE,check_estimator,get_test_data_estimator,Estimator_TEST_TF1
 
 
 @pytest.mark.parametrize(
@@ -50,7 +50,7 @@ def test_CCPM_without_seq(sparse_feature_num, dense_feature_num):
      ]
 )
 def test_CCPMEstimator_without_seq(sparse_feature_num, dense_feature_num):
-    if tf.__version__ < "2.2.0":
+    if not Estimator_TEST_TF1 and tf.__version__ < "2.2.0":
         return
     model_name = "CCPM"
 

@@ -1,7 +1,8 @@
 import pytest
+import tensorflow as tf
 from deepctr.models import xDeepFM
 from deepctr.estimator import xDeepFMEstimator
-from ..utils import check_model, get_test_data,SAMPLE_SIZE,get_test_data_estimator,check_estimator
+from ..utils import check_model, get_test_data,SAMPLE_SIZE,get_test_data_estimator,check_estimator,Estimator_TEST_TF1
 
 
 @pytest.mark.parametrize(
@@ -42,7 +43,7 @@ def test_xDeepFM(dnn_hidden_units, cin_layer_size, cin_split_half, cin_activatio
 )
 
 def test_xDeepFMEstimator(dnn_hidden_units, cin_layer_size, cin_split_half, cin_activation, sparse_feature_num, dense_feature_dim):
-    if tf.__version__ < "2.2.0":
+    if not Estimator_TEST_TF1 and  tf.__version__ < "2.2.0":
         return
     model_name = "xDeepFM"
     sample_size = SAMPLE_SIZE

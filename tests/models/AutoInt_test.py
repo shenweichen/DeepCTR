@@ -4,7 +4,7 @@ from packaging import version
 
 from deepctr.estimator import AutoIntEstimator
 from deepctr.models import AutoInt
-from ..utils import check_model, get_test_data, SAMPLE_SIZE, get_test_data_estimator, check_estimator
+from ..utils import check_model, get_test_data, SAMPLE_SIZE, get_test_data_estimator, check_estimator,Estimator_TEST_TF1
 
 
 @pytest.mark.parametrize(
@@ -29,7 +29,7 @@ def test_AutoInt(att_layer_num, dnn_hidden_units, sparse_feature_num):
     [(1, (4,), 1)]  # (0, (4,), 2), (2, (4, 4,), 2)
 )
 def test_AutoIntEstimator(att_layer_num, dnn_hidden_units, sparse_feature_num):
-    if version.parse(tf.__version__) < version.parse('2.2.0'):
+    if not Estimator_TEST_TF1 and version.parse(tf.__version__) < version.parse('2.2.0'):
         return
     model_name = "AutoInt"
     sample_size = SAMPLE_SIZE

@@ -16,7 +16,7 @@ from deepctr.layers import custom_objects
 
 SAMPLE_SIZE = 8
 VOCABULARY_SIZE = 4
-
+Estimator_TEST_TF1 = False
 
 def gen_sequence(dim, max_len, sample_size):
     return np.array([np.random.randint(0, dim, max_len) for _ in range(sample_size)]), np.random.randint(1, max_len + 1,

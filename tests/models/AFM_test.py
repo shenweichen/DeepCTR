@@ -4,8 +4,7 @@ from packaging import version
 
 from deepctr.estimator import AFMEstimator
 from deepctr.models import AFM
-from ..utils import check_model, check_estimator, get_test_data, get_test_data_estimator, SAMPLE_SIZE
-
+from ..utils import check_model, check_estimator, get_test_data, get_test_data_estimator, SAMPLE_SIZE,Estimator_TEST_TF1
 
 @pytest.mark.parametrize(
     'use_attention,sparse_feature_num,dense_feature_num',
@@ -29,7 +28,7 @@ def test_AFM(use_attention, sparse_feature_num, dense_feature_num):
      ]
 )
 def test_AFMEstimator(use_attention, sparse_feature_num, dense_feature_num):
-    if version.parse(tf.__version__) < version.parse('2.2.0'):
+    if not Estimator_TEST_TF1 and version.parse(tf.__version__) < version.parse('2.2.0'):
         return
 
     model_name = "AFM"

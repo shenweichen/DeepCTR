@@ -3,7 +3,7 @@ import tensorflow as tf
 
 from deepctr.models import FiBiNET
 from deepctr.estimator import FiBiNETEstimator
-from ..utils import check_model, SAMPLE_SIZE,get_test_data,get_test_data_estimator,check_estimator
+from ..utils import check_model, SAMPLE_SIZE,get_test_data,get_test_data_estimator,check_estimator,Estimator_TEST_TF1
 
 
 @pytest.mark.parametrize(
@@ -25,7 +25,7 @@ def test_FiBiNET(bilinear_type):
     ["interaction"]
 )
 def test_FiBiNETEstimator(bilinear_type):
-    if tf.__version__ < "2.2.0":
+    if not Estimator_TEST_TF1 and tf.__version__ < "2.2.0":
         return
     model_name = "FiBiNET"
     sample_size = SAMPLE_SIZE

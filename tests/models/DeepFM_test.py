@@ -2,7 +2,7 @@ import pytest
 import tensorflow as tf
 from deepctr.models import DeepFM
 from deepctr.estimator import DeepFMEstimator
-from ..utils import check_model, get_test_data,SAMPLE_SIZE,get_test_data_estimator,check_estimator
+from ..utils import check_model, get_test_data,SAMPLE_SIZE,get_test_data_estimator,check_estimator,Estimator_TEST_TF1
 
 
 @pytest.mark.parametrize(
@@ -28,7 +28,7 @@ def test_DeepFM(hidden_size, sparse_feature_num):
 )
 
 def test_DeepFMEstimator(hidden_size, sparse_feature_num):
-    if tf.__version__ < "2.2.0":
+    if not Estimator_TEST_TF1 and tf.__version__ < "2.2.0":
         return
     model_name = "DeepFM"
     sample_size = SAMPLE_SIZE
