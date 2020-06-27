@@ -346,8 +346,8 @@ if __name__ == "__main__":
 
     for i, feat in enumerate(sparse_features):
         dnn_feature_columns.append(tf.feature_column.embedding_column(
-            tf.feature_column.categorical_column_with_identity(feat, 100), 4))
-        linear_feature_columns.append(tf.feature_column.categorical_column_with_identity(feat, 100))
+            tf.feature_column.categorical_column_with_identity(feat, 1000), 4))
+        linear_feature_columns.append(tf.feature_column.categorical_column_with_identity(feat, 1000))
     for feat in dense_features:
         dnn_feature_columns.append(tf.feature_column.numeric_column(feat))
         linear_feature_columns.append(tf.feature_column.numeric_column(feat))
