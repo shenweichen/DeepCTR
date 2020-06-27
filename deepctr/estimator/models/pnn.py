@@ -20,7 +20,7 @@ def PNNEstimator(dnn_feature_columns, dnn_hidden_units=(128, 128), l2_reg_embedd
                  seed=1024, dnn_dropout=0, dnn_activation='relu', use_inner=True, use_outter=False, kernel_type='mat',
                  task='binary', model_dir=None, config=None,
                  linear_optimizer='Ftrl',
-                 dnn_optimizer='Adagrad'):
+                 dnn_optimizer='Adagrad', training_chief_hooks=None):
     """Instantiates the Product-based Neural Network architecture.
 
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
@@ -42,6 +42,8 @@ def PNNEstimator(dnn_feature_columns, dnn_hidden_units=(128, 128), l2_reg_embedd
         the linear part of the model. Defaults to FTRL optimizer.
     :param dnn_optimizer: An instance of `tf.Optimizer` used to apply gradients to
         the deep part of the model. Defaults to Adagrad optimizer.
+    :param training_chief_hooks: Iterable of `tf.train.SessionRunHook` objects to
+        run on the chief worker during training.
     :return: A Tensorflow Estimator  instance.
 
     """
@@ -86,6 +88,7 @@ def PNNEstimator(dnn_feature_columns, dnn_hidden_units=(128, 128), l2_reg_embedd
 
         logits = linear_logits + dnn_logit
 
-        return deepctr_model_fn(features, mode, logits, labels, task, linear_optimizer, dnn_optimizer)
+        return deepctr_model_fn(features, mode, logits, labels, task, linear_optimizer, dnn_optimizer,
+                                training_chief_hooks=training_chief_hooks)
 
     return tf.estimator.Estimator(_model_fn, model_dir=model_dir, config=config)

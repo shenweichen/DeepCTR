@@ -21,7 +21,7 @@ def DeepFMEstimator(linear_feature_columns, dnn_feature_columns, dnn_hidden_unit
                     l2_reg_linear=0.00001, l2_reg_embedding=0.00001, l2_reg_dnn=0, seed=1024, dnn_dropout=0,
                     dnn_activation='relu', dnn_use_bn=False, task='binary', model_dir=None, config=None,
                     linear_optimizer='Ftrl',
-                    dnn_optimizer='Adagrad'):
+                    dnn_optimizer='Adagrad', training_chief_hooks=None):
     """Instantiates the DeepFM Network architecture.
 
     :param linear_feature_columns: An iterable containing all the features used by linear part of the model.
@@ -44,6 +44,8 @@ def DeepFMEstimator(linear_feature_columns, dnn_feature_columns, dnn_hidden_unit
         the linear part of the model. Defaults to FTRL optimizer.
     :param dnn_optimizer: An instance of `tf.Optimizer` used to apply gradients to
         the deep part of the model. Defaults to Adagrad optimizer.
+    :param training_chief_hooks: Iterable of `tf.train.SessionRunHook` objects to
+        run on the chief worker during training.
     :return: A Tensorflow Estimator  instance.
 
     """
@@ -68,6 +70,8 @@ def DeepFMEstimator(linear_feature_columns, dnn_feature_columns, dnn_hidden_unit
 
         logits = linear_logits + fm_logit + dnn_logit
 
-        return deepctr_model_fn(features, mode, logits, labels, task, linear_optimizer, dnn_optimizer)
+        return deepctr_model_fn(features, mode, logits, labels, task, linear_optimizer, dnn_optimizer,
+                                training_chief_hooks
+                                =training_chief_hooks)
 
     return tf.estimator.Estimator(_model_fn, model_dir=model_dir, config=config)

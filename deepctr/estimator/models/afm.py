@@ -20,7 +20,7 @@ from ...layers.utils import concat_func
 def AFMEstimator(linear_feature_columns, dnn_feature_columns, use_attention=True, attention_factor=8,
                  l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_att=1e-5, afm_dropout=0, seed=1024,
                  task='binary', model_dir=None, config=None, linear_optimizer='Ftrl',
-                 dnn_optimizer='Adagrad'):
+                 dnn_optimizer='Adagrad', training_chief_hooks=None):
     """Instantiates the Attentional Factorization Machine architecture.
 
     :param linear_feature_columns: An iterable containing all the features used by linear part of the model.
@@ -41,6 +41,8 @@ def AFMEstimator(linear_feature_columns, dnn_feature_columns, use_attention=True
         the linear part of the model. Defaults to FTRL optimizer.
     :param dnn_optimizer: An instance of `tf.Optimizer` used to apply gradients to
         the deep part of the model. Defaults to Adagrad optimizer.
+    :param training_chief_hooks: Iterable of `tf.train.SessionRunHook` objects to
+        run on the chief worker during training.
     :return: A Tensorflow Estimator  instance.
 
     """
@@ -62,6 +64,7 @@ def AFMEstimator(linear_feature_columns, dnn_feature_columns, use_attention=True
 
         logits = linear_logits + fm_logit
 
-        return deepctr_model_fn(features, mode, logits, labels, task, linear_optimizer, dnn_optimizer)
+        return deepctr_model_fn(features, mode, logits, labels, task, linear_optimizer, dnn_optimizer,
+                                training_chief_hooks=training_chief_hooks)
 
     return tf.estimator.Estimator(_model_fn, model_dir=model_dir, config=config)
