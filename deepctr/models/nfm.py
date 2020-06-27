@@ -44,8 +44,6 @@ def NFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128)
     sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
                                                                          l2_reg_embedding, seed)
 
-
-
     fm_input = concat_func(sparse_embedding_list, axis=1)
     bi_out = BiInteractionPooling()(fm_input)
     if bi_dropout:

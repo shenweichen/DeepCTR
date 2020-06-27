@@ -49,7 +49,7 @@ def PNN(dnn_feature_columns, dnn_hidden_units=(128, 128), l2_reg_embedding=1e-5,
 
     # ipnn deep input
     linear_signal = tf.keras.layers.Reshape(
-        [sum(map(lambda x:int(x.shape[-1]) ,sparse_embedding_list))])(concat_func(sparse_embedding_list))
+        [sum(map(lambda x: int(x.shape[-1]), sparse_embedding_list))])(concat_func(sparse_embedding_list))
 
     if use_inner and use_outter:
         deep_input = tf.keras.layers.Concatenate()(

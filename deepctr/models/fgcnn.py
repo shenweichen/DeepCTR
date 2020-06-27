@@ -22,9 +22,10 @@ def unstack(input_tensor):
     return tf.unstack(input_, input_.shape[1], 1)
 
 
-def FGCNN(linear_feature_columns,dnn_feature_columns, conv_kernel_width=(7, 7, 7, 7), conv_filters=(14, 16, 18, 20),
+def FGCNN(linear_feature_columns, dnn_feature_columns, conv_kernel_width=(7, 7, 7, 7), conv_filters=(14, 16, 18, 20),
           new_maps=(3, 3, 3, 3),
-          pooling_width=(2, 2, 2, 2), dnn_hidden_units=(128,),l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_dnn=0, dnn_dropout=0,
+          pooling_width=(2, 2, 2, 2), dnn_hidden_units=(128,), l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_dnn=0,
+          dnn_dropout=0,
           seed=1024,
           task='binary', ):
     """Instantiates the Feature Generation by Convolutional Neural Network architecture.
@@ -57,9 +58,8 @@ def FGCNN(linear_feature_columns,dnn_feature_columns, conv_kernel_width=(7, 7, 7
                                     l2_reg=l2_reg_linear)
 
     deep_emb_list, _ = input_from_feature_columns(features, dnn_feature_columns, l2_reg_embedding, seed)
-    fg_deep_emb_list,_ = input_from_feature_columns(features, dnn_feature_columns, l2_reg_embedding, seed,
-                                                    prefix='fg')
-
+    fg_deep_emb_list, _ = input_from_feature_columns(features, dnn_feature_columns, l2_reg_embedding, seed,
+                                                     prefix='fg')
 
     fg_input = concat_func(fg_deep_emb_list, axis=1)
     origin_input = concat_func(deep_emb_list, axis=1)
@@ -80,7 +80,7 @@ def FGCNN(linear_feature_columns,dnn_feature_columns, conv_kernel_width=(7, 7, 7
                       l2_reg=l2_reg_dnn)(dnn_input)
     final_logit = tf.keras.layers.Dense(1, use_bias=False)(final_logit)
 
-    final_logit = add_func([final_logit,linear_logit])
+    final_logit = add_func([final_logit, linear_logit])
     output = PredictionLayer(task)(final_logit)
 
     model = tf.keras.models.Model(inputs=inputs_list, outputs=output)

@@ -10,14 +10,13 @@ Reference:
 
 from collections import OrderedDict
 
-from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.layers import (Concatenate, Dense, Embedding,
                                             Flatten, Input)
 from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.regularizers import l2
 
-from ..inputs import (get_embedding_vec_list, get_inputs_list, embedding_lookup, get_dense_input)
 from ..feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, build_input_features
+from ..inputs import (get_embedding_vec_list, get_inputs_list, embedding_lookup, get_dense_input)
 from ..layers.core import DNN, PredictionLayer
 from ..layers.sequence import (AttentionSequencePoolingLayer, BiasEncoding,
                                BiLSTM, Transformer)
@@ -49,7 +48,8 @@ def DSIN(dnn_feature_columns, sess_feature_list, sess_max_count=5, bias_encoding
 
     """
 
-    hist_emb_size = sum(map(lambda fc:fc.embedding_dim,filter(lambda fc:fc.name in sess_feature_list,dnn_feature_columns)))
+    hist_emb_size = sum(
+        map(lambda fc: fc.embedding_dim, filter(lambda fc: fc.name in sess_feature_list, dnn_feature_columns)))
 
     if (att_embedding_size * att_head_num != hist_emb_size):
         raise ValueError(
@@ -96,9 +96,9 @@ def DSIN(dnn_feature_columns, sess_feature_list, sess_max_count=5, bias_encoding
                       enumerate(sparse_feature_columns)}
 
     query_emb_list = embedding_lookup(embedding_dict, features, sparse_feature_columns, sess_feature_list,
-                                      sess_feature_list,to_list=True)
+                                      sess_feature_list, to_list=True)
     dnn_input_emb_list = embedding_lookup(embedding_dict, features, sparse_feature_columns,
-                                          mask_feat_list=sess_feature_list,to_list=True)
+                                          mask_feat_list=sess_feature_list, to_list=True)
     dense_value_list = get_dense_input(features, dense_feature_columns)
 
     query_emb = concat_func(query_emb_list, mask=True)
