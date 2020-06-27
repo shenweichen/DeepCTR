@@ -4,7 +4,8 @@ from packaging import version
 
 from deepctr.estimator import AutoIntEstimator
 from deepctr.models import AutoInt
-from ..utils import check_model, get_test_data, SAMPLE_SIZE, get_test_data_estimator, check_estimator,Estimator_TEST_TF1
+from ..utils import check_model, get_test_data, SAMPLE_SIZE, get_test_data_estimator, check_estimator, \
+    Estimator_TEST_TF1
 
 
 @pytest.mark.parametrize(
