@@ -1,7 +1,7 @@
-deepctr.estimator.models.deepfwfm module
+deepctr.estimator.models.fwfm module
 ========================================
 
-.. automodule:: deepctr.estimator.models.deepfwfm
+.. automodule:: deepctr.estimator.models.fwfm
     :members:
     :no-undoc-members:
     :no-show-inheritance:
