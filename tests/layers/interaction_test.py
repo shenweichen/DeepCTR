@@ -22,8 +22,8 @@ SEQ_LENGTH = 10
     [0.000001]
 )
 def test_FwFM(reg_strength):
-    with CustomObjectScope({'FwFM': layers.FwFM}):
-        layer_test(layers.FwFM, kwargs={'num_fields': FIELD_SIZE, 'regularizer': reg_strength},
+    with CustomObjectScope({'FwFMLayer': layers.FwFMLayer}):
+        layer_test(layers.FwFMLayer, kwargs={'num_fields': FIELD_SIZE, 'regularizer': reg_strength},
                    input_shape=(BATCH_SIZE, FIELD_SIZE, EMBEDDING_SIZE))
 
 @pytest.mark.parametrize(

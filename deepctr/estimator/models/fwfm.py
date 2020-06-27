@@ -15,7 +15,7 @@ import tensorflow as tf
 from ..feature_column import get_linear_logit, input_from_feature_columns
 from ..utils import DNN_SCOPE_NAME, deepctr_model_fn, variable_scope
 from ...layers.core import DNN
-from ...layers.interaction import FwFM
+from ...layers.interaction import FwFMLayer
 from ...layers.utils import concat_func, add_func, combined_dnn_input
 
 
@@ -61,7 +61,7 @@ def FwFMEstimator(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=
             sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
                                                                                  l2_reg_embedding=l2_reg_embedding)
 
-            fwfm_logit = FwFM(num_fields=len(sparse_embedding_list), regularizer=l2_reg_field_strength)(
+            fwfm_logit = FwFMLayer(num_fields=len(sparse_embedding_list), regularizer=l2_reg_field_strength)(
                 concat_func(sparse_embedding_list, axis=1))
 
             final_logit_components.append(fwfm_logit)

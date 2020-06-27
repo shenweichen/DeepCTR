@@ -14,7 +14,7 @@ import tensorflow as tf
 
 from ..feature_column import build_input_features, get_linear_logit, DEFAULT_GROUP_NAME, input_from_feature_columns
 from ..layers.core import PredictionLayer, DNN
-from ..layers.interaction import FwFM
+from ..layers.interaction import FwFMLayer
 from ..layers.utils import concat_func, add_func, combined_dnn_input
 
 
@@ -53,7 +53,7 @@ def FwFM(linear_feature_columns, dnn_feature_columns, fm_group=[DEFAULT_GROUP_NA
 
 
 
-    fwfm_logit = add_func([FwFM(num_fields=len(v), regularizer=l2_reg_field_strength)
+    fwfm_logit = add_func([FwFMLayer(num_fields=len(v), regularizer=l2_reg_field_strength)
                            (concat_func(v, axis=1)) for k, v in group_embedding_dict.items() if k in fm_group])
 
     final_logit_components = [linear_logit, fwfm_logit]
