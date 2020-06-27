@@ -3,7 +3,6 @@ import tensorflow as tf
 
 def input_fn_pandas(df, features, label=None, batch_size=256, num_epochs=1, shuffle=False, queue_capacity_factor=10,
                     num_threads=1):
-
     if label is not None:
         y = df[label]
     else:
@@ -11,11 +10,13 @@ def input_fn_pandas(df, features, label=None, batch_size=256, num_epochs=1, shuf
     if tf.__version__ >= "2.0.0":
         return tf.compat.v1.estimator.inputs.pandas_input_fn(df[features], y, batch_size=batch_size,
                                                              num_epochs=num_epochs,
-                                                             shuffle=shuffle, queue_capacity=batch_size*queue_capacity_factor,
+                                                             shuffle=shuffle,
+                                                             queue_capacity=batch_size * queue_capacity_factor,
                                                              num_threads=num_threads)
 
     return tf.estimator.inputs.pandas_input_fn(df[features], y, batch_size=batch_size, num_epochs=num_epochs,
-                                               shuffle=shuffle, queue_capacity=batch_size*queue_capacity_factor, num_threads=num_threads)
+                                               shuffle=shuffle, queue_capacity=batch_size * queue_capacity_factor,
+                                               num_threads=num_threads)
 
 
 def input_fn_tfrecord(filenames, feature_description, label=None, batch_size=256, num_epochs=1, num_parallel_calls=8,

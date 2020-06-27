@@ -9,6 +9,7 @@ Reference:
 """
 
 from itertools import chain
+
 import tensorflow as tf
 
 from ..feature_column import build_input_features, get_linear_logit, DEFAULT_GROUP_NAME, input_from_feature_columns
@@ -46,8 +47,7 @@ def DeepFM(linear_feature_columns, dnn_feature_columns, fm_group=[DEFAULT_GROUP_
                                     l2_reg=l2_reg_linear)
 
     group_embedding_dict, dense_value_list = input_from_feature_columns(features, dnn_feature_columns, l2_reg_embedding,
-                                                                         seed, support_group=True)
-
+                                                                        seed, support_group=True)
 
     fm_logit = add_func([FM()(concat_func(v, axis=1))
                          for k, v in group_embedding_dict.items() if k in fm_group])
