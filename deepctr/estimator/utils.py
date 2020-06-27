@@ -72,13 +72,9 @@ class Head(_Head):
         del mode, features  # Unused for this head.
         losses = get_losses()
         if self._task == "binary":
-
-            loss = tf.nn.sigmoid_cross_entropy_with_logits(
-                logits=logits,
-                labels=tf.cast(labels, tf.float32))
-
+            loss = losses.sigmoid_cross_entropy(labels, logits, reduction=losses.Reduction.NONE)
         else:
-            loss = tf.losses.mean_squared_error(labels, logits, reduction=losses.Reduction.NONE)
+            loss = losses.mean_squared_error(labels, logits, reduction=losses.Reduction.NONE)
         return loss
 
     def create_estimator_spec(
