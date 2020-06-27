@@ -249,3 +249,5 @@ class PredictionLayer(Layer):
         config = {'task': self.task, 'use_bias': self.use_bias}
         base_config = super(PredictionLayer, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
+
+

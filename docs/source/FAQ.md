@@ -48,7 +48,7 @@ Then,use the following code,the `attentional_weights[:,i,0]` is the `feature_int
 import itertools
 import deepctr
 from deepctr.models import AFM
-from deepctr.inputs import get_feature_names,get_varlen_feature_names
+from deepctr.feature_column import get_feature_names
 from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.layers import Lambda
 
@@ -59,9 +59,8 @@ afmlayer = model.layers[-3]
 afm_weight_model = Model(model.input,outputs=Lambda(lambda x:afmlayer.normalized_att_score)(model.input))
 attentional_weights = afm_weight_model.predict(model_input,batch_size=4096)
 
-fixlen_names = get_feature_names( dnn_feature_columns)
-varlen_names = get_varlen_feature_names(dnn_feature_columns)
-feature_interactions = list(itertools.combinations(fixlen_names+varlen_names ,2))
+feature_names = get_feature_names(dnn_feature_columns)
+feature_interactions = list(itertools.combinations(feature_names ,2))
 ```
 ## 4. How to extract the embedding vectors in deepfm?
 ```python
@@ -87,7 +86,7 @@ item_id_emb = embedding_dict['item_id']
 ## 5. How to add a long dense feature vector as a input to the model?
 ```python
 from deepctr.models import DeepFM
-from deepctr.inputs import DenseFeat,SparseFeat,get_feature_names
+from deepctr.feature_column import SparseFeat, DenseFeat,get_feature_names
 import numpy as np
 
 feature_columns = [SparseFeat('user_id',120,),SparseFeat('item_id',60,),DenseFeat("pic_vec",5)]
@@ -105,11 +104,39 @@ model.compile('adagrad','binary_crossentropy')
 model.fit(model_input,label)
 ```
 
-## 6. How to run the demo with GPU ?
+## 6. How to use pretrained weights to initialize embedding weights and frozen embedding weights?
+-----------------------------------------------------------------------------------------------------
+
+Use `tf.initializers.identity()` to set the `embeddings_initializer` of `SparseFeat`,and set `trainable=False` to frozen embedding weights.
+
+```python
+import numpy as np
+import tensorflow as tf
+from deepctr.models import DeepFM
+from deepctr.feature_column import SparseFeat,get_feature_names
+
+pretrained_item_weights = np.random.randn(60,4)
+pretrained_weights_initializer = tf.initializers.identity(pretrained_item_weights)
+
+feature_columns = [SparseFeat('user_id',120,),SparseFeat('item_id',60,embedding_dim=4,embeddings_initializer=pretrained_weights_initializer,trainable=False)]
+fixlen_feature_names = get_feature_names(feature_columns)
+
+user_id = np.array([[1],[0],[1]])
+item_id = np.array([[30],[20],[10]])
+label = np.array([1,0,1])
+
+model_input = {'user_id':user_id,'item_id':item_id,}
+
+model = DeepFM(feature_columns,feature_columns)
+model.compile('adagrad','binary_crossentropy')
+model.fit(model_input,label)
+```
+
+## 7. How to run the demo with GPU ?
 just install deepctr with 
 ```bash
 $ pip install deepctr[gpu]
 ```
 
-## 7. How to run the demo with multiple GPUs
+## 8. How to run the demo with multiple GPUs
 you can use multiple gpus with tensorflow version higher than ``1.4``,see [run_classification_criteo_multi_gpu.py](https://github.com/shenweichen/DeepCTR/blob/master/examples/run_classification_criteo_multi_gpu.py)

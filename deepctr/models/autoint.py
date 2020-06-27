@@ -11,16 +11,16 @@ Reference:
 
 import tensorflow as tf
 
-from ..inputs import input_from_feature_columns, build_input_features, combined_dnn_input, get_linear_logit
+from ..feature_column import build_input_features, get_linear_logit, input_from_feature_columns
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import InteractingLayer
-from ..layers.utils import concat_func, add_func
+from ..layers.utils import concat_func, add_func, combined_dnn_input
 
 
 def AutoInt(linear_feature_columns, dnn_feature_columns, att_layer_num=3, att_embedding_size=8, att_head_num=2,
             att_res=True,
             dnn_hidden_units=(256, 256), dnn_activation='relu', l2_reg_linear=1e-5,
-            l2_reg_embedding=1e-5, l2_reg_dnn=0, dnn_use_bn=False, dnn_dropout=0, init_std=0.0001, seed=1024,
+            l2_reg_embedding=1e-5, l2_reg_dnn=0, dnn_use_bn=False, dnn_dropout=0, seed=1024,
             task='binary', ):
     """Instantiates the AutoInt Network architecture.
 
@@ -37,7 +37,6 @@ def AutoInt(linear_feature_columns, dnn_feature_columns, att_layer_num=3, att_em
     :param l2_reg_dnn: float. L2 regularizer strength applied to DNN
     :param dnn_use_bn:  bool. Whether use BatchNormalization before activation or not in DNN
     :param dnn_dropout: float in [0,1), the probability we will drop out a given DNN coordinate.
-    :param init_std: float,to use as the initialize std of embedding vector
     :param seed: integer ,to use as random seed.
     :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
     :return: A Keras model instance.
@@ -49,10 +48,11 @@ def AutoInt(linear_feature_columns, dnn_feature_columns, att_layer_num=3, att_em
     features = build_input_features(dnn_feature_columns)
     inputs_list = list(features.values())
 
-    sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
-                                                                         l2_reg_embedding, init_std, seed)
-    linear_logit = get_linear_logit(features, linear_feature_columns, init_std=init_std, seed=seed, prefix='linear',
+    linear_logit = get_linear_logit(features, linear_feature_columns, seed=seed, prefix='linear',
                                     l2_reg=l2_reg_linear)
+
+    sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
+                                                                         l2_reg_embedding, seed)
 
     att_input = concat_func(sparse_embedding_list, axis=1)
 
@@ -71,7 +71,7 @@ def AutoInt(linear_feature_columns, dnn_feature_columns, att_layer_num=3, att_em
             1, use_bias=False, activation=None)(stack_out)
     elif len(dnn_hidden_units) > 0:  # Only Deep
         deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
-                       dnn_use_bn, seed)(dnn_input)
+                       dnn_use_bn, seed)(dnn_input, )
         final_logit = tf.keras.layers.Dense(
             1, use_bias=False, activation=None)(deep_out)
     elif att_layer_num > 0:  # Only Interacting Layer

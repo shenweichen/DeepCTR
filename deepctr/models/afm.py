@@ -11,14 +11,15 @@ Reference:
 """
 import tensorflow as tf
 
-from ..inputs import input_from_feature_columns, get_linear_logit, build_input_features, DEFAULT_GROUP_NAME
+from ..feature_column import build_input_features, get_linear_logit, DEFAULT_GROUP_NAME, input_from_feature_columns
 from ..layers.core import PredictionLayer
 from ..layers.interaction import AFMLayer, FM
 from ..layers.utils import concat_func, add_func
 
 
-def AFM(linear_feature_columns, dnn_feature_columns, fm_group=DEFAULT_GROUP_NAME, use_attention=True, attention_factor=8,
-        l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_att=1e-5, afm_dropout=0, init_std=0.0001, seed=1024,
+def AFM(linear_feature_columns, dnn_feature_columns, fm_group=DEFAULT_GROUP_NAME, use_attention=True,
+        attention_factor=8,
+        l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_att=1e-5, afm_dropout=0, seed=1024,
         task='binary'):
     """Instantiates the Attentional Factorization Machine architecture.
 
@@ -31,7 +32,6 @@ def AFM(linear_feature_columns, dnn_feature_columns, fm_group=DEFAULT_GROUP_NAME
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
     :param l2_reg_att: float. L2 regularizer strength applied to attention net
     :param afm_dropout: float in [0,1), Fraction of the attention net output units to dropout.
-    :param init_std: float,to use as the initialize std of embedding vector
     :param seed: integer ,to use as random seed.
     :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
     :return: A Keras model instance.
@@ -42,10 +42,10 @@ def AFM(linear_feature_columns, dnn_feature_columns, fm_group=DEFAULT_GROUP_NAME
 
     inputs_list = list(features.values())
 
-    group_embedding_dict, _ = input_from_feature_columns(features, dnn_feature_columns, l2_reg_embedding, init_std,
+    group_embedding_dict, _ = input_from_feature_columns(features, dnn_feature_columns, l2_reg_embedding,
                                                          seed, support_dense=False, support_group=True)
 
-    linear_logit = get_linear_logit(features, linear_feature_columns, init_std=init_std, seed=seed, prefix='linear',
+    linear_logit = get_linear_logit(features, linear_feature_columns, seed=seed, prefix='linear',
                                     l2_reg=l2_reg_linear)
 
     if use_attention:

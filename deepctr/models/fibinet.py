@@ -7,17 +7,18 @@ Reference:
     [1] Huang T, Zhang Z, Zhang J. FiBiNET: Combining Feature Importance and Bilinear feature Interaction for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1905.09433, 2019.
 """
 
-from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.layers import Dense, Flatten
+from tensorflow.python.keras.models import Model
 
-from ..inputs import build_input_features, get_linear_logit, input_from_feature_columns, combined_dnn_input
+from ..feature_column import build_input_features, get_linear_logit, input_from_feature_columns
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import SENETLayer, BilinearInteraction
-from ..layers.utils import concat_func, add_func
+from ..layers.utils import concat_func, add_func, combined_dnn_input
 
 
-def FiBiNET(linear_feature_columns, dnn_feature_columns, bilinear_type='interaction', reduction_ratio=3, dnn_hidden_units=(128, 128), l2_reg_linear=1e-5,
-            l2_reg_embedding=1e-5, l2_reg_dnn=0, init_std=0.0001, seed=1024, dnn_dropout=0, dnn_activation='relu',
+def FiBiNET(linear_feature_columns, dnn_feature_columns, bilinear_type='interaction', reduction_ratio=3,
+            dnn_hidden_units=(128, 128), l2_reg_linear=1e-5,
+            l2_reg_embedding=1e-5, l2_reg_dnn=0, seed=1024, dnn_dropout=0, dnn_activation='relu',
             task='binary'):
     """Instantiates the Feature Importance and Bilinear feature Interaction NETwork architecture.
 
@@ -29,7 +30,6 @@ def FiBiNET(linear_feature_columns, dnn_feature_columns, bilinear_type='interact
     :param l2_reg_linear: float. L2 regularizer strength applied to wide part
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
     :param l2_reg_dnn: float. L2 regularizer strength applied to DNN
-    :param init_std: float,to use as the initialize std of embedding vector
     :param seed: integer ,to use as random seed.
     :param dnn_dropout: float in [0,1), the probability we will drop out a given DNN coordinate.
     :param dnn_activation: Activation function to use in DNN
@@ -41,8 +41,11 @@ def FiBiNET(linear_feature_columns, dnn_feature_columns, bilinear_type='interact
 
     inputs_list = list(features.values())
 
+    linear_logit = get_linear_logit(features, linear_feature_columns, seed=seed, prefix='linear',
+                                    l2_reg=l2_reg_linear)
+
     sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
-                                                                         l2_reg_embedding, init_std, seed)
+                                                                         l2_reg_embedding, seed)
 
     senet_embedding_list = SENETLayer(
         reduction_ratio, seed)(sparse_embedding_list)
@@ -52,9 +55,6 @@ def FiBiNET(linear_feature_columns, dnn_feature_columns, bilinear_type='interact
     bilinear_out = BilinearInteraction(
         bilinear_type=bilinear_type, seed=seed)(sparse_embedding_list)
 
-    linear_logit = get_linear_logit(features, linear_feature_columns, init_std=init_std, seed=seed, prefix='linear',
-                                    l2_reg=l2_reg_linear)
-
     dnn_input = combined_dnn_input(
         [Flatten()(concat_func([senet_bilinear_out, bilinear_out]))], dense_value_list)
     dnn_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
@@ -62,7 +62,7 @@ def FiBiNET(linear_feature_columns, dnn_feature_columns, bilinear_type='interact
     dnn_logit = Dense(
         1, use_bias=False, activation=None)(dnn_out)
 
-    final_logit = add_func([linear_logit,dnn_logit])
+    final_logit = add_func([linear_logit, dnn_logit])
     output = PredictionLayer(task)(final_logit)
 
     model = Model(inputs=inputs_list, outputs=output)

@@ -10,24 +10,22 @@ Reference:
 
 from collections import OrderedDict
 
-from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.layers import (Concatenate, Dense, Embedding,
                                             Flatten, Input)
 from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.regularizers import l2
 
-from ..inputs import (build_input_features,
-                      get_embedding_vec_list, get_inputs_list, SparseFeat, VarLenSparseFeat, DenseFeat,
-                      embedding_lookup, get_dense_input, combined_dnn_input)
+from ..feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, build_input_features
+from ..inputs import (get_embedding_vec_list, get_inputs_list, embedding_lookup, get_dense_input)
 from ..layers.core import DNN, PredictionLayer
 from ..layers.sequence import (AttentionSequencePoolingLayer, BiasEncoding,
                                BiLSTM, Transformer)
-from ..layers.utils import concat_func
+from ..layers.utils import concat_func, combined_dnn_input
 
 
 def DSIN(dnn_feature_columns, sess_feature_list, sess_max_count=5, bias_encoding=False,
          att_embedding_size=1, att_head_num=8, dnn_hidden_units=(200, 80), dnn_activation='sigmoid', dnn_dropout=0,
-         dnn_use_bn=False, l2_reg_dnn=0, l2_reg_embedding=1e-6, init_std=0.0001, seed=1024, task='binary',
+         dnn_use_bn=False, l2_reg_dnn=0, l2_reg_embedding=1e-6, seed=1024, task='binary',
          ):
     """Instantiates the Deep Session Interest Network architecture.
 
@@ -44,14 +42,14 @@ def DSIN(dnn_feature_columns, sess_feature_list, sess_max_count=5, bias_encoding
     :param dnn_use_bn: bool. Whether use BatchNormalization before activation or not in deep net
     :param l2_reg_dnn: float. L2 regularizer strength applied to DNN
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
-    :param init_std: float,to use as the initialize std of embedding vector
     :param seed: integer ,to use as random seed.
     :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
     :return: A Keras model instance.
 
     """
 
-    hist_emb_size = sum(map(lambda fc:fc.embedding_dim,filter(lambda fc:fc.name in sess_feature_list,dnn_feature_columns)))
+    hist_emb_size = sum(
+        map(lambda fc: fc.embedding_dim, filter(lambda fc: fc.name in sess_feature_list, dnn_feature_columns)))
 
     if (att_embedding_size * att_head_num != hist_emb_size):
         raise ValueError(
@@ -89,8 +87,7 @@ def DSIN(dnn_feature_columns, sess_feature_list, sess_max_count=5, bias_encoding
     user_sess_length = Input(shape=(1,), name='sess_length')
 
     embedding_dict = {feat.embedding_name: Embedding(feat.vocabulary_size, feat.embedding_dim,
-                                                     embeddings_initializer=RandomNormal(
-                                                         mean=0.0, stddev=init_std, seed=seed),
+                                                     embeddings_initializer=feat.embeddings_initializer,
                                                      embeddings_regularizer=l2(
                                                          l2_reg_embedding),
                                                      name='sparse_emb_' +
@@ -99,9 +96,9 @@ def DSIN(dnn_feature_columns, sess_feature_list, sess_max_count=5, bias_encoding
                       enumerate(sparse_feature_columns)}
 
     query_emb_list = embedding_lookup(embedding_dict, features, sparse_feature_columns, sess_feature_list,
-                                      sess_feature_list,to_list=True)
+                                      sess_feature_list, to_list=True)
     dnn_input_emb_list = embedding_lookup(embedding_dict, features, sparse_feature_columns,
-                                          mask_feat_list=sess_feature_list,to_list=True)
+                                          mask_feat_list=sess_feature_list, to_list=True)
     dense_value_list = get_dense_input(features, dense_feature_columns)
 
     query_emb = concat_func(query_emb_list, mask=True)

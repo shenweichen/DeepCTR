@@ -1,8 +1,9 @@
 # -*- coding:utf-8 -*-
 """
 
-Author:
-    Weichen Shen,wcshen1994@163.com
+Authors:
+    Weichen Shen,wcshen1994@163.com,
+    Harshit Pande
 
 """
 
@@ -11,9 +12,10 @@ import itertools
 import tensorflow as tf
 from tensorflow.python.keras import backend as K
 from tensorflow.python.keras.initializers import (Zeros, glorot_normal,
-                                                  glorot_uniform)
+                                                  glorot_uniform, TruncatedNormal)
 from tensorflow.python.keras.layers import Layer
 from tensorflow.python.keras.regularizers import l2
+from tensorflow.python.keras.backend import batch_dot
 from tensorflow.python.layers import utils
 
 from .activation import activation_layer
@@ -56,6 +58,8 @@ class AFMLayer(Layer):
     def build(self, input_shape):
 
         if not isinstance(input_shape, list) or len(input_shape) < 2:
+            #input_shape = input_shape[0]
+            #if not isinstance(input_shape, list) or len(input_shape) < 2:
             raise ValueError('A `AttentionalFM` layer should be called '
                              'on a list of at least 2 inputs')
 
@@ -122,7 +126,7 @@ class AFMLayer(Layer):
         attention_output = reduce_sum(
             self.normalized_att_score * bi_interaction, axis=1)
 
-        attention_output = self.dropout(attention_output)  # training
+        attention_output = self.dropout(attention_output,training=training)  # training
 
         afm_out = self.tensordot([attention_output, self.projection_p])
         return afm_out
@@ -1052,7 +1056,7 @@ class FieldWiseBiInteraction(Layer):
 
       Output shape
         - 2D tensor with shape: ``(batch_size,embedding_size)``.
-     
+
       Arguments
         - **use_bias** : Boolean, if use bias.
         - **seed** : A Python integer to use as random seed.
@@ -1062,7 +1066,7 @@ class FieldWiseBiInteraction(Layer):
 
     """
 
-    def __init__(self,use_bias=True, seed=1024, **kwargs):
+    def __init__(self, use_bias=True, seed=1024, **kwargs):
         self.use_bias = use_bias
         self.seed = seed
 
@@ -1167,3 +1171,80 @@ class FieldWiseBiInteraction(Layer):
         config = {'use_bias': self.use_bias, 'seed': self.seed}
         base_config = super(FieldWiseBiInteraction, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
+
+
+class FwFMLayer(Layer):
+    """Field-weighted Factorization Machines
+
+      Input shape
+        - 3D tensor with shape: ``(batch_size,field_size,embedding_size)``.
+
+      Output shape
+        - 2D tensor with shape: ``(batch_size, 1)``.
+
+      Arguments
+        - **num_fields** : integer for number of fields
+        - **regularizer** : L2 regularizer weight for the field strength parameters of FwFM
+
+      References
+        - [Field-weighted Factorization Machines for Click-Through Rate Prediction in Display Advertising]
+        https://arxiv.org/pdf/1806.03514.pdf
+    """
+
+    def __init__(self, num_fields=4, regularizer=0.000001, **kwargs):
+        self.num_fields = num_fields
+        self.regularizer = regularizer
+        super(FwFMLayer, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+        if len(input_shape) != 3:
+            raise ValueError("Unexpected inputs dimensions % d,\
+                             expect to be 3 dimensions" % (len(input_shape)))
+
+        if input_shape[1] != self.num_fields:
+            raise ValueError("Mismatch in number of fields {} and \
+                 concatenated embeddings dims {}".format(self.num_fields, input_shape[1]))
+
+        self.field_strengths = self.add_weight(name='field_pair_strengths',
+                                               shape=(self.num_fields, self.num_fields),
+                                               initializer=TruncatedNormal(),
+                                               regularizer=l2(self.regularizer),
+                                               trainable=True)
+
+        super(FwFMLayer, self).build(input_shape)  # Be sure to call this somewhere!
+
+    def call(self, inputs, **kwargs):
+        if K.ndim(inputs) != 3:
+            raise ValueError(
+                "Unexpected inputs dimensions %d, expect to be 3 dimensions"
+                % (K.ndim(inputs)))
+
+        if inputs.shape[1] != self.num_fields:
+            raise ValueError("Mismatch in number of fields {} and \
+                 concatenated embeddings dims {}".format(self.num_fields, inputs.shape[1]))
+
+        pairwise_inner_prods = []
+        for fi, fj in itertools.combinations(range(self.num_fields), 2):
+            # get field strength for pair fi and fj
+            r_ij = self.field_strengths[fi, fj]
+
+            # get embeddings for the features of both the fields
+            feat_embed_i = tf.squeeze(inputs[0:, fi:fi + 1, 0:], axis=1)
+            feat_embed_j = tf.squeeze(inputs[0:, fj:fj + 1, 0:], axis=1)
+
+            f = tf.scalar_mul(r_ij, batch_dot(feat_embed_i, feat_embed_j, axes=1))
+            pairwise_inner_prods.append(f)
+
+        sum_ = tf.add_n(pairwise_inner_prods)
+        return sum_
+
+    def compute_output_shape(self, input_shape):
+        return (None, 1)
+
+    def get_config(self):
+        config = super(FwFMLayer, self).get_config().copy()
+        config.update({
+            'num_fields': self.num_fields,
+            'regularizer': self.regularizer
+        })
+        return config
