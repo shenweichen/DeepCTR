@@ -8,10 +8,10 @@ Reference:
 """
 import tensorflow as tf
 
-from ..layers.utils import add_func, combined_dnn_input
 from ..feature_column import build_input_features, get_linear_logit, input_from_feature_columns
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import CrossNet
+from ..layers.utils import add_func, combined_dnn_input
 
 
 def DCN(linear_feature_columns, dnn_feature_columns, cross_num=2, dnn_hidden_units=(128, 128,), l2_reg_linear=1e-5,

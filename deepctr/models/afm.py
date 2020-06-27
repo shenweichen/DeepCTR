@@ -17,7 +17,8 @@ from ..layers.interaction import AFMLayer, FM
 from ..layers.utils import concat_func, add_func
 
 
-def AFM(linear_feature_columns, dnn_feature_columns, fm_group=DEFAULT_GROUP_NAME, use_attention=True, attention_factor=8,
+def AFM(linear_feature_columns, dnn_feature_columns, fm_group=DEFAULT_GROUP_NAME, use_attention=True,
+        attention_factor=8,
         l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_att=1e-5, afm_dropout=0, seed=1024,
         task='binary'):
     """Instantiates the Attentional Factorization Machine architecture.

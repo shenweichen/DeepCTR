@@ -35,84 +35,88 @@ class Head(_Head):
         labels = to_float(labels)
         predictions = to_float(predictions)
 
-        with name_scope(None, 'metrics', (labels, logits, predictions,
-                                          unweighted_loss, weights)):
-            metric_ops = {
-                _summary_key(self._name, "prediction/mean"): get_metrics().mean(predictions, weights=weights,
-                                                                                name="prediction/mean"),
-                _summary_key(self._name, "label/mean"): get_metrics().mean(labels, weights=weights, name="label/mean"),
-            }
-            if self._task == "binary":
-                metric_ops[_summary_key(self._name, "binary_crossentropy")] = get_metrics().mean(unweighted_loss,
-                                                                                                 weights=weights,
-                                                                                                 name="binary_crossentropy")
-                metric_ops[_summary_key(self._name, "AUC")] = get_metrics().auc(labels, predictions, weights=weights,
-                                                                                name="AUC")
-            else:
-                metric_ops[_summary_key(self._name, "mse")] = get_metrics().mean(unweighted_loss, weights=weights,
-                                                                                 name="mse")
+        # with name_scope(None, 'metrics', (labels, logits, predictions,
+        # unweighted_loss, weights)):
+        metrics = get_metrics()
+        losses = get_losses()
 
-                metric_ops[_summary_key(self._name, "MSE")] = get_metrics().mean_squared_error(labels, predictions,
-                                                                                               weights=weights,
-                                                                                               name="MSE")
-                metric_ops[_summary_key(self._name, "MAE")] = get_metrics().mean_absolute_error(labels, predictions,
-                                                                                                weights=weights,
-                                                                                                name="MAE")
-            return metric_ops
+        metric_ops = {
+            _summary_key(self._name, "prediction/mean"): metrics.mean(predictions, weights=weights),
+            _summary_key(self._name, "label/mean"): metrics.mean(labels, weights=weights),
+        }
+        tf.summary.scalar("prediction/mean", metric_ops[_summary_key(self._name, "prediction/mean")][1])
+        tf.summary.scalar("label/mean", metric_ops[_summary_key(self._name, "label/mean")][1])
+
+        mean_loss = losses.compute_weighted_loss(
+            unweighted_loss, weights=1.0, reduction=losses.Reduction.MEAN)
+
+        if self._task == "binary":
+            metric_ops[_summary_key(self._name, "LogLoss")] = metrics.mean(mean_loss, weights=weights, )
+            tf.summary.scalar("LogLoss", mean_loss)
+
+            metric_ops[_summary_key(self._name, "AUC")] = metrics.auc(labels, predictions, weights=weights)
+            tf.summary.scalar("AUC", metric_ops[_summary_key(self._name, "AUC")][1])
+        else:
+
+            metric_ops[_summary_key(self._name, "MSE")] = metrics.mean_squared_error(labels, predictions,
+                                                                                     weights=weights)
+            tf.summary.scalar("MSE", mean_loss)
+
+            metric_ops[_summary_key(self._name, "MAE")] = metrics.mean_absolute_error(labels, predictions,
+                                                                                      weights=weights)
+            tf.summary.scalar("MAE", metric_ops[_summary_key(self._name, "MAE")][1])
+
+        return metric_ops
 
     def create_loss(self, features, mode, logits, labels):
         del mode, features  # Unused for this head.
+        losses = get_losses()
         if self._task == "binary":
-            loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(
-                logits=logits,
-                labels=tf.cast(labels, tf.float32))
-            )
-
+            loss = losses.sigmoid_cross_entropy(labels, logits, reduction=losses.Reduction.NONE)
         else:
-            loss = tf.losses.mean_squared_error(labels, logits, reduction=tf.losses.Reduction.MEAN)
+            loss = losses.mean_squared_error(labels, logits, reduction=losses.Reduction.NONE)
         return loss
 
     def create_estimator_spec(
-            self, features, mode, logits, labels=None, train_op_fn=None):
-        with name_scope('head'):
-            logits = tf.reshape(logits, [-1, 1])
-            if self._task == 'binary':
-                pred = tf.sigmoid(logits)
-            else:
-                pred = logits
+            self, features, mode, logits, labels=None, train_op_fn=None, training_chief_hooks=None):
+        # with name_scope('head'):
+        logits = tf.reshape(logits, [-1, 1])
+        if self._task == 'binary':
+            pred = tf.sigmoid(logits)
+        else:
+            pred = logits
 
-            predictions = {"pred": pred, "logits": logits}
-            export_outputs = {"predict": tf.estimator.export.PredictOutput(predictions)}
-            if mode == tf.estimator.ModeKeys.PREDICT:
-                return tf.estimator.EstimatorSpec(
-                    mode=mode,
-                    predictions=predictions,
-                    export_outputs=export_outputs)
+        predictions = {"pred": pred, "logits": logits}
+        export_outputs = {"predict": tf.estimator.export.PredictOutput(predictions)}
+        if mode == tf.estimator.ModeKeys.PREDICT:
+            return tf.estimator.EstimatorSpec(
+                mode=mode,
+                predictions=predictions,
+                export_outputs=export_outputs)
 
-            labels = tf.reshape(labels, [-1, 1])
+        labels = tf.reshape(labels, [-1, 1])
 
-            loss = self.create_loss(features, mode, logits, labels)
-            reg_loss = get_losses().get_regularization_loss()
+        unweighted_loss = self.create_loss(features, mode, logits, labels)
 
-            training_loss = loss + reg_loss
+        losses = get_losses()
+        loss = losses.compute_weighted_loss(
+            unweighted_loss, weights=1.0, reduction=losses.Reduction.SUM)
+        reg_loss = losses.get_regularization_loss()
 
-            if mode == tf.estimator.ModeKeys.EVAL:
-                return tf.estimator.EstimatorSpec(
-                    mode=mode,
-                    predictions=predictions,
-                    loss=training_loss,
-                    eval_metric_ops=self._eval_metric_ops(labels, logits, pred, loss))
+        training_loss = loss + reg_loss
 
-            if mode == tf.estimator.ModeKeys.TRAIN:
-                return tf.estimator.EstimatorSpec(
-                    mode=mode,
-                    predictions=predictions,
-                    loss=training_loss,
-                    train_op=train_op_fn(training_loss))
+        eval_metric_ops = self._eval_metric_ops(labels, logits, pred, unweighted_loss)
+
+        return tf.estimator.EstimatorSpec(
+            mode=mode,
+            predictions=predictions,
+            loss=training_loss,
+            train_op=train_op_fn(training_loss),
+            eval_metric_ops=eval_metric_ops,
+            training_chief_hooks=training_chief_hooks)
 
 
-def deepctr_model_fn(features, mode, logits, labels, task, linear_optimizer, dnn_optimizer):
-
+def deepctr_model_fn(features, mode, logits, labels, task, linear_optimizer, dnn_optimizer, training_chief_hooks):
     linear_optimizer = get_optimizer_instance(linear_optimizer, 0.005)
     dnn_optimizer = get_optimizer_instance(dnn_optimizer, 0.01)
     train_op_fn = get_train_op_fn(linear_optimizer, dnn_optimizer)
@@ -122,7 +126,7 @@ def deepctr_model_fn(features, mode, logits, labels, task, linear_optimizer, dnn
                                       mode=mode,
                                       labels=labels,
                                       train_op_fn=train_op_fn,
-                                      logits=logits)
+                                      logits=logits, training_chief_hooks=training_chief_hooks)
 
 
 def get_train_op_fn(linear_optimizer, dnn_optimizer):
@@ -131,6 +135,7 @@ def get_train_op_fn(linear_optimizer, dnn_optimizer):
         global_step = tf.train.get_global_step() if tf.__version__ < "2.0.0" else tf.compat.v1.train.get_global_step()
         linear_var_list = get_collection(get_GraphKeys().TRAINABLE_VARIABLES, LINEAR_SCOPE_NAME)
         dnn_var_list = get_collection(get_GraphKeys().TRAINABLE_VARIABLES, DNN_SCOPE_NAME)
+
         if len(dnn_var_list) > 0:
             train_ops.append(
                 dnn_optimizer.minimize(

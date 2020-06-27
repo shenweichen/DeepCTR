@@ -4,8 +4,8 @@ from sklearn.metrics import log_loss, roc_auc_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 
-from deepctr.estimator.inputs import input_fn_pandas
 from deepctr.estimator import DeepFMEstimator
+from deepctr.estimator.inputs import input_fn_pandas
 
 if __name__ == "__main__":
     data = pd.read_csv('./criteo_sample.txt')
@@ -43,15 +43,15 @@ if __name__ == "__main__":
 
     # Not setting default value for continuous feature. filled with mean.
 
-    train_model_input = input_fn_pandas(train,sparse_features+dense_features,'label')
-    test_model_input = input_fn_pandas(test,sparse_features+dense_features,None)
+    train_model_input = input_fn_pandas(train, sparse_features + dense_features, 'label', shuffle=True)
+    test_model_input = input_fn_pandas(test, sparse_features + dense_features, None, shuffle=False)
 
     # 4.Define Model,train,predict and evaluate
-    model = DeepFMEstimator(linear_feature_columns, dnn_feature_columns)
+    model = DeepFMEstimator(linear_feature_columns, dnn_feature_columns, task='binary')
 
     model.train(train_model_input)
     pred_ans_iter = model.predict(test_model_input)
-    pred_ans = list(map(lambda x:x['pred'],pred_ans_iter))
+    pred_ans = list(map(lambda x: x['pred'], pred_ans_iter))
     #
     print("test LogLoss", round(log_loss(test[target].values, pred_ans), 4))
     print("test AUC", round(roc_auc_score(test[target].values, pred_ans), 4))

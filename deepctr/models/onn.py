@@ -19,8 +19,8 @@ from tensorflow.python.keras.layers import (Dense, Embedding, Lambda,
 from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.regularizers import l2
 
-from ..inputs import (get_dense_input)
 from ..feature_column import SparseFeat, VarLenSparseFeat, build_input_features, get_linear_logit
+from ..inputs import (get_dense_input)
 from ..layers.core import DNN, PredictionLayer
 from ..layers.sequence import SequencePoolingLayer
 from ..layers.utils import concat_func, Hash, NoMask, add_func, combined_dnn_input
@@ -46,7 +46,6 @@ def ONN(linear_feature_columns, dnn_feature_columns, embedding_size=4, dnn_hidde
     :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
     :return: A Keras model instance.
     """
-
 
     features = build_input_features(linear_feature_columns + dnn_feature_columns)
 
@@ -100,8 +99,7 @@ def ONN(linear_feature_columns, dnn_feature_columns, embedding_size=4, dnn_hidde
     dnn_out = DNN(dnn_hidden_units, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout)(dnn_input)
     dnn_logit = Dense(1, use_bias=False)(dnn_out)
 
-
-    final_logit = add_func([dnn_logit,linear_logit])
+    final_logit = add_func([dnn_logit, linear_logit])
 
     output = PredictionLayer(task)(final_logit)
 

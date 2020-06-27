@@ -12,7 +12,6 @@ from itertools import chain
 from tensorflow.python.keras.layers import Embedding
 from tensorflow.python.keras.regularizers import l2
 
-
 from . import feature_column as fc_lib
 from .layers.sequence import SequencePoolingLayer, WeightedSequenceLayer
 from .layers.utils import Hash
@@ -24,13 +23,12 @@ def get_inputs_list(inputs):
 
 def create_embedding_dict(sparse_feature_columns, varlen_sparse_feature_columns, seed, l2_reg,
                           prefix='sparse_', seq_mask_zero=True):
-
     sparse_embedding = {}
     for feat in sparse_feature_columns:
         emb = Embedding(feat.vocabulary_size, feat.embedding_dim,
-                                                       embeddings_initializer=feat.embeddings_initializer,
-                                                       embeddings_regularizer=l2(l2_reg),
-                                                       name=prefix + '_emb_' + feat.embedding_name)
+                        embeddings_initializer=feat.embeddings_initializer,
+                        embeddings_regularizer=l2(l2_reg),
+                        name=prefix + '_emb_' + feat.embedding_name)
         emb.trainable = feat.trainable
         sparse_embedding[feat.embedding_name] = emb
 
@@ -38,11 +36,11 @@ def create_embedding_dict(sparse_feature_columns, varlen_sparse_feature_columns,
         for feat in varlen_sparse_feature_columns:
             # if feat.name not in sparse_embedding:
             emb = Embedding(feat.vocabulary_size, feat.embedding_dim,
-                                                              embeddings_initializer=feat.embeddings_initializer,
-                                                              embeddings_regularizer=l2(
-                                                                  l2_reg),
-                                                              name=prefix + '_seq_emb_' + feat.name,
-                                                              mask_zero=seq_mask_zero)
+                            embeddings_initializer=feat.embeddings_initializer,
+                            embeddings_regularizer=l2(
+                                l2_reg),
+                            name=prefix + '_seq_emb_' + feat.name,
+                            mask_zero=seq_mask_zero)
             emb.trainable = feat.trainable
             sparse_embedding[feat.embedding_name] = emb
     return sparse_embedding
@@ -134,11 +132,13 @@ def get_varlen_pooling_list(embedding_dict, features, varlen_sparse_feature_colu
 
 
 def get_dense_input(features, feature_columns):
-    dense_feature_columns = list(filter(lambda x: isinstance(x, fc_lib.DenseFeat), feature_columns)) if feature_columns else []
+    dense_feature_columns = list(
+        filter(lambda x: isinstance(x, fc_lib.DenseFeat), feature_columns)) if feature_columns else []
     dense_input_list = []
     for fc in dense_feature_columns:
         dense_input_list.append(features[fc.name])
     return dense_input_list
+
 
 def mergeDict(a, b):
     c = defaultdict(list)
@@ -147,5 +147,3 @@ def mergeDict(a, b):
     for k, v in b.items():
         c[k].extend(v)
     return c
-
-

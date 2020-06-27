@@ -7,8 +7,8 @@ Reference:
     [1] Cheng H T, Koc L, Harmsen J, et al. Wide & deep learning for recommender systems[C]//Proceedings of the 1st Workshop on Deep Learning for Recommender Systems. ACM, 2016: 7-10.(https://arxiv.org/pdf/1606.07792.pdf)
 """
 
-from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.layers import Dense
+from tensorflow.python.keras.models import Model
 
 from ..feature_column import build_input_features, get_linear_logit, input_from_feature_columns
 from ..layers.core import PredictionLayer, DNN
@@ -16,7 +16,7 @@ from ..layers.utils import add_func, combined_dnn_input
 
 
 def WDL(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128), l2_reg_linear=1e-5,
-        l2_reg_embedding=1e-5, l2_reg_dnn=0,seed=1024, dnn_dropout=0, dnn_activation='relu',
+        l2_reg_embedding=1e-5, l2_reg_dnn=0, seed=1024, dnn_dropout=0, dnn_activation='relu',
         task='binary'):
     """Instantiates the Wide&Deep Learning architecture.
 
