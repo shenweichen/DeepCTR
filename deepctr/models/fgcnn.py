@@ -11,7 +11,7 @@ Reference:
 """
 import tensorflow as tf
 
-from ..inputs import build_input_features, input_from_feature_columns, get_linear_logit
+from ..feature_column import build_input_features, get_linear_logit, input_from_feature_columns
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import InnerProductLayer, FGCNNLayer
 from ..layers.utils import concat_func, add_func
@@ -25,7 +25,7 @@ def unstack(input_tensor):
 def FGCNN(linear_feature_columns,dnn_feature_columns, conv_kernel_width=(7, 7, 7, 7), conv_filters=(14, 16, 18, 20),
           new_maps=(3, 3, 3, 3),
           pooling_width=(2, 2, 2, 2), dnn_hidden_units=(128,),l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_dnn=0, dnn_dropout=0,
-          init_std=0.0001, seed=1024,
+          seed=1024,
           task='binary', ):
     """Instantiates the Feature Generation by Convolutional Neural Network architecture.
 
@@ -40,7 +40,6 @@ def FGCNN(linear_feature_columns,dnn_feature_columns, conv_kernel_width=(7, 7, 7
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
     :param l2_reg_dnn: float. L2 regularizer strength applied to DNN
     :param dnn_dropout: float in [0,1), the probability we will drop out a given DNN coordinate.
-    :param init_std: float,to use as the initialize std of embedding vector
     :param seed: integer ,to use as random seed.
     :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
     :return: A Keras model instance.
@@ -54,11 +53,11 @@ def FGCNN(linear_feature_columns,dnn_feature_columns, conv_kernel_width=(7, 7, 7
 
     inputs_list = list(features.values())
 
-    linear_logit = get_linear_logit(features, linear_feature_columns, init_std=init_std, seed=seed, prefix='linear',
+    linear_logit = get_linear_logit(features, linear_feature_columns, seed=seed, prefix='linear',
                                     l2_reg=l2_reg_linear)
 
-    deep_emb_list, _ = input_from_feature_columns(features, dnn_feature_columns, l2_reg_embedding, init_std, seed)
-    fg_deep_emb_list,_ = input_from_feature_columns(features, dnn_feature_columns, l2_reg_embedding, init_std, seed,
+    deep_emb_list, _ = input_from_feature_columns(features, dnn_feature_columns, l2_reg_embedding, seed)
+    fg_deep_emb_list,_ = input_from_feature_columns(features, dnn_feature_columns, l2_reg_embedding, seed,
                                                     prefix='fg')
 
 

@@ -58,6 +58,8 @@ class AFMLayer(Layer):
     def build(self, input_shape):
 
         if not isinstance(input_shape, list) or len(input_shape) < 2:
+            #input_shape = input_shape[0]
+            #if not isinstance(input_shape, list) or len(input_shape) < 2:
             raise ValueError('A `AttentionalFM` layer should be called '
                              'on a list of at least 2 inputs')
 
@@ -124,7 +126,7 @@ class AFMLayer(Layer):
         attention_output = reduce_sum(
             self.normalized_att_score * bi_interaction, axis=1)
 
-        attention_output = self.dropout(attention_output)  # training
+        attention_output = self.dropout(attention_output,training=training)  # training
 
         afm_out = self.tensordot([attention_output, self.projection_p])
         return afm_out
@@ -1171,7 +1173,7 @@ class FieldWiseBiInteraction(Layer):
         return dict(list(base_config.items()) + list(config.items()))
 
 
-class FwFM(Layer):
+class FwFMLayer(Layer):
     """Field-weighted Factorization Machines
 
       Input shape
@@ -1192,7 +1194,7 @@ class FwFM(Layer):
     def __init__(self, num_fields=4, regularizer=0.000001, **kwargs):
         self.num_fields = num_fields
         self.regularizer = regularizer
-        super(FwFM, self).__init__(**kwargs)
+        super(FwFMLayer, self).__init__(**kwargs)
 
     def build(self, input_shape):
         if len(input_shape) != 3:
@@ -1209,7 +1211,7 @@ class FwFM(Layer):
                                                regularizer=l2(self.regularizer),
                                                trainable=True)
 
-        super(FwFM, self).build(input_shape)  # Be sure to call this somewhere!
+        super(FwFMLayer, self).build(input_shape)  # Be sure to call this somewhere!
 
     def call(self, inputs, **kwargs):
         if K.ndim(inputs) != 3:
@@ -1240,7 +1242,7 @@ class FwFM(Layer):
         return (None, 1)
 
     def get_config(self):
-        config = super(FwFM, self).get_config().copy()
+        config = super(FwFMLayer, self).get_config().copy()
         config.update({
             'num_fields': self.num_fields,
             'regularizer': self.regularizer

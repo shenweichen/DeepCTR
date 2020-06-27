@@ -11,12 +11,12 @@ from tensorflow.python.keras import backend as K
 from tensorflow.python.keras.layers import Input, Masking
 from tensorflow.python.keras.models import Model, load_model, save_model
 
-from deepctr.inputs import SparseFeat, DenseFeat, VarLenSparseFeat,DEFAULT_GROUP_NAME
+from deepctr.feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, DEFAULT_GROUP_NAME
 from deepctr.layers import custom_objects
 
 SAMPLE_SIZE = 8
 VOCABULARY_SIZE = 4
-
+Estimator_TEST_TF1 = True
 
 def gen_sequence(dim, max_len, sample_size):
     return np.array([np.random.randint(0, dim, max_len) for _ in range(sample_size)]), np.random.randint(1, max_len + 1,
@@ -354,3 +354,36 @@ def check_model(model, model_name, x, y, check_model_io=True):
         print(model_name + " test save load model pass!")
 
     print(model_name + " test pass!")
+
+def get_test_data_estimator(sample_size=1000, embedding_size=4, sparse_feature_num=1, dense_feature_num=1, classification=True):
+
+    x = {}
+    dnn_feature_columns = []
+    linear_feature_columns = []
+    voc_size = 4
+    for i in range(sparse_feature_num):
+        name = 's_'+str(i)
+        x[name] = np.random.randint(0, voc_size, sample_size)
+        dnn_feature_columns.append(tf.feature_column.embedding_column(tf.feature_column.categorical_column_with_identity(name,voc_size),embedding_size))
+        linear_feature_columns.append(tf.feature_column.categorical_column_with_identity(name, voc_size))
+
+    for i in range(dense_feature_num):
+        name = 'd_'+str(i)
+        x[name] = np.random.random(sample_size)
+        dnn_feature_columns.append(tf.feature_column.numeric_column(name))
+        linear_feature_columns.append(tf.feature_column.numeric_column(name))
+
+    if classification:
+        y = np.random.randint(0, 2, sample_size)
+    else:
+        y = np.random.random(sample_size)
+    if tf.__version__ >= "2.0.0":
+        input_fn = tf.compat.v1.estimator.inputs.numpy_input_fn(x, y, shuffle=False)
+    else:
+        input_fn = tf.estimator.inputs.numpy_input_fn(x, y, shuffle=False)
+
+    return linear_feature_columns,dnn_feature_columns,input_fn
+
+def check_estimator(model,input_fn):
+    model.train(input_fn)
+    model.evaluate(input_fn)

@@ -1,5 +1,5 @@
 from deepctr.models import DeepFM
-from deepctr.inputs import DenseFeat, SparseFeat, get_feature_names
+from deepctr.feature_column import SparseFeat, DenseFeat,get_feature_names
 import numpy as np
 def test_long_dense_vector():
 

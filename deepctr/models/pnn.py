@@ -9,13 +9,13 @@ Reference:
 
 import tensorflow as tf
 
-from ..inputs import input_from_feature_columns, build_input_features, combined_dnn_input
+from ..feature_column import build_input_features, input_from_feature_columns
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import InnerProductLayer, OutterProductLayer
-from ..layers.utils import concat_func
+from ..layers.utils import concat_func, combined_dnn_input
 
 
-def PNN(dnn_feature_columns, dnn_hidden_units=(128, 128), l2_reg_embedding=1e-5, l2_reg_dnn=0, init_std=0.0001,
+def PNN(dnn_feature_columns, dnn_hidden_units=(128, 128), l2_reg_embedding=1e-5, l2_reg_dnn=0,
         seed=1024, dnn_dropout=0, dnn_activation='relu', use_inner=True, use_outter=False, kernel_type='mat',
         task='binary'):
     """Instantiates the Product-based Neural Network architecture.
@@ -24,7 +24,6 @@ def PNN(dnn_feature_columns, dnn_hidden_units=(128, 128), l2_reg_embedding=1e-5,
     :param dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of deep net
     :param l2_reg_embedding: float . L2 regularizer strength applied to embedding vector
     :param l2_reg_dnn: float. L2 regularizer strength applied to DNN
-    :param init_std: float,to use as the initialize std of embedding vector
     :param seed: integer ,to use as random seed.
     :param dnn_dropout: float in [0,1), the probability we will drop out a given DNN coordinate.
     :param dnn_activation: Activation function to use in DNN
@@ -43,7 +42,7 @@ def PNN(dnn_feature_columns, dnn_hidden_units=(128, 128), l2_reg_embedding=1e-5,
     inputs_list = list(features.values())
 
     sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
-                                                                         l2_reg_embedding, init_std, seed)
+                                                                         l2_reg_embedding, seed)
     inner_product = tf.keras.layers.Flatten()(
         InnerProductLayer()(sparse_embedding_list))
     outter_product = OutterProductLayer(kernel_type)(sparse_embedding_list)

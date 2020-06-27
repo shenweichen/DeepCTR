@@ -3,7 +3,7 @@ from sklearn.metrics import log_loss, roc_auc_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
-from deepctr.inputs import SparseFeat, get_feature_names
+from deepctr.feature_column import SparseFeat,get_feature_names
 from deepctr.models import FLEN
 
 if __name__ == "__main__":

@@ -12,10 +12,10 @@ from itertools import chain
 
 import tensorflow as tf
 
-from ..inputs import input_from_feature_columns, get_linear_logit, build_input_features, combined_dnn_input
+from ..feature_column import build_input_features, get_linear_logit, input_from_feature_columns
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import FieldWiseBiInteraction
-from ..layers.utils import concat_func, add_func
+from ..layers.utils import concat_func, add_func, combined_dnn_input
 
 
 def FLEN(linear_feature_columns,
@@ -24,7 +24,6 @@ def FLEN(linear_feature_columns,
          l2_reg_linear=0.00001,
          l2_reg_embedding=0.00001,
          l2_reg_dnn=0,
-         init_std=0.0001,
          seed=1024,
          dnn_dropout=0.0,
          dnn_activation='relu',
@@ -38,7 +37,6 @@ def FLEN(linear_feature_columns,
     :param l2_reg_linear: float. L2 regularizer strength applied to linear part
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
     :param l2_reg_dnn: float. L2 regularizer strength applied to DNN
-    :param init_std: float,to use as the initialize std of embedding vector
     :param seed: integer ,to use as random seed.
     :param dnn_dropout: float in [0,1), the probability we will drop out a given DNN coordinate.
     :param dnn_activation: Activation function to use in DNN
@@ -56,13 +54,11 @@ def FLEN(linear_feature_columns,
         features,
         dnn_feature_columns,
         l2_reg_embedding,
-        init_std,
         seed,
         support_group=True)
 
     linear_logit = get_linear_logit(features,
                                     linear_feature_columns,
-                                    init_std=init_std,
                                     seed=seed,
                                     prefix='linear',
                                     l2_reg=l2_reg_linear)

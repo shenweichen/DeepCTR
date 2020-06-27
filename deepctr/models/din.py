@@ -10,15 +10,16 @@ Reference:
 from tensorflow.python.keras.layers import Dense,Concatenate, Flatten
 from tensorflow.python.keras.models import Model
 
-from ..inputs import  build_input_features,create_embedding_matrix,SparseFeat,VarLenSparseFeat,DenseFeat,embedding_lookup,get_dense_input,varlen_embedding_lookup,get_varlen_pooling_list,combined_dnn_input
+from ..inputs import create_embedding_matrix, embedding_lookup,get_dense_input,varlen_embedding_lookup,get_varlen_pooling_list
+from ..feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, build_input_features
 from ..layers.core import DNN, PredictionLayer
 from ..layers.sequence import AttentionSequencePoolingLayer
-from ..layers.utils import concat_func, NoMask
+from ..layers.utils import concat_func, NoMask, combined_dnn_input
 
 
 def DIN(dnn_feature_columns, history_feature_list, dnn_use_bn=False,
         dnn_hidden_units=(200, 80), dnn_activation='relu', att_hidden_size=(80, 40), att_activation="dice",
-        att_weight_normalization=False, l2_reg_dnn=0, l2_reg_embedding=1e-6, dnn_dropout=0, init_std=0.0001, seed=1024,
+        att_weight_normalization=False, l2_reg_dnn=0, l2_reg_embedding=1e-6, dnn_dropout=0, seed=1024,
         task='binary'):
     """Instantiates the Deep Interest Network architecture.
 
@@ -33,7 +34,6 @@ def DIN(dnn_feature_columns, history_feature_list, dnn_use_bn=False,
     :param l2_reg_dnn: float. L2 regularizer strength applied to DNN
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
     :param dnn_dropout: float in [0,1), the probability we will drop out a given DNN coordinate.
-    :param init_std: float,to use as the initialize std of embedding vector
     :param seed: integer ,to use as random seed.
     :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
     :return: A Keras model instance.
@@ -63,7 +63,7 @@ def DIN(dnn_feature_columns, history_feature_list, dnn_use_bn=False,
     inputs_list = list(features.values())
 
 
-    embedding_dict = create_embedding_matrix(dnn_feature_columns, l2_reg_embedding, init_std, seed, prefix="")
+    embedding_dict = create_embedding_matrix(dnn_feature_columns, l2_reg_embedding, seed, prefix="")
 
 
     query_emb_list = embedding_lookup(embedding_dict, features, sparse_feature_columns, history_feature_list,
