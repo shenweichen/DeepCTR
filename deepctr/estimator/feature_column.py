@@ -27,12 +27,12 @@ def get_linear_logit(features, linear_feature_columns, l2_reg_linear=0):
     return linear_logits
 
 
-def input_from_feature_columns(features, feature_columns, l2_reg_embedding=0.0, expand_dim=True):
+def input_from_feature_columns(features, feature_columns, l2_reg_embedding=0.0):
     dense_value_list = []
     sparse_emb_list = []
     for feat in feature_columns:
         if is_embedding(feat):
-            sparse_emb = input_layer(features, [feat])
+            sparse_emb = tf.expand_dims(input_layer(features, [feat]), axis=1)
             sparse_emb_list.append(sparse_emb)
             if l2_reg_embedding > 0:
                 get_losses().add_loss(tf.nn.l2_loss(sparse_emb, name=feat.name + "_l2loss"),
@@ -40,9 +40,6 @@ def input_from_feature_columns(features, feature_columns, l2_reg_embedding=0.0, 
 
         else:
             dense_value_list.append(input_layer(features, [feat]))
-
-    if expand_dim:
-        sparse_emb_list = [tf.expand_dims(x, axis=1) for x in sparse_emb_list]
 
     return sparse_emb_list, dense_value_list
 
