@@ -332,7 +332,7 @@ and run the following codes.
 import tensorflow as tf
 
 from deepctr.estimator.inputs import input_fn_tfrecord
-from deepctr.estimator.models import DeepFMEstimator
+from deepctr.estimator import DeepFMEstimator
 
 if __name__ == "__main__":
 

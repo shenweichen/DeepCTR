@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 from deepctr.estimator.inputs import input_fn_tfrecord
-from deepctr.estimator.models import DeepFMEstimator
+from deepctr.estimator import DeepFMEstimator
 
 if __name__ == "__main__":
 
@@ -38,8 +38,5 @@ if __name__ == "__main__":
     eval_result = model.evaluate(test_model_input)
 
     print(eval_result)
-    # all_input = linear_feature_columns + dnn_feature_columns
-    # feature_spec = tf.feature_column.make_parse_example_spec(all_input)
-    # ser_input_fn = tf.estimator.export.build_parsing_serving_input_receiver_fn(feature_spec)
-    # export_model = model.export_savedmodel('./serv/',ser_input_fn)
+
 
