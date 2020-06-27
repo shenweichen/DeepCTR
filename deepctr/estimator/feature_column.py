@@ -22,7 +22,7 @@ def get_linear_logit(features, linear_feature_columns, l2_reg_linear=0):
 
             if l2_reg_linear > 0:
                 for var in get_collection(get_GraphKeys().TRAINABLE_VARIABLES, LINEAR_SCOPE_NAME)[:-1]:
-                    get_losses().add_loss(tf.nn.l2_loss(var, name=var.name.split(":")[0] + "_l2loss"),
+                    get_losses().add_loss(2*l2_reg_linear*tf.nn.l2_loss(var, name=var.name.split(":")[0] + "_l2loss"),
                                           get_GraphKeys().REGULARIZATION_LOSSES)
     return linear_logits
 
@@ -35,7 +35,7 @@ def input_from_feature_columns(features, feature_columns, l2_reg_embedding=0.0):
             sparse_emb = tf.expand_dims(input_layer(features, [feat]), axis=1)
             sparse_emb_list.append(sparse_emb)
             if l2_reg_embedding > 0:
-                get_losses().add_loss(tf.nn.l2_loss(sparse_emb, name=feat.name + "_l2loss"),
+                get_losses().add_loss(2*l2_reg_embedding*tf.nn.l2_loss(sparse_emb, name=feat.name + "_l2loss"),
                                       get_GraphKeys().REGULARIZATION_LOSSES)
 
         else:
