@@ -79,7 +79,7 @@ def CCPMEstimator(linear_feature_columns, dnn_feature_columns, conv_kernel_width
 
             flatten_result = tf.keras.layers.Flatten()(pooling_result)
             dnn_out = DNN(dnn_hidden_units, l2_reg=l2_reg_dnn,
-                          dropout_rate=dnn_dropout)(flatten_result, training=train_flag)
+                          dropout_rate=dnn_dropout,seed=seed)(flatten_result, training=train_flag)
             dnn_logit = tf.keras.layers.Dense(1, use_bias=False)(dnn_out)
 
         logits = linear_logits + dnn_logit

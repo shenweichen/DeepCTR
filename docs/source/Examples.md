@@ -331,8 +331,8 @@ and run the following codes.
 ```python
 import tensorflow as tf
 
-from deepctr.estimator.inputs import input_fn_tfrecord
 from deepctr.estimator import DeepFMEstimator
+from deepctr.estimator.inputs import input_fn_tfrecord
 
 if __name__ == "__main__":
 
@@ -359,11 +359,13 @@ if __name__ == "__main__":
         {k: tf.FixedLenFeature(dtype=tf.float32, shape=1) for k in dense_features})
     feature_description['label'] = tf.FixedLenFeature(dtype=tf.float32, shape=1)
 
-    train_model_input = input_fn_tfrecord('./criteo_sample.tr.tfrecords',feature_description,'label',batch_size=256,num_epochs=1)
-    test_model_input = input_fn_tfrecord('./criteo_sample.te.tfrecords', feature_description, 'label',batch_size=2**14,num_epochs=1)
+    train_model_input = input_fn_tfrecord('./criteo_sample.tr.tfrecords', feature_description, 'label', batch_size=256,
+                                          num_epochs=1, shuffle_factor=10)
+    test_model_input = input_fn_tfrecord('./criteo_sample.te.tfrecords', feature_description, 'label',
+                                         batch_size=2 ** 14, num_epochs=1, shuffle_factor=0)
 
     # 3.Define Model,train,predict and evaluate
-    model = DeepFMEstimator(linear_feature_columns, dnn_feature_columns, l2_reg_dnn=0, l2_reg_embedding=0.0, l2_reg_linear=1e-5)
+    model = DeepFMEstimator(linear_feature_columns, dnn_feature_columns, task='binary')
 
     model.train(train_model_input)
     eval_result = model.evaluate(test_model_input)
@@ -383,11 +385,11 @@ from sklearn.metrics import log_loss, roc_auc_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 
-from deepctr.estimator.inputs import input_fn_pandas
 from deepctr.estimator import DeepFMEstimator
+from deepctr.estimator.inputs import input_fn_pandas
 
 if __name__ == "__main__":
-    data = pd.read_csv('../criteo_sample.txt')
+    data = pd.read_csv('./criteo_sample.txt')
 
     sparse_features = ['C' + str(i) for i in range(1, 27)]
     dense_features = ['I' + str(i) for i in range(1, 14)]
@@ -422,15 +424,15 @@ if __name__ == "__main__":
 
     # Not setting default value for continuous feature. filled with mean.
 
-    train_model_input = input_fn_pandas(train,sparse_features+dense_features,'label')
-    test_model_input = input_fn_pandas(test,sparse_features+dense_features,None)
+    train_model_input = input_fn_pandas(train, sparse_features + dense_features, 'label', shuffle=True)
+    test_model_input = input_fn_pandas(test, sparse_features + dense_features, None, shuffle=False)
 
     # 4.Define Model,train,predict and evaluate
-    model = DeepFMEstimator(linear_feature_columns, dnn_feature_columns)
+    model = DeepFMEstimator(linear_feature_columns, dnn_feature_columns, task='binary')
 
     model.train(train_model_input)
     pred_ans_iter = model.predict(test_model_input)
-    pred_ans = list(map(lambda x:x['pred'],pred_ans_iter))
+    pred_ans = list(map(lambda x: x['pred'], pred_ans_iter))
     #
     print("test LogLoss", round(log_loss(test[target].values, pred_ans), 4))
     print("test AUC", round(roc_auc_score(test[target].values, pred_ans), 4))
