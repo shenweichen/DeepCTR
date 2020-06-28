@@ -6,11 +6,14 @@ Author:
 
 """
 
-import sys
-
 import tensorflow as tf
 from tensorflow.python.keras.initializers import Zeros
 from tensorflow.python.keras.layers import Layer
+
+try:
+    unicode
+except NameError:
+    unicode = str
 
 
 class Dice(Layer):
@@ -61,9 +64,9 @@ class Dice(Layer):
 
 
 def activation_layer(activation):
-    if activation == "dice" or activation == "Dice":
+    if activation in ("dice", "Dice"):
         act_layer = Dice()
-    elif (isinstance(activation, str)) or (sys.version_info.major == 2 and isinstance(activation, (str, unicode))):
+    elif isinstance(activation, (str, unicode)):
         act_layer = tf.keras.layers.Activation(activation)
     elif issubclass(activation, Layer):
         act_layer = activation()
