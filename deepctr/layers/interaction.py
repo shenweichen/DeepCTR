@@ -1022,12 +1022,13 @@ class BilinearInteraction(Layer):
             raise ValueError(
                 "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
 
+        n = len(inputs)
         if self.bilinear_type == "all":
-            p = [tf.multiply(tf.tensordot(v_i, self.W, axes=(-1, 0)), v_j)
-                 for v_i, v_j in itertools.combinations(inputs, 2)]
+            vidots = [tf.tensordot(inputs[i], self.W, axes=(-1, 0)) for i in range(n)]
+            p = [tf.multiply(vidots[i], inputs[j]) for i, j in itertools.combinations(range(n), 2)]
         elif self.bilinear_type == "each":
-            p = [tf.multiply(tf.tensordot(inputs[i], self.W_list[i], axes=(-1, 0)), inputs[j])
-                 for i, j in itertools.combinations(range(len(inputs)), 2)]
+            vidots = [tf.tensordot(inputs[i], self.W_list[i], axes=(-1, 0)) for i in range(n - 1)]
+            p = [tf.multiply(vidots[i], inputs[j]) for i, j in itertools.combinations(range(n), 2)]
         elif self.bilinear_type == "interaction":
             p = [tf.multiply(tf.tensordot(v[0], w, axes=(-1, 0)), v[1])
                  for v, w in zip(itertools.combinations(inputs, 2), self.W_list)]
