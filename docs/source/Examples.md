@@ -259,7 +259,7 @@ if __name__ == "__main__":
 
 
     # 3.generate input data for model
-    model_input = {name:data[name] for name in sparse_features}#
+    model_input = {name:data[name] for name in feature_names}#
     model_input["genres"] = genres_list
     model_input["genres_weight"] =  np.random.randn(data.shape[0],max_len,1)
 
