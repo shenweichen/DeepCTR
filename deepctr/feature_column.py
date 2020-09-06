@@ -169,9 +169,6 @@ def get_linear_logit(features, feature_columns, units=1, use_bias=False, seed=10
     return concat_func(linear_logit_list)
 
 
-DEFAULT_GROUP_NAME = "default_group"
-
-
 def input_from_feature_columns(features, feature_columns, l2_reg, seed, prefix='', seq_mask_zero=True,
                                support_dense=True, support_group=False):
     sparse_feature_columns = list(

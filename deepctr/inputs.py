@@ -12,7 +12,7 @@ from itertools import chain
 from tensorflow.python.keras.layers import Embedding
 from tensorflow.python.keras.regularizers import l2
 
-from . import feature_column as fc_lib
+import deepctr.feature_column as fc_lib
 from .layers.sequence import SequencePoolingLayer, WeightedSequenceLayer
 from .layers.utils import Hash
 

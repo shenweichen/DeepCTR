@@ -53,7 +53,23 @@ Let's [**Get Started!**](https://deepctr-doc.readthedocs.io/en/latest/Quick-Star
 |                FiBiNET                 | [RecSys 2019][FiBiNET: Combining Feature Importance and Bilinear feature Interaction for Click-Through Rate Prediction](https://arxiv.org/pdf/1905.09433.pdf)   |
 |                FLEN                    | [arxiv 2019][FLEN: Leveraging Field for Scalable CTR Prediction](https://arxiv.org/pdf/1911.04690.pdf)   |
 
+## Citation
 
+- Weichen Shen.  DeepCTR: Easy-to-use,modularand extendible package of deep-learning based ctr models. https://github.com/shenweichen/deepctr, 2018.
+
+
+If you find this code useful in your research, please cite it using the following BibTeX:
+
+```bibtex
+@misc{shen2018deepctr,
+  author = {Weichen Shen},
+  title = {DeepCTR: Easy-to-use,Modular and Extendible package of deep-learning based CTR models},
+  year = {2018},
+  publisher = {GitHub},
+  journal = {GitHub Repository},
+  howpublished = {\url{https://github.com/shenweichen/deepctr}},
+}
+```
 
 ## DisscussionGroup  
 
