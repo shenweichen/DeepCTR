@@ -55,7 +55,7 @@ Let's [**Get Started!**](https://deepctr-doc.readthedocs.io/en/latest/Quick-Star
 
 ## Citation
 
-- Weichen Shen.  DeepCTR: Easy-to-use,modularand extendible package of deep-learning based ctr models. https://github.com/shenweichen/deepctr, 2018.
+- Weichen Shen. (2018). DeepCTR: Easy-to-use,Modular and Extendible package of deep-learning based CTR models. https://github.com/shenweichen/deepctr.
 
 
 If you find this code useful in your research, please cite it using the following BibTeX:

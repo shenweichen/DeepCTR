@@ -169,10 +169,9 @@ def DIEN(dnn_feature_columns, history_feature_list,
     :return: A Keras model instance.
 
     """
-
     features = build_input_features(dnn_feature_columns)
 
-    user_behavior_length = Input(shape=(1,), name='seq_length')
+    user_behavior_length = features["seq_length"]
 
     sparse_feature_columns = list(
         filter(lambda x: isinstance(x, SparseFeat), dnn_feature_columns)) if dnn_feature_columns else []
@@ -245,14 +244,14 @@ def DIEN(dnn_feature_columns, history_feature_list,
 
     # model_input_list = get_inputs_list(
     #    [sparse_input, dense_input, user_behavior_input])
-    model_input_list = inputs_list
+    #model_input_list = inputs_list
 
     # if use_negsampling:
     #    model_input_list += list(neg_user_behavior_input.values())
 
-    model_input_list += [user_behavior_length]
+    #model_input_list += [user_behavior_length]
 
-    model = tf.keras.models.Model(inputs=model_input_list, outputs=output)
+    model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
 
     if use_negsampling:
         model.add_loss(alpha * aux_loss_1)
