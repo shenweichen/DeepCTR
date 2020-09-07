@@ -2,7 +2,7 @@ from collections import namedtuple, OrderedDict
 from copy import copy
 from itertools import chain
 
-from tensorflow.python.keras.initializers import RandomNormal
+from tensorflow.python.keras.initializers import RandomNormal, Zeros
 from tensorflow.python.keras.layers import Input
 
 from .inputs import create_embedding_matrix, embedding_lookup, get_dense_input, varlen_embedding_lookup, \
@@ -139,10 +139,12 @@ def get_linear_logit(features, feature_columns, units=1, use_bias=False, seed=10
     linear_feature_columns = copy(feature_columns)
     for i in range(len(linear_feature_columns)):
         if isinstance(linear_feature_columns[i], SparseFeat):
-            linear_feature_columns[i] = linear_feature_columns[i]._replace(embedding_dim=1)
+            linear_feature_columns[i] = linear_feature_columns[i]._replace(embedding_dim=1,
+                                                                           embeddings_initializer=Zeros())
         if isinstance(linear_feature_columns[i], VarLenSparseFeat):
             linear_feature_columns[i] = linear_feature_columns[i]._replace(
-                sparsefeat=linear_feature_columns[i].sparsefeat._replace(embedding_dim=1))
+                sparsefeat=linear_feature_columns[i].sparsefeat._replace(embedding_dim=1,
+                                                                         embeddings_initializer=Zeros()))
 
     linear_emb_list = [input_from_feature_columns(features, linear_feature_columns, l2_reg, seed,
                                                   prefix=prefix + str(i))[0] for i in range(units)]
