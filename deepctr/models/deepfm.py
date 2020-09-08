@@ -12,6 +12,8 @@ from itertools import chain
 
 import tensorflow as tf
 
+from tensorflow.python.keras.initializers import glorot_normal
+
 from ..feature_column import build_input_features, get_linear_logit, DEFAULT_GROUP_NAME, input_from_feature_columns
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import FM
@@ -57,7 +59,7 @@ def DeepFM(linear_feature_columns, dnn_feature_columns, fm_group=[DEFAULT_GROUP_
     dnn_output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
                      dnn_use_bn, seed)(dnn_input)
     dnn_logit = tf.keras.layers.Dense(
-        1, use_bias=False, activation=None)(dnn_output)
+        1, use_bias=False, activation=None, kernel_initializer=glorot_normal(seed=seed))(dnn_output)
 
     final_logit = add_func([linear_logit, fm_logit, dnn_logit])
 
