@@ -8,7 +8,7 @@ Reference:
 """
 
 import tensorflow as tf
-from tensorflow.python.keras.layers import (Concatenate, Dense, Input, Permute, multiply)
+from tensorflow.python.keras.layers import (Concatenate, Dense, Permute, multiply)
 
 from ..feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, build_input_features
 from ..inputs import get_varlen_pooling_list, create_embedding_matrix, embedding_lookup, varlen_embedding_lookup, \
@@ -35,9 +35,11 @@ def auxiliary_loss(h_states, click_seq, noclick_seq, mask, stag=None):
 
     noclick_input_ = tf.concat([h_states, noclick_seq], -1)
 
-    click_prop_ = auxiliary_net(click_input_, stag=stag)[:, :, 0]
+    auxiliary_nn = DNN([100, 50, 1], activation='sigmoid')
 
-    noclick_prop_ = auxiliary_net(noclick_input_, stag=stag)[
+    click_prop_ = auxiliary_nn(click_input_, stag=stag)[:, :, 0]
+
+    noclick_prop_ = auxiliary_nn(noclick_input_, stag=stag)[
                     :, :, 0]  # [B,T-1]
 
     try:
@@ -241,15 +243,6 @@ def DIEN(dnn_feature_columns, history_feature_list,
                  dnn_dropout, use_bn, seed)(dnn_input)
     final_logit = Dense(1, use_bias=False)(output)
     output = PredictionLayer(task)(final_logit)
-
-    # model_input_list = get_inputs_list(
-    #    [sparse_input, dense_input, user_behavior_input])
-    #model_input_list = inputs_list
-
-    # if use_negsampling:
-    #    model_input_list += list(neg_user_behavior_input.values())
-
-    #model_input_list += [user_behavior_length]
 
     model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
 
