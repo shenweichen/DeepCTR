@@ -11,11 +11,11 @@ import itertools
 
 import tensorflow as tf
 from tensorflow.python.keras import backend as K
+from tensorflow.python.keras.backend import batch_dot
 from tensorflow.python.keras.initializers import (Zeros, glorot_normal,
                                                   glorot_uniform, TruncatedNormal)
 from tensorflow.python.keras.layers import Layer
 from tensorflow.python.keras.regularizers import l2
-from tensorflow.python.keras.backend import batch_dot
 from tensorflow.python.layers import utils
 
 from .activation import activation_layer
@@ -58,8 +58,8 @@ class AFMLayer(Layer):
     def build(self, input_shape):
 
         if not isinstance(input_shape, list) or len(input_shape) < 2:
-            #input_shape = input_shape[0]
-            #if not isinstance(input_shape, list) or len(input_shape) < 2:
+            # input_shape = input_shape[0]
+            # if not isinstance(input_shape, list) or len(input_shape) < 2:
             raise ValueError('A `AttentionalFM` layer should be called '
                              'on a list of at least 2 inputs')
 
@@ -126,7 +126,7 @@ class AFMLayer(Layer):
         attention_output = reduce_sum(
             self.normalized_att_score * bi_interaction, axis=1)
 
-        attention_output = self.dropout(attention_output,training=training)  # training
+        attention_output = self.dropout(attention_output, training=training)  # training
 
         afm_out = self.tensordot([attention_output, self.projection_p])
         return afm_out
@@ -1022,12 +1022,13 @@ class BilinearInteraction(Layer):
             raise ValueError(
                 "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
 
+        n = len(inputs)
         if self.bilinear_type == "all":
-            p = [tf.multiply(tf.tensordot(v_i, self.W, axes=(-1, 0)), v_j)
-                 for v_i, v_j in itertools.combinations(inputs, 2)]
+            vidots = [tf.tensordot(inputs[i], self.W, axes=(-1, 0)) for i in range(n)]
+            p = [tf.multiply(vidots[i], inputs[j]) for i, j in itertools.combinations(range(n), 2)]
         elif self.bilinear_type == "each":
-            p = [tf.multiply(tf.tensordot(inputs[i], self.W_list[i], axes=(-1, 0)), inputs[j])
-                 for i, j in itertools.combinations(range(len(inputs)), 2)]
+            vidots = [tf.tensordot(inputs[i], self.W_list[i], axes=(-1, 0)) for i in range(n - 1)]
+            p = [tf.multiply(vidots[i], inputs[j]) for i, j in itertools.combinations(range(n), 2)]
         elif self.bilinear_type == "interaction":
             p = [tf.multiply(tf.tensordot(v[0], w, axes=(-1, 0)), v[1])
                  for v, w in zip(itertools.combinations(inputs, 2), self.W_list)]
