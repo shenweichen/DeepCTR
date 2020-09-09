@@ -60,7 +60,7 @@ class Hash(tf.keras.layers.Layer):
 
 class Linear(tf.keras.layers.Layer):
 
-    def __init__(self, l2_reg=0.0, mode=0, use_bias=False, **kwargs):
+    def __init__(self, l2_reg=0.0, mode=0, use_bias=False, seed=1024, **kwargs):
 
         self.l2_reg = l2_reg
         # self.l2_reg = tf.contrib.layers.l2_regularizer(float(l2_reg_linear))
@@ -68,6 +68,7 @@ class Linear(tf.keras.layers.Layer):
             raise ValueError("mode must be 0,1 or 2")
         self.mode = mode
         self.use_bias = use_bias
+        self.seed = seed
         super(Linear, self).__init__(**kwargs)
 
     def build(self, input_shape):
@@ -80,14 +81,14 @@ class Linear(tf.keras.layers.Layer):
             self.kernel = self.add_weight(
                 'linear_kernel',
                 shape=[int(input_shape[-1]), 1],
-                initializer=tf.keras.initializers.glorot_normal(),
+                initializer=tf.keras.initializers.glorot_normal(self.seed),
                 regularizer=tf.keras.regularizers.l2(self.l2_reg),
                 trainable=True)
         elif self.mode == 2:
             self.kernel = self.add_weight(
                 'linear_kernel',
                 shape=[int(input_shape[1][-1]), 1],
-                initializer=tf.keras.initializers.glorot_normal(),
+                initializer=tf.keras.initializers.glorot_normal(self.seed),
                 regularizer=tf.keras.regularizers.l2(self.l2_reg),
                 trainable=True)
 
@@ -188,7 +189,7 @@ def reduce_max(input_tensor,
 def div(x, y, name=None):
     try:
         return tf.div(x, y, name=name)
-    except TypeError:
+    except AttributeError:
         return tf.divide(x, y, name=name)
 
 

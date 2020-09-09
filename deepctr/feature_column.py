@@ -156,13 +156,13 @@ def get_linear_logit(features, feature_columns, units=1, use_bias=False, seed=10
         if len(linear_emb_list[i]) > 0 and len(dense_input_list) > 0:
             sparse_input = concat_func(linear_emb_list[i])
             dense_input = concat_func(dense_input_list)
-            linear_logit = Linear(l2_reg, mode=2, use_bias=use_bias)([sparse_input, dense_input])
+            linear_logit = Linear(l2_reg, mode=2, use_bias=use_bias, seed=seed)([sparse_input, dense_input])
         elif len(linear_emb_list[i]) > 0:
             sparse_input = concat_func(linear_emb_list[i])
-            linear_logit = Linear(l2_reg, mode=0, use_bias=use_bias)(sparse_input)
+            linear_logit = Linear(l2_reg, mode=0, use_bias=use_bias, seed=seed)(sparse_input)
         elif len(dense_input_list) > 0:
             dense_input = concat_func(dense_input_list)
-            linear_logit = Linear(l2_reg, mode=1, use_bias=use_bias)(dense_input)
+            linear_logit = Linear(l2_reg, mode=1, use_bias=use_bias, seed=seed)(dense_input)
         else:
             # raise NotImplementedError
             return add_func([])
