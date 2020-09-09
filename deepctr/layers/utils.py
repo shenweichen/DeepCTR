@@ -56,6 +56,10 @@ class Hash(tf.keras.layers.Layer):
             hash_x = (hash_x + 1) * mask
 
         return hash_x
+    def get_config(self, ):
+        config = {'num_buckets': self.num_buckets, 'mask_zero': self.mask_zero, }
+        base_config = super(Hash, self).get_config()
+        return dict(list(base_config.items()) + list(config.items()))
 
 
 class Linear(tf.keras.layers.Layer):
