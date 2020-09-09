@@ -190,9 +190,9 @@ def get_GraphKeys():
 
 def get_losses():
     try:
-        return tf.losses
-    except AttributeError:
         return tf.compat.v1.losses
+    except AttributeError:
+        return tf.losses
 
 
 def input_layer(features, feature_columns):
@@ -204,9 +204,9 @@ def input_layer(features, feature_columns):
 
 def get_metrics():
     try:
-        return tf.metrics
-    except AttributeError:
         return tf.compat.v1.metrics
+    except AttributeError:
+        return tf.metrics
 
 
 def to_float(x, name="ToFloat"):
