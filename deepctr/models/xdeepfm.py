@@ -55,14 +55,14 @@ def xDeepFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(256, 
     dnn_output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
                      dnn_use_bn, seed)(dnn_input)
     dnn_logit = tf.keras.layers.Dense(
-        1, use_bias=False, activation=None)(dnn_output)
+        1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(dnn_output)
 
     final_logit = add_func([linear_logit, dnn_logit])
 
     if len(cin_layer_size) > 0:
         exFM_out = CIN(cin_layer_size, cin_activation,
                        cin_split_half, l2_reg_cin, seed)(fm_input)
-        exFM_logit = tf.keras.layers.Dense(1, activation=None, )(exFM_out)
+        exFM_logit = tf.keras.layers.Dense(1, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(exFM_out)
         final_logit = add_func([final_logit, exFM_logit])
 
     output = PredictionLayer(task)(final_logit)

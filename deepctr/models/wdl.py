@@ -48,7 +48,7 @@ def WDL(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128)
     dnn_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
                   False, seed)(dnn_input)
     dnn_logit = Dense(
-        1, use_bias=False, activation=None)(dnn_out)
+        1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(dnn_out)
 
     final_logit = add_func([dnn_logit, linear_logit])
 

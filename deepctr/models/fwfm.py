@@ -63,7 +63,7 @@ def FwFM(linear_feature_columns, dnn_feature_columns, fm_group=[DEFAULT_GROUP_NA
         dnn_output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
                          dnn_use_bn, seed)(dnn_input)
         dnn_logit = tf.keras.layers.Dense(
-            1, use_bias=False, activation=None)(dnn_output)
+            1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(dnn_output)
         final_logit_components.append(dnn_logit)
 
     final_logit = add_func(final_logit_components)

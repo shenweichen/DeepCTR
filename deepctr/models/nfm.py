@@ -52,7 +52,7 @@ def NFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128)
     dnn_output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
                      False, seed)(dnn_input)
     dnn_logit = tf.keras.layers.Dense(
-        1, use_bias=False, activation=None)(dnn_output)
+        1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(dnn_output)
 
     final_logit = add_func([linear_logit, dnn_logit])
 

@@ -70,7 +70,7 @@ def CCPM(linear_feature_columns, dnn_feature_columns, conv_kernel_width=(6, 5), 
     flatten_result = tf.keras.layers.Flatten()(pooling_result)
     dnn_out = DNN(dnn_hidden_units, l2_reg=l2_reg_dnn,
                   dropout_rate=dnn_dropout)(flatten_result)
-    dnn_logit = tf.keras.layers.Dense(1, use_bias=False)(dnn_out)
+    dnn_logit = tf.keras.layers.Dense(1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(dnn_out)
 
     final_logit = add_func([dnn_logit, linear_logit])
 
