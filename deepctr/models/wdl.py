@@ -53,5 +53,5 @@ def WDL(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128)
 
     output = PredictionLayer(task)(final_logit)
 
-    model = tf.keras.Model(inputs=inputs_list, outputs=output)
+    model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
     return model
