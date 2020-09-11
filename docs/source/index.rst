@@ -43,7 +43,7 @@ You can read the latest code and related projects
 News
 -----
 
-09/11/2020 : Improve the reproducibility & fix some bugs. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.1>`_
+09/12/2020 : Improve the reproducibility & fix some bugs. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.1>`_
 
 06/27/2020 : Support ``Tensorflow Estimator`` for large scale data and distributed training.Support different initializers for different embedding weights and loading pretrained embeddings.Add new model ``FwFM``. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.0>`_
 
