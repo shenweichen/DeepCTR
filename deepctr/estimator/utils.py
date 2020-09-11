@@ -166,14 +166,6 @@ def variable_scope(name_or_scope):
     except AttributeError:
         return tf.compat.v1.variable_scope(name_or_scope)
 
-
-def name_scope(name, default_name=None, values=None):
-    try:
-        return tf.name_scope(name, default_name, values)
-    except AttributeError:
-        return tf.compat.v1.name_scope(name, default_name, values)
-
-
 def get_collection(key, scope=None):
     try:
         return tf.get_collection(key, scope=scope)

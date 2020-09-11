@@ -61,43 +61,6 @@ def auxiliary_loss(h_states, click_seq, noclick_seq, mask, stag=None):
 
     return loss_
 
-
-def auxiliary_net(in_, stag='auxiliary_net'):
-    try:
-        bn1 = tf.layers.batch_normalization(
-            inputs=in_, name='bn1' + stag, reuse=tf.AUTO_REUSE)
-    except:
-        bn1 = tf.compat.v1.layers.batch_normalization(
-            inputs=in_, name='bn1' + stag, reuse=tf.compat.v1.AUTO_REUSE)
-
-    try:  # todo
-        dnn1 = tf.layers.dense(bn1, 100, activation=None,
-                               name='f1' + stag, reuse=tf.AUTO_REUSE)
-    except:
-        dnn1 = tf.compat.v1.layers.dense(bn1, 100, activation=None,
-                                         name='f1' + stag, reuse=tf.compat.v1.AUTO_REUSE)
-
-    dnn1 = tf.nn.sigmoid(dnn1)
-    try:
-        dnn2 = tf.layers.dense(dnn1, 50, activation=None,
-                               name='f2' + stag, reuse=tf.AUTO_REUSE)
-    except:
-        dnn2 = tf.compat.v1.layers.dense(dnn1, 50, activation=None,
-                                         name='f2' + stag, reuse=tf.compat.v1.AUTO_REUSE)
-
-    dnn2 = tf.nn.sigmoid(dnn2)
-    try:
-        dnn3 = tf.layers.dense(dnn2, 1, activation=None,
-                               name='f3' + stag, reuse=tf.AUTO_REUSE)
-    except:
-        dnn3 = tf.compat.v1.layers.dense(dnn2, 1, activation=None,
-                                         name='f3' + stag, reuse=tf.compat.v1.AUTO_REUSE)
-
-    y_hat = tf.nn.sigmoid(dnn3)
-
-    return y_hat
-
-
 def interest_evolution(concat_behavior, deep_input_item, user_behavior_length, gru_type="GRU", use_neg=False,
                        neg_concat_behavior=None, att_hidden_size=(64, 16), att_activation='sigmoid',
                        att_weight_normalization=False, ):
