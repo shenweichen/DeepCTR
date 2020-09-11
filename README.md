@@ -71,7 +71,7 @@ If you find this code useful in your research, please cite it using the followin
 }
 ```
 
-## DisscussionGroup  
+## DisscussionGroup 交流群
 
 Please follow our wechat to join group:  
 - 公众号：**浅梦的学习笔记**  

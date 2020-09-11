@@ -49,7 +49,7 @@ News
 
 05/17/2020 : Fix numerical instability in ``LayerNormalization``. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.7.5>`_
 
-DisscussionGroup
+DisscussionGroup 交流群
 -----------------------
 
 公众号：**浅梦的学习笔记**  wechat ID: **deepctrbot**
