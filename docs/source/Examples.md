@@ -55,7 +55,7 @@ if __name__ == "__main__":
 
     # 3.generate input data for model
 
-    train, test = train_test_split(data, test_size=0.2)
+    train, test = train_test_split(data, test_size=0.2, random_state=2020)
     train_model_input = {name:train[name] for name in feature_names}
     test_model_input = {name:test[name] for name in feature_names}
 
@@ -110,7 +110,7 @@ if __name__ == "__main__":
 
     # 3.generate input data for model
 
-    train, test = train_test_split(data, test_size=0.2)
+    train, test = train_test_split(data, test_size=0.2, random_state=2020)
 
     train_model_input = {name:train[name] for name in feature_names}
     test_model_input = {name:test[name] for name in feature_names}
@@ -168,7 +168,7 @@ if __name__ == "__main__":
     feature_names = get_feature_names(linear_feature_columns + dnn_feature_columns)
 
     # 3.generate input data for model
-    train, test = train_test_split(data, test_size=0.2)
+    train, test = train_test_split(data, test_size=0.2, random_state=2020)
     train_model_input = {name:train[name].values for name in feature_names}
     test_model_input = {name:test[name].values for name in feature_names}
 
@@ -259,7 +259,7 @@ if __name__ == "__main__":
 
 
     # 3.generate input data for model
-    model_input = {name:data[name] for name in sparse_features}#
+    model_input = {name:data[name] for name in feature_names}#
     model_input["genres"] = genres_list
     model_input["genres_weight"] =  np.random.randn(data.shape[0],max_len,1)
 
@@ -420,7 +420,7 @@ if __name__ == "__main__":
 
     # 3.generate input data for model
 
-    train, test = train_test_split(data, test_size=0.2)
+    train, test = train_test_split(data, test_size=0.2, random_state=2020)
 
     # Not setting default value for continuous feature. filled with mean.
 

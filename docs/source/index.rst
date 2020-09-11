@@ -43,11 +43,11 @@ You can read the latest code and related projects
 News
 -----
 
+08/12/2020 : Improve the reproducibility & fix some bugs. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.1>`_
+
 06/27/2020 : Support ``Tensorflow Estimator`` for large scale data and distributed training.Support different initializers for different embedding weights and loading pretrained embeddings.Add new model ``FwFM``. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.0>`_
 
 05/17/2020 : Fix numerical instability in ``LayerNormalization``. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.7.5>`_
-
-03/15/2020 : Add `FLEN <./Features.html#flen-field-leveraged-embedding-network>`_ (`中文介绍 <https://zhuanlan.zhihu.com/p/92787577>`_) and ``FieldWiseBiInteraction``. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.7.4>`_
 
 DisscussionGroup
 -----------------------

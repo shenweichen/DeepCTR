@@ -41,9 +41,13 @@ class Hash(tf.keras.layers.Layer):
 
     def call(self, x, mask=None, **kwargs):
 
-        zero = tf.as_string(tf.zeros([1], dtype=x.dtype))
+
         if x.dtype != tf.string:
+            zero = tf.as_string(tf.zeros([1], dtype=x.dtype))
             x = tf.as_string(x, )
+        else:
+            zero = tf.as_string(tf.zeros([1], dtype='int32'))
+
         num_buckets = self.num_buckets if not self.mask_zero else self.num_buckets - 1
         try:
             hash_x = tf.string_to_hash_bucket_fast(x, num_buckets,
