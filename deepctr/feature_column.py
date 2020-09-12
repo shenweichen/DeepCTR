@@ -2,7 +2,7 @@ from collections import namedtuple, OrderedDict
 from copy import copy
 from itertools import chain
 
-from tensorflow.python.keras.initializers import RandomNormal
+from tensorflow.python.keras.initializers import RandomNormal, Zeros
 from tensorflow.python.keras.layers import Input
 
 from .inputs import create_embedding_matrix, embedding_lookup, get_dense_input, varlen_embedding_lookup, \
@@ -139,10 +139,12 @@ def get_linear_logit(features, feature_columns, units=1, use_bias=False, seed=10
     linear_feature_columns = copy(feature_columns)
     for i in range(len(linear_feature_columns)):
         if isinstance(linear_feature_columns[i], SparseFeat):
-            linear_feature_columns[i] = linear_feature_columns[i]._replace(embedding_dim=1)
+            linear_feature_columns[i] = linear_feature_columns[i]._replace(embedding_dim=1,
+                                                                           embeddings_initializer=Zeros())
         if isinstance(linear_feature_columns[i], VarLenSparseFeat):
             linear_feature_columns[i] = linear_feature_columns[i]._replace(
-                sparsefeat=linear_feature_columns[i].sparsefeat._replace(embedding_dim=1))
+                sparsefeat=linear_feature_columns[i].sparsefeat._replace(embedding_dim=1,
+                                                                         embeddings_initializer=Zeros()))
 
     linear_emb_list = [input_from_feature_columns(features, linear_feature_columns, l2_reg, seed,
                                                   prefix=prefix + str(i))[0] for i in range(units)]
@@ -154,22 +156,19 @@ def get_linear_logit(features, feature_columns, units=1, use_bias=False, seed=10
         if len(linear_emb_list[i]) > 0 and len(dense_input_list) > 0:
             sparse_input = concat_func(linear_emb_list[i])
             dense_input = concat_func(dense_input_list)
-            linear_logit = Linear(l2_reg, mode=2, use_bias=use_bias)([sparse_input, dense_input])
+            linear_logit = Linear(l2_reg, mode=2, use_bias=use_bias, seed=seed)([sparse_input, dense_input])
         elif len(linear_emb_list[i]) > 0:
             sparse_input = concat_func(linear_emb_list[i])
-            linear_logit = Linear(l2_reg, mode=0, use_bias=use_bias)(sparse_input)
+            linear_logit = Linear(l2_reg, mode=0, use_bias=use_bias, seed=seed)(sparse_input)
         elif len(dense_input_list) > 0:
             dense_input = concat_func(dense_input_list)
-            linear_logit = Linear(l2_reg, mode=1, use_bias=use_bias)(dense_input)
+            linear_logit = Linear(l2_reg, mode=1, use_bias=use_bias, seed=seed)(dense_input)
         else:
             # raise NotImplementedError
             return add_func([])
         linear_logit_list.append(linear_logit)
 
     return concat_func(linear_logit_list)
-
-
-DEFAULT_GROUP_NAME = "default_group"
 
 
 def input_from_feature_columns(features, feature_columns, l2_reg, seed, prefix='', seq_mask_zero=True,

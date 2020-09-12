@@ -10,6 +10,7 @@ Reference:
 
 from collections import OrderedDict
 
+import tensorflow as tf
 from tensorflow.python.keras.layers import (Concatenate, Dense, Embedding,
                                             Flatten, Input)
 from tensorflow.python.keras.models import Model
@@ -129,16 +130,14 @@ def DSIN(dnn_feature_columns, sess_feature_list, sess_max_count=5, bias_encoding
     dnn_input_emb = combined_dnn_input([dnn_input_emb], dense_value_list)
     output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn,
                  dnn_dropout, dnn_use_bn, seed)(dnn_input_emb)
-    output = Dense(1, use_bias=False, activation=None)(output)
+    output = Dense(1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(output)
     output = PredictionLayer(task)(output)
 
     sess_input_list = []
-    # sess_input_length_list = []
     for i in range(sess_max_count):
         sess_name = "sess_" + str(i)
         sess_input_list.extend(get_inputs_list(
             [user_behavior_input_dict[sess_name]]))
-        # sess_input_length_list.append(user_behavior_length_dict[sess_name])
 
     model = Model(inputs=inputs_list + [user_sess_length], outputs=output)
 
@@ -153,8 +152,7 @@ def sess_interest_division(sparse_embedding_dict, user_behavior_input_dict, spar
         sess_name = "sess_" + str(i)
         keys_emb_list = get_embedding_vec_list(sparse_embedding_dict, user_behavior_input_dict[sess_name],
                                                sparse_fg_list, sess_feture_list, sess_feture_list)
-        # [sparse_embedding_dict[feat](user_behavior_input_dict[sess_name][feat]) for feat in
-        #             sess_feture_list]
+
         keys_emb = concat_func(keys_emb_list, mask=True)
         tr_input.append(keys_emb)
     if bias_encoding:

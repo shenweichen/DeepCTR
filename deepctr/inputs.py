@@ -12,7 +12,6 @@ from itertools import chain
 from tensorflow.python.keras.layers import Embedding
 from tensorflow.python.keras.regularizers import l2
 
-from . import feature_column as fc_lib
 from .layers.sequence import SequencePoolingLayer, WeightedSequenceLayer
 from .layers.utils import Hash
 
@@ -62,6 +61,8 @@ def get_embedding_vec_list(embedding_dict, input_dict, sparse_feature_columns, r
 
 
 def create_embedding_matrix(feature_columns, l2_reg, seed, prefix="", seq_mask_zero=True):
+    from . import feature_column as fc_lib
+
     sparse_feature_columns = list(
         filter(lambda x: isinstance(x, fc_lib.SparseFeat), feature_columns)) if feature_columns else []
     varlen_sparse_feature_columns = list(
@@ -132,6 +133,7 @@ def get_varlen_pooling_list(embedding_dict, features, varlen_sparse_feature_colu
 
 
 def get_dense_input(features, feature_columns):
+    from . import feature_column as fc_lib
     dense_feature_columns = list(
         filter(lambda x: isinstance(x, fc_lib.DenseFeat), feature_columns)) if feature_columns else []
     dense_input_list = []

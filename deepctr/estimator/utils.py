@@ -132,7 +132,10 @@ def deepctr_model_fn(features, mode, logits, labels, task, linear_optimizer, dnn
 def get_train_op_fn(linear_optimizer, dnn_optimizer):
     def _train_op_fn(loss):
         train_ops = []
-        global_step = tf.train.get_global_step() if tf.__version__ < "2.0.0" else tf.compat.v1.train.get_global_step()
+        try:
+            global_step = tf.train.get_global_step()
+        except AttributeError:
+            global_step = tf.compat.v1.train.get_global_step()
         linear_var_list = get_collection(get_GraphKeys().TRAINABLE_VARIABLES, LINEAR_SCOPE_NAME)
         dnn_var_list = get_collection(get_GraphKeys().TRAINABLE_VARIABLES, DNN_SCOPE_NAME)
 
@@ -149,63 +152,57 @@ def get_train_op_fn(linear_optimizer, dnn_optimizer):
 
         train_op = tf.group(*train_ops)
         with tf.control_dependencies([train_op]):
-            return tf.assign_add(global_step, 1).op if tf.__version__ < "2.0.0" else tf.compat.v1.assign_add(
-                global_step, 1).op
+            try:
+                return tf.assign_add(global_step, 1).op
+            except AttributeError:
+                return tf.compat.v1.assign_add(global_step, 1).op
 
     return _train_op_fn
 
 
 def variable_scope(name_or_scope):
-    if tf.__version__ < "2.0.0":
+    try:
         return tf.variable_scope(name_or_scope)
-    else:
+    except AttributeError:
         return tf.compat.v1.variable_scope(name_or_scope)
 
-
-def name_scope(name, default_name=None, values=None):
-    if tf.__version__ < "2.0.0":
-        return tf.name_scope(name, default_name, values)
-    else:
-        return tf.compat.v1.name_scope(name, default_name, values)
-
-
 def get_collection(key, scope=None):
-    if tf.__version__ < "2.0.0":
+    try:
         return tf.get_collection(key, scope=scope)
-    else:
+    except AttributeError:
         return tf.compat.v1.get_collection(key, scope=scope)
 
 
 def get_GraphKeys():
-    if tf.__version__ < "2.0.0":
+    try:
         return tf.GraphKeys
-    else:
+    except AttributeError:
         return tf.compat.v1.GraphKeys
 
 
 def get_losses():
-    if tf.__version__ < "2.0.0":
-        return tf.losses
-    else:
+    try:
         return tf.compat.v1.losses
+    except AttributeError:
+        return tf.losses
 
 
 def input_layer(features, feature_columns):
-    if tf.__version__ < "2.0.0":
+    try:
         return tf.feature_column.input_layer(features, feature_columns)
-    else:
+    except AttributeError:
         return tf.compat.v1.feature_column.input_layer(features, feature_columns)
 
 
 def get_metrics():
-    if tf.__version__ < "2.0.0":
-        return tf.metrics
-    else:
+    try:
         return tf.compat.v1.metrics
+    except AttributeError:
+        return tf.metrics
 
 
 def to_float(x, name="ToFloat"):
-    if tf.__version__ < "2.0.0":
+    try:
         return tf.to_float(x, name)
-    else:
+    except AttributeError:
         return tf.compat.v1.to_float(x, name)

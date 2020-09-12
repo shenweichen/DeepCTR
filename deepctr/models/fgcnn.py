@@ -78,7 +78,7 @@ def FGCNN(linear_feature_columns, dnn_feature_columns, conv_kernel_width=(7, 7, 
 
     final_logit = DNN(dnn_hidden_units, dropout_rate=dnn_dropout,
                       l2_reg=l2_reg_dnn)(dnn_input)
-    final_logit = tf.keras.layers.Dense(1, use_bias=False)(final_logit)
+    final_logit = tf.keras.layers.Dense(1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(final_logit)
 
     final_logit = add_func([final_logit, linear_logit])
     output = PredictionLayer(task)(final_logit)

@@ -1,7 +1,9 @@
 import tensorflow as tf
 
+from tensorflow.python.ops.parsing_ops import  FixedLenFeature
 from deepctr.estimator import DeepFMEstimator
 from deepctr.estimator.inputs import input_fn_tfrecord
+
 
 if __name__ == "__main__":
 
@@ -23,10 +25,10 @@ if __name__ == "__main__":
 
     # 2.generate input data for model
 
-    feature_description = {k: tf.FixedLenFeature(dtype=tf.int64, shape=1) for k in sparse_features}
+    feature_description = {k: FixedLenFeature(dtype=tf.int64, shape=1) for k in sparse_features}
     feature_description.update(
-        {k: tf.FixedLenFeature(dtype=tf.float32, shape=1) for k in dense_features})
-    feature_description['label'] = tf.FixedLenFeature(dtype=tf.float32, shape=1)
+        {k: FixedLenFeature(dtype=tf.float32, shape=1) for k in dense_features})
+    feature_description['label'] = FixedLenFeature(dtype=tf.float32, shape=1)
 
     train_model_input = input_fn_tfrecord('./criteo_sample.tr.tfrecords', feature_description, 'label', batch_size=256,
                                           num_epochs=1, shuffle_factor=10)

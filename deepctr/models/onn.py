@@ -97,7 +97,7 @@ def ONN(linear_feature_columns, dnn_feature_columns, embedding_size=4, dnn_hidde
         ffm_out = tf.keras.layers.BatchNormalization()(ffm_out)
     dnn_input = combined_dnn_input([ffm_out], dense_value_list)
     dnn_out = DNN(dnn_hidden_units, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout)(dnn_input)
-    dnn_logit = Dense(1, use_bias=False)(dnn_out)
+    dnn_logit = Dense(1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(dnn_out)
 
     final_logit = add_func([dnn_logit, linear_logit])
 

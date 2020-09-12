@@ -7,8 +7,7 @@ Reference:
     [1] Cheng H T, Koc L, Harmsen J, et al. Wide & deep learning for recommender systems[C]//Proceedings of the 1st Workshop on Deep Learning for Recommender Systems. ACM, 2016: 7-10.(https://arxiv.org/pdf/1606.07792.pdf)
 """
 
-from tensorflow.python.keras.layers import Dense
-from tensorflow.python.keras.models import Model
+import tensorflow as tf
 
 from ..feature_column import build_input_features, get_linear_logit, input_from_feature_columns
 from ..layers.core import PredictionLayer, DNN
@@ -47,12 +46,12 @@ def WDL(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128)
     dnn_input = combined_dnn_input(sparse_embedding_list, dense_value_list)
     dnn_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
                   False, seed)(dnn_input)
-    dnn_logit = Dense(
-        1, use_bias=False, activation=None)(dnn_out)
+    dnn_logit = tf.keras.layers.Dense(
+        1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(dnn_out)
 
     final_logit = add_func([dnn_logit, linear_logit])
 
     output = PredictionLayer(task)(final_logit)
 
-    model = Model(inputs=inputs_list, outputs=output)
+    model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
     return model

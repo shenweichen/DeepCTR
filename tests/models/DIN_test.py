@@ -29,7 +29,7 @@ def get_xy_fd(hash_flag=False):
 
     feature_names = get_feature_names(feature_columns)
     x = {name: feature_dict[name] for name in feature_names}
-    y = [1, 0, 1]
+    y = np.array([1, 0, 1])
     return x, y, feature_columns, behavior_feature_list
 
 

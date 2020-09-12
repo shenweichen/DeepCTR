@@ -67,14 +67,14 @@ def xDeepFMEstimator(linear_feature_columns, dnn_feature_columns, dnn_hidden_uni
             dnn_output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
                              dnn_use_bn, seed)(dnn_input, training=train_flag)
             dnn_logit = tf.keras.layers.Dense(
-                1, use_bias=False, activation=None)(dnn_output)
+                1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(dnn_output)
 
             logits_list.append(dnn_logit)
 
             if len(cin_layer_size) > 0:
                 exFM_out = CIN(cin_layer_size, cin_activation,
                                cin_split_half, l2_reg_cin, seed)(fm_input, training=train_flag)
-                exFM_logit = tf.keras.layers.Dense(1, activation=None, )(exFM_out)
+                exFM_logit = tf.keras.layers.Dense(1, kernel_initializer=tf.keras.initializers.glorot_normal(seed) )(exFM_out)
                 logits_list.append(exFM_logit)
 
         logits = add_func(logits_list)
