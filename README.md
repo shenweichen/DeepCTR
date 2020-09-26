@@ -78,3 +78,12 @@ Please follow our wechat to join group:
 - wechat ID: **deepctrbot**
 
   ![wechat](./docs/pics/code.png)
+  
+## 合作推广
+
+更多关于推荐系统的内容，如特征工程，用户画像，召回和排序，在线学习与实时计算以及更多前沿技术和实战项目等可参考：
+
+
+- [推荐系统实战](https://www.julyedu.com/course/getDetail/181?ccode=5ee751d37278c)
+- [推荐系统就业小班 [保证就业，挑战年薪四十万或薪资翻倍]](https://www.julyedu.com/course/getDetail/321?ccode=5ee751d37278c)
+
