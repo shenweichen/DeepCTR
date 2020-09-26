@@ -56,6 +56,18 @@ DisscussionGroup 交流群
 
 .. image:: ../pics/code.png
 
+Cooperative promotion 合作推广
+------------------------------
+
+For more information about the recommendation system, such as **feature engineering, user profile, matching, ranking and multi-objective optimization, online learning and real-time computing, and more cutting-edge technologies and practical projects** :
+
+更多关于推荐系统的内容，如 **特征工程，用户画像，召回，排序和多目标优化，在线学习与实时计算以及更多前沿技术和实战项目** 等可参考：
+
+- `推荐系统实战 <https://www.julyedu.com/course/getDetail/181?ccode=5ee751d37278c>`_
+- `推荐系统就业小班 <https://www.julyedu.com/course/getDetail/321?ccode=5ee751d37278c>`_
+
+
+
 .. toctree::
    :maxdepth: 2
    :caption: Home:
