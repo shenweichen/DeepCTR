@@ -88,5 +88,5 @@ For more information about the recommendation system, such as **feature engineer
 
 
 - [推荐系统实战](https://www.julyedu.com/course/getDetail/181?ccode=5ee751d37278c)
-- [推荐系统就业小班 [保证就业，挑战年薪四十万或薪资翻倍]](https://www.julyedu.com/course/getDetail/321?ccode=5ee751d37278c)
+- [推荐系统就业小班](https://www.julyedu.com/course/getDetail/321?ccode=5ee751d37278c)
 
