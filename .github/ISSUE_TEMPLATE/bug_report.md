@@ -19,8 +19,8 @@ Steps to reproduce the behavior:
 
 **Operating environment(运行环境):**
  - python version [e.g. 3.5, 3.7]
- - tensorflow version [e.g. 1.4.0, 1.15.0, 2.2.0]
- - deepctr version [e.g. 0.8.0,]
+ - tensorflow version [e.g. 1.4.0, 1.15.0, 2.3.0]
+ - deepctr version [e.g. 0.8.2,]
 
 **Additional context**
 Add any other context about the problem here.
