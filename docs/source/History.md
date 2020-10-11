@@ -1,5 +1,5 @@
 # History
-
+- 10/11/2020 : [v0.8.2](https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.2) released.Refactor `DNN` Layer.
 - 09/12/2020 : [v0.8.1](https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.1) released.Improve the reproducibility & fix some bugs.
 - 06/27/2020 : [v0.8.0](https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.0) released.
   - Support `Tensorflow Estimator` for large scale data and distributed training. [example: Estimator with TFRecord](https://deepctr-doc.readthedocs.io/en/latest/Examples.html#estimator-with-tfrecord-classification-criteo) 

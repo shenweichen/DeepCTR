@@ -133,7 +133,7 @@ class DNN(Layer):
 
         - **use_bn**: bool. Whether use BatchNormalization before activation or not.
 
-        - **output_activation**: Activation function to use in the last layer.If None,the activation function will be same as ``activation``.
+        - **output_activation**: Activation function to use in the last layer.If ``None``,it will be same as ``activation``.
 
         - **seed**: A Python integer to use as random seed.
     """
