@@ -57,16 +57,16 @@ Let's [**Get Started!**](https://deepctr-doc.readthedocs.io/en/latest/Quick-Star
 
 ## Citation
 
-- Weichen Shen. (2018). DeepCTR: Easy-to-use,Modular and Extendible package of deep-learning based CTR models. https://github.com/shenweichen/deepctr.
+- Weichen Shen. (2017). DeepCTR: Easy-to-use,Modular and Extendible package of deep-learning based CTR models. https://github.com/shenweichen/deepctr.
 
 
 If you find this code useful in your research, please cite it using the following BibTeX:
 
 ```bibtex
-@misc{shen2018deepctr,
+@misc{shen2017deepctr,
   author = {Weichen Shen},
   title = {DeepCTR: Easy-to-use,Modular and Extendible package of deep-learning based CTR models},
-  year = {2018},
+  year = {2017},
   publisher = {GitHub},
   journal = {GitHub Repository},
   howpublished = {\url{https://github.com/shenweichen/deepctr}},
@@ -86,7 +86,6 @@ For more information about the recommendation system, such as **feature engineer
 
 更多关于推荐系统的内容，如**特征工程，用户画像，召回，排序和多目标优化，在线学习与实时计算以及更多前沿技术和实战项目**等可参考：
 
-
 - [推荐系统实战](https://www.julyedu.com/course/getDetail/181?ccode=5ee751d37278c)
-- [推荐系统就业小班](https://www.julyedu.com/course/getDetail/321?ccode=5ee751d37278c)
+- [互联网计算广告实战](https://www.julyedu.com/course/getDetail/158?ccode=5ee751d37278c)
 
