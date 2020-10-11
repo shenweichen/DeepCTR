@@ -52,8 +52,7 @@ def xDeepFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(256, 
     fm_input = concat_func(sparse_embedding_list, axis=1)
 
     dnn_input = combined_dnn_input(sparse_embedding_list, dense_value_list)
-    dnn_output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
-                     dnn_use_bn, seed)(dnn_input)
+    dnn_output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed)(dnn_input)
     dnn_logit = tf.keras.layers.Dense(
         1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(dnn_output)
 

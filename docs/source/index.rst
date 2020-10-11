@@ -43,11 +43,11 @@ You can read the latest code and related projects
 News
 -----
 
+10/11/2020 : Refactor ``DNN`` Layer. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.2>`_
+
 09/12/2020 : Improve the reproducibility & fix some bugs. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.1>`_
 
 06/27/2020 : Support ``Tensorflow Estimator`` for large scale data and distributed training.Support different initializers for different embedding weights and loading pretrained embeddings.Add new model ``FwFM``. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.0>`_
-
-05/17/2020 : Fix numerical instability in ``LayerNormalization``. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.7.5>`_
 
 DisscussionGroup 交流群
 -----------------------
@@ -64,7 +64,7 @@ For more information about the recommendation system, such as **feature engineer
 更多关于推荐系统的内容，如 **特征工程，用户画像，召回，排序和多目标优化，在线学习与实时计算以及更多前沿技术和实战项目** 等可参考：
 
 - `推荐系统实战 <https://www.julyedu.com/course/getDetail/181?ccode=5ee751d37278c>`_
-- `推荐系统就业小班 <https://www.julyedu.com/course/getDetail/321?ccode=5ee751d37278c>`_
+- `互联网计算广告实战 <https://www.julyedu.com/course/getDetail/158?ccode=5ee751d37278c>`_
 
 
 

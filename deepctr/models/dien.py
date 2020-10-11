@@ -177,7 +177,6 @@ def DIEN(dnn_feature_columns, history_feature_list,
     sequence_embed_list = get_varlen_pooling_list(sequence_embed_dict, features, sparse_varlen_feature_columns,
                                                   to_list=True)
     dnn_input_emb_list += sequence_embed_list
-
     keys_emb = concat_func(keys_emb_list)
     deep_input_emb = concat_func(dnn_input_emb_list)
     query_emb = concat_func(query_emb_list)
@@ -202,8 +201,7 @@ def DIEN(dnn_feature_columns, history_feature_list,
     deep_input_emb = tf.keras.layers.Flatten()(deep_input_emb)
 
     dnn_input = combined_dnn_input([deep_input_emb], dense_value_list)
-    output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn,
-                 dnn_dropout, use_bn, seed)(dnn_input)
+    output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, use_bn, seed=seed)(dnn_input)
     final_logit = Dense(1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(output)
     output = PredictionLayer(task)(final_logit)
 

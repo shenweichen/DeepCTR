@@ -56,8 +56,7 @@ def FiBiNET(linear_feature_columns, dnn_feature_columns, bilinear_type='interact
 
     dnn_input = combined_dnn_input(
         [tf.keras.layers.Flatten()(concat_func([senet_bilinear_out, bilinear_out]))], dense_value_list)
-    dnn_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
-                  False, seed)(dnn_input)
+    dnn_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, False, seed=seed)(dnn_input)
     dnn_logit = tf.keras.layers.Dense(
         1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(dnn_out)
 

@@ -63,8 +63,7 @@ def DeepFMEstimator(linear_feature_columns, dnn_feature_columns, dnn_hidden_unit
 
             fm_logit = FM()(concat_func(sparse_embedding_list, axis=1))
 
-            dnn_output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
-                             dnn_use_bn, seed)(dnn_input, training=train_flag)
+            dnn_output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed)(dnn_input, training=train_flag)
             dnn_logit = tf.keras.layers.Dense(
                 1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed=seed))(dnn_output)
 

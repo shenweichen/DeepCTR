@@ -128,8 +128,7 @@ def DSIN(dnn_feature_columns, sess_feature_list, sess_max_count=5, bias_encoding
         [dnn_input_emb, Flatten()(interest_attention_layer), Flatten()(lstm_attention_layer)])
 
     dnn_input_emb = combined_dnn_input([dnn_input_emb], dense_value_list)
-    output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn,
-                 dnn_dropout, dnn_use_bn, seed)(dnn_input_emb)
+    output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed)(dnn_input_emb)
     output = Dense(1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(output)
     output = PredictionLayer(task)(output)
 

@@ -86,8 +86,7 @@ def DIN(dnn_feature_columns, history_feature_list, dnn_use_bn=False,
     deep_input_emb = tf.keras.layers.Concatenate()([NoMask()(deep_input_emb), hist])
     deep_input_emb = tf.keras.layers.Flatten()(deep_input_emb)
     dnn_input = combined_dnn_input([deep_input_emb], dense_value_list)
-    output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn,
-                 dnn_dropout, dnn_use_bn, seed)(dnn_input)
+    output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed)(dnn_input)
     final_logit = tf.keras.layers.Dense(1, use_bias=False,
                                         kernel_initializer=tf.keras.initializers.glorot_normal(seed))(output)
 

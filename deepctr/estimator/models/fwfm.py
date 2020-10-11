@@ -71,8 +71,7 @@ def FwFMEstimator(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=
             if dnn_hidden_units:
                 dnn_input = combined_dnn_input(sparse_embedding_list, dense_value_list)
 
-                dnn_output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
-                                 dnn_use_bn, seed)(dnn_input, training=train_flag)
+                dnn_output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed)(dnn_input, training=train_flag)
                 dnn_logit = tf.keras.layers.Dense(
                     1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(dnn_output)
                 final_logit_components.append(dnn_logit)
