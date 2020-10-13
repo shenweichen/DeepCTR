@@ -3,7 +3,7 @@ from copy import copy
 from itertools import chain
 
 from tensorflow.python.keras.initializers import RandomNormal, Zeros
-from tensorflow.python.keras.layers import Input, Lambda
+from tensorflow.python.keras.layers import Input
 
 from .inputs import create_embedding_matrix, embedding_lookup, get_dense_input, varlen_embedding_lookup, \
     get_varlen_pooling_list, mergeDict
