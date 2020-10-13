@@ -101,7 +101,7 @@ class DenseFeat(namedtuple('DenseFeat', ['name', 'dimension', 'dtype', 'transfor
     __slots__ = ()
 
     def __new__(cls, name, dimension=1, dtype="float32", transform_fn=None):
-        return super(DenseFeat, cls).__new__(cls, name, dimension, dtype)
+        return super(DenseFeat, cls).__new__(cls, name, dimension, dtype, transform_fn)
 
     def __hash__(self):
         return self.name.__hash__()
