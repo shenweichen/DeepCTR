@@ -138,7 +138,11 @@ def get_dense_input(features, feature_columns):
         filter(lambda x: isinstance(x, fc_lib.DenseFeat), feature_columns)) if feature_columns else []
     dense_input_list = []
     for fc in dense_feature_columns:
-        dense_input_list.append(features[fc.name])
+        if fc.transform_fn is None:
+            dense_input_list.append(features[fc.name])
+        else:
+            transform_result = Lambda(fc.transform_fn)(features[fc.name])
+            dense_input_list.append(transform_result)
     return dense_input_list
 
 
