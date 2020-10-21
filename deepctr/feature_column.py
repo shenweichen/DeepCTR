@@ -91,8 +91,8 @@ class DenseFeat(namedtuple('DenseFeat', ['name', 'dimension', 'dtype', 'transfor
     """ Dense feature
     Args:
         name: feature name,
-        dimension: dimension of the feature, default = 1
-        dtype: dtype of the feature, default="float32"
+        dimension: dimension of the feature, default = 1.
+        dtype: dtype of the feature, default="float32".
         transform_fn: If not None, a function that can be used to transfrom
         values of the feature.  the function takes the input Tensor as its
         argument, and returns the output Tensor. 
