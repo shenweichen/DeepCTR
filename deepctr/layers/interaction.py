@@ -399,7 +399,7 @@ class CrossNet(Layer):
                 dot_ = tf.matmul(x_0, xl_w)
                 x_l = dot_ + self.bias[i]
             elif self.parameterization == 'matrix':
-                dot_ = tf.matmul(self.kernels[i], x_l)  # W * xi  (bs, dim, 1)
+                dot_ = tf.einsum('ij,bjk->bik', self.kernels[i], x_l)  # W * xi  (bs, dim, 1)
                 dot_ = dot_ + self.bias[i]  # W * xi + b
                 dot_ = x_0 * dot_  # x0 · (W * xi + b)  Hadamard-product
             else:  # error
@@ -510,15 +510,15 @@ class CrossNetMix(Layer):
 
                 # (2) E(x_l)
                 # project the input x_l to $\mathbb{R}^{r}$
-                v_x = tf.matmul(tf.transpose(self.V_list[i][expert_id]), x_l)  # (bs, low_rank, 1)
+                v_x = tf.einsum('ij,bjk->bik', tf.transpose(self.V_list[i][expert_id]), x_l)  # (bs, low_rank, 1)
 
                 # nonlinear activation in low rank space
                 v_x = tf.nn.tanh(v_x)
-                v_x = tf.matmul(self.C_list[i][expert_id], v_x)
+                v_x = tf.einsum('ij,bjk->bik', self.C_list[i][expert_id], v_x)  # (bs, low_rank, 1)
                 v_x = tf.nn.tanh(v_x)
 
                 # project back to $\mathbb{R}^{d}$
-                uv_x = tf.matmul(self.U_list[i][expert_id], v_x)  # (bs, in_features, 1)
+                uv_x = tf.einsum('ij,bjk->bik', self.U_list[i][expert_id], v_x)  # (bs, dim, 1)
 
                 dot_ = uv_x + self.bias[i]
                 dot_ = x_0 * dot_  # Hadamard-product
@@ -526,10 +526,10 @@ class CrossNetMix(Layer):
                 output_of_experts.append(tf.squeeze(dot_, axis=2))
 
             # (3) mixture of low-rank experts
-            output_of_experts = tf.stack(output_of_experts, 2)  # (bs, in_features, num_experts)
+            output_of_experts = tf.stack(output_of_experts, 2)  # (bs, dim, num_experts)
             gating_score_of_experts = tf.stack(gating_score_of_experts, 1)  # (bs, num_experts, 1)
             moe_out = tf.matmul(output_of_experts, tf.nn.softmax(gating_score_of_experts, axis=1))
-            x_l = moe_out + x_l  # (bs, in_features, 1)
+            x_l = moe_out + x_l  # (bs, dim, 1)
         x_l = tf.squeeze(x_l, axis=2)
         return x_l
 
