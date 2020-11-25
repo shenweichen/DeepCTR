@@ -142,7 +142,8 @@ class AFMLayer(Layer):
         config = {'attention_factor': self.attention_factor,
                   'l2_reg_w': self.l2_reg_w, 'dropout_rate': self.dropout_rate, 'seed': self.seed}
         base_config = super(AFMLayer, self).get_config()
-        return dict(list(base_config.items()) + list(config.items()))
+        base_config.update(config)
+        return base_config
 
 
 class BiInteractionPooling(Layer):
@@ -322,7 +323,8 @@ class CIN(Layer):
         config = {'layer_size': self.layer_size, 'split_half': self.split_half, 'activation': self.activation,
                   'seed': self.seed}
         base_config = super(CIN, self).get_config()
-        return dict(list(base_config.items()) + list(config.items()))
+        base_config.update(config)
+        return base_config
 
 
 class CrossNet(Layer):
@@ -413,7 +415,8 @@ class CrossNet(Layer):
         config = {'layer_num': self.layer_num, 'parameterization': self.parameterization,
                   'l2_reg': self.l2_reg, 'seed': self.seed}
         base_config = super(CrossNet, self).get_config()
-        return dict(list(base_config.items()) + list(config.items()))
+        base_config.update(config)
+        return base_config
 
     def compute_output_shape(self, input_shape):
         return input_shape
@@ -538,7 +541,8 @@ class CrossNetMix(Layer):
         config = {'low_rank': self.low_rank, 'num_experts': self.num_experts, 'layer_num': self.layer_num,
                   'l2_reg': self.l2_reg, 'seed': self.seed}
         base_config = super(CrossNetMix, self).get_config()
-        return dict(list(base_config.items()) + list(config.items()))
+        base_config.update(config)
+        return base_config
 
     def compute_output_shape(self, input_shape):
         return input_shape
@@ -674,7 +678,8 @@ class InnerProductLayer(Layer):
     def get_config(self, ):
         config = {'reduce_sum': self.reduce_sum, }
         base_config = super(InnerProductLayer, self).get_config()
-        return dict(list(base_config.items()) + list(config.items()))
+        base_config.update(config)
+        return base_config
 
 
 class InteractingLayer(Layer):
@@ -766,7 +771,8 @@ class InteractingLayer(Layer):
         config = {'att_embedding_size': self.att_embedding_size, 'head_num': self.head_num, 'use_res': self.use_res,
                   'seed': self.seed}
         base_config = super(InteractingLayer, self).get_config()
-        return dict(list(base_config.items()) + list(config.items()))
+        base_config.update(config)
+        return base_config
 
 
 class OutterProductLayer(Layer):
@@ -909,7 +915,8 @@ class OutterProductLayer(Layer):
     def get_config(self, ):
         config = {'kernel_type': self.kernel_type, 'seed': self.seed}
         base_config = super(OutterProductLayer, self).get_config()
-        return dict(list(base_config.items()) + list(config.items()))
+        base_config.update(config)
+        return base_config
 
 
 class FGCNNLayer(Layer):
@@ -1013,7 +1020,8 @@ class FGCNNLayer(Layer):
         config = {'kernel_width': self.kernel_width, 'filters': self.filters, 'new_maps': self.new_maps,
                   'pooling_width': self.pooling_width}
         base_config = super(FGCNNLayer, self).get_config()
-        return dict(list(base_config.items()) + list(config.items()))
+        base_config.update(config)
+        return base_config
 
     def _conv_output_shape(self, input_shape, kernel_size):
         # channels_last
@@ -1112,7 +1120,8 @@ class SENETLayer(Layer):
     def get_config(self, ):
         config = {'reduction_ratio': self.reduction_ratio, 'seed': self.seed}
         base_config = super(SENETLayer, self).get_config()
-        return dict(list(base_config.items()) + list(config.items()))
+        base_config.update(config)
+        return base_config
 
 
 class BilinearInteraction(Layer):
@@ -1192,7 +1201,8 @@ class BilinearInteraction(Layer):
     def get_config(self, ):
         config = {'bilinear_type': self.bilinear_type, 'seed': self.seed}
         base_config = super(BilinearInteraction, self).get_config()
-        return dict(list(base_config.items()) + list(config.items()))
+        base_config.update(config)
+        return base_config
 
 
 class FieldWiseBiInteraction(Layer):
@@ -1318,7 +1328,8 @@ class FieldWiseBiInteraction(Layer):
     def get_config(self, ):
         config = {'use_bias': self.use_bias, 'seed': self.seed}
         base_config = super(FieldWiseBiInteraction, self).get_config()
-        return dict(list(base_config.items()) + list(config.items()))
+        base_config.update(config)
+        return base_config
 
 
 class FwFMLayer(Layer):
