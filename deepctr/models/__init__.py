@@ -21,4 +21,4 @@ from .fwfm import FwFM
 from .dmr import DMR
 
 __all__ = ["AFM", "CCPM","DCN", "MLR",  "DeepFM", "MLR", "NFM", "DIN", "DIEN", "FNN", "PNN",
-           "WDL", "xDeepFM", "AutoInt", "ONN", "FGCNN", "DSIN", "FiBiNET", 'FLEN', "FwFM"]
+           "WDL", "xDeepFM", "AutoInt", "ONN", "FGCNN", "DSIN", "FiBiNET", 'FLEN', "FwFM", "DMR"]
