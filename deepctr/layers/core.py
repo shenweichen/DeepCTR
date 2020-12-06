@@ -36,19 +36,22 @@ class LocalActivationUnit(Layer):
 
         - **use_bn**: bool. Whether use BatchNormalization before activation or not in attention net.
 
+        - **self_attention**: bool.Whether or not use self_attention.
+
         - **seed**: A Python integer to use as random seed.
 
       References
         - [Zhou G, Zhu X, Song C, et al. Deep interest network for click-through rate prediction[C]//Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. ACM, 2018: 1059-1068.](https://arxiv.org/pdf/1706.06978.pdf)
     """
 
-    def __init__(self, hidden_units=(64, 32), activation='sigmoid', l2_reg=0, dropout_rate=0, use_bn=False, seed=1024,
-                 **kwargs):
+    def __init__(self, hidden_units=(64, 32), activation='sigmoid', l2_reg=0, dropout_rate=0, use_bn=False,
+                 self_attention=False, seed=1024, **kwargs):
         self.hidden_units = hidden_units
         self.activation = activation
         self.l2_reg = l2_reg
         self.dropout_rate = dropout_rate
         self.use_bn = use_bn
+        self.self_attention = self_attention
         self.seed = seed
         super(LocalActivationUnit, self).__init__(**kwargs)
         self.supports_masking = True
@@ -63,8 +66,13 @@ class LocalActivationUnit(Layer):
             raise ValueError("Unexpected inputs dimensions %d and %d, expect to be 3 dimensions" % (
                 len(input_shape[0]), len(input_shape[1])))
 
-        if input_shape[0][-1] != input_shape[1][-1] or input_shape[0][1] != 1:
-            raise ValueError('A `LocalActivationUnit` layer requires '
+        if self.self_attention and input_shape[0][-1] != input_shape[1][-1]:
+            raise ValueError('A `LocalActivationUnit` layer with self_attention is True requires '
+                             'inputs of a two inputs with shape (None,T,embedding_size) and (None,T,embedding_size)'
+                             'Got different shapes: %s,%s' % (input_shape[0], input_shape[1]))
+
+        if not self.self_attention and (input_shape[0][-1] != input_shape[1][-1] or input_shape[0][1] != 1):
+            raise ValueError('A `LocalActivationUnit` layer with not self_attention requires '
                              'inputs of a two inputs with shape (None,1,embedding_size) and (None,T,embedding_size)'
                              'Got different shapes: %s,%s' % (input_shape[0], input_shape[1]))
         size = 4 * \
@@ -88,8 +96,11 @@ class LocalActivationUnit(Layer):
 
         query, keys = inputs
 
-        keys_len = keys.get_shape()[1]
-        queries = K.repeat_elements(query, keys_len, 1)
+        if not self.self_attention:
+            keys_len = keys.get_shape()[1]
+            queries = K.repeat_elements(query, keys_len, 1)
+        else:
+            queries = query
 
         att_input = tf.concat(
             [queries, keys, queries - keys, queries * keys], axis=-1)
