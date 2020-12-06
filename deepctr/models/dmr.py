@@ -1,4 +1,10 @@
 # -*- coding:utf-8 -*-
+"""
+Author:
+    Fan Zhang,826427920@qq.com
+Reference:
+    [1] Ze Lyu, Yu Dong, Chengfu Huo, Weijun Ren. Deep Match to Rank Model for Personalized Click-Through Rate Prediction[J]. (https://github.com/lvze92/DMR)
+"""
 
 import tensorflow as tf
 from tensorflow.python.keras.layers import Lambda,Dot,Multiply
