@@ -6,6 +6,8 @@ from sklearn.preprocessing import MinMaxScaler
 from deepctr.models import DeepFM
 from deepctr.inputs import SparseFeat, DenseFeat,get_feature_names
 
+#import  os
+#print (os.getcwd()) #获取当前工作目录路径
 if __name__ == "__main__":
     data = pd.read_csv('./criteo_sample.txt')
 

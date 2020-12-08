@@ -8,7 +8,7 @@ from deepctr.inputs import SparseFeat,get_feature_names
 
 if __name__ == "__main__":
 
-    data = pd.read_csv("./movielens_sample.txt")
+    data = pd.read_csv("./examples/movielens_sample.txt")
     sparse_features = ["movie_id", "user_id",
                        "gender", "age", "occupation", "zip"]
     target = ['rating']

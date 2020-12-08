@@ -23,20 +23,20 @@ function run_py(){
 
 ## python3
 python_version=python3
-source activate base
-cd ..
-python setup.py install
+#source activate base
+#cd ..
+#python setup.py install
 cd ./examples
 run_py
 
-#python2
-python_version=python2
-source activate py27
-cd ..
-python setup.py install
-cd ./examples
-run_py
-echo "all examples run succeed in python2.7"
+##python2
+#python_version=python2
+#source activate py27
+#cd ..
+#python setup.py install
+#cd ./examples
+#run_py
+#echo "all examples run succeed in python2.7"
 
 
 echo "all examples run succeed in python3.6"
