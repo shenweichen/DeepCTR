@@ -465,21 +465,21 @@ class CrossNetMix(Layer):
         dim = int(input_shape[-1])
 
         # U: (dim, low_rank)
-        self.U_list = [self.add_weight(name='kernel' + str(i),
+        self.U_list = [self.add_weight(name='U_list' + str(i),
                                        shape=(self.num_experts, dim, self.low_rank),
                                        initializer=glorot_normal(
                                            seed=self.seed),
                                        regularizer=l2(self.l2_reg),
                                        trainable=True) for i in range(self.layer_num)]
         # V: (dim, low_rank)
-        self.V_list = [self.add_weight(name='kernel' + str(i),
+        self.V_list = [self.add_weight(name='V_list' + str(i),
                                        shape=(self.num_experts, dim, self.low_rank),
                                        initializer=glorot_normal(
                                            seed=self.seed),
                                        regularizer=l2(self.l2_reg),
                                        trainable=True) for i in range(self.layer_num)]
         # C: (low_rank, low_rank)
-        self.C_list = [self.add_weight(name='kernel' + str(i),
+        self.C_list = [self.add_weight(name='C_list' + str(i),
                                        shape=(self.num_experts, self.low_rank, self.low_rank),
                                        initializer=glorot_normal(
                                            seed=self.seed),
@@ -531,7 +531,7 @@ class CrossNetMix(Layer):
             # (3) mixture of low-rank experts
             output_of_experts = tf.stack(output_of_experts, 2)  # (bs, dim, num_experts)
             gating_score_of_experts = tf.stack(gating_score_of_experts, 1)  # (bs, num_experts, 1)
-            moe_out = tf.matmul(output_of_experts, tf.nn.softmax(gating_score_of_experts, axis=1))
+            moe_out = tf.matmul(output_of_experts, tf.nn.softmax(gating_score_of_experts, 1))
             x_l = moe_out + x_l  # (bs, dim, 1)
         x_l = tf.squeeze(x_l, axis=2)
         return x_l
