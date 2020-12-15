@@ -1127,13 +1127,13 @@ class BilinearInteraction(Layer):
     """BilinearInteraction Layer used in FiBiNET.
 
       Input shape
-        - A list of 3D tensor with shape: ``(batch_size,1,embedding_size)``.
+        - A list of 3D tensor with shape: ``(batch_size,1,embedding_size)``. Its length is ``filed_size``.
 
       Output shape
-        - 3D tensor with shape: ``(batch_size,1,embedding_size)``.
+        - 3D tensor with shape: ``(batch_size,filed_size*(filed_size-1)/2,embedding_size)``.
 
       Arguments
-        - **str** : String, types of bilinear functions used in this layer.
+        - **bilinear_type** : String, types of bilinear functions used in this layer.
 
         - **seed** : A Python integer to use as random seed.
 
@@ -1189,7 +1189,8 @@ class BilinearInteraction(Layer):
                  for v, w in zip(itertools.combinations(inputs, 2), self.W_list)]
         else:
             raise NotImplementedError
-        return concat_func(p)
+        output = concat_func(p, axis=1)
+        return output
 
     def compute_output_shape(self, input_shape):
         filed_size = len(input_shape)
