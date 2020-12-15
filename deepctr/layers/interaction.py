@@ -1196,7 +1196,7 @@ class BilinearInteraction(Layer):
         filed_size = len(input_shape)
         embedding_size = input_shape[0][-1]
 
-        return (None, 1, filed_size * (filed_size - 1) // 2 * embedding_size)
+        return (None, filed_size * (filed_size - 1) // 2, embedding_size)
 
     def get_config(self, ):
         config = {'bilinear_type': self.bilinear_type, 'seed': self.seed}
