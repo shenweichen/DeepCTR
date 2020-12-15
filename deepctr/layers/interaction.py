@@ -496,7 +496,6 @@ class CrossNetMix(Layer):
         super(CrossNetMix, self).build(input_shape)
 
     def call(self, inputs, **kwargs):
-        # tf.print(self.kernels[0].shape,self.kernels[0])
         if K.ndim(inputs) != 2:
             raise ValueError(
                 "Unexpected inputs dimensions %d, expect to be 2 dimensions" % (K.ndim(inputs)))
