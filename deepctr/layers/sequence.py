@@ -39,15 +39,18 @@ class SequencePoolingLayer(Layer):
       Arguments
         - **mode**:str.Pooling operation to be used,can be sum,mean or max.
 
+        - **padding_first**: bool.Is padding at the beginning of the sequence
+
         - **supports_masking**:If True,the input need to support masking.
     """
 
-    def __init__(self, mode='mean', supports_masking=False, **kwargs):
+    def __init__(self, mode='mean', padding_first=False, supports_masking=False, **kwargs):
 
         if mode not in ['sum', 'mean', 'max']:
             raise ValueError("mode must be sum or mean")
         self.mode = mode
         self.eps = tf.constant(1e-8, tf.float32)
+        self.padding_first = padding_first
         super(SequencePoolingLayer, self).__init__(**kwargs)
 
         self.supports_masking = supports_masking
@@ -73,6 +76,9 @@ class SequencePoolingLayer(Layer):
             mask = tf.sequence_mask(user_behavior_length,
                                     self.seq_len_max, dtype=tf.float32)
             mask = tf.transpose(mask, (0, 2, 1))
+
+        if self.padding_first:
+            mask = tf.reverse(mask, axis=[-1])
 
         embedding_size = uiseq_embed_list.shape[-1]
 
@@ -188,7 +194,8 @@ class AttentionSequencePoolingLayer(Layer):
       Input shape
         - A list of three tensor: [query,keys,keys_length]
 
-        - query is a 3D tensor with shape:  ``(batch_size, 1, embedding_size)``
+        - query is a 3D tensor with shape:  ``(batch_size, T, embedding_size)`` with self_attention is True,
+          and ``(batch_size, 1, embedding_size)``with self_attention is False,
 
         - keys is a 3D tensor with shape:   ``(batch_size, T, embedding_size)``
 
@@ -204,6 +211,12 @@ class AttentionSequencePoolingLayer(Layer):
 
         - **weight_normalization**: bool.Whether normalize the attention score of local activation unit.
 
+        - **padding_first**: bool.Is padding at the beginning of the sequence
+
+        - **causality**: bool.Whether or not use blinding.
+
+        - **self_attention**: bool.Whether or not use self_attention.
+
         - **supports_masking**:If True,the input need to support masking.
 
       References
@@ -211,13 +224,16 @@ class AttentionSequencePoolingLayer(Layer):
     """
 
     def __init__(self, att_hidden_units=(80, 40), att_activation='sigmoid', weight_normalization=False,
-                 return_score=False,
+                 return_score=False, padding_first=False, causality=False,self_attention=False,
                  supports_masking=False, **kwargs):
 
         self.att_hidden_units = att_hidden_units
         self.att_activation = att_activation
         self.weight_normalization = weight_normalization
         self.return_score = return_score
+        self.padding_first = padding_first
+        self.causality = causality
+        self.self_attention = self_attention
         super(AttentionSequencePoolingLayer, self).__init__(**kwargs)
         self.supports_masking = supports_masking
 
@@ -232,14 +248,20 @@ class AttentionSequencePoolingLayer(Layer):
                     "Unexpected inputs dimensions,the 3 tensor dimensions are %d,%d and %d , expect to be 3,3 and 2" % (
                         len(input_shape[0]), len(input_shape[1]), len(input_shape[2])))
 
-            if input_shape[0][-1] != input_shape[1][-1] or input_shape[0][1] != 1 or input_shape[2][1] != 1:
-                raise ValueError('A `AttentionSequencePoolingLayer` layer requires '
-                                 'inputs of a 3 tensor with shape (None,1,embedding_size),(None,T,embedding_size) and (None,1)'
-                                 'Got different shapes: %s' % (input_shape))
+            if self.self_attention and input_shape[0][-1] != input_shape[1][-1]:
+                raise ValueError('A `LocalActivationUnit` layer with self_attention is True requires '
+                                 'inputs of a two inputs with shape (None,T,embedding_size) and (None,T,embedding_size)'
+                                 'Got different shapes: %s,%s' % (input_shape[0], input_shape[1]))
+
+            if not self.self_attention and (input_shape[0][-1] != input_shape[1][-1] or input_shape[0][1] != 1):
+                raise ValueError('A `LocalActivationUnit` layer with not self_attention requires '
+                                 'inputs of a two inputs with shape (None,1,embedding_size) and (None,T,embedding_size)'
+                                 'Got different shapes: %s,%s' % (input_shape[0], input_shape[1]))
         else:
             pass
         self.local_att = LocalActivationUnit(
-            self.att_hidden_units, self.att_activation, l2_reg=0, dropout_rate=0, use_bn=False, seed=1024, )
+            self.att_hidden_units, self.att_activation, l2_reg=0, dropout_rate=0, use_bn=False,
+            self_attention=self.self_attention,seed=1024)
         super(AttentionSequencePoolingLayer, self).build(
             input_shape)  # Be sure to call this somewhere!
 
@@ -253,10 +275,12 @@ class AttentionSequencePoolingLayer(Layer):
             key_masks = tf.expand_dims(mask[-1], axis=1)
 
         else:
-
             queries, keys, keys_length = inputs
             hist_len = keys.get_shape()[1]
             key_masks = tf.sequence_mask(keys_length, hist_len)
+
+        if self.padding_first:
+            key_masks = tf.reverse(key_masks, axis=[-1])
 
         attention_score = self.local_att([queries, keys], training=training)
 
@@ -268,6 +292,14 @@ class AttentionSequencePoolingLayer(Layer):
             paddings = tf.zeros_like(outputs)
 
         outputs = tf.where(key_masks, outputs, paddings)
+
+        if self.causality:
+            scores_tile = tf.tile(tf.reduce_sum(outputs, axis=1), [1, tf.shape(outputs)[-1]])
+            scores_tile = tf.reshape(scores_tile, [-1, tf.shape(outputs)[-1], tf.shape(outputs)[-1]])
+            diag_vals = tf.ones_like(scores_tile)
+            tril = tf.linalg.LinearOperatorLowerTriangular(diag_vals).to_dense()
+            paddings = tf.ones_like(tril) * (-2 ** 32 + 1)
+            outputs = tf.where(tf.equal(tril, 0), paddings, scores_tile)
 
         if self.weight_normalization:
             outputs = softmax(outputs)
@@ -295,6 +327,7 @@ class AttentionSequencePoolingLayer(Layer):
 
         config = {'att_hidden_units': self.att_hidden_units, 'att_activation': self.att_activation,
                   'weight_normalization': self.weight_normalization, 'return_score': self.return_score,
+                  'padding_first': self.padding_first, 'causality': self.causality,
                   'supports_masking': self.supports_masking}
         base_config = super(AttentionSequencePoolingLayer, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
@@ -648,6 +681,101 @@ def positional_encoding(inputs,
     return outputs + inputs
 
 
+class PositionalEncoding(Layer):
+    """The PositionalEncoding is used to encode position information for the behavior sequence.
+
+      Input shape
+        - A 3D tensor with shape: ``(batch_size, T, embedding_size)``
+
+      Output shape
+        - A 3D tensor with shape: ``(batch_size, T, embedding_size)`` with use_concat is False
+        or A 3D tensor with shape: ``(batch_size, T, embedding_size*2)`` with use_concat is True;
+
+      Arguments
+        - **use_sinusoidal**: Whether or not use sinusoidal positional encoding.
+
+        - **zero_pad**: Bool.If True, all the values of the first row (id = 0) should be constant zero
+
+        - **scale**:Bool.If True, the output will be multiplied by sqrt num_units(check details from paper)
+
+        - **use_concat**:Bool.If True, the positional encoding will concat with input; else, the it will be added to the input
+        """
+    def __init__(self, use_sinusoidal=True, zero_pad=False, scale=True, use_concat=False, seed=1024, **kwargs):
+        self.use_sinusoidal = use_sinusoidal
+        self.zero_pad = zero_pad
+        self.scale = scale
+        self.use_concat = use_concat
+        self.seed = seed
+        super(PositionalEncoding, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+
+        embed_size = input_shape[2].value
+        seq_len_max = input_shape[1].value
+        if not self.use_sinusoidal:
+           self.position_embedding = self.add_weight('position_embedding', shape=(seq_len_max, embed_size),
+                                              initializer=TruncatedNormal(
+                                                  mean=0.0, stddev=0.0001, seed=self.seed))
+
+        # Be sure to call this somewhere!
+        super(PositionalEncoding, self).build(input_shape)
+
+    def call(self, inputs, mask=None):
+        """
+        :param inputs: None * field_size * embedding_size
+        :return: None * field_size * embedding_size or None * （field_size*2） * embedding_size
+        """
+        _, T, num_units = inputs.get_shape().as_list()
+        position_ind = tf.expand_dims(tf.range(T), 0)
+        if self.use_sinusoidal:
+            position_enc = np.array([
+                [pos / np.power(10000, 2. * i / num_units)
+                 for i in range(num_units)]
+                for pos in range(T)])
+
+            # Second part, apply the cosine to even columns and sin to odds.
+            position_enc[:, 0::2] = np.sin(position_enc[:, 0::2])  # dim 2i
+            position_enc[:, 1::2] = np.cos(position_enc[:, 1::2])  # dim 2i+1
+            # Convert to a tensor
+            lookup_table = tf.convert_to_tensor(position_enc)
+            lookup_table = tf.cast(lookup_table, tf.float32)
+        else:
+            lookup_table = self.position_embedding
+
+        if self.zero_pad:
+            lookup_table = tf.concat((tf.zeros(shape=[1, num_units]),
+                                      lookup_table[1:, :]), 0)
+
+        outputs = tf.nn.embedding_lookup(lookup_table, position_ind)
+
+        if self.scale:
+            outputs = outputs * num_units ** 0.5
+
+        if self.use_concat:
+            outputs = tf.squeeze(outputs,axis=0)
+            outputs = tf.tile(outputs, [tf.shape(inputs)[0], 1])
+            outputs = tf.reshape(outputs, [tf.shape(inputs)[0], -1, outputs.get_shape().as_list()[1]])
+            outputs = tf.concat([outputs, inputs], -1)
+        else:
+            outputs = outputs + inputs
+
+        return outputs
+
+    def compute_output_shape(self, input_shape):
+
+        return input_shape
+
+    def compute_mask(self, inputs, mask=None):
+        return mask
+
+    def get_config(self, ):
+
+        config = {'use_sinusoidal': self.use_sinusoidal,'zero_pad': self.zero_pad,'scale': self.scale,
+                  'use_concat': self.use_concat, 'seed': self.seed,}
+        base_config = super(PositionalEncoding, self).get_config()
+        return dict(list(base_config.items()) + list(config.items()))
+    
+    
 class BiasEncoding(Layer):
     def __init__(self, sess_max_count, seed=1024, **kwargs):
         self.sess_max_count = sess_max_count

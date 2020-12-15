@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 from .activation import Dice
-from .core import DNN, LocalActivationUnit, PredictionLayer
+from .core import DNN, LocalActivationUnit, PredictionLayer,SampledSoftmaxLayer,EmbeddingIndex,PoolingLayer
 from .interaction import (CIN, FM, AFMLayer, BiInteractionPooling, CrossNet,
                           InnerProductLayer, InteractingLayer,
                           OutterProductLayer, FGCNNLayer, SENETLayer, BilinearInteraction,
@@ -9,7 +9,7 @@ from .interaction import (CIN, FM, AFMLayer, BiInteractionPooling, CrossNet,
 from .normalization import LayerNormalization
 from .sequence import (AttentionSequencePoolingLayer, BiasEncoding, BiLSTM,
                        KMaxPooling, SequencePoolingLayer,WeightedSequenceLayer,
-                       Transformer, DynamicGRU)
+                       Transformer, DynamicGRU,PositionalEncoding)
 from .utils import NoMask, Hash,Linear,Add,combined_dnn_input
 
 custom_objects = {'tf': tf,
@@ -42,5 +42,10 @@ custom_objects = {'tf': tf,
                   'WeightedSequenceLayer':WeightedSequenceLayer,
                   'Add':Add,
                   'FieldWiseBiInteraction':FieldWiseBiInteraction,
-                  'FwFMLayer': FwFMLayer
+                  'FwFMLayer': FwFMLayer,
+                  'SampledSoftmaxLayer': SampledSoftmaxLayer,
+                  'EmbeddingIndex': EmbeddingIndex,
+                  'PoolingLayer': PoolingLayer,
+                  'PositionalEncoding':PositionalEncoding
                   }
+
