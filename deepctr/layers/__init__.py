@@ -5,7 +5,7 @@ from .core import DNN, LocalActivationUnit, PredictionLayer
 from .interaction import (CIN, FM, AFMLayer, BiInteractionPooling, CrossNet,
                           InnerProductLayer, InteractingLayer,
                           OutterProductLayer, FGCNNLayer, SENETLayer, BilinearInteraction,
-                          FieldWiseBiInteraction, FwFMLayer)
+                          FieldWiseBiInteraction, FwFMLayer, FEFMLayer)
 from .normalization import LayerNormalization
 from .sequence import (AttentionSequencePoolingLayer, BiasEncoding, BiLSTM,
                        KMaxPooling, SequencePoolingLayer,WeightedSequenceLayer,
@@ -42,5 +42,6 @@ custom_objects = {'tf': tf,
                   'WeightedSequenceLayer':WeightedSequenceLayer,
                   'Add':Add,
                   'FieldWiseBiInteraction':FieldWiseBiInteraction,
-                  'FwFMLayer': FwFMLayer
+                  'FwFMLayer': FwFMLayer,
+                  'FEFMLayer': FEFMLayer
                   }
