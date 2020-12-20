@@ -87,11 +87,21 @@ class VarLenSparseFeat(namedtuple('VarLenSparseFeat',
         return self.name.__hash__()
 
 
-class DenseFeat(namedtuple('DenseFeat', ['name', 'dimension', 'dtype'])):
+class DenseFeat(namedtuple('DenseFeat', ['name', 'dimension', 'dtype', 'transform_fn'])):
+    """ Dense feature
+    Args:
+        name: feature name,
+        dimension: dimension of the feature, default = 1.
+        dtype: dtype of the feature, default="float32".
+        transform_fn: If not None, a function that can be used to transfrom
+        values of the feature.  the function takes the input Tensor as its
+        argument, and returns the output Tensor. 
+        (e.g. lambda x: (x - 3.0) / 4.2).
+    """
     __slots__ = ()
 
-    def __new__(cls, name, dimension=1, dtype="float32"):
-        return super(DenseFeat, cls).__new__(cls, name, dimension, dtype)
+    def __new__(cls, name, dimension=1, dtype="float32", transform_fn=None):
+        return super(DenseFeat, cls).__new__(cls, name, dimension, dtype, transform_fn)
 
     def __hash__(self):
         return self.name.__hash__()
