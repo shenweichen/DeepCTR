@@ -1419,25 +1419,22 @@ class FEFMLayer(Layer):
 
       Output shape
         - 2D tensor with shape:
-            ``(batch_size, 1)`` if dont_add_interactions in kwargs is False -> use for shallow FEFM or ablation studies
-            ``(batch_size, (num_fields * (num_fields-1))/2)`` if dont_add_interactions in kwargs is True (DeepFEFM)
+            ``(batch_size, (num_fields * (num_fields-1))/2)`` # concatenated FEFM interaction embeddings
 
       Arguments
         - **num_fields** : integer for number of fields
-        - **regularizer** : L2 regularizer weight for the field strength parameters of FwFM
         - **embedding_size** : integer for embedding dimension
-        - **dont_add_interactions**: See comments in Output shape description
+        - **regularizer** : L2 regularizer weight for the field pair matrix embeddings parameters of FEFM
 
       References
-        - [Field-Embedded Factorization Machines for Click-through Rate Prediction in Display Advertising]
-        https://arxiv.org/pdf/1806.03514.pdf
+        - [Field-Embedded Factorization Machines for Click-through Rate Prediction]
+         https://arxiv.org/pdf/2009.09931.pdf
     """
 
     def __init__(self, num_fields, embedding_size, regularizer, **kwargs):
         self.num_fields = num_fields
         self.embedding_size = embedding_size
         self.regularizer = regularizer
-        self.dont_add_interactions = kwargs.pop('dont_add_interactions', False)
         super(FEFMLayer, self).__init__(**kwargs)
 
     def build(self, input_shape):
@@ -1456,13 +1453,12 @@ class FEFMLayer(Layer):
             self.field_embeddings[field_pair_id] = self.add_weight(name='field_embeddings' + field_pair_id,
                                                                    shape=(self.embedding_size, self.embedding_size),
                                                                    initializer=TruncatedNormal(),
-                                                                   regularizer=self.regularizer,
+                                                                   regularizer=l2(self.regularizer),
                                                                    trainable=True)
 
         super(FEFMLayer, self).build(input_shape)  # Be sure to call this somewhere!
 
     def call(self, inputs, **kwargs):
-        # Here input is same as in FM -> the concatenated feature embeddings for each field
         if K.ndim(inputs) != 3:
             raise ValueError(
                 "Unexpected inputs dimensions %d, expect to be 3 dimensions"
@@ -1484,8 +1480,17 @@ class FEFMLayer(Layer):
             f = batch_dot(feat_embed_i_tr, feat_embed_j, axes=1)
             pairwise_inner_prods.append(f)
 
-        if not self.dont_add_interactions:
-            return tf.add_n(pairwise_inner_prods)
-        else:
-            concat_vec = tf.concat(pairwise_inner_prods, axis=1)
-            return concat_vec
+        concat_vec = tf.concat(pairwise_inner_prods, axis=1)
+        return concat_vec
+
+    def compute_output_shape(self, input_shape):
+        return (None, (self.num_fields * (self.num_fields-1))/2)
+
+    def get_config(self):
+        config = super(FEFMLayer, self).get_config().copy()
+        config.update({
+            'num_fields': self.num_fields,
+            'regularizer': self.regularizer,
+            'embedding_size': self.embedding_size
+        })
+        return config
