@@ -65,7 +65,7 @@ def DeepFEFMEstimator(linear_feature_columns, dnn_feature_columns, embedding_siz
             fefm_interaction_embedding = FEFMLayer(num_fields=len(sparse_embedding_list), embedding_size=embedding_size,
                                    regularizer=l2_reg_embedding_field)(concat_func(sparse_embedding_list, axis=1))
 
-            fefm_logit = reduce_sum(fefm_interaction_embedding, axis=1, keep_dims=True)
+            fefm_logit = tf.keras.layers.Lambda(lambda x: reduce_sum(x, axis=1, keep_dims=True))(fefm_interaction_embedding)
 
             final_logit_components.append(fefm_logit)
 
