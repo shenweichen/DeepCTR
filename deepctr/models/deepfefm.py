@@ -78,7 +78,7 @@ def DeepFEFM(linear_feature_columns, dnn_feature_columns, fm_group=[DEFAULT_GROU
     dnn_logit = tf.keras.layers.Dense(
         1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(dnn_out)
 
-    fefm_logit = tf.keras.layers.Lambda(lambda x: tf.reduce_sum(x, axis=1, keepdims=True))(concat_func(fefm_output_group, axis=1))
+    fefm_logit = tf.keras.layers.Lambda(lambda x: tf.reduce_sum(x, axis=1, keep_dims=True))(concat_func(fefm_output_group, axis=1))
 
     if len(dnn_hidden_units) == 0 and use_fefm is False and use_linear is True:  # only linear
         final_logit = linear_logit
