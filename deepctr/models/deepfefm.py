@@ -18,7 +18,7 @@ import tensorflow as tf
 from ..feature_column import input_from_feature_columns, get_linear_logit, build_input_features, DEFAULT_GROUP_NAME
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import FEFMLayer
-from ..layers.utils import concat_func, combined_dnn_input
+from ..layers.utils import concat_func, combined_dnn_input, reduce_sum
 
 
 def DeepFEFM(linear_feature_columns, dnn_feature_columns, fm_group=[DEFAULT_GROUP_NAME], embedding_size=48,
@@ -58,9 +58,9 @@ def DeepFEFM(linear_feature_columns, dnn_feature_columns, fm_group=[DEFAULT_GROU
                                                                         l2_reg_embedding_feat,
                                                                         seed, support_group=True)
 
-    fefm_output_group = [FEFMLayer(num_fields=len(v), embedding_size=embedding_size,
-                                   regularizer=l2_reg_embedding_field)(concat_func(v, axis=1))
-                         for k, v in group_embedding_dict.items() if k in fm_group]
+    fefm_interaction_embedding = concat_func([FEFMLayer(num_fields=len(v), embedding_size=embedding_size,
+                                               regularizer=l2_reg_embedding_field)(concat_func(v, axis=1))
+                                     for k, v in group_embedding_dict.items() if k in fm_group], axis=1)
 
     dnn_input = combined_dnn_input(list(chain.from_iterable(group_embedding_dict.values())), dense_value_list)
 
@@ -68,17 +68,17 @@ def DeepFEFM(linear_feature_columns, dnn_feature_columns, fm_group=[DEFAULT_GROU
     if use_fefm_embed_in_dnn:
         if exclude_feature_embed_in_dnn:
             # Ablation3: remove feature vector embeddings from the DNN input
-            dnn_input = concat_func(fefm_output_group, axis=1)
+            dnn_input = fefm_interaction_embedding
         else:
             # No ablation
-            dnn_input = concat_func([dnn_input, concat_func(fefm_output_group, axis=1)], axis=1)
+            dnn_input = concat_func([dnn_input, fefm_interaction_embedding], axis=1)
 
     dnn_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed)(dnn_input)
 
     dnn_logit = tf.keras.layers.Dense(
         1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(dnn_out)
 
-    fefm_logit = tf.keras.layers.Lambda(lambda x: tf.reduce_sum(x, axis=1, keep_dims=True))(concat_func(fefm_output_group, axis=1))
+    fefm_logit = reduce_sum(fefm_interaction_embedding, axis=1, keep_dims=True)
 
     if len(dnn_hidden_units) == 0 and use_fefm is False and use_linear is True:  # only linear
         final_logit = linear_logit

@@ -15,7 +15,7 @@ from ..feature_column import get_linear_logit, input_from_feature_columns
 from ..utils import DNN_SCOPE_NAME, deepctr_model_fn, variable_scope
 from ...layers.core import DNN
 from ...layers.interaction import FEFMLayer
-from ...layers.utils import concat_func, add_func, combined_dnn_input
+from ...layers.utils import concat_func, add_func, combined_dnn_input, reduce_sum
 
 
 def DeepFEFMEstimator(linear_feature_columns, dnn_feature_columns, embedding_size=48,
@@ -65,7 +65,7 @@ def DeepFEFMEstimator(linear_feature_columns, dnn_feature_columns, embedding_siz
             fefm_interaction_embedding = FEFMLayer(num_fields=len(sparse_embedding_list), embedding_size=embedding_size,
                                    regularizer=l2_reg_embedding_field)(concat_func(sparse_embedding_list, axis=1))
 
-            fefm_logit = tf.keras.layers.Lambda(lambda x: tf.reduce_sum(x, axis=1, keep_dims=True))(fefm_interaction_embedding)
+            fefm_logit = reduce_sum(fefm_interaction_embedding, axis=1, keep_dims=True)
 
             final_logit_components.append(fefm_logit)
 
