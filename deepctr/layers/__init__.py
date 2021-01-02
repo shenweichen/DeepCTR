@@ -10,7 +10,7 @@ from .normalization import LayerNormalization
 from .sequence import (AttentionSequencePoolingLayer, BiasEncoding, BiLSTM,
                        KMaxPooling, SequencePoolingLayer,WeightedSequenceLayer,
                        Transformer, DynamicGRU)
-from .utils import NoMask, Hash,Linear,Add,combined_dnn_input
+from .utils import NoMask, Hash,Linear,Add,combined_dnn_input, reduce_sum
 
 custom_objects = {'tf': tf,
                   'InnerProductLayer': InnerProductLayer,
@@ -43,5 +43,6 @@ custom_objects = {'tf': tf,
                   'Add':Add,
                   'FieldWiseBiInteraction':FieldWiseBiInteraction,
                   'FwFMLayer': FwFMLayer,
-                  'FEFMLayer': FEFMLayer
+                  'FEFMLayer': FEFMLayer,
+                  'reduce_sum': reduce_sum
                   }
