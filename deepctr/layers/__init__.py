@@ -10,7 +10,11 @@ from .normalization import LayerNormalization
 from .sequence import (AttentionSequencePoolingLayer, BiasEncoding, BiLSTM,
                        KMaxPooling, SequencePoolingLayer, WeightedSequenceLayer,
                        Transformer, DynamicGRU)
+<<<<<<< HEAD
 from .utils import NoMask, Hash, Linear, Add, combined_dnn_input, softmax
+=======
+from .utils import NoMask, Hash,Linear,Add,combined_dnn_input, reduce_sum
+>>>>>>> 4ab3607 (serialization support for reduce_sum)
 
 custom_objects = {'tf': tf,
                   'InnerProductLayer': InnerProductLayer,
@@ -45,5 +49,6 @@ custom_objects = {'tf': tf,
                   'FieldWiseBiInteraction': FieldWiseBiInteraction,
                   'FwFMLayer': FwFMLayer,
                   'softmax': softmax,
-                  'FEFMLayer': FEFMLayer
+                  'FEFMLayer': FEFMLayer,
+                  'reduce_sum': reduce_sum
                   }
