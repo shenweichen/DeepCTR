@@ -2,7 +2,7 @@ import tensorflow as tf
 
 from .activation import Dice
 from .core import DNN, LocalActivationUnit, PredictionLayer
-from .interaction import (CIN, FM, AFMLayer, BiInteractionPooling, CrossNet,
+from .interaction import (CIN, FM, AFMLayer, BiInteractionPooling, CrossNet, CrossNetMix,
                           InnerProductLayer, InteractingLayer,
                           OutterProductLayer, FGCNNLayer, SENETLayer, BilinearInteraction,
                           FieldWiseBiInteraction, FwFMLayer)
@@ -20,6 +20,7 @@ custom_objects = {'tf': tf,
                   'FM': FM,
                   'AFMLayer': AFMLayer,
                   'CrossNet': CrossNet,
+                  'CrossNetMix': CrossNetMix,
                   'BiInteractionPooling': BiInteractionPooling,
                   'LocalActivationUnit': LocalActivationUnit,
                   'Dice': Dice,
