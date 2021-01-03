@@ -2,6 +2,7 @@ from .afm import AFM
 from .autoint import AutoInt
 from .ccpm import CCPM
 from .dcn import DCN
+from .dcnmix import DCNMix
 from .deepfm import DeepFM
 from .dien import DIEN
 from .din import DIN
@@ -20,5 +21,5 @@ from .flen import FLEN
 from .fwfm import FwFM
 from .deepfefm import DeepFEFM
 
-__all__ = ["AFM", "CCPM","DCN", "MLR",  "DeepFM", "MLR", "NFM", "DIN", "DIEN", "FNN", "PNN",
+__all__ = ["AFM", "CCPM","DCN", "DCNMix", "MLR",  "DeepFM", "MLR", "NFM", "DIN", "DIEN", "FNN", "PNN",
            "WDL", "xDeepFM", "AutoInt", "ONN", "FGCNN", "DSIN", "FiBiNET", 'FLEN', "FwFM", "DeepFEFM"]
