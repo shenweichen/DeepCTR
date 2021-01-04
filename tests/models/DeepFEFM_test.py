@@ -7,17 +7,25 @@ from ..utils import check_model, get_test_data, SAMPLE_SIZE, get_test_data_estim
     Estimator_TEST_TF1
 
 @pytest.mark.parametrize(
-    'hidden_size,sparse_feature_num',
-    [((2,), 1),
-     ((), 1),
+    'hidden_size,sparse_feature_num,use_fefm,use_linear,use_fefm_embed_in_dnn',
+    [((2,), 1, True, True, True),
+     ((2,), 1, True, True, False),
+     ((2,), 1, True, False, True),
+     ((2,), 1, False, True, True),
+     ((2,), 1, True, False, False),
+     ((2,), 1, False, True, False),
+     ((2,), 1, False, False, True),
+     ((2,), 1, False, False, False),
+     ((), 1, True, True, True)
      ]
 )
-def test_DeepFEFM(hidden_size, sparse_feature_num):
+def test_DeepFEFM(hidden_size, sparse_feature_num, use_fefm, use_linear, use_fefm_embed_in_dnn):
     model_name = "DeepFEFM"
     sample_size = SAMPLE_SIZE
     x, y, feature_columns = get_test_data(sample_size, sparse_feature_num=sparse_feature_num,
                                           dense_feature_num=sparse_feature_num)
-    model = DeepFEFM(feature_columns, feature_columns, embedding_size=4, dnn_hidden_units=hidden_size, dnn_dropout=0.5)
+    model = DeepFEFM(feature_columns, feature_columns, embedding_size=4, dnn_hidden_units=hidden_size, dnn_dropout=0.5,
+                     use_linear=use_linear, use_fefm=use_fefm,  use_fefm_embed_in_dnn=use_fefm_embed_in_dnn)
 
     check_model(model, model_name, x, y)
 
