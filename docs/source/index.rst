@@ -42,7 +42,7 @@ You can read the latest code and related projects
 
 News
 -----
-01/xx/2021 : Add `DCN-Mix <./Features.html#dcn-mix-improved-deep-cross-network-with-mix-of-experts-and-matrix-kernel>`_ (`中文介绍 <https://mp.weixin.qq.com/s/0qidwbxyfTkODTw2DIiRWw>`_) and support ``transform_fn`` in ``DenseFeat``. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.3>`_
+01/05/2021 : Add `DCN-Mix <./Features.html#dcn-mix-improved-deep-cross-network-with-mix-of-experts-and-matrix-kernel>`_ (`中文介绍 <https://mp.weixin.qq.com/s/0qidwbxyfTkODTw2DIiRWw>`_) and support ``transform_fn`` in ``DenseFeat``. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.3>`_
 
 10/11/2020 : Refactor ``DNN`` Layer. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.2>`_
 

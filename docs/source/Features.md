@@ -187,7 +187,7 @@ DCN-Mix uses a matrix kernel instead of vector kernel in CrossNet compared with 
 
 ![DCN-Mix](../pics/DCN-Mix.png)
 
-[Wang R, Shivanna R, Cheng D Z, et al. DCN-M: Improved Deep & Cross Network for Feature Cross Learning in Web-scale Learning to Rank Systems[J]. arXiv preprint arXiv:2008.13535, 2020.
+[Wang R, Shivanna R, Cheng D Z, et al. DCN V2: Improved Deep & Cross Network and Practical Lessons for Web-scale Learning to Rank Systems[J]. arXiv preprint arXiv:2008.13535, 2020.
 ](https://arxiv.org/abs/2008.13535) 
 
 
