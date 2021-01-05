@@ -36,11 +36,15 @@ DNN based CTR prediction models usually have following 4 modules:
 - trainable: default `True`.Whether or not the embedding is trainable.
 
 ### DenseFeat
-``DenseFeat`` is a namedtuple with signature ``DenseFeat(name, dimension, dtype)``
+``DenseFeat`` is a namedtuple with signature ``DenseFeat(name, dimension, dtype, transform_fn)``
 
 - name : feature name
 - dimension : dimension of dense feature vector.
 - dtype : default `float32`.dtype of input tensor.
+- transform_fn : If not None, a function that can be used to transfrom
+        values of the feature.  the function takes the input Tensor as its
+        argument, and returns the output Tensor. 
+        (e.g. lambda x: (x - 3.0) / 4.2).
 
 ### VarLenSparseFeat
 
@@ -173,6 +177,18 @@ The output of Cross Net and MLP are concatenated.The concatenated vector are fee
 ![DCN](../pics/DCN.png)
 
 [Wang R, Fu B, Fu G, et al. Deep & cross network for ad click predictions[C]//Proceedings of the ADKDD'17. ACM, 2017: 12.](https://arxiv.org/abs/1708.05123) 
+
+
+### DCN-Mix (Improved Deep & Cross Network with mix of experts and matrix kernel)
+
+DCN-Mix uses a matrix kernel instead of vector kernel in CrossNet compared with DCN,and it uses mixture of experts to learn feature interactions. 
+
+[**DCN-Mix Model API**](./deepctr.models.dcnmix.html)
+
+![DCN-Mix](../pics/DCN-Mix.png)
+
+[Wang R, Shivanna R, Cheng D Z, et al. DCN-M: Improved Deep & Cross Network for Feature Cross Learning in Web-scale Learning to Rank Systems[J]. arXiv preprint arXiv:2008.13535, 2020.
+](https://arxiv.org/abs/2008.13535) 
 
 
 ### DIN (Deep Interest Network)
