@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 """
 Author:
-    Weichen Shen,wcshen1994@163.com
+    Weichen Shen, wcshen1994@163.com
 
     Shuxun Zan, zanshuxun@aliyun.com
 

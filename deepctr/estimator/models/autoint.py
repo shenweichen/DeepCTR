@@ -2,7 +2,7 @@
 """
 
 Author:
-    Weichen Shen,wcshen1994@163.com
+    Weichen Shen, wcshen1994@163.com
 
 Reference:
     [1] Song W, Shi C, Xiao Z, et al. AutoInt: Automatic Feature Interaction Learning via Self-Attentive Neural Networks[J]. arXiv preprint arXiv:1810.11921, 2018.(https://arxiv.org/abs/1810.11921)

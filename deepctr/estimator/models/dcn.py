@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 """
 Author:
-    Weichen Shen,wcshen1994@163.com
+    Weichen Shen, wcshen1994@163.com
 
 Reference:
     [1] Wang R, Fu B, Fu G, et al. Deep & cross network for ad click predictions[C]//Proceedings of the ADKDD'17. ACM, 2017: 12. (https://arxiv.org/abs/1708.05123)

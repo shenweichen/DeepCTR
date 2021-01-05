@@ -44,7 +44,7 @@ DNN based CTR prediction models usually have following 4 modules:
 - transform_fn : If not None, a function that can be used to transfrom
         values of the feature.  the function takes the input Tensor as its
         argument, and returns the output Tensor. 
-        (e.g. lambda x: (x - 3.0) / 4.2).
+        (e.g. `lambda x: (x - 3.0) / 4.2)`.
 
 ### VarLenSparseFeat
 
@@ -249,7 +249,8 @@ By stacking multiple interacting layers,AutoInt is able to model different order
 
 ![AutoInt](../pics/AutoInt.png)
 
-[Song W, Shi C, Xiao Z, et al. AutoInt: Automatic Feature Interaction Learning via Self-Attentive Neural Networks[J]. arXiv preprint arXiv:1810.11921, 2018.](https://arxiv.org/abs/1810.11921)
+[Song W, Shi C, Xiao Z, et al. Autoint: Automatic feature interaction learning via self-attentive neural networks[C]//Proceedings of the 28th ACM International Conference on Information and Knowledge Management. 2019: 1161-1170.
+](https://arxiv.org/abs/1810.11921)
 
 ### ONN(Operation-aware Neural Networks for User Response Prediction)
 

@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 """
 Author:
-    Weichen Shen,wcshen1994@163.com
+    Weichen Shen, wcshen1994@163.com
 
 Reference:
     [1] Huang T, Zhang Z, Zhang J. FiBiNET: Combining Feature Importance and Bilinear feature Interaction for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1905.09433, 2019.
