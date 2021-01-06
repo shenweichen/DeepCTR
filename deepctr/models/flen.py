@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 """
 Author:
-    Tingyi Tan,5636374@qq.com
+    Tingyi Tan, 5636374@qq.com
 
 Reference:
     [1] Chen W, Zhan L, Ci Y, Lin C. FLEN: Leveraging Field for Scalable CTR Prediction . arXiv preprint arXiv:1911.04690, 2019.(https://arxiv.org/pdf/1911.04690)

@@ -1,9 +1,8 @@
 import tensorflow as tf
 
-from tensorflow.python.ops.parsing_ops import  FixedLenFeature
+from tensorflow.python.ops.parsing_ops import FixedLenFeature
 from deepctr.estimator import DeepFMEstimator
 from deepctr.estimator.inputs import input_fn_tfrecord
-
 
 if __name__ == "__main__":
 
@@ -36,7 +35,8 @@ if __name__ == "__main__":
                                          batch_size=2 ** 14, num_epochs=1, shuffle_factor=0)
 
     # 3.Define Model,train,predict and evaluate
-    model = DeepFMEstimator(linear_feature_columns, dnn_feature_columns, task='binary')
+    model = DeepFMEstimator(linear_feature_columns, dnn_feature_columns, task='binary',
+                            config=tf.estimator.RunConfig(tf_random_seed=2021))
 
     model.train(train_model_input)
     eval_result = model.evaluate(test_model_input)
