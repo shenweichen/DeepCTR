@@ -1,14 +1,14 @@
 # -*- coding:utf-8 -*-
 """
 Author:
-    Weichen Shen,wcshen1994@163.com
+    Weichen Shen, wcshen1994@163.com
 
     Shuxun Zan, zanshuxun@aliyun.com
 
 Reference:
     [1] Wang R, Fu B, Fu G, et al. Deep & cross network for ad click predictions[C]//Proceedings of the ADKDD'17. ACM, 2017: 12. (https://arxiv.org/abs/1708.05123)
 
-    [2] Wang R, Shivanna R, Cheng D Z, et al. DCN-M: Improved Deep & Cross Network for Feature Cross Learning in Web-scale Learning to Rank Systems[J]. 2020. (https://arxiv.org/abs/2008.13535)
+    [2] Wang R, Shivanna R, Cheng D Z, et al. DCN V2: Improved Deep & Cross Network and Practical Lessons for Web-scale Learning to Rank Systems[J]. 2020. (https://arxiv.org/abs/2008.13535)
 """
 import tensorflow as tf
 
@@ -22,7 +22,7 @@ def DCNMix(linear_feature_columns, dnn_feature_columns, cross_num=2,
            dnn_hidden_units=(128, 128,), l2_reg_linear=1e-5, l2_reg_embedding=1e-5, low_rank=32, num_experts=4,
            l2_reg_cross=1e-5, l2_reg_dnn=0, seed=1024, dnn_dropout=0, dnn_use_bn=False,
            dnn_activation='relu', task='binary'):
-    """Instantiates the Deep&Cross Network architecture.
+    """Instantiates the Deep&Cross Network with mixture of experts architecture.
 
     :param linear_feature_columns: An iterable containing all the features used by linear part of the model.
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
