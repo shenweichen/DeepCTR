@@ -76,7 +76,7 @@ If you find this code useful in your research, please cite it using the followin
 
 ## DisscussionGroup 交流群
 
-Please follow our wechat to join group:  
+- [Discussions](https://github.com/shenweichen/DeepCTR/discussions)
 - 公众号：**浅梦的学习笔记**  
 - wechat ID: **deepctrbot**
 

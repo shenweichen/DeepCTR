@@ -51,7 +51,7 @@ News
 DisscussionGroup 交流群
 -----------------------
 
-公众号：**浅梦的学习笔记**  wechat ID: **deepctrbot**
+`Discussions <https://github.com/shenweichen/DeepCTR/discussions>`_  公众号：**浅梦的学习笔记**  wechat ID: **deepctrbot**
 
 .. image:: ../pics/code.png
 

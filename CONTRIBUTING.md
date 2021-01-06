@@ -15,3 +15,7 @@ please send a brief introduction of your background and experience to wcshen1994
 3. **Testing**: Test  logical correctness and effect when finishing the code development of the `dev_yourname` branch. 
 4. **Pre-release** : After testing contact wcshen1994@163.com for pre-release integration, usually your branch `dev_yourname` will be merged into `release` branch by squash merge. 
 5. **Release a new version**: After confirming that the change is no longer needed, `release` branch will be merged into `master` and a new python package will be released on pypi.
+
+# Discussions
+
+https://github.com/shenweichen/DeepCTR/discussions
