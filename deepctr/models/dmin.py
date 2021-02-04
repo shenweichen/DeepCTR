@@ -200,7 +200,7 @@ def DMIN(dnn_feature_columns, history_feature_list, position_embedding_dim=2, at
                        use_positional_encoding=False, use_res=True, use_feed_forward=True, use_layer_norm=True,
                        blinding=False, seed=seed, supports_masking=True)
 
-    mask = tf.sequence_mask(tf.squeeze(user_behavior_length, axis=1), max_len)
+    mask = tf.sequence_mask(tf.squeeze(user_behavior_length, axis=1), max_len, dtype=tf.float32)
     mha1_output = mha1([hist_emb, hist_emb], [mask, mask])
 
     if mha1_output.get_shape().as_list()[1] != hist_emb.get_shape().as_list()[1]:
