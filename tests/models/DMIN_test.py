@@ -5,7 +5,7 @@ from packaging import version
 
 from deepctr.feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, get_feature_names
 from deepctr.models import DMIN
-from ..utils import check_model
+from tests.utils import check_model
 
 
 def get_xy_fd(use_neg=False, hash_flag=False):
@@ -58,18 +58,17 @@ def get_xy_fd(use_neg=False, hash_flag=False):
 
 def test_DMIN():
     if version.parse(tf.__version__) >= version.parse('2.0.0'):
-        tf.compat.v1.disable_eager_execution()
+        tf.compat.v1.disable_eager_execution() 
     model_name = "DMIN"
 
-    x, y, feature_columns, behavior_feature_list = get_xy_fd(hash_flag=True)
+    x, y, feature_columns, behavior_feature_list = get_xy_fd(hash_flag=False)
 
     model = DMIN(dnn_feature_columns=feature_columns,
                  history_feature_list=behavior_feature_list,
                  position_embedding_dim=2,
                  use_negsampling=False)
 
-    check_model(model, model_name, x, y,
-                check_model_io=True)
+    check_model(model, model_name, x, y)
 
 
 def test_DMIN_neg():
@@ -87,4 +86,5 @@ def test_DMIN_neg():
 
 
 if __name__ == "__main__":
-    pass
+    test_DMIN()
+    test_DMIN_neg()
