@@ -8,7 +8,7 @@ Reference:
 """
 
 import tensorflow as tf
-from tensorflow.python.keras.layers import (Concatenate, Dense, Permute, multiply, Input, Embedding)
+from tensorflow.python.keras.layers import (Concatenate, Dense, Input, Embedding)
 from tensorflow.python.keras.regularizers import l2
 from tensorflow.python.keras.initializers import RandomNormal
 from ..feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, build_input_features
@@ -18,46 +18,7 @@ from ..layers.core import DNN, PredictionLayer
 from ..layers.sequence import Transformer
 from ..layers.utils import concat_func, reduce_mean, combined_dnn_input
 from ..layers.normalization import LayerNormalization
-
-
-def AttentionUnit(query_emb, mha_output_item, position_hist_emb, mask, max_len):
-    '''
-    AttentionUnit is used for Multi-Interest Extractor Layer in DMIN.
-
-    Note: total_emb_dim used below refers to the sum of embedding dim of all of user behavior features.
-    For example: if behavior_feature_list=["item_id", "cate_id"] and the embedding dims of both is 8 and 4 respectively, then total_emb_dim=12.
-    In original paper, behavior_feature_list=["item_id", "cate_id"] and the embedding dims of both are emb_dim, then total_emb_dim=2*emb_dim.
-
-    query_emb:[bsz,total_emb_dim],
-    mha2_output_item:[bsz,max_len,total_emb_dim]
-    position:[bsz,max_len,position_emb_dim]
-    mask:[bsz,1]
-    '''
-
-    mask = tf.sequence_mask(tf.squeeze(mask, axis=-1), max_len)
-    mask = tf.equal(mask, tf.ones_like(mask))
-    query_emb = tf.tile(query_emb, [1, tf.shape(mha_output_item)[1]])
-    query_emb = tf.reshape(query_emb, tf.shape(mha_output_item))
-    query_emb = concat_func([query_emb, position_hist_emb], axis=-1)
-    query_emb = Dense(mha_output_item.get_shape().as_list()[-1])(query_emb)
-
-    concat_output = concat_func([query_emb, mha_output_item, \
-                               query_emb - mha_output_item, query_emb * mha_output_item], axis=-1)
-    concat_output = Dense(80, activation="sigmoid")(concat_output)
-    concat_output = Dense(40, activation="sigmoid")(concat_output)
-    concat_output = Dense(1)(concat_output)
-    concat_output = tf.reshape(concat_output, [-1, 1, tf.shape(mha_output_item)[1]])
-    scores = concat_output
-
-    key_masks = tf.expand_dims(mask, 1)
-    paddings = tf.ones_like(scores) * (-2 ** 32 + 1)
-    scores = tf.where(key_masks, scores, paddings)
-    paddings_no_softmax = tf.zeros_like(scores)
-    scores_no_softmax = tf.where(key_masks, scores, paddings_no_softmax)
-
-    scores = tf.nn.softmax(scores)
-    output = tf.matmul(scores, mha_output_item)
-    return output, scores, scores_no_softmax
+from ..layers.interaction import BehaviorRefinerLayer, MultiInterestExtractorLayer
 
 
 def auxiliary_loss(h_states, click_seq, noclick_seq, mask, stag=None):
@@ -182,8 +143,8 @@ def DMIN(dnn_feature_columns, history_feature_list, position_embedding_dim=2, at
         neg_concat_behavior = None
 
     dnn_input_emb_list += sequence_embed_list
-    query_emb = tf.squeeze(concat_func(query_emb_list), axis=1)
-    deep_input_emb = tf.squeeze(concat_func(dnn_input_emb_list), axis=1)
+    query_emb = concat_func(query_emb_list)
+    deep_input_emb = concat_func(dnn_input_emb_list)
     hist_emb = concat_func(hist_emb_list)
 
     max_len = varlen_sparse_feature_columns[0].maxlen
@@ -192,24 +153,10 @@ def DMIN(dnn_feature_columns, history_feature_list, position_embedding_dim=2, at
                                   embeddings_initializer=RandomNormal(mean=0.0, stddev=0.0001, seed=2020),
                                   embeddings_regularizer=l2(l2_reg_embedding))(position_his_input)
 
-    # Behavior Refiner Layer
     embedding_dim = varlen_sparse_feature_columns[0].embedding_dim
-    total_embedding_dim = hist_emb.get_shape().as_list()[-1]
-    mha1_att_embedding_size = hist_emb.get_shape().as_list()[-1] // att_head_num
-    mha1 = Transformer(att_embedding_size=mha1_att_embedding_size, head_num=att_head_num, dropout_rate=dnn_dropout,
-                       use_positional_encoding=False, use_res=True, use_feed_forward=True, use_layer_norm=True,
-                       blinding=False, seed=seed, supports_masking=True)
 
-    mask = tf.sequence_mask(tf.squeeze(user_behavior_length, axis=1), max_len, dtype=tf.float32)
-    mha1_output = mha1([hist_emb, hist_emb], [mask, mask])
-
-    if mha1_output.get_shape().as_list()[1] != hist_emb.get_shape().as_list()[1]:
-        mha1_output = tf.tile(mha1_output, [1, hist_emb.get_shape().as_list()[1], 1])
-
-    mha1_output_trans = Dense(embedding_dim * 4, activation='relu')(mha1_output)
-    mha1_output_trans = Dense(total_embedding_dim)(mha1_output_trans)
-
-    mha1_output = mha1_output_trans + mha1_output
+    # Behavior Refiner Layer
+    mha1_output = BehaviorRefinerLayer(att_head_num, dnn_dropout, seed)([hist_emb, user_behavior_length])
 
     if use_negsampling:
         aux_loss = auxiliary_loss(mha1_output[:, :-1, :], hist_emb[:, 1:, :], neg_concat_behavior[:, 1:, :],
@@ -218,31 +165,10 @@ def DMIN(dnn_feature_columns, history_feature_list, position_embedding_dim=2, at
         aux_loss = 0.0
 
     # Multi-Interest Extractor Layer
-    if mha1_output.get_shape().as_list()[1] != hist_emb.get_shape().as_list()[1]:
-        mha1_output = tf.tile(mha1_output, [1, hist_emb.get_shape().as_list()[1], 1])
+    att_fea = MultiInterestExtractorLayer( att_head_num, dnn_dropout, seed)(
+        [mha1_output, user_behavior_length, query_emb, position_hist_emb, deep_input_emb])
 
-    mha2_input = Dense(total_embedding_dim * att_head_num)(mha1_output)
-    mha2_att_embedding_size = mha2_input.get_shape().as_list()[-1] // att_head_num
-    mha2 = Transformer(att_embedding_size=mha2_att_embedding_size, head_num=att_head_num, dropout_rate=dnn_dropout,
-                       use_positional_encoding=False, use_res=True, use_feed_forward=True, use_layer_norm=True,
-                       blinding=False, seed=seed, supports_masking=True)
-    mha2_output = mha2([mha2_input, mha2_input], [mask, mask])
-
-    if mha2_output.get_shape().as_list()[1] != hist_emb.get_shape().as_list()[1]:
-        mha2_output = tf.tile(mha2_output, [1, hist_emb.get_shape().as_list()[1], 1])
-
-    mha2_output_list = tf.split(mha2_output, att_head_num, axis=-1)
-
-    for idx, mha2_output_item in enumerate(mha2_output_list):
-        mha2_output_item_trans = Dense(embedding_dim * 4, activation='relu')(mha2_output_item)
-        mha2_output_item_trans = Dense(total_embedding_dim, activation='relu')(mha2_output_item_trans)
-        mha2_output_item = mha2_output_item_trans + mha2_output_item
-        attn_output, attn_score, attn_scores_no_softmax = AttentionUnit(query_emb, mha2_output_item, position_hist_emb,
-                                                                        user_behavior_length, max_len)
-        att_fea = tf.reduce_sum(attn_output, 1)
-        deep_input_emb = Concatenate(axis=1)([deep_input_emb, att_fea])
-
-    deep_input_emb = tf.keras.layers.Flatten()(deep_input_emb)
+    deep_input_emb = tf.keras.layers.Flatten()(att_fea)
 
     dnn_input = combined_dnn_input([deep_input_emb], dense_value_list)
     output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, use_bn, seed=seed)(dnn_input)

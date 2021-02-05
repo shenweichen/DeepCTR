@@ -4,7 +4,6 @@ import tensorflow as tf
 from deepctr.feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, get_feature_names
 from deepctr.models import DMIN
 
-
 def get_xy_fd(use_neg=False, hash_flag=False):
     feature_columns = [SparseFeat('user', 3, embedding_dim=10, use_hash=hash_flag),
                        SparseFeat('gender', 2, embedding_dim=4, use_hash=hash_flag),
@@ -64,3 +63,5 @@ if __name__ == "__main__":
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
     history = model.fit(x, y, verbose=1, epochs=10, validation_split=0.5)
+
+
