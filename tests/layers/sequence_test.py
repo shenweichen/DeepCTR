@@ -65,7 +65,7 @@ def test_SequencePoolingLayer(mode, supports_masking, input_shape):
 @pytest.mark.parametrize(
 
     'merge_mode',
-    ['concat', 'ave', 'fw',
+    [ 'ave', 'fw',
      ]
 
 )
