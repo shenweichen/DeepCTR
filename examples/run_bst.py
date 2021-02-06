@@ -2,7 +2,7 @@ import numpy as np
 import tensorflow as tf
 
 from deepctr.feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, get_feature_names
-from deepctr.models import DMIN
+from deepctr.models import BST
 
 def get_xy_fd(use_neg=False, hash_flag=False):
     feature_columns = [SparseFeat('user', 3, embedding_dim=10, use_hash=hash_flag),
@@ -45,7 +45,6 @@ def get_xy_fd(use_neg=False, hash_flag=False):
 
     x = {name: feature_dict[name] for name in get_feature_names(feature_columns)}
     y = np.array([1, 0, 1])
-    x["position_hist"] = np.array([[0, 1, 2, 3], [0, 1, 2, 3], [0, 1, 2, 3]])
     return x, y, feature_columns, behavior_feature_list
 
 
@@ -55,10 +54,9 @@ if __name__ == "__main__":
     USE_NEG = True
     x, y, feature_columns, behavior_feature_list = get_xy_fd(use_neg=USE_NEG)
 
-    model = DMIN(dnn_feature_columns=feature_columns,
-                 history_feature_list=behavior_feature_list,
-                 position_embedding_dim=2,
-                 use_negsampling=True)
+    model = BST(dnn_feature_columns=feature_columns,
+                history_feature_list=behavior_feature_list,
+                att_head_num=4)
 
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
