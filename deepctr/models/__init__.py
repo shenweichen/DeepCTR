@@ -19,6 +19,7 @@ from .dsin import DSIN
 from .fibinet import FiBiNET
 from .flen import FLEN
 from .fwfm import FwFM
+from .bst import BST
 
 __all__ = ["AFM", "CCPM", "DCN", "DCNMix", "MLR",  "DeepFM", "MLR", "NFM", "DIN", "DIEN", "FNN", "PNN",
-           "WDL", "xDeepFM", "AutoInt", "ONN", "FGCNN", "DSIN", "FiBiNET", 'FLEN', "FwFM"]
+           "WDL", "xDeepFM", "AutoInt", "ONN", "FGCNN", "DSIN", "FiBiNET", 'FLEN', "FwFM", "BST"]
