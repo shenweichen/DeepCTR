@@ -436,6 +436,7 @@ class Transformer(Layer):
             - **blinding**: bool. Whether or not use blinding.
             - **seed**: A Python integer to use as random seed.
             - **supports_masking**:bool. Whether or not support masking.
+            - **output_type**: str or None. Whether or not use average pooling for output.
 
       References
             - [Vaswani, Ashish, et al. "Attention is all you need." Advances in Neural Information Processing Systems. 2017.](https://papers.nips.cc/paper/7181-attention-is-all-you-need.pdf)
@@ -443,7 +444,7 @@ class Transformer(Layer):
 
     def __init__(self, att_embedding_size=1, head_num=8, dropout_rate=0.0, use_positional_encoding=True, use_res=True,
                  use_feed_forward=True, use_layer_norm=False, blinding=True, seed=1024, supports_masking=False,
-                 **kwargs):
+                 output_type="mean", **kwargs):
         if head_num <= 0:
             raise ValueError('head_num must be a int > 0')
         self.att_embedding_size = att_embedding_size
@@ -456,6 +457,7 @@ class Transformer(Layer):
         self.dropout_rate = dropout_rate
         self.use_layer_norm = use_layer_norm
         self.blinding = blinding
+        self.output_type=output_type
         super(Transformer, self).__init__(**kwargs)
         self.supports_masking = supports_masking
 
@@ -579,7 +581,10 @@ class Transformer(Layer):
             if self.use_layer_norm:
                 result = self.ln(result)
 
-        return reduce_mean(result, axis=1, keep_dims=True)
+        if self.output_type=="mean":
+            return reduce_mean(result, axis=1, keep_dims=True)
+        else:
+            return result
 
     def compute_output_shape(self, input_shape):
 
