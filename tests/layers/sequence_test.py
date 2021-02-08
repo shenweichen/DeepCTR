@@ -62,7 +62,7 @@ def test_SequencePoolingLayer(mode, supports_masking, input_shape):
 #
 
 
-'''@pytest.mark.parametrize(
+@pytest.mark.parametrize(
 
     'merge_mode',
     ['concat', 'ave', 'fw',
@@ -73,7 +73,7 @@ def test_BiLSTM(merge_mode):
     with CustomObjectScope({'BiLSTM': sequence.BiLSTM}):
         layer_test(sequence.BiLSTM, kwargs={'merge_mode': merge_mode, 'units': EMBEDDING_SIZE,'dropout_rate':0.0}, #todo 0.5
                    input_shape=(BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE))
-'''
+
 
 def test_Transformer():
     if tf.__version__ >= '2.0.0':

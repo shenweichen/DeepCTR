@@ -48,8 +48,7 @@ def get_xy_fd(hash_flag=False):
 
 
 if __name__ == "__main__":
-    pass
-    '''if tf.__version__ >= '2.0.0':
+    if tf.__version__ >= '2.0.0':
         tf.compat.v1.disable_eager_execution()
 
     x, y, feature_columns, behavior_feature_list = get_xy_fd(True)
@@ -59,4 +58,4 @@ if __name__ == "__main__":
 
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
-    history = model.fit(x, y, verbose=1, epochs=10, validation_split=0.5)'''
+    history = model.fit(x, y, verbose=1, epochs=10, validation_split=0.5)

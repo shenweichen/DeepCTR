@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 REQUIRED_PACKAGES = [
-    'h5py==2.10.0','requests'
+    'h5py==2.10.0','requests','numpy==1.19.5'
 ]
 
 setuptools.setup(
