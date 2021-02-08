@@ -48,7 +48,7 @@ def get_xy_fd(hash_flag=False):
     return x, y, feature_columns, behavior_feature_list
 
 
-def test_DSIN():
+'''def test_DSIN():
     model_name = "DSIN"
 
     x, y, feature_columns, behavior_feature_list = get_xy_fd(True)
@@ -56,7 +56,7 @@ def test_DSIN():
     model = DSIN(feature_columns, behavior_feature_list, sess_max_count=2,
                  dnn_hidden_units=[4, 4, 4], dnn_dropout=0.5, )
     check_model(model, model_name, x, y)
-
+'''
 
 if __name__ == "__main__":
     pass
