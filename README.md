@@ -76,17 +76,9 @@ If you find this code useful in your research, please cite it using the followin
 
 ## DisscussionGroup 交流群
 
-- [Discussions](https://github.com/shenweichen/DeepCTR/discussions)
+- [Discussions](https://github.com/shenweichen/DeepCTR/blob/master/README.md#disscussiongroup )
 - 公众号：**浅梦的学习笔记**  
 - wechat ID: **deepctrbot**
 
   ![wechat](./docs/pics/code.png)
   
-##  Cooperative promotion 合作推广
-For more information about the recommendation system, such as **feature engineering, user profile, matching, ranking and multi-objective optimization, online learning and real-time computing, and more cutting-edge technologies and practical projects**:
-
-更多关于推荐系统的内容，如**特征工程，用户画像，召回，排序和多目标优化，在线学习与实时计算以及更多前沿技术和实战项目**等可参考：
-
-- [推荐系统实战](https://www.julyedu.com/course/getDetail/181?ccode=5ee751d37278c)
-- [互联网计算广告实战](https://www.julyedu.com/course/getDetail/158?ccode=5ee751d37278c)
-

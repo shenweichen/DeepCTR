@@ -399,14 +399,13 @@ class CrossNet(Layer):
             if self.parameterization == 'vector':
                 xl_w = tf.tensordot(x_l, self.kernels[i], axes=(1, 0))
                 dot_ = tf.matmul(x_0, xl_w)
-                x_l = dot_ + self.bias[i]
+                x_l = dot_ + self.bias[i] + x_l
             elif self.parameterization == 'matrix':
-                dot_ = tf.einsum('ij,bjk->bik', self.kernels[i], x_l)  # W * xi  (bs, dim, 1)
-                dot_ = dot_ + self.bias[i]  # W * xi + b
-                dot_ = x_0 * dot_  # x0 · (W * xi + b)  Hadamard-product
+                xl_w = tf.einsum('ij,bjk->bik', self.kernels[i], x_l)  # W * xi  (bs, dim, 1)
+                dot_ = xl_w + self.bias[i]  # W * xi + b
+                x_l = x_0 * dot_ + x_l  # x0 · (W * xi + b) +xl  Hadamard-product
             else:  # error
-                print("parameterization should be 'vector' or 'matrix'")
-            x_l = dot_ + x_l
+                raise ValueError("parameterization should be 'vector' or 'matrix'")
         x_l = tf.squeeze(x_l, axis=2)
         return x_l
 
