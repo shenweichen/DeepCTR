@@ -53,7 +53,6 @@ def test_CCPM_without_seq(sparse_feature_num, dense_feature_num):
 def test_CCPMEstimator_without_seq(sparse_feature_num, dense_feature_num):
     if not Estimator_TEST_TF1 and tf.__version__ < "2.2.0":
         return
-    model_name = "CCPM"
 
     sample_size = SAMPLE_SIZE
     linear_feature_columns, dnn_feature_columns, input_fn = get_test_data_estimator(sample_size,

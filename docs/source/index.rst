@@ -42,30 +42,18 @@ You can read the latest code and related projects
 
 News
 -----
+02/12/2021 : Fix bug in DCN-Mix. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.4>`_
+
 01/06/2021 : Add `DCN-Mix <./Features.html#dcn-mix-improved-deep-cross-network-with-mix-of-experts-and-matrix-kernel>`_ (`中文介绍 <https://mp.weixin.qq.com/s/0qidwbxyfTkODTw2DIiRWw>`_) and support ``transform_fn`` in ``DenseFeat``. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.3>`_
 
 10/11/2020 : Refactor ``DNN`` Layer. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.2>`_
 
-09/12/2020 : Improve the reproducibility & fix some bugs. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.1>`_
-
-DisscussionGroup 交流群
+DisscussionGroup
 -----------------------
 
 `Discussions <https://github.com/shenweichen/DeepCTR/discussions>`_  公众号：**浅梦的学习笔记**  wechat ID: **deepctrbot**
 
 .. image:: ../pics/code.png
-
-Cooperative promotion 合作推广
-------------------------------
-
-For more information about the recommendation system, such as **feature engineering, user profile, matching, ranking and multi-objective optimization, online learning and real-time computing, and more cutting-edge technologies and practical projects** :
-
-更多关于推荐系统的内容，如 **特征工程，用户画像，召回，排序和多目标优化，在线学习与实时计算以及更多前沿技术和实战项目** 等可参考：
-
-- `推荐系统实战 <https://www.julyedu.com/course/getDetail/181?ccode=5ee751d37278c>`_
-- `互联网计算广告实战 <https://www.julyedu.com/course/getDetail/158?ccode=5ee751d37278c>`_
-
-
 
 .. toctree::
    :maxdepth: 2

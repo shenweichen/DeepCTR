@@ -59,7 +59,7 @@ def CCPMEstimator(linear_feature_columns, dnn_feature_columns, conv_kernel_width
         linear_logits = get_linear_logit(features, linear_feature_columns, l2_reg_linear=l2_reg_linear)
 
         with variable_scope(DNN_SCOPE_NAME):
-            sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
+            sparse_embedding_list, _ = input_from_feature_columns(features, dnn_feature_columns,
                                                                                  l2_reg_embedding=l2_reg_embedding)
             n = len(sparse_embedding_list)
             l = len(conv_filters)

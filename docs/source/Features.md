@@ -41,7 +41,7 @@ DNN based CTR prediction models usually have following 4 modules:
 - name : feature name
 - dimension : dimension of dense feature vector.
 - dtype : default `float32`.dtype of input tensor.
-- transform_fn : If not None, a function that can be used to transfrom
+- transform_fn : If not `None` , a function that can be used to transform
         values of the feature.  the function takes the input Tensor as its
         argument, and returns the output Tensor. 
         (e.g. `lambda x: (x - 3.0) / 4.2)`.

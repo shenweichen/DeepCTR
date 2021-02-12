@@ -37,6 +37,18 @@ es = EarlyStopping(monitor='val_binary_crossentropy')
 history = model.fit(model_input, data[target].values,batch_size=256, epochs=10, verbose=2, validation_split=0.2,callbacks=[es] )
 ```
 
+If you are using Estimator models, you can set learning rate like:
+
+```python
+from deepctr.estimator import DeepFMEstimator
+import tensorflow as tf
+
+model = DeepFMEstimator(linear_feature_columns, dnn_feature_columns, task='binary', 
+                            linear_optimizer=tf.train.FtrlOptimizer(0.05), dnn_optimizer=tf.train.AdagradOptimizer(0.1)
+                            )
+
+```
+
 
 ## 3. Get the attentional weights of feature interactions in AFM
 --------------------------------------------------------------------------

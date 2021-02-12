@@ -29,7 +29,6 @@ def test_FiBiNET(bilinear_type):
 def test_FiBiNETEstimator(bilinear_type):
     if not Estimator_TEST_TF1 and tf.__version__ < "2.2.0":
         return
-    model_name = "FiBiNET"
     sample_size = SAMPLE_SIZE
     linear_feature_columns, dnn_feature_columns, input_fn = get_test_data_estimator(sample_size, sparse_feature_num=2,
                                                                                     dense_feature_num=2)

@@ -32,7 +32,6 @@ def test_AutoInt(att_layer_num, dnn_hidden_units, sparse_feature_num):
 def test_AutoIntEstimator(att_layer_num, dnn_hidden_units, sparse_feature_num):
     if not Estimator_TEST_TF1 and version.parse(tf.__version__) < version.parse('2.2.0'):
         return
-    model_name = "AutoInt"
     sample_size = SAMPLE_SIZE
     linear_feature_columns, dnn_feature_columns, input_fn = get_test_data_estimator(sample_size,
                                                                                     sparse_feature_num=sparse_feature_num,
