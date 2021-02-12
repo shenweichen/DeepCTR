@@ -13,7 +13,7 @@
 ![CI status](https://github.com/shenweichen/deepctr/workflows/CI/badge.svg)
 [![Coverage Status](https://coveralls.io/repos/github/shenweichen/DeepCTR/badge.svg?branch=master)](https://coveralls.io/github/shenweichen/DeepCTR?branch=master)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/d4099734dc0e4bab91d332ead8c0bdd0)](https://www.codacy.com/app/wcshen1994/DeepCTR?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=shenweichen/DeepCTR&amp;utm_campaign=Badge_Grade)
-[![Disscussion](https://img.shields.io/badge/chat-wechat-brightgreen?style=flat)](./README.md#disscussiongroup)
+[![Disscussion](https://img.shields.io/badge/chat-wechat-brightgreen?style=flat)](./README.md#DisscussionGroup)
 [![License](https://img.shields.io/github/license/shenweichen/deepctr.svg)](https://github.com/shenweichen/deepctr/blob/master/LICENSE)
 <!-- [![Gitter](https://badges.gitter.im/DeepCTR/community.svg)](https://gitter.im/DeepCTR/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) -->
 
@@ -74,9 +74,9 @@ If you find this code useful in your research, please cite it using the followin
 }
 ```
 
-## DisscussionGroup 交流群
+## DisscussionGroup
 
-- [Discussions](https://github.com/shenweichen/DeepCTR/blob/master/README.md#disscussiongroup )
+- [Discussions](https://github.com/shenweichen/DeepCTR/discussions)
 - 公众号：**浅梦的学习笔记**  
 - wechat ID: **deepctrbot**
 
