@@ -33,7 +33,6 @@ def test_DeepFM(hidden_size, sparse_feature_num):
 def test_DeepFMEstimator(hidden_size, sparse_feature_num):
     if not Estimator_TEST_TF1 and tf.__version__ < "2.2.0":
         return
-    model_name = "DeepFM"
     sample_size = SAMPLE_SIZE
     linear_feature_columns, dnn_feature_columns, input_fn = get_test_data_estimator(sample_size,
                                                                                     sparse_feature_num=sparse_feature_num,

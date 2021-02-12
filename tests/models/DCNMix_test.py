@@ -1,9 +1,7 @@
 import pytest
-import tensorflow as tf
 
 from deepctr.models import DCNMix
-from ..utils import check_model, get_test_data, SAMPLE_SIZE, get_test_data_estimator, check_estimator, \
-    Estimator_TEST_TF1
+from ..utils import check_model, get_test_data, SAMPLE_SIZE
 
 
 @pytest.mark.parametrize(

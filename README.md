@@ -24,7 +24,7 @@ DeepCTR is a **Easy-to-use**,**Modular** and **Extendible** package of deep-lear
 - Provide  `tensorflow estimator` interface for **large scale data** and **distributed training**. [example](https://deepctr-doc.readthedocs.io/en/latest/Quick-Start.html#getting-started-4-steps-to-deepctr-estimator-with-tfrecord)
 - It is compatible with both `tf 1.x`  and `tf 2.x`.
 
-Some related project:
+Some related projects:
 - DeepMatch: https://github.com/shenweichen/DeepMatch
 - DeepCTR-Torch: https://github.com/shenweichen/DeepCTR-Torch
 

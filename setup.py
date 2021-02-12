@@ -11,7 +11,7 @@ setuptools.setup(
     name="deepctr",
     version="0.8.3",
     author="Weichen Shen",
-    author_email="wcshen1994@163.com",
+    author_email="weichenswc@163.com",
     description="Easy-to-use,Modular and Extendible package of deep learning based CTR(Click Through Rate) prediction models with tensorflow 1.x and 2.x .",
     long_description=long_description,
     long_description_content_type="text/markdown",
