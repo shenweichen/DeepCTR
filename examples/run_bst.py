@@ -4,6 +4,7 @@ import tensorflow as tf
 from deepctr.feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, get_feature_names
 from deepctr.models import BST
 
+
 def get_xy_fd(use_neg=False, hash_flag=False):
     feature_columns = [SparseFeat('user', 3, embedding_dim=10, use_hash=hash_flag),
                        SparseFeat('gender', 2, embedding_dim=4, use_hash=hash_flag),
