@@ -587,8 +587,10 @@ class Transformer(Layer):
             return result
 
     def compute_output_shape(self, input_shape):
-
-        return (None, 1, self.att_embedding_size * self.head_num)
+        if self.output_type=="mean":
+            return (None, 1, self.att_embedding_size * self.head_num)
+        else:
+            return (None,input_shape[0][1],self.att_embedding_size * self.head_num)
 
     def compute_mask(self, inputs, mask=None):
         return None
