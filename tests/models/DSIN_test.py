@@ -51,8 +51,6 @@ def get_xy_fd(hash_flag=False):
 
 def test_DSIN():
     model_name = "DSIN"
-    if tf.__version__ >= '2.0.0':
-        tf.compat.v1.disable_eager_execution()
 
     x, y, feature_columns, behavior_feature_list = get_xy_fd(True)
 

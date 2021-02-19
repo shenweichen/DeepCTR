@@ -20,7 +20,6 @@ from tensorflow.python.layers import utils
 
 from .activation import activation_layer
 from .utils import concat_func, reduce_sum, softmax, reduce_mean
-from .sequence import Transformer
 
 
 class AFMLayer(Layer):
@@ -1407,4 +1406,3 @@ class FwFMLayer(Layer):
             'regularizer': self.regularizer
         })
         return config
-

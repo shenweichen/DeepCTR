@@ -79,7 +79,7 @@ class SequencePoolingLayer(Layer):
         mask = tf.tile(mask, [1, 1, embedding_size])
 
         if self.mode == "max":
-            hist = uiseq_embed_list - (1-mask) * 1e9
+            hist = uiseq_embed_list - (1 - mask) * 1e9
             return reduce_max(hist, 1, keep_dims=True)
 
         hist = reduce_sum(uiseq_embed_list * mask, 1, keep_dims=False)
@@ -436,7 +436,7 @@ class Transformer(Layer):
             - **blinding**: bool. Whether or not use blinding.
             - **seed**: A Python integer to use as random seed.
             - **supports_masking**:bool. Whether or not support masking.
-            - **output_type**: str or None. Whether or not use average pooling for output.
+            - **output_type**: str or None. Whether or not use average/sum pooling for output.
 
       References
             - [Vaswani, Ashish, et al. "Attention is all you need." Advances in Neural Information Processing Systems. 2017.](https://papers.nips.cc/paper/7181-attention-is-all-you-need.pdf)
@@ -457,7 +457,7 @@ class Transformer(Layer):
         self.dropout_rate = dropout_rate
         self.use_layer_norm = use_layer_norm
         self.blinding = blinding
-        self.output_type=output_type
+        self.output_type = output_type
         super(Transformer, self).__init__(**kwargs)
         self.supports_masking = supports_masking
 
@@ -466,7 +466,7 @@ class Transformer(Layer):
         if self.num_units != embedding_size:
             raise ValueError(
                 "att_embedding_size * head_num must equal the last dimension size of inputs,got %d * %d != %d" % (
-                self.att_embedding_size, self.head_num, embedding_size))
+                    self.att_embedding_size, self.head_num, embedding_size))
         self.seq_len_max = int(input_shape[0][-2])
         self.W_Query = self.add_weight(name='query', shape=[embedding_size, self.att_embedding_size * self.head_num],
                                        dtype=tf.float32,
@@ -581,14 +581,18 @@ class Transformer(Layer):
             if self.use_layer_norm:
                 result = self.ln(result)
 
-        if self.output_type=="mean":
+        if self.output_type == "mean":
             return reduce_mean(result, axis=1, keep_dims=True)
+        elif self.output_type == "sum":
+            return reduce_sum(result, axis=1, keep_dims=True)
         else:
             return result
 
     def compute_output_shape(self, input_shape):
-
-        return (None, 1, self.att_embedding_size * self.head_num)
+        if self.output_type == None:
+            return (None, input_shape[0][1], self.att_embedding_size * self.head_num)
+        else:
+            return (None, 1, self.att_embedding_size * self.head_num)
 
     def compute_mask(self, inputs, mask=None):
         return None
