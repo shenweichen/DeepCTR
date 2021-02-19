@@ -11,11 +11,11 @@ import itertools
 
 import tensorflow as tf
 from tensorflow.python.keras import backend as K
+from tensorflow.python.keras.backend import batch_dot
 from tensorflow.python.keras.initializers import (Zeros, glorot_normal,
                                                   glorot_uniform, TruncatedNormal)
 from tensorflow.python.keras.layers import Layer
 from tensorflow.python.keras.regularizers import l2
-from tensorflow.python.keras.backend import batch_dot
 from tensorflow.python.layers import utils
 
 from .activation import activation_layer
@@ -58,8 +58,8 @@ class AFMLayer(Layer):
     def build(self, input_shape):
 
         if not isinstance(input_shape, list) or len(input_shape) < 2:
-            #input_shape = input_shape[0]
-            #if not isinstance(input_shape, list) or len(input_shape) < 2:
+            # input_shape = input_shape[0]
+            # if not isinstance(input_shape, list) or len(input_shape) < 2:
             raise ValueError('A `AttentionalFM` layer should be called '
                              'on a list of at least 2 inputs')
 
@@ -126,7 +126,7 @@ class AFMLayer(Layer):
         attention_output = reduce_sum(
             self.normalized_att_score * bi_interaction, axis=1)
 
-        attention_output = self.dropout(attention_output,training=training)  # training
+        attention_output = self.dropout(attention_output, training=training)  # training
 
         afm_out = self.tensordot([attention_output, self.projection_p])
         return afm_out
@@ -142,7 +142,8 @@ class AFMLayer(Layer):
         config = {'attention_factor': self.attention_factor,
                   'l2_reg_w': self.l2_reg_w, 'dropout_rate': self.dropout_rate, 'seed': self.seed}
         base_config = super(AFMLayer, self).get_config()
-        return dict(list(base_config.items()) + list(config.items()))
+        base_config.update(config)
+        return base_config
 
 
 class BiInteractionPooling(Layer):
@@ -322,7 +323,8 @@ class CIN(Layer):
         config = {'layer_size': self.layer_size, 'split_half': self.split_half, 'activation': self.activation,
                   'seed': self.seed}
         base_config = super(CIN, self).get_config()
-        return dict(list(base_config.items()) + list(config.items()))
+        base_config.update(config)
+        return base_config
 
 
 class CrossNet(Layer):
@@ -340,16 +342,20 @@ class CrossNet(Layer):
 
         - **l2_reg**: float between 0 and 1. L2 regularizer strength applied to the kernel weights matrix
 
+        - **parameterization**: string, ``"vector"``  or ``"matrix"`` ,  way to parameterize the cross network.
+
         - **seed**: A Python integer to use as random seed.
 
       References
         - [Wang R, Fu B, Fu G, et al. Deep & cross network for ad click predictions[C]//Proceedings of the ADKDD'17. ACM, 2017: 12.](https://arxiv.org/abs/1708.05123)
     """
 
-    def __init__(self, layer_num=2, l2_reg=0, seed=1024, **kwargs):
+    def __init__(self, layer_num=2, parameterization='vector', l2_reg=0, seed=1024, **kwargs):
         self.layer_num = layer_num
+        self.parameterization = parameterization
         self.l2_reg = l2_reg
         self.seed = seed
+        print('CrossNet parameterization:', self.parameterization)
         super(CrossNet, self).__init__(**kwargs)
 
     def build(self, input_shape):
@@ -359,12 +365,22 @@ class CrossNet(Layer):
                 "Unexpected inputs dimensions %d, expect to be 2 dimensions" % (len(input_shape),))
 
         dim = int(input_shape[-1])
-        self.kernels = [self.add_weight(name='kernel' + str(i),
-                                        shape=(dim, 1),
-                                        initializer=glorot_normal(
-                                            seed=self.seed),
-                                        regularizer=l2(self.l2_reg),
-                                        trainable=True) for i in range(self.layer_num)]
+        if self.parameterization == 'vector':
+            self.kernels = [self.add_weight(name='kernel' + str(i),
+                                            shape=(dim, 1),
+                                            initializer=glorot_normal(
+                                                seed=self.seed),
+                                            regularizer=l2(self.l2_reg),
+                                            trainable=True) for i in range(self.layer_num)]
+        elif self.parameterization == 'matrix':
+            self.kernels = [self.add_weight(name='kernel' + str(i),
+                                            shape=(dim, dim),
+                                            initializer=glorot_normal(
+                                                seed=self.seed),
+                                            regularizer=l2(self.l2_reg),
+                                            trainable=True) for i in range(self.layer_num)]
+        else:  # error
+            raise ValueError("parameterization should be 'vector' or 'matrix'")
         self.bias = [self.add_weight(name='bias' + str(i),
                                      shape=(dim, 1),
                                      initializer=Zeros(),
@@ -380,18 +396,151 @@ class CrossNet(Layer):
         x_0 = tf.expand_dims(inputs, axis=2)
         x_l = x_0
         for i in range(self.layer_num):
-            xl_w = tf.tensordot(x_l, self.kernels[i], axes=(1, 0))
-            dot_ = tf.matmul(x_0, xl_w)
-            x_l = dot_ + self.bias[i] + x_l
+            if self.parameterization == 'vector':
+                xl_w = tf.tensordot(x_l, self.kernels[i], axes=(1, 0))
+                dot_ = tf.matmul(x_0, xl_w)
+                x_l = dot_ + self.bias[i] + x_l
+            elif self.parameterization == 'matrix':
+                xl_w = tf.einsum('ij,bjk->bik', self.kernels[i], x_l)  # W * xi  (bs, dim, 1)
+                dot_ = xl_w + self.bias[i]  # W * xi + b
+                x_l = x_0 * dot_ + x_l  # x0 · (W * xi + b) +xl  Hadamard-product
+            else:  # error
+                raise ValueError("parameterization should be 'vector' or 'matrix'")
         x_l = tf.squeeze(x_l, axis=2)
         return x_l
 
     def get_config(self, ):
 
-        config = {'layer_num': self.layer_num,
+        config = {'layer_num': self.layer_num, 'parameterization': self.parameterization,
                   'l2_reg': self.l2_reg, 'seed': self.seed}
         base_config = super(CrossNet, self).get_config()
-        return dict(list(base_config.items()) + list(config.items()))
+        base_config.update(config)
+        return base_config
+
+    def compute_output_shape(self, input_shape):
+        return input_shape
+
+
+class CrossNetMix(Layer):
+    """The Cross Network part of DCN-Mix model, which improves DCN-M by:
+      1 add MOE to learn feature interactions in different subspaces
+      2 add nonlinear transformations in low-dimensional space
+
+      Input shape
+        - 2D tensor with shape: ``(batch_size, units)``.
+
+      Output shape
+        - 2D tensor with shape: ``(batch_size, units)``.
+
+      Arguments
+        - **low_rank** : Positive integer, dimensionality of low-rank sapce.
+
+        - **num_experts** : Positive integer, number of experts.
+
+        - **layer_num**: Positive integer, the cross layer number
+
+        - **l2_reg**: float between 0 and 1. L2 regularizer strength applied to the kernel weights matrix
+
+        - **seed**: A Python integer to use as random seed.
+
+      References
+        - [Wang R, Shivanna R, Cheng D Z, et al. DCN-M: Improved Deep & Cross Network for Feature Cross Learning in Web-scale Learning to Rank Systems[J]. 2020.](https://arxiv.org/abs/2008.13535)
+    """
+
+    def __init__(self, low_rank=32, num_experts=4, layer_num=2, l2_reg=0, seed=1024, **kwargs):
+        self.low_rank = low_rank
+        self.num_experts = num_experts
+        self.layer_num = layer_num
+        self.l2_reg = l2_reg
+        self.seed = seed
+        super(CrossNetMix, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+
+        if len(input_shape) != 2:
+            raise ValueError(
+                "Unexpected inputs dimensions %d, expect to be 2 dimensions" % (len(input_shape),))
+
+        dim = int(input_shape[-1])
+
+        # U: (dim, low_rank)
+        self.U_list = [self.add_weight(name='U_list' + str(i),
+                                       shape=(self.num_experts, dim, self.low_rank),
+                                       initializer=glorot_normal(
+                                           seed=self.seed),
+                                       regularizer=l2(self.l2_reg),
+                                       trainable=True) for i in range(self.layer_num)]
+        # V: (dim, low_rank)
+        self.V_list = [self.add_weight(name='V_list' + str(i),
+                                       shape=(self.num_experts, dim, self.low_rank),
+                                       initializer=glorot_normal(
+                                           seed=self.seed),
+                                       regularizer=l2(self.l2_reg),
+                                       trainable=True) for i in range(self.layer_num)]
+        # C: (low_rank, low_rank)
+        self.C_list = [self.add_weight(name='C_list' + str(i),
+                                       shape=(self.num_experts, self.low_rank, self.low_rank),
+                                       initializer=glorot_normal(
+                                           seed=self.seed),
+                                       regularizer=l2(self.l2_reg),
+                                       trainable=True) for i in range(self.layer_num)]
+
+        self.gating = [tf.keras.layers.Dense(1, use_bias=False) for i in range(self.num_experts)]
+
+        self.bias = [self.add_weight(name='bias' + str(i),
+                                     shape=(dim, 1),
+                                     initializer=Zeros(),
+                                     trainable=True) for i in range(self.layer_num)]
+        # Be sure to call this somewhere!
+        super(CrossNetMix, self).build(input_shape)
+
+    def call(self, inputs, **kwargs):
+        if K.ndim(inputs) != 2:
+            raise ValueError(
+                "Unexpected inputs dimensions %d, expect to be 2 dimensions" % (K.ndim(inputs)))
+
+        x_0 = tf.expand_dims(inputs, axis=2)
+        x_l = x_0
+        for i in range(self.layer_num):
+            output_of_experts = []
+            gating_score_of_experts = []
+            for expert_id in range(self.num_experts):
+                # (1) G(x_l)
+                # compute the gating score by x_l
+                gating_score_of_experts.append(self.gating[expert_id](tf.squeeze(x_l, axis=2)))
+
+                # (2) E(x_l)
+                # project the input x_l to $\mathbb{R}^{r}$
+                v_x = tf.einsum('ij,bjk->bik', tf.transpose(self.V_list[i][expert_id]), x_l)  # (bs, low_rank, 1)
+
+                # nonlinear activation in low rank space
+                v_x = tf.nn.tanh(v_x)
+                v_x = tf.einsum('ij,bjk->bik', self.C_list[i][expert_id], v_x)  # (bs, low_rank, 1)
+                v_x = tf.nn.tanh(v_x)
+
+                # project back to $\mathbb{R}^{d}$
+                uv_x = tf.einsum('ij,bjk->bik', self.U_list[i][expert_id], v_x)  # (bs, dim, 1)
+
+                dot_ = uv_x + self.bias[i]
+                dot_ = x_0 * dot_  # Hadamard-product
+
+                output_of_experts.append(tf.squeeze(dot_, axis=2))
+
+            # (3) mixture of low-rank experts
+            output_of_experts = tf.stack(output_of_experts, 2)  # (bs, dim, num_experts)
+            gating_score_of_experts = tf.stack(gating_score_of_experts, 1)  # (bs, num_experts, 1)
+            moe_out = tf.matmul(output_of_experts, tf.nn.softmax(gating_score_of_experts, 1))
+            x_l = moe_out + x_l  # (bs, dim, 1)
+        x_l = tf.squeeze(x_l, axis=2)
+        return x_l
+
+    def get_config(self, ):
+
+        config = {'low_rank': self.low_rank, 'num_experts': self.num_experts, 'layer_num': self.layer_num,
+                  'l2_reg': self.l2_reg, 'seed': self.seed}
+        base_config = super(CrossNetMix, self).get_config()
+        base_config.update(config)
+        return base_config
 
     def compute_output_shape(self, input_shape):
         return input_shape
@@ -527,7 +676,8 @@ class InnerProductLayer(Layer):
     def get_config(self, ):
         config = {'reduce_sum': self.reduce_sum, }
         base_config = super(InnerProductLayer, self).get_config()
-        return dict(list(base_config.items()) + list(config.items()))
+        base_config.update(config)
+        return base_config
 
 
 class InteractingLayer(Layer):
@@ -619,7 +769,8 @@ class InteractingLayer(Layer):
         config = {'att_embedding_size': self.att_embedding_size, 'head_num': self.head_num, 'use_res': self.use_res,
                   'seed': self.seed}
         base_config = super(InteractingLayer, self).get_config()
-        return dict(list(base_config.items()) + list(config.items()))
+        base_config.update(config)
+        return base_config
 
 
 class OutterProductLayer(Layer):
@@ -762,7 +913,8 @@ class OutterProductLayer(Layer):
     def get_config(self, ):
         config = {'kernel_type': self.kernel_type, 'seed': self.seed}
         base_config = super(OutterProductLayer, self).get_config()
-        return dict(list(base_config.items()) + list(config.items()))
+        base_config.update(config)
+        return base_config
 
 
 class FGCNNLayer(Layer):
@@ -866,7 +1018,8 @@ class FGCNNLayer(Layer):
         config = {'kernel_width': self.kernel_width, 'filters': self.filters, 'new_maps': self.new_maps,
                   'pooling_width': self.pooling_width}
         base_config = super(FGCNNLayer, self).get_config()
-        return dict(list(base_config.items()) + list(config.items()))
+        base_config.update(config)
+        return base_config
 
     def _conv_output_shape(self, input_shape, kernel_size):
         # channels_last
@@ -965,20 +1118,21 @@ class SENETLayer(Layer):
     def get_config(self, ):
         config = {'reduction_ratio': self.reduction_ratio, 'seed': self.seed}
         base_config = super(SENETLayer, self).get_config()
-        return dict(list(base_config.items()) + list(config.items()))
+        base_config.update(config)
+        return base_config
 
 
 class BilinearInteraction(Layer):
     """BilinearInteraction Layer used in FiBiNET.
 
       Input shape
-        - A list of 3D tensor with shape: ``(batch_size,1,embedding_size)``.
+        - A list of 3D tensor with shape: ``(batch_size,1,embedding_size)``. Its length is ``filed_size``.
 
       Output shape
-        - 3D tensor with shape: ``(batch_size,1,embedding_size)``.
+        - 3D tensor with shape: ``(batch_size,filed_size*(filed_size-1)/2,embedding_size)``.
 
       Arguments
-        - **str** : String, types of bilinear functions used in this layer.
+        - **bilinear_type** : String, types of bilinear functions used in this layer.
 
         - **seed** : A Python integer to use as random seed.
 
@@ -1022,29 +1176,32 @@ class BilinearInteraction(Layer):
             raise ValueError(
                 "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
 
+        n = len(inputs)
         if self.bilinear_type == "all":
-            p = [tf.multiply(tf.tensordot(v_i, self.W, axes=(-1, 0)), v_j)
-                 for v_i, v_j in itertools.combinations(inputs, 2)]
+            vidots = [tf.tensordot(inputs[i], self.W, axes=(-1, 0)) for i in range(n)]
+            p = [tf.multiply(vidots[i], inputs[j]) for i, j in itertools.combinations(range(n), 2)]
         elif self.bilinear_type == "each":
-            p = [tf.multiply(tf.tensordot(inputs[i], self.W_list[i], axes=(-1, 0)), inputs[j])
-                 for i, j in itertools.combinations(range(len(inputs)), 2)]
+            vidots = [tf.tensordot(inputs[i], self.W_list[i], axes=(-1, 0)) for i in range(n - 1)]
+            p = [tf.multiply(vidots[i], inputs[j]) for i, j in itertools.combinations(range(n), 2)]
         elif self.bilinear_type == "interaction":
             p = [tf.multiply(tf.tensordot(v[0], w, axes=(-1, 0)), v[1])
                  for v, w in zip(itertools.combinations(inputs, 2), self.W_list)]
         else:
             raise NotImplementedError
-        return concat_func(p)
+        output = concat_func(p, axis=1)
+        return output
 
     def compute_output_shape(self, input_shape):
         filed_size = len(input_shape)
         embedding_size = input_shape[0][-1]
 
-        return (None, 1, filed_size * (filed_size - 1) // 2 * embedding_size)
+        return (None, filed_size * (filed_size - 1) // 2, embedding_size)
 
     def get_config(self, ):
         config = {'bilinear_type': self.bilinear_type, 'seed': self.seed}
         base_config = super(BilinearInteraction, self).get_config()
-        return dict(list(base_config.items()) + list(config.items()))
+        base_config.update(config)
+        return base_config
 
 
 class FieldWiseBiInteraction(Layer):
@@ -1170,7 +1327,8 @@ class FieldWiseBiInteraction(Layer):
     def get_config(self, ):
         config = {'use_bias': self.use_bias, 'seed': self.seed}
         base_config = super(FieldWiseBiInteraction, self).get_config()
-        return dict(list(base_config.items()) + list(config.items()))
+        base_config.update(config)
+        return base_config
 
 
 class FwFMLayer(Layer):

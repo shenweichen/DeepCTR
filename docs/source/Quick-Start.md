@@ -1,5 +1,5 @@
 # Quick-Start
-
+[![](https://pai-public-data.oss-cn-beijing.aliyuncs.com/EN-pai-dsw.svg)](https://dsw-dev.data.aliyun.com/#/?fileUrl=https://pai-public-data.oss-cn-beijing.aliyuncs.com/deep-ctr/Getting-started-4-steps-to-DeepCTR.ipynb&fileName=Getting-started-4-steps-to-DeepCTR.ipynb)
 ## Installation Guide
 Now `deepctr` is available for python `2.7 `and `3.5, 3.6, 3.7`.  
 `deepctr` depends on tensorflow, you can specify to install the cpu version or gpu version through `pip`.
@@ -127,6 +127,7 @@ You can check the full code [here](./Examples.html#classification-criteo).
 ```python
 import tensorflow as tf
 
+from tensorflow.python.ops.parsing_ops import  FixedLenFeature
 from deepctr.estimator.inputs import input_fn_tfrecord
 from deepctr.estimator.models import DeepFMEstimator
 
@@ -153,10 +154,10 @@ for feat in dense_features:
 ### Step 3: Generate the training samples with TFRecord format
 
 ```python
-feature_description = {k: tf.FixedLenFeature(dtype=tf.int64, shape=1) for k in sparse_features}
+feature_description = {k: FixedLenFeature(dtype=tf.int64, shape=1) for k in sparse_features}
 feature_description.update(
-    {k: tf.FixedLenFeature(dtype=tf.float32, shape=1) for k in dense_features})
-feature_description['label'] = tf.FixedLenFeature(dtype=tf.float32, shape=1)
+    {k: FixedLenFeature(dtype=tf.float32, shape=1) for k in dense_features})
+feature_description['label'] = FixedLenFeature(dtype=tf.float32, shape=1)
 
 train_model_input = input_fn_tfrecord('./criteo_sample.tr.tfrecords', feature_description, 'label', batch_size=256,
                                       num_epochs=1, shuffle_factor=10)

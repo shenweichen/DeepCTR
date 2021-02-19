@@ -40,33 +40,35 @@ class Hash(tf.keras.layers.Layer):
         super(Hash, self).build(input_shape)
 
     def call(self, x, mask=None, **kwargs):
+
+
         if x.dtype != tf.string:
+            zero = tf.as_string(tf.zeros([1], dtype=x.dtype))
             x = tf.as_string(x, )
+        else:
+            zero = tf.as_string(tf.zeros([1], dtype='int32'))
+
+        num_buckets = self.num_buckets if not self.mask_zero else self.num_buckets - 1
         try:
-            hash_x = tf.string_to_hash_bucket_fast(x, self.num_buckets if not self.mask_zero else self.num_buckets - 1,
-                                                    name=None)  # weak hash
+            hash_x = tf.string_to_hash_bucket_fast(x, num_buckets,
+                                                   name=None)  # weak hash
         except:
-            hash_x = tf.strings.to_hash_bucket_fast(x, self.num_buckets if not self.mask_zero else self.num_buckets - 1,
-                                               name=None)  # weak hash
+            hash_x = tf.strings.to_hash_bucket_fast(x, num_buckets,
+                                                    name=None)  # weak hash
         if self.mask_zero:
-            mask_1 = tf.cast(tf.not_equal(x, "0"), 'int64')
-            mask_2 = tf.cast(tf.not_equal(x, "0.0"), 'int64')
-            mask = mask_1 * mask_2
+            mask = tf.cast(tf.not_equal(x, zero), dtype='int64')
             hash_x = (hash_x + 1) * mask
+
         return hash_x
-
-    def compute_mask(self, inputs, mask):
-        return None
-
     def get_config(self, ):
-        config = {'num_buckets': self.num_buckets, 'mask_zero': self.mask_zero}
+        config = {'num_buckets': self.num_buckets, 'mask_zero': self.mask_zero, }
         base_config = super(Hash, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
 
 class Linear(tf.keras.layers.Layer):
 
-    def __init__(self, l2_reg=0.0, mode=0, use_bias=False, **kwargs):
+    def __init__(self, l2_reg=0.0, mode=0, use_bias=False, seed=1024, **kwargs):
 
         self.l2_reg = l2_reg
         # self.l2_reg = tf.contrib.layers.l2_regularizer(float(l2_reg_linear))
@@ -74,6 +76,7 @@ class Linear(tf.keras.layers.Layer):
             raise ValueError("mode must be 0,1 or 2")
         self.mode = mode
         self.use_bias = use_bias
+        self.seed = seed
         super(Linear, self).__init__(**kwargs)
 
     def build(self, input_shape):
@@ -86,14 +89,14 @@ class Linear(tf.keras.layers.Layer):
             self.kernel = self.add_weight(
                 'linear_kernel',
                 shape=[int(input_shape[-1]), 1],
-                initializer=tf.keras.initializers.glorot_normal(),
+                initializer=tf.keras.initializers.glorot_normal(self.seed),
                 regularizer=tf.keras.regularizers.l2(self.l2_reg),
                 trainable=True)
-        elif self.mode == 2 :
+        elif self.mode == 2:
             self.kernel = self.add_weight(
                 'linear_kernel',
                 shape=[int(input_shape[1][-1]), 1],
-                initializer=tf.keras.initializers.glorot_normal(),
+                initializer=tf.keras.initializers.glorot_normal(self.seed),
                 regularizer=tf.keras.regularizers.l2(self.l2_reg),
                 trainable=True)
 
@@ -123,7 +126,7 @@ class Linear(tf.keras.layers.Layer):
         return None
 
     def get_config(self, ):
-        config = {'mode': self.mode, 'l2_reg': self.l2_reg,'use_bias':self.use_bias}
+        config = {'mode': self.mode, 'l2_reg': self.l2_reg, 'use_bias': self.use_bias, 'seed': self.seed}
         base_config = super(Linear, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
@@ -138,21 +141,21 @@ def concat_func(inputs, axis=-1, mask=False):
 
 
 def reduce_mean(input_tensor,
-               axis=None,
-               keep_dims=False,
-               name=None,
-               reduction_indices=None):
-    if tf.__version__ < '2.0.0':
+                axis=None,
+                keep_dims=False,
+                name=None,
+                reduction_indices=None):
+    try:
         return tf.reduce_mean(input_tensor,
-                   axis=axis,
-                   keep_dims=keep_dims,
-                   name=name,
-                   reduction_indices=reduction_indices)
-    else:
-        return  tf.reduce_mean(input_tensor,
-                   axis=axis,
-                   keepdims=keep_dims,
-                   name=name)
+                              axis=axis,
+                              keep_dims=keep_dims,
+                              name=name,
+                              reduction_indices=reduction_indices)
+    except TypeError:
+        return tf.reduce_mean(input_tensor,
+                              axis=axis,
+                              keepdims=keep_dims,
+                              name=name)
 
 
 def reduce_sum(input_tensor,
@@ -160,45 +163,48 @@ def reduce_sum(input_tensor,
                keep_dims=False,
                name=None,
                reduction_indices=None):
-    if tf.__version__ < '2.0.0':
+    try:
         return tf.reduce_sum(input_tensor,
-                   axis=axis,
-                   keep_dims=keep_dims,
-                   name=name,
-                   reduction_indices=reduction_indices)
-    else:
-        return  tf.reduce_sum(input_tensor,
-                   axis=axis,
-                   keepdims=keep_dims,
-                   name=name)
+                             axis=axis,
+                             keep_dims=keep_dims,
+                             name=name,
+                             reduction_indices=reduction_indices)
+    except TypeError:
+        return tf.reduce_sum(input_tensor,
+                             axis=axis,
+                             keepdims=keep_dims,
+                             name=name)
+
 
 def reduce_max(input_tensor,
                axis=None,
                keep_dims=False,
                name=None,
                reduction_indices=None):
-    if tf.__version__ < '2.0.0':
+    try:
         return tf.reduce_max(input_tensor,
-                   axis=axis,
-                   keep_dims=keep_dims,
-                   name=name,
-                   reduction_indices=reduction_indices)
-    else:
-        return  tf.reduce_max(input_tensor,
-                   axis=axis,
-                   keepdims=keep_dims,
-                   name=name)
+                             axis=axis,
+                             keep_dims=keep_dims,
+                             name=name,
+                             reduction_indices=reduction_indices)
+    except TypeError:
+        return tf.reduce_max(input_tensor,
+                             axis=axis,
+                             keepdims=keep_dims,
+                             name=name)
+
 
 def div(x, y, name=None):
-    if tf.__version__ < '2.0.0':
+    try:
         return tf.div(x, y, name=name)
-    else:
+    except AttributeError:
         return tf.divide(x, y, name=name)
 
+
 def softmax(logits, dim=-1, name=None):
-    if tf.__version__ < '2.0.0':
+    try:
         return tf.nn.softmax(logits, dim=dim, name=name)
-    else:
+    except TypeError:
         return tf.nn.softmax(logits, axis=dim, name=name)
 
 
@@ -211,14 +217,16 @@ class Add(tf.keras.layers.Layer):
         super(Add, self).build(input_shape)
 
     def call(self, inputs, **kwargs):
-        if not isinstance(inputs,list):
+        if not isinstance(inputs, list):
             return inputs
-        if len(inputs) == 1  :
+        if len(inputs) == 1:
             return inputs[0]
         if len(inputs) == 0:
             return tf.constant([[0.0]])
 
         return tf.keras.layers.add(inputs)
+
+
 def add_func(inputs):
     return Add()(inputs)
 

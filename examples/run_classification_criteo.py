@@ -24,9 +24,8 @@ if __name__ == "__main__":
     data[dense_features] = mms.fit_transform(data[dense_features])
 
     # 2.count #unique features for each sparse field,and record dense feature field name
-    import tensorflow as tf
-    import numpy as np
-    fixlen_feature_columns = [SparseFeat(feat, vocabulary_size=data[feat].nunique(),embedding_dim=4,embeddings_initializer=tf.initializers.identity(np.zeros([data[feat].nunique(),4])))
+
+    fixlen_feature_columns = [SparseFeat(feat, vocabulary_size=data[feat].nunique(),embedding_dim=4 )
                            for i,feat in enumerate(sparse_features)] + [DenseFeat(feat, 1,)
                           for feat in dense_features]
 
@@ -37,7 +36,7 @@ if __name__ == "__main__":
 
     # 3.generate input data for model
 
-    train, test = train_test_split(data, test_size=0.2)
+    train, test = train_test_split(data, test_size=0.2, random_state=2020)
     train_model_input = {name:train[name] for name in feature_names}
     test_model_input = {name:test[name] for name in feature_names}
 

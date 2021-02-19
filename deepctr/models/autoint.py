@@ -2,7 +2,7 @@
 """
 
 Author:
-    Weichen Shen,wcshen1994@163.com
+    Weichen Shen, wcshen1994@163.com
 
 Reference:
     [1] Song W, Shi C, Xiao Z, et al. AutoInt: Automatic Feature Interaction Learning via Self-Attentive Neural Networks[J]. arXiv preprint arXiv:1810.11921, 2018.(https://arxiv.org/abs/1810.11921)
@@ -64,19 +64,17 @@ def AutoInt(linear_feature_columns, dnn_feature_columns, att_layer_num=3, att_em
     dnn_input = combined_dnn_input(sparse_embedding_list, dense_value_list)
 
     if len(dnn_hidden_units) > 0 and att_layer_num > 0:  # Deep & Interacting Layer
-        deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
-                       dnn_use_bn, seed)(dnn_input)
+        deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed)(dnn_input)
         stack_out = tf.keras.layers.Concatenate()([att_output, deep_out])
         final_logit = tf.keras.layers.Dense(
-            1, use_bias=False, activation=None)(stack_out)
+            1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(stack_out)
     elif len(dnn_hidden_units) > 0:  # Only Deep
-        deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
-                       dnn_use_bn, seed)(dnn_input, )
+        deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed)(dnn_input, )
         final_logit = tf.keras.layers.Dense(
-            1, use_bias=False, activation=None)(deep_out)
+            1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(deep_out)
     elif att_layer_num > 0:  # Only Interacting Layer
         final_logit = tf.keras.layers.Dense(
-            1, use_bias=False, activation=None)(att_output)
+            1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(att_output)
     else:  # Error
         raise NotImplementedError
 

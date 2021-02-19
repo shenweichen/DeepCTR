@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 """
 Author:
-    Weichen Shen,wcshen1994@163.com
+    Weichen Shen, wcshen1994@163.com
 
 Reference:
     [1] Huang T, Zhang Z, Zhang J. FiBiNET: Combining Feature Importance and Bilinear feature Interaction for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1905.09433, 2019.
@@ -68,10 +68,9 @@ def FiBiNETEstimator(linear_feature_columns, dnn_feature_columns, bilinear_type=
 
             dnn_input = combined_dnn_input(
                 [Flatten()(concat_func([senet_bilinear_out, bilinear_out]))], dense_value_list)
-            dnn_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
-                          False, seed)(dnn_input, training=train_flag)
+            dnn_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, False, seed=seed)(dnn_input, training=train_flag)
             dnn_logit = Dense(
-                1, use_bias=False, activation=None)(dnn_out)
+                1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(dnn_out)
 
         logits = linear_logits + dnn_logit
 

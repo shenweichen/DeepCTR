@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 """
 Author:
-    Weichen Shen,wcshen1994@163.com
+    Weichen Shen, wcshen1994@163.com
 
 Reference:
     [1] Wang R, Fu B, Fu G, et al. Deep & cross network for ad click predictions[C]//Proceedings of the ADKDD'17. ACM, 2017: 12. (https://arxiv.org/abs/1708.05123)
@@ -63,21 +63,19 @@ def DCNEstimator(linear_feature_columns, dnn_feature_columns, cross_num=2, dnn_h
             dnn_input = combined_dnn_input(sparse_embedding_list, dense_value_list)
 
             if len(dnn_hidden_units) > 0 and cross_num > 0:  # Deep & Cross
-                deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
-                               dnn_use_bn, seed)(dnn_input, training=train_flag)
+                deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed)(dnn_input, training=train_flag)
                 cross_out = CrossNet(cross_num, l2_reg=l2_reg_cross)(dnn_input)
                 stack_out = tf.keras.layers.Concatenate()([cross_out, deep_out])
                 final_logit = tf.keras.layers.Dense(
-                    1, use_bias=False, activation=None)(stack_out)
+                    1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(stack_out)
             elif len(dnn_hidden_units) > 0:  # Only Deep
-                deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
-                               dnn_use_bn, seed)(dnn_input, training=train_flag)
+                deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed)(dnn_input, training=train_flag)
                 final_logit = tf.keras.layers.Dense(
-                    1, use_bias=False, activation=None)(deep_out)
+                    1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(deep_out)
             elif cross_num > 0:  # Only Cross
                 cross_out = CrossNet(cross_num, l2_reg=l2_reg_cross)(dnn_input)
                 final_logit = tf.keras.layers.Dense(
-                    1, use_bias=False, activation=None)(cross_out)
+                    1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(cross_out)
             else:  # Error
                 raise NotImplementedError
 

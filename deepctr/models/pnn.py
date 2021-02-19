@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 """
 Author:
-    Weichen Shen,wcshen1994@163.com
+    Weichen Shen, wcshen1994@163.com
 
 Reference:
     [1] Qu Y, Cai H, Ren K, et al. Product-based neural networks for user response prediction[C]//Data Mining (ICDM), 2016 IEEE 16th International Conference on. IEEE, 2016: 1149-1154.(https://arxiv.org/pdf/1611.00144.pdf)
@@ -64,10 +64,9 @@ def PNN(dnn_feature_columns, dnn_hidden_units=(128, 128), l2_reg_embedding=1e-5,
         deep_input = linear_signal
 
     dnn_input = combined_dnn_input([deep_input], dense_value_list)
-    dnn_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
-                  False, seed)(dnn_input)
+    dnn_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, False, seed=seed)(dnn_input)
     dnn_logit = tf.keras.layers.Dense(
-        1, use_bias=False, activation=None)(dnn_out)
+        1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(dnn_out)
 
     output = PredictionLayer(task)(dnn_logit)
 

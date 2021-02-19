@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 """
 Author:
-    Tingyi Tan,5636374@qq.com
+    Tingyi Tan, 5636374@qq.com
 
 Reference:
     [1] Chen W, Zhan L, Ci Y, Lin C. FLEN: Leveraging Field for Scalable CTR Prediction . arXiv preprint arXiv:1911.04690, 2019.(https://arxiv.org/pdf/1911.04690)
@@ -69,10 +69,9 @@ def FLEN(linear_feature_columns,
     dnn_input = combined_dnn_input(
         list(chain.from_iterable(group_embedding_dict.values())),
         dense_value_list)
-    dnn_output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
-                     dnn_use_bn, seed)(dnn_input)
+    dnn_output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed)(dnn_input)
 
-    dnn_logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(concat_func([fm_mf_out, dnn_output]))
+    dnn_logit = tf.keras.layers.Dense(1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(concat_func([fm_mf_out, dnn_output]))
 
     final_logit = add_func([linear_logit, dnn_logit])
     output = PredictionLayer(task)(final_logit)

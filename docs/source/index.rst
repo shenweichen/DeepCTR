@@ -42,19 +42,18 @@ You can read the latest code and related projects
 
 News
 -----
+02/12/2021 : Fix bug in DCN-Mix. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.4>`_
 
-06/27/2020 : Support ``Tensorflow Estimator`` for large scale data and distributed training.Support different initializers for different embedding weights and loading pretrained embeddings.Add new model ``FwFM``. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.0>`_
+01/06/2021 : Add `DCN-Mix <./Features.html#dcn-mix-improved-deep-cross-network-with-mix-of-experts-and-matrix-kernel>`_ (`中文介绍 <https://mp.weixin.qq.com/s/0qidwbxyfTkODTw2DIiRWw>`_) and support ``transform_fn`` in ``DenseFeat``. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.3>`_
 
-05/17/2020 : Fix numerical instability in ``LayerNormalization``. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.7.5>`_
-
-03/15/2020 : Add `FLEN <./Features.html#flen-field-leveraged-embedding-network>`_ (`中文介绍 <https://zhuanlan.zhihu.com/p/92787577>`_) and ``FieldWiseBiInteraction``. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.7.4>`_
+10/11/2020 : Refactor ``DNN`` Layer. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.2>`_
 
 DisscussionGroup
 -----------------------
 
-公众号：**浅梦的学习笔记**  wechat ID: **deepctrbot**
+`Discussions <https://github.com/shenweichen/DeepCTR/discussions>`_  公众号：**浅梦的学习笔记**  wechat ID: **deepctrbot**
 
-.. image:: ../pics/weichennote.png
+.. image:: ../pics/code.png
 
 .. toctree::
    :maxdepth: 2

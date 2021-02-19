@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
     # 3.generate input data for model
 
-    train, test = train_test_split(data, test_size=0.2)
+    train, test = train_test_split(data, test_size=0.2, random_state=2021)
 
     # Not setting default value for continuous feature. filled with mean.
 
@@ -47,7 +47,8 @@ if __name__ == "__main__":
     test_model_input = input_fn_pandas(test, sparse_features + dense_features, None, shuffle=False)
 
     # 4.Define Model,train,predict and evaluate
-    model = DeepFMEstimator(linear_feature_columns, dnn_feature_columns, task='binary')
+    model = DeepFMEstimator(linear_feature_columns, dnn_feature_columns, task='binary',
+                            config=tf.estimator.RunConfig(tf_random_seed=2021))
 
     model.train(train_model_input)
     pred_ans_iter = model.predict(test_model_input)

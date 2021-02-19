@@ -1,14 +1,14 @@
 # -*- coding:utf-8 -*-
 """
 Author:
-    Weichen Shen,wcshen1994@163.com
+    Weichen Shen, wcshen1994@163.com
 
 Reference:
     [1] Zhou G, Mou N, Fan Y, et al. Deep Interest Evolution Network for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1809.03672, 2018. (https://arxiv.org/pdf/1809.03672.pdf)
 """
 
 import tensorflow as tf
-from tensorflow.python.keras.layers import (Concatenate, Dense, Input, Permute, multiply)
+from tensorflow.python.keras.layers import (Concatenate, Dense, Permute, multiply)
 
 from ..feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, build_input_features
 from ..inputs import get_varlen_pooling_list, create_embedding_matrix, embedding_lookup, varlen_embedding_lookup, \
@@ -35,9 +35,11 @@ def auxiliary_loss(h_states, click_seq, noclick_seq, mask, stag=None):
 
     noclick_input_ = tf.concat([h_states, noclick_seq], -1)
 
-    click_prop_ = auxiliary_net(click_input_, stag=stag)[:, :, 0]
+    auxiliary_nn = DNN([100, 50, 1], activation='sigmoid')
 
-    noclick_prop_ = auxiliary_net(noclick_input_, stag=stag)[
+    click_prop_ = auxiliary_nn(click_input_, stag=stag)[:, :, 0]
+
+    noclick_prop_ = auxiliary_nn(noclick_input_, stag=stag)[
                     :, :, 0]  # [B,T-1]
 
     try:
@@ -58,43 +60,6 @@ def auxiliary_loss(h_states, click_seq, noclick_seq, mask, stag=None):
     loss_ = reduce_mean(click_loss_ + noclick_loss_)
 
     return loss_
-
-
-def auxiliary_net(in_, stag='auxiliary_net'):
-    try:
-        bn1 = tf.layers.batch_normalization(
-            inputs=in_, name='bn1' + stag, reuse=tf.AUTO_REUSE)
-    except:
-        bn1 = tf.compat.v1.layers.batch_normalization(
-            inputs=in_, name='bn1' + stag, reuse=tf.compat.v1.AUTO_REUSE)
-
-    try:  # todo
-        dnn1 = tf.layers.dense(bn1, 100, activation=None,
-                               name='f1' + stag, reuse=tf.AUTO_REUSE)
-    except:
-        dnn1 = tf.compat.v1.layers.dense(bn1, 100, activation=None,
-                                         name='f1' + stag, reuse=tf.compat.v1.AUTO_REUSE)
-
-    dnn1 = tf.nn.sigmoid(dnn1)
-    try:
-        dnn2 = tf.layers.dense(dnn1, 50, activation=None,
-                               name='f2' + stag, reuse=tf.AUTO_REUSE)
-    except:
-        dnn2 = tf.compat.v1.layers.dense(dnn1, 50, activation=None,
-                                         name='f2' + stag, reuse=tf.compat.v1.AUTO_REUSE)
-
-    dnn2 = tf.nn.sigmoid(dnn2)
-    try:
-        dnn3 = tf.layers.dense(dnn2, 1, activation=None,
-                               name='f3' + stag, reuse=tf.AUTO_REUSE)
-    except:
-        dnn3 = tf.compat.v1.layers.dense(dnn2, 1, activation=None,
-                                         name='f3' + stag, reuse=tf.compat.v1.AUTO_REUSE)
-
-    y_hat = tf.nn.sigmoid(dnn3)
-
-    return y_hat
-
 
 def interest_evolution(concat_behavior, deep_input_item, user_behavior_length, gru_type="GRU", use_neg=False,
                        neg_concat_behavior=None, att_hidden_size=(64, 16), att_activation='sigmoid',
@@ -169,10 +134,9 @@ def DIEN(dnn_feature_columns, history_feature_list,
     :return: A Keras model instance.
 
     """
-
     features = build_input_features(dnn_feature_columns)
 
-    user_behavior_length = Input(shape=(1,), name='seq_length')
+    user_behavior_length = features["seq_length"]
 
     sparse_feature_columns = list(
         filter(lambda x: isinstance(x, SparseFeat), dnn_feature_columns)) if dnn_feature_columns else []
@@ -213,7 +177,6 @@ def DIEN(dnn_feature_columns, history_feature_list,
     sequence_embed_list = get_varlen_pooling_list(sequence_embed_dict, features, sparse_varlen_feature_columns,
                                                   to_list=True)
     dnn_input_emb_list += sequence_embed_list
-
     keys_emb = concat_func(keys_emb_list)
     deep_input_emb = concat_func(dnn_input_emb_list)
     query_emb = concat_func(query_emb_list)
@@ -238,21 +201,11 @@ def DIEN(dnn_feature_columns, history_feature_list,
     deep_input_emb = tf.keras.layers.Flatten()(deep_input_emb)
 
     dnn_input = combined_dnn_input([deep_input_emb], dense_value_list)
-    output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn,
-                 dnn_dropout, use_bn, seed)(dnn_input)
-    final_logit = Dense(1, use_bias=False)(output)
+    output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, use_bn, seed=seed)(dnn_input)
+    final_logit = Dense(1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(output)
     output = PredictionLayer(task)(final_logit)
 
-    # model_input_list = get_inputs_list(
-    #    [sparse_input, dense_input, user_behavior_input])
-    model_input_list = inputs_list
-
-    # if use_negsampling:
-    #    model_input_list += list(neg_user_behavior_input.values())
-
-    model_input_list += [user_behavior_length]
-
-    model = tf.keras.models.Model(inputs=model_input_list, outputs=output)
+    model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
 
     if use_negsampling:
         model.add_loss(alpha * aux_loss_1)

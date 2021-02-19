@@ -23,7 +23,10 @@ def input_fn_tfrecord(filenames, feature_description, label=None, batch_size=256
                       shuffle_factor=10, prefetch_factor=1,
                       ):
     def _parse_examples(serial_exmp):
-        features = tf.parse_single_example(serial_exmp, features=feature_description)
+        try:
+            features = tf.parse_single_example(serial_exmp, features=feature_description)
+        except AttributeError:
+            features = tf.io.parse_single_example(serial_exmp, features=feature_description)
         if label is not None:
             labels = features.pop(label)
             return features, labels
@@ -39,8 +42,10 @@ def input_fn_tfrecord(filenames, feature_description, label=None, batch_size=256
 
         if prefetch_factor > 0:
             dataset = dataset.prefetch(buffer_size=batch_size * prefetch_factor)
-
-        iterator = dataset.make_one_shot_iterator()
+        try:
+            iterator = dataset.make_one_shot_iterator()
+        except AttributeError:
+            iterator = tf.compat.v1.data.make_one_shot_iterator(dataset)
 
         return iterator.get_next()
 

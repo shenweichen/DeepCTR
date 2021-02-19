@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 """
 Author:
-    Weichen Shen,wcshen1994@163.com
+    Weichen Shen, wcshen1994@163.com
 
 Reference:
     [1] Guo H, Tang R, Ye Y, et al. Deepfm: a factorization-machine based neural network for ctr prediction[J]. arXiv preprint arXiv:1703.04247, 2017.(https://arxiv.org/abs/1703.04247)
@@ -63,10 +63,9 @@ def DeepFMEstimator(linear_feature_columns, dnn_feature_columns, dnn_hidden_unit
 
             fm_logit = FM()(concat_func(sparse_embedding_list, axis=1))
 
-            dnn_output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
-                             dnn_use_bn, seed)(dnn_input, training=train_flag)
+            dnn_output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed)(dnn_input, training=train_flag)
             dnn_logit = tf.keras.layers.Dense(
-                1, use_bias=False, activation=None)(dnn_output)
+                1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed=seed))(dnn_output)
 
         logits = linear_logits + fm_logit + dnn_logit
 

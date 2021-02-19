@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 """
 Author:
-    Weichen Shen,wcshen1994@163.com
+    Weichen Shen, wcshen1994@163.com
 
 Reference:
     [1] Cheng H T, Koc L, Harmsen J, et al. Wide & deep learning for recommender systems[C]//Proceedings of the 1st Workshop on Deep Learning for Recommender Systems. ACM, 2016: 7-10.(https://arxiv.org/pdf/1606.07792.pdf)
@@ -54,10 +54,9 @@ def WDLEstimator(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(
             sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
                                                                                  l2_reg_embedding=l2_reg_embedding)
             dnn_input = combined_dnn_input(sparse_embedding_list, dense_value_list)
-            dnn_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
-                          False, seed)(dnn_input, training=train_flag)
+            dnn_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, False, seed=seed)(dnn_input, training=train_flag)
             dnn_logits = Dense(
-                1, use_bias=False, activation=None)(dnn_out)
+                1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(dnn_out)
 
         logits = linear_logits + dnn_logits
 

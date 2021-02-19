@@ -2,7 +2,7 @@
 """
 
 Author:
-    Weichen Shen,wcshen1994@163.com
+    Weichen Shen, wcshen1994@163.com
 
 Reference:
     [1] Liu B, Tang R, Chen Y, et al. Feature Generation by Convolutional Neural Network for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1904.04447, 2019.
@@ -80,9 +80,8 @@ def FGCNN(linear_feature_columns, dnn_feature_columns, conv_kernel_width=(7, 7, 
     dnn_input = tf.keras.layers.Concatenate()([linear_signal, inner_product])
     dnn_input = tf.keras.layers.Flatten()(dnn_input)
 
-    final_logit = DNN(dnn_hidden_units, dropout_rate=dnn_dropout,
-                      l2_reg=l2_reg_dnn)(dnn_input)
-    final_logit = tf.keras.layers.Dense(1, use_bias=False)(final_logit)
+    final_logit = DNN(dnn_hidden_units, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout)(dnn_input)
+    final_logit = tf.keras.layers.Dense(1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(final_logit)
 
     final_logit = add_func([final_logit, linear_logit])
     output = PredictionLayer(task)(final_logit)

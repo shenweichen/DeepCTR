@@ -2,7 +2,7 @@
 """
 
 Author:
-    Weichen Shen,wcshen1994@163.com
+    Weichen Shen, wcshen1994@163.com
 
 Reference:
     [1] Liu Q, Yu F, Wu S, et al. A convolutional click prediction model[C]//Proceedings of the 24th ACM International on Conference on Information and Knowledge Management. ACM, 2015: 1743-1746.
@@ -68,9 +68,8 @@ def CCPM(linear_feature_columns, dnn_feature_columns, conv_kernel_width=(6, 5), 
             k=min(k, int(conv_result.shape[1])), axis=1)(conv_result)
 
     flatten_result = tf.keras.layers.Flatten()(pooling_result)
-    dnn_out = DNN(dnn_hidden_units, l2_reg=l2_reg_dnn,
-                  dropout_rate=dnn_dropout)(flatten_result)
-    dnn_logit = tf.keras.layers.Dense(1, use_bias=False)(dnn_out)
+    dnn_out = DNN(dnn_hidden_units, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout)(flatten_result)
+    dnn_logit = tf.keras.layers.Dense(1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(dnn_out)
 
     final_logit = add_func([dnn_logit, linear_logit])
 

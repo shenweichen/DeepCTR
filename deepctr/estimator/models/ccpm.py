@@ -2,7 +2,7 @@
 """
 
 Author:
-    Weichen Shen,wcshen1994@163.com
+    Weichen Shen, wcshen1994@163.com
 
 Reference:
     [1] Liu Q, Yu F, Wu S, et al. A convolutional click prediction model[C]//Proceedings of the 24th ACM International on Conference on Information and Knowledge Management. ACM, 2015: 1743-1746.
@@ -59,7 +59,7 @@ def CCPMEstimator(linear_feature_columns, dnn_feature_columns, conv_kernel_width
         linear_logits = get_linear_logit(features, linear_feature_columns, l2_reg_linear=l2_reg_linear)
 
         with variable_scope(DNN_SCOPE_NAME):
-            sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
+            sparse_embedding_list, _ = input_from_feature_columns(features, dnn_feature_columns,
                                                                                  l2_reg_embedding=l2_reg_embedding)
             n = len(sparse_embedding_list)
             l = len(conv_filters)
@@ -80,9 +80,8 @@ def CCPMEstimator(linear_feature_columns, dnn_feature_columns, conv_kernel_width
                     k=min(k, int(conv_result.shape[1])), axis=1)(conv_result)
 
             flatten_result = tf.keras.layers.Flatten()(pooling_result)
-            dnn_out = DNN(dnn_hidden_units, l2_reg=l2_reg_dnn,
-                          dropout_rate=dnn_dropout, seed=seed)(flatten_result, training=train_flag)
-            dnn_logit = tf.keras.layers.Dense(1, use_bias=False)(dnn_out)
+            dnn_out = DNN(dnn_hidden_units, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout, seed=seed)(flatten_result, training=train_flag)
+            dnn_logit = tf.keras.layers.Dense(1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(dnn_out)
 
         logits = linear_logits + dnn_logit
 

@@ -1,5 +1,8 @@
 # History
-
+- 02/12/2021 : [v0.8.4](https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.4) released.Fix bug in DCN-Mix. 
+- 01/06/2021 : [v0.8.3](https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.3) released.Add [DCN-Mix](./Features.html#dcn-mix-improved-deep-cross-network-with-mix-of-experts-and-matrix-kernel) model.Support `transform_fn` in `DenseFeat`.
+- 10/11/2020 : [v0.8.2](https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.2) released.Refactor `DNN` Layer.
+- 09/12/2020 : [v0.8.1](https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.1) released.Improve the reproducibility & fix some bugs.
 - 06/27/2020 : [v0.8.0](https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.0) released.
   - Support `Tensorflow Estimator` for large scale data and distributed training. [example: Estimator with TFRecord](https://deepctr-doc.readthedocs.io/en/latest/Examples.html#estimator-with-tfrecord-classification-criteo) 
   - Support different initializers for different embedding weights and loading pretrained embeddings. [example](https://deepctr-doc.readthedocs.io/en/latest/FAQ.html#how-to-use-pretrained-weights-to-initialize-embedding-weights-and-frozen-embedding-weights)

@@ -52,7 +52,15 @@ def get_test_data(sample_size=1000, embedding_size=4, sparse_feature_num=1, dens
             SparseFeat(prefix + 'sparse_feature_' + str(i), dim, embedding_size, use_hash=hash_flag, dtype=tf.int32,group_name=group_name))
 
     for i in range(dense_feature_num):
-        feature_columns.append(DenseFeat(prefix + 'dense_feature_' + str(i), 1, dtype=tf.float32))
+        transform_fn = lambda x: (x - 0.0)/ 1.0
+        feature_columns.append(
+            DenseFeat(
+                prefix + 'dense_feature_' + str(i),
+                1,
+                dtype=tf.float32,
+                transform_fn=transform_fn
+            )
+        )
     for i, mode in enumerate(sequence_feature):
         dim = np.random.randint(1, 10)
         maxlen = np.random.randint(1, 10)

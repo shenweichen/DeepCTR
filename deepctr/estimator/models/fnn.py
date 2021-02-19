@@ -1,7 +1,7 @@
 # -*- coding:utf-8 -*-
 """
 Author:
-    Weichen Shen,wcshen1994@163.com
+    Weichen Shen, wcshen1994@163.com
 
 Reference:
     [1] Zhang W, Du T, Wang J. Deep learning over multi-field categorical data[C]//European conference on information retrieval. Springer, Cham, 2016: 45-57.(https://arxiv.org/pdf/1601.02376.pdf)
@@ -53,10 +53,9 @@ def FNNEstimator(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(
             sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
                                                                                  l2_reg_embedding=l2_reg_embedding)
             dnn_input = combined_dnn_input(sparse_embedding_list, dense_value_list)
-            deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn,
-                           dnn_dropout, False, seed)(dnn_input, training=train_flag)
+            deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, False, seed=seed)(dnn_input, training=train_flag)
             dnn_logit = tf.keras.layers.Dense(
-                1, use_bias=False, activation=None)(deep_out)
+                1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(deep_out)
 
         logits = linear_logits + dnn_logit
 
