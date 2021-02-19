@@ -466,7 +466,7 @@ class Transformer(Layer):
         if self.num_units != embedding_size:
             raise ValueError(
                 "att_embedding_size * head_num must equal the last dimension size of inputs,got %d * %d != %d" % (
-                    self.att_embedding_size, self.head_num, embedding_size))
+                self.att_embedding_size, self.head_num, embedding_size))
         self.seq_len_max = int(input_shape[0][-2])
         self.W_Query = self.add_weight(name='query', shape=[embedding_size, self.att_embedding_size * self.head_num],
                                        dtype=tf.float32,
@@ -589,6 +589,7 @@ class Transformer(Layer):
             return result
 
     def compute_output_shape(self, input_shape):
+
         if self.output_type == None:
             return (None, input_shape[0][1], self.att_embedding_size * self.head_num)
         else:
