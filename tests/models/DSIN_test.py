@@ -1,5 +1,4 @@
 import numpy as np
-import tensorflow as tf
 
 from deepctr.feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, get_feature_names
 from deepctr.models.dsin import DSIN
