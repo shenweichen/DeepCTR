@@ -542,8 +542,8 @@ class Transformer(Layer):
         elif self.attention_type == "additive":
             querys_reshaped = tf.expand_dims(querys, axis=-2)
             keys_reshaped = tf.expand_dims(keys, axis=-3)
-            outputs = tf.tanh(tf.nn.bias_add(querys_reshaped + keys_reshaped,self.b))
-            outputs=tf.squeeze(tf.matmul(outputs,tf.expand_dims(self.v,axis=-1)),axis=-1)
+            outputs = tf.tanh(tf.nn.bias_add(querys_reshaped + keys_reshaped, self.b))
+            outputs = tf.squeeze(tf.tensordot(outputs, tf.expand_dims(self.v, axis=-1), axes=[-1, 0]), axis=-1)
         else:
             NotImplementedError
 
