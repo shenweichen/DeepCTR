@@ -436,6 +436,7 @@ class Transformer(Layer):
             - **blinding**: bool. Whether or not use blinding.
             - **seed**: A Python integer to use as random seed.
             - **supports_masking**:bool. Whether or not support masking.
+            - **attention_type**: str, Type of attention, the value must be one of ["scaled_dot_product","additive"].
             - **output_type**: str or None. Whether or not use average/sum pooling for output.
 
       References
@@ -444,7 +445,7 @@ class Transformer(Layer):
 
     def __init__(self, att_embedding_size=1, head_num=8, dropout_rate=0.0, use_positional_encoding=True, use_res=True,
                  use_feed_forward=True, use_layer_norm=False, blinding=True, seed=1024, supports_masking=False,
-                 output_type="mean", **kwargs):
+                 attention_type="scaled_dot_product", output_type="mean", **kwargs):
         if head_num <= 0:
             raise ValueError('head_num must be a int > 0')
         self.att_embedding_size = att_embedding_size
@@ -457,6 +458,7 @@ class Transformer(Layer):
         self.dropout_rate = dropout_rate
         self.use_layer_norm = use_layer_norm
         self.blinding = blinding
+        self.attention_type = attention_type
         self.output_type = output_type
         super(Transformer, self).__init__(**kwargs)
         self.supports_masking = supports_masking
@@ -466,7 +468,7 @@ class Transformer(Layer):
         if self.num_units != embedding_size:
             raise ValueError(
                 "att_embedding_size * head_num must equal the last dimension size of inputs,got %d * %d != %d" % (
-                self.att_embedding_size, self.head_num, embedding_size))
+                    self.att_embedding_size, self.head_num, embedding_size))
         self.seq_len_max = int(input_shape[0][-2])
         self.W_Query = self.add_weight(name='query', shape=[embedding_size, self.att_embedding_size * self.head_num],
                                        dtype=tf.float32,
@@ -527,10 +529,17 @@ class Transformer(Layer):
         keys = tf.concat(tf.split(keys, self.head_num, axis=2), axis=0)
         values = tf.concat(tf.split(values, self.head_num, axis=2), axis=0)
 
-        # head_num*None T_q T_k
-        outputs = tf.matmul(querys, keys, transpose_b=True)
+        if self.attention_type == "scaled_dot_product":
+            # head_num*None T_q T_k
+            outputs = tf.matmul(querys, keys, transpose_b=True)
 
-        outputs = outputs / (keys.get_shape().as_list()[-1] ** 0.5)
+            outputs = outputs / (keys.get_shape().as_list()[-1] ** 0.5)
+        elif self.attention_type == "additive":
+            querys_reshaped = tf.expand_dims(querys, axis=-2)
+            keys_reshaped = tf.expand_dims(keys, axis=-3)
+            outputs = reduce_sum(tf.tanh(querys_reshaped + keys_reshaped), axis=-1)
+        else:
+            NotImplementedError
 
         key_masks = tf.tile(key_masks, [self.head_num, 1])
 
@@ -552,6 +561,8 @@ class Transformer(Layer):
                                                                 :, :, 0] * (-2 ** 32 + 1))
 
         outputs -= reduce_max(outputs, axis=-1, keep_dims=True)
+
+
         outputs = softmax(outputs)
         query_masks = tf.tile(query_masks, [self.head_num, 1])  # (h*N, T_q)
         # (h*N, T_q, T_k)
@@ -590,7 +601,10 @@ class Transformer(Layer):
 
     def compute_output_shape(self, input_shape):
 
-        return (None, 1, self.att_embedding_size * self.head_num)
+        if self.output_type == None:
+            return (None, input_shape[0][1], self.att_embedding_size * self.head_num)
+        else:
+            return (None, 1, self.att_embedding_size * self.head_num)
 
     def compute_mask(self, inputs, mask=None):
         return None
