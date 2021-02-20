@@ -479,6 +479,11 @@ class Transformer(Layer):
         self.W_Value = self.add_weight(name='value', shape=[embedding_size, self.att_embedding_size * self.head_num],
                                        dtype=tf.float32,
                                        initializer=tf.keras.initializers.TruncatedNormal(seed=self.seed + 2))
+        if self.attention_type == "additive":
+            self.b = self.add_weight('b', shape=[self.att_embedding_size], dtype=tf.float32,
+                                     initializer=tf.keras.initializers.glorot_uniform(seed=self.seed))
+            self.v = self.add_weight('v', shape=[self.att_embedding_size], dtype=tf.float32,
+                                     initializer=tf.keras.initializers.glorot_uniform(seed=self.seed))
         # if self.use_res:
         #     self.W_Res = self.add_weight(name='res', shape=[embedding_size, self.att_embedding_size * self.head_num], dtype=tf.float32,
         #                                  initializer=tf.keras.initializers.TruncatedNormal(seed=self.seed))
@@ -537,7 +542,8 @@ class Transformer(Layer):
         elif self.attention_type == "additive":
             querys_reshaped = tf.expand_dims(querys, axis=-2)
             keys_reshaped = tf.expand_dims(keys, axis=-3)
-            outputs = reduce_sum(tf.tanh(querys_reshaped + keys_reshaped), axis=-1)
+            outputs = tf.tanh(tf.nn.bias_add(querys_reshaped + keys_reshaped,self.b))
+            outputs=tf.squeeze(tf.matmul(outputs,tf.expand_dims(self.v,axis=-1)),axis=-1)
         else:
             NotImplementedError
 
@@ -609,7 +615,7 @@ class Transformer(Layer):
                   'dropout_rate': self.dropout_rate, 'use_res': self.use_res,
                   'use_positional_encoding': self.use_positional_encoding, 'use_feed_forward': self.use_feed_forward,
                   'use_layer_norm': self.use_layer_norm, 'seed': self.seed, 'supports_masking': self.supports_masking,
-                  'blinding': self.blinding}
+                  'blinding': self.blinding, 'attention_type': self.attention_type, 'output_type': self.output_type}
         base_config = super(Transformer, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
