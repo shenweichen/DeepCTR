@@ -561,8 +561,6 @@ class Transformer(Layer):
                                                                 :, :, 0] * (-2 ** 32 + 1))
 
         outputs -= reduce_max(outputs, axis=-1, keep_dims=True)
-
-
         outputs = softmax(outputs)
         query_masks = tf.tile(query_masks, [self.head_num, 1])  # (h*N, T_q)
         # (h*N, T_q, T_k)
