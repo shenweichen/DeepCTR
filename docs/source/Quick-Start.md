@@ -79,7 +79,7 @@ And for varlen(multi-valued) sparse features,you can use [VarlenSparseFeat](./Fe
 
 - Label Encoding
 ```python
-fixlen_feature_columns = [SparseFeat(feat, vocabulary_size=data[feat].nunique(),embedding_dim=4)
+fixlen_feature_columns = [SparseFeat(feat, vocabulary_size=data[feat].max() + 1,embedding_dim=4)
                        for i,feat in enumerate(sparse_features)] + [DenseFeat(feat, 1,)
                       for feat in dense_features]
 

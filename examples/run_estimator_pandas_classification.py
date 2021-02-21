@@ -31,8 +31,8 @@ if __name__ == "__main__":
 
     for i, feat in enumerate(sparse_features):
         dnn_feature_columns.append(tf.feature_column.embedding_column(
-            tf.feature_column.categorical_column_with_identity(feat, data[feat].nunique()), 4))
-        linear_feature_columns.append(tf.feature_column.categorical_column_with_identity(feat, data[feat].nunique()))
+            tf.feature_column.categorical_column_with_identity(feat, data[feat].max() + 1), 4))
+        linear_feature_columns.append(tf.feature_column.categorical_column_with_identity(feat, data[feat].max() + 1))
     for feat in dense_features:
         dnn_feature_columns.append(tf.feature_column.numeric_column(feat))
         linear_feature_columns.append(tf.feature_column.numeric_column(feat))
