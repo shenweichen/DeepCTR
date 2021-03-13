@@ -83,3 +83,38 @@ If you find this code useful in your research, please cite it using the followin
 
   ![wechat](./docs/pics/code.png)
   
+
+## Main contributors([welcome to join us!](./CONTRIBUTING.md))
+
+<table border="0">
+  <tbody>
+    <tr align="center" >
+      <td>
+        ​ <a href="https://github.com/shenweichen"><img width="70" height="70" src="https://github.com/shenweichen.png?s=40" alt="pic"></a><br>
+        ​ <a href="https://github.com/shenweichen">Shen Weichen</a> ​
+        <p>
+        Alibaba Group  </p>​
+      </td>
+      <td>
+         <a href="https://github.com/zanshuxun"><img width="70" height="70" src="https://github.com/zanshuxun.png?s=40" alt="pic"></a><br>
+         <a href="https://github.com/zanshuxun">Zan Shuxun</a> ​
+        <p>Beijing University <br> of  Posts and <br> Telecommunications  </p>​
+      </td>
+      <td>
+        ​ <a href="https://github.com/pandeconscious"><img width="70" height="70" src="https://github.com/pandeconscious.png?s=40" alt="pic"></a><br>
+        ​ <a href="https://github.com/pandeconscious">Harshit Pande</a>
+        <p> Amazon   </p>​
+      </td>
+      <td>
+        ​ <a href="https://github.com/codewithzichao"><img width="70" height="70" src="https://github.com/codewithzichao.png?s=40" alt="pic"></a><br>
+        ​ <a href="https://github.com/codewithzichao">Li Zichao</a>
+        <p> Peking University   </p>​
+      </td>
+      <td>
+        ​ <a href="https://github.com/TanTingyi"><img width="70" height="70" src="https://github.com/TanTingyi.png?s=40" alt="pic"></a><br>
+         <a href="https://github.com/TanTingyi">LeoCai</a>
+         <p>  Chongqing University <br> of  Posts and <br> Telecommunications   </p>​
+      </td>
+    </tr>
+  </tbody>
+</table>

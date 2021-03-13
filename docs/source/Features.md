@@ -284,6 +284,18 @@ Deep Session Interest Network (DSIN) extracts users' multiple historical session
 
 [Feng Y, Lv F, Shen W, et al. Deep Session Interest Network for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1905.06482, 2019.](https://arxiv.org/abs/1905.06482)
 
+### BST(Behavior Sequence Transformer)
+
+BST use the powerful Transformer model to capture the sequential signals underlying users’ behavior sequences . 
+
+[**BST Model API**](./deepctr.models.bst.html)  
+
+[BST example](https://github.com/shenweichen/DeepCTR/tree/master/examples/run_din.py)
+
+![BST](../pics/BST.png)
+
+[Qiwei Chen, Huan Zhao, Wei Li, Pipei Huang, and Wenwu Ou. 2019. Behavior sequence transformer for e-commerce recommendation in Alibaba. In Proceedings of the 1st International Workshop on Deep Learning Practice for High-Dimensional Sparse Data (DLP-KDD '19). Association for Computing Machinery, New York, NY, USA, Article 12, 1–4. DOI:)
+
 ### FiBiNET(Feature Importance and Bilinear feature Interaction NETwork)
 
 Feature Importance and Bilinear feature Interaction NETwork is proposed to dynamically learn the feature importance and fine-grained feature interactions. On the one hand, the FiBiNET can dynamically learn the importance of fea- tures via the Squeeze-Excitation network (SENET) mechanism; on the other hand, it is able to effectively learn the feature interactions via bilinear function.
