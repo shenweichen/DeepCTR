@@ -436,7 +436,7 @@ class Transformer(Layer):
             - **blinding**: bool. Whether or not use blinding.
             - **seed**: A Python integer to use as random seed.
             - **supports_masking**:bool. Whether or not support masking.
-            - **attention_type**: str, Type of attention, the value must be one of ["scaled_dot_product","additive"].
+            - **attention_type**: str, Type of attention, the value must be one of { ``'scaled_dot_product'`` , ``'additive'`` }.
             - **output_type**: str or None. Whether or not use average/sum pooling for output.
 
       References
