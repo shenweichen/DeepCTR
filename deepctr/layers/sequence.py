@@ -422,8 +422,7 @@ class Transformer(Layer):
 
 
       Output shape
-        - 3D tensor with shape: ``(batch_size, 1, input_dim)``.
-        - 3D tensor with shape: ``(batch_size, 1, input_dim)``  if ``output_type=mean or sum``,else  ``(batch_size, timesteps, input_dim)`` .
+        - 3D tensor with shape: ``(batch_size, 1, input_dim)``  if ``output_type='mean'`` or  or ``output_type='sum'`` , else  ``(batch_size, timesteps, input_dim)`` .
 
 
       Arguments
