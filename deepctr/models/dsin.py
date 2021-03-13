@@ -1,7 +1,7 @@
 # coding: utf-8
 """
 Author:
-    Weichen Shen, wcshen1994@163.com
+    Weichen Shen, weichenswc@163.com
 
 Reference:
     [1] Feng Y, Lv F, Shen W, et al. Deep Session Interest Network for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1905.06482, 2019.(https://arxiv.org/abs/1905.06482)

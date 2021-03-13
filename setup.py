@@ -4,12 +4,12 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 REQUIRED_PACKAGES = [
-    'h5py==2.10.0','requests'
+    'h5py==2.10.0', 'requests'
 ]
 
 setuptools.setup(
     name="deepctr",
-    version="0.8.3",
+    version="0.8.5",
     author="Weichen Shen",
     author_email="weichenswc@163.com",
     description="Easy-to-use,Modular and Extendible package of deep learning based CTR(Click Through Rate) prediction models with tensorflow 1.x and 2.x .",
