@@ -16,6 +16,7 @@ DeepCTR Models API
    DIN<deepctr.models.din>
    DIEN<deepctr.models.dien>
    DSIN<deepctr.models.dsin>
+   BST<deepctr.models.bst>
    xDeepFM<deepctr.models.xdeepfm>
    AutoInt<deepctr.models.autoint>
    ONN<deepctr.models.onn>

@@ -2,7 +2,7 @@
 """
 
 Author:
-    Weichen Shen,wcshen1994@163.com
+    Weichen Shen,weichenswc@163.com
 
 """
 import tensorflow as tf

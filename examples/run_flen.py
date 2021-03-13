@@ -38,7 +38,7 @@ if __name__ == "__main__":
                       )
 
     fixlen_feature_columns = [
-        SparseFeat(name, vocabulary_size=data[name].nunique(), embedding_dim=16, use_hash=False, dtype='int32',
+        SparseFeat(name, vocabulary_size=data[name].max() + 1, embedding_dim=16, use_hash=False, dtype='int32',
                    group_name=field_info[name]) for name in sparse_features]
 
     dnn_feature_columns = fixlen_feature_columns

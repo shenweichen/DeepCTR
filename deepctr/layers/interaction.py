@@ -2,7 +2,7 @@
 """
 
 Authors:
-    Weichen Shen,wcshen1994@163.com,
+    Weichen Shen,weichenswc@163.com,
     Harshit Pande
 
 """
