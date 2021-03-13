@@ -423,6 +423,7 @@ class Transformer(Layer):
 
       Output shape
         - 3D tensor with shape: ``(batch_size, 1, input_dim)``.
+        - 3D tensor with shape: ``(batch_size, 1, input_dim)``  if ``output_type=mean or sum``,else  ``(batch_size, timesteps, input_dim)`` .
 
 
       Arguments
@@ -437,7 +438,7 @@ class Transformer(Layer):
             - **seed**: A Python integer to use as random seed.
             - **supports_masking**:bool. Whether or not support masking.
             - **attention_type**: str, Type of attention, the value must be one of { ``'scaled_dot_product'`` , ``'additive'`` }.
-            - **output_type**: str or None. Whether or not use average/sum pooling for output.
+            - **output_type**: ``'mean'`` , ``'sum'`` or `None`. Whether or not use average/sum pooling for output.
 
       References
             - [Vaswani, Ashish, et al. "Attention is all you need." Advances in Neural Information Processing Systems. 2017.](https://papers.nips.cc/paper/7181-attention-is-all-you-need.pdf)
