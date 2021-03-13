@@ -23,11 +23,11 @@ def get_xy_fd():
 
     hist_iid = np.array([[1, 2, 3, 0], [3, 2, 1, 0], [1, 2, 0, 0]])
     hist_cate_id = np.array([[1, 2, 2, 0], [2, 2, 1, 0], [1, 2, 0, 0]])
-    seq_length = np.array([3, 3, 2])
+    seq_length = np.array([3, 3, 2])  # the actual length of the behavior sequence
 
     feature_dict = {'user': uid, 'gender': ugender, 'item_id': iid, 'cate_id': cate_id,
-                    'hist_item_id': hist_iid, 'hist_cate_id': hist_cate_id, 'pay_score': pay_score,
-                    'seq_length': seq_length}
+                    'hist_item_id': hist_iid, 'hist_cate_id': hist_cate_id,
+                    'pay_score': pay_score, 'seq_length': seq_length}
     x = {name: feature_dict[name] for name in get_feature_names(feature_columns)}
     y = np.array([1, 0, 1])
     return x, y, feature_columns, behavior_feature_list
