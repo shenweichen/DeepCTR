@@ -36,7 +36,7 @@ def get_xy_fd():
 if __name__ == "__main__":
     x, y, feature_columns, behavior_feature_list = get_xy_fd()
     model = DIN(feature_columns, behavior_feature_list)
-    # model = BST(feature_columns, behavior_feature_list,att_head_num=3)
+    # model = BST(feature_columns, behavior_feature_list,att_head_num=4)
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
     history = model.fit(x, y, verbose=1, epochs=10, validation_split=0.5)
