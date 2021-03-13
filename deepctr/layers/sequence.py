@@ -417,12 +417,12 @@ class Transformer(Layer):
     """  Simplified version of Transformer  proposed in 《Attention is all you need》
 
       Input shape
-        - a list of two 3D tensor with shape ``(batch_size, timesteps, input_dim)`` if supports_masking=True.
-        - a list of two 4 tensors, first two tensors with shape ``(batch_size, timesteps, input_dim)``,last two tensors with shape ``(batch_size, 1)`` if supports_masking=False.
+        - a list of two 3D tensor with shape ``(batch_size, timesteps, input_dim)`` if ``supports_masking=True`` .
+        - a list of two 4 tensors, first two tensors with shape ``(batch_size, timesteps, input_dim)``,last two tensors with shape ``(batch_size, 1)`` if ``supports_masking=False`` .
 
 
       Output shape
-        - 3D tensor with shape: ``(batch_size, 1, input_dim)``  if ``output_type='mean'`` or  or ``output_type='sum'`` , else  ``(batch_size, timesteps, input_dim)`` .
+        - 3D tensor with shape: ``(batch_size, 1, input_dim)``  if ``output_type='mean'`` or ``output_type='sum'`` , else  ``(batch_size, timesteps, input_dim)`` .
 
 
       Arguments
