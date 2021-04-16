@@ -3,28 +3,29 @@
 Author:
     zanshuxun, zanshuxun@aliyun.com
 Reference:
-    [1] Yu Y, Wang Z, Yuan B. An Input-aware Factorization Machine for Sparse Prediction[C]//IJCAI. 2019: 1466-1472.(https://www.ijcai.org/Proceedings/2019/0203.pdf)
+    [1] Lu W, Yu Y, Chang Y, et al. A Dual Input-aware Factorization Machine for CTR Prediction[C]//IJCAI. 2020: 3139-3145.(https://www.ijcai.org/Proceedings/2020/0434.pdf)
 """
-
-from itertools import chain
 
 import tensorflow as tf
 
 from ..feature_column import build_input_features, get_linear_logit, DEFAULT_GROUP_NAME, input_from_feature_columns
 from ..layers.core import PredictionLayer, DNN
-from ..layers.interaction import FM
+from ..layers.interaction import FM, InteractingLayer
 from ..layers.utils import concat_func, add_func, combined_dnn_input
 from deepctr.feature_column import SparseFeat, VarLenSparseFeat
 
 
-def IFM(linear_feature_columns, dnn_feature_columns, fm_group=[DEFAULT_GROUP_NAME], dnn_hidden_units=(128, 128),
-        l2_reg_linear=0.00001, l2_reg_embedding=0.00001, l2_reg_dnn=0, seed=1024, dnn_dropout=0,
-        dnn_activation='relu', dnn_use_bn=False, task='binary'):
-    """Instantiates the IFM Network architecture.
+def DIFM(linear_feature_columns, dnn_feature_columns,
+         att_embedding_size=8, att_head_num=8, att_res=True, dnn_hidden_units=(128, 128),
+         l2_reg_linear=0.00001, l2_reg_embedding=0.00001, l2_reg_dnn=0, seed=1024, dnn_dropout=0,
+         dnn_activation='relu', dnn_use_bn=False, task='binary'):
+    """Instantiates the DIFM Network architecture.
 
     :param linear_feature_columns: An iterable containing all the features used by linear part of the model.
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
-    :param fm_group: list, group_name of features that will be used to do feature interactions.
+    :param att_embedding_size: integer, the embedding size in multi-head self-attention network.
+    :param att_head_num: int. The head number in multi-head  self-attention network.
+    :param att_res: bool. Whether or not use standard residual connections before output.
     :param dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of DNN
     :param l2_reg_linear: float. L2 regularizer strength applied to linear part
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
@@ -48,31 +49,31 @@ def IFM(linear_feature_columns, dnn_feature_columns, fm_group=[DEFAULT_GROUP_NAM
     print('sparse_feat_num', sparse_feat_num)
     inputs_list = list(features.values())
 
-    group_embedding_dict, dense_value_list = input_from_feature_columns(features, dnn_feature_columns, l2_reg_embedding,
-                                                                        seed, support_group=True)
-    if not len(group_embedding_dict) > 0:
+    sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns, l2_reg_embedding,
+                                                                        seed, support_group=False)
+    if not len(sparse_embedding_list) > 0:
         raise ValueError("there are no sparse features")
 
-    dnn_input = combined_dnn_input(list(chain.from_iterable(
-        group_embedding_dict.values())), [])
+    att_input = concat_func(sparse_embedding_list, axis=1)
+    att_out = InteractingLayer(att_embedding_size, att_head_num, att_res)(att_input)
+    att_out = tf.keras.layers.Flatten()(att_out)
+    m_vec = tf.keras.layers.Dense(
+        sparse_feat_num, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed=seed))(att_out)
+
+    dnn_input = combined_dnn_input(sparse_embedding_list, [])
     dnn_output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed)(dnn_input)
-    # here, dnn_output is the m'_{x}
-    dnn_output = tf.keras.layers.Dense(
+    m_bit = tf.keras.layers.Dense(
         sparse_feat_num, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed=seed))(dnn_output)
-    # input_aware_factor m_{x,i}
-    input_aware_factor = tf.keras.layers.Lambda(lambda x: sparse_feat_num * tf.nn.softmax(x, axis=1))(dnn_output)
+
+    input_aware_factor = add_func([m_vec, m_bit])  # m_x is the complete input-aware factor
 
     linear_logit = get_linear_logit(features, linear_feature_columns, seed=seed, prefix='linear',
                                     l2_reg=l2_reg_linear, sparse_feat_refine_weight=input_aware_factor)
 
-    fm_group_result = []
-    for k, v in group_embedding_dict.items():
-        if k in fm_group:
-            fm_input = concat_func(v, axis=1)
-            refined_fm_input = tf.keras.layers.Lambda(lambda x: x[0] * tf.expand_dims(x[1], axis=-1))(
-                [fm_input, input_aware_factor])
-            fm_group_result.append(FM()(refined_fm_input))
-    fm_logit = add_func(fm_group_result)
+    fm_input = concat_func(sparse_embedding_list, axis=1)
+    refined_fm_input = tf.keras.layers.Lambda(lambda x: x[0] * tf.expand_dims(x[1], axis=-1))(
+        [fm_input, input_aware_factor])
+    fm_logit = FM()(refined_fm_input)
 
     final_logit = add_func([linear_logit, fm_logit])
 
