@@ -65,7 +65,7 @@ def DIFM(linear_feature_columns, dnn_feature_columns,
     m_bit = tf.keras.layers.Dense(
         sparse_feat_num, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed=seed))(dnn_output)
 
-    input_aware_factor = add_func([m_vec, m_bit])  # m_x is the complete input-aware factor
+    input_aware_factor = add_func([m_vec, m_bit])  # the complete input-aware factor m_x
 
     linear_logit = get_linear_logit(features, linear_feature_columns, seed=seed, prefix='linear',
                                     l2_reg=l2_reg_linear, sparse_feat_refine_weight=input_aware_factor)
