@@ -145,7 +145,7 @@ def build_input_features(feature_columns, prefix=''):
 
 
 def get_linear_logit(features, feature_columns, units=1, use_bias=False, seed=1024, prefix='linear',
-                     l2_reg=0):
+                     l2_reg=0, sparse_feat_refine_weight=None):
     linear_feature_columns = copy(feature_columns)
     for i in range(len(linear_feature_columns)):
         if isinstance(linear_feature_columns[i], SparseFeat):
@@ -166,10 +166,10 @@ def get_linear_logit(features, feature_columns, units=1, use_bias=False, seed=10
         if len(linear_emb_list[i]) > 0 and len(dense_input_list) > 0:
             sparse_input = concat_func(linear_emb_list[i])
             dense_input = concat_func(dense_input_list)
-            linear_logit = Linear(l2_reg, mode=2, use_bias=use_bias, seed=seed)([sparse_input, dense_input])
+            linear_logit = Linear(l2_reg, mode=2, use_bias=use_bias, seed=seed)([sparse_input, dense_input], sparse_feat_refine_weight=sparse_feat_refine_weight)
         elif len(linear_emb_list[i]) > 0:
             sparse_input = concat_func(linear_emb_list[i])
-            linear_logit = Linear(l2_reg, mode=0, use_bias=use_bias, seed=seed)(sparse_input)
+            linear_logit = Linear(l2_reg, mode=0, use_bias=use_bias, seed=seed)(sparse_input, sparse_feat_refine_weight=sparse_feat_refine_weight)
         elif len(dense_input_list) > 0:
             dense_input = concat_func(dense_input_list)
             linear_logit = Linear(l2_reg, mode=1, use_bias=use_bias, seed=seed)(dense_input)
