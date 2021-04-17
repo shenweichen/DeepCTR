@@ -48,13 +48,12 @@ def IFM(linear_feature_columns, dnn_feature_columns, fm_group=[DEFAULT_GROUP_NAM
     print('sparse_feat_num', sparse_feat_num)
     inputs_list = list(features.values())
 
-    group_embedding_dict, dense_value_list = input_from_feature_columns(features, dnn_feature_columns, l2_reg_embedding,
-                                                                        seed, support_group=True)
-    if not len(group_embedding_dict) > 0:
+    sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
+                                                                         l2_reg_embedding, seed)
+    if not len(sparse_embedding_list) > 0:
         raise ValueError("there are no sparse features")
 
-    dnn_input = combined_dnn_input(list(chain.from_iterable(
-        group_embedding_dict.values())), [])
+    dnn_input = combined_dnn_input(sparse_embedding_list, [])
     dnn_output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed)(dnn_input)
     # here, dnn_output is the m'_{x}
     dnn_output = tf.keras.layers.Dense(
@@ -65,14 +64,11 @@ def IFM(linear_feature_columns, dnn_feature_columns, fm_group=[DEFAULT_GROUP_NAM
     linear_logit = get_linear_logit(features, linear_feature_columns, seed=seed, prefix='linear',
                                     l2_reg=l2_reg_linear, sparse_feat_refine_weight=input_aware_factor)
 
-    fm_group_result = []
-    for k, v in group_embedding_dict.items():
-        if k in fm_group:
-            fm_input = concat_func(v, axis=1)
-            refined_fm_input = tf.keras.layers.Lambda(lambda x: x[0] * tf.expand_dims(x[1], axis=-1))(
-                [fm_input, input_aware_factor])
-            fm_group_result.append(FM()(refined_fm_input))
-    fm_logit = add_func(fm_group_result)
+
+    fm_input = concat_func(sparse_embedding_list, axis=1)
+    refined_fm_input = tf.keras.layers.Lambda(lambda x: x[0] * tf.expand_dims(x[1], axis=-1))(
+        [fm_input, input_aware_factor])
+    fm_logit = FM()(refined_fm_input)
 
     final_logit = add_func([linear_logit, fm_logit])
 
