@@ -62,7 +62,6 @@ def IFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128)
     linear_logit = get_linear_logit(features, linear_feature_columns, seed=seed, prefix='linear',
                                     l2_reg=l2_reg_linear, sparse_feat_refine_weight=input_aware_factor)
 
-
     fm_input = concat_func(sparse_embedding_list, axis=1)
     refined_fm_input = tf.keras.layers.Lambda(lambda x: x[0] * tf.expand_dims(x[1], axis=-1))(
         [fm_input, input_aware_factor])
