@@ -1410,7 +1410,7 @@ class FwFMLayer(Layer):
 
 class IFMSoftmax(Layer):
     # The special softmax operation in IFM.
-    # In tf1.4, multiplying a integer and a tensor in Lambda Layer will cause error in load model.
+    # In tf1.4, multiplying a integer and a tensor in Lambda Layer will cause error in load_model().
     # Hence, this operation are wrapped in this class.
     def __init__(self, sparse_feat_num, **kwargs):
         self.sparse_feat_num = sparse_feat_num
