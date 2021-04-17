@@ -10,10 +10,9 @@ import tensorflow as tf
 
 from ..feature_column import build_input_features, get_linear_logit, input_from_feature_columns
 from ..layers.core import PredictionLayer, DNN
-from ..layers.interaction import FM
-from ..layers.utils import concat_func, add_func, softmax, combined_dnn_input
+from ..layers.interaction import FM, IFMSoftmax
+from ..layers.utils import concat_func, add_func, combined_dnn_input
 from deepctr.feature_column import SparseFeat, VarLenSparseFeat
-
 
 def IFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128),
         l2_reg_linear=0.00001, l2_reg_embedding=0.00001, l2_reg_dnn=0, seed=1024, dnn_dropout=0,
@@ -57,7 +56,7 @@ def IFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128)
     dnn_output = tf.keras.layers.Dense(
         sparse_feat_num, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed=seed))(dnn_output)
     # input_aware_factor m_{x,i}
-    input_aware_factor = tf.keras.layers.Lambda(lambda x: sparse_feat_num * softmax(x, dim=1))(dnn_output)
+    input_aware_factor = IFMSoftmax(sparse_feat_num)(dnn_output)
 
     linear_logit = get_linear_logit(features, linear_feature_columns, seed=seed, prefix='linear',
                                     l2_reg=l2_reg_linear, sparse_feat_refine_weight=input_aware_factor)

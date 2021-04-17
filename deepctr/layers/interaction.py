@@ -1406,3 +1406,22 @@ class FwFMLayer(Layer):
             'regularizer': self.regularizer
         })
         return config
+
+
+class IFMSoftmax(Layer):
+    # The special softmax operation in IFM.
+    # In tf1.4, multiplying a integer and a tensor in Lambda Layer will cause error in load model.
+    # Hence, this operation are wrapped in this class.
+    def __init__(self, sparse_feat_num, **kwargs):
+        self.sparse_feat_num = sparse_feat_num
+        super(IFMSoftmax, self).__init__()
+
+    def call(self, inputs, **kwargs):
+        return self.sparse_feat_num * softmax(inputs, dim=1)
+
+    def get_config(self):
+        config = super(IFMSoftmax, self).get_config().copy()
+        config.update({
+            'sparse_feat_num': self.sparse_feat_num,
+        })
+        return config
