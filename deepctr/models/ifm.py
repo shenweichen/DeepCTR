@@ -6,18 +6,16 @@ Reference:
     [1] Yu Y, Wang Z, Yuan B. An Input-aware Factorization Machine for Sparse Prediction[C]//IJCAI. 2019: 1466-1472.(https://www.ijcai.org/Proceedings/2019/0203.pdf)
 """
 
-from itertools import chain
-
 import tensorflow as tf
 
-from ..feature_column import build_input_features, get_linear_logit, DEFAULT_GROUP_NAME, input_from_feature_columns
+from ..feature_column import build_input_features, get_linear_logit, input_from_feature_columns
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import FM
 from ..layers.utils import concat_func, add_func, combined_dnn_input
 from deepctr.feature_column import SparseFeat, VarLenSparseFeat
 
 
-def IFM(linear_feature_columns, dnn_feature_columns, fm_group=[DEFAULT_GROUP_NAME], dnn_hidden_units=(128, 128),
+def IFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128),
         l2_reg_linear=0.00001, l2_reg_embedding=0.00001, l2_reg_dnn=0, seed=1024, dnn_dropout=0,
         dnn_activation='relu', dnn_use_bn=False, task='binary'):
     """Instantiates the IFM Network architecture.
