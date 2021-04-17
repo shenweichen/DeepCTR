@@ -57,7 +57,7 @@ def IFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128)
     dnn_output = tf.keras.layers.Dense(
         sparse_feat_num, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed=seed))(dnn_output)
     # input_aware_factor m_{x,i}
-    input_aware_factor = tf.keras.layers.Lambda(lambda x: sparse_feat_num * softmax(x, axis=1))(dnn_output)
+    input_aware_factor = tf.keras.layers.Lambda(lambda x: sparse_feat_num * softmax(x, dim=1))(dnn_output)
 
     linear_logit = get_linear_logit(features, linear_feature_columns, seed=seed, prefix='linear',
                                     l2_reg=l2_reg_linear, sparse_feat_refine_weight=input_aware_factor)
