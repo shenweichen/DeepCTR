@@ -56,7 +56,7 @@ def DIFM(linear_feature_columns, dnn_feature_columns,
         raise ValueError("there are no sparse features")
 
     att_input = concat_func(sparse_embedding_list, axis=1)
-    att_out = InteractingLayer(att_embedding_size, att_head_num, att_res)(att_input)
+    att_out = InteractingLayer(att_embedding_size, att_head_num, att_res, scaling=True)(att_input)
     att_out = tf.keras.layers.Flatten()(att_out)
     m_vec = tf.keras.layers.Dense(
         sparse_feat_num, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed=seed))(att_out)
