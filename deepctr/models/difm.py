@@ -8,11 +8,11 @@ Reference:
 
 import tensorflow as tf
 
-from ..feature_column import build_input_features, get_linear_logit, input_from_feature_columns
+from ..feature_column import build_input_features, get_linear_logit, input_from_feature_columns, SparseFeat, \
+    VarLenSparseFeat
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import FM, InteractingLayer
 from ..layers.utils import concat_func, add_func, combined_dnn_input
-from deepctr.feature_column import SparseFeat, VarLenSparseFeat
 
 
 def DIFM(linear_feature_columns, dnn_feature_columns,
@@ -46,7 +46,6 @@ def DIFM(linear_feature_columns, dnn_feature_columns,
 
     sparse_feat_num = len(list(filter(lambda x: isinstance(x, SparseFeat) or isinstance(x, VarLenSparseFeat),
                                       dnn_feature_columns)))
-    print('sparse_feat_num', sparse_feat_num)
     inputs_list = list(features.values())
 
     sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
