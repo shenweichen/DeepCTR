@@ -48,7 +48,7 @@ def DIFM(linear_feature_columns, dnn_feature_columns,
                                       dnn_feature_columns)))
     inputs_list = list(features.values())
 
-    sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
+    sparse_embedding_list, _ = input_from_feature_columns(features, dnn_feature_columns,
                                                                          l2_reg_embedding, seed)
 
     if not len(sparse_embedding_list) > 0:
