@@ -3,7 +3,8 @@
 Author:
     zanshuxun, zanshuxun@aliyun.com
 Reference:
-    [1] Lu W, Yu Y, Chang Y, et al. A Dual Input-aware Factorization Machine for CTR Prediction[C]//IJCAI. 2020: 3139-3145.(https://www.ijcai.org/Proceedings/2020/0434.pdf)
+    [1] Lu W, Yu Y, Chang Y, et al. A Dual Input-aware Factorization Machine for CTR Prediction[C]
+    //IJCAI. 2020: 3139-3145.(https://www.ijcai.org/Proceedings/2020/0434.pdf)
 """
 
 import tensorflow as tf
@@ -49,7 +50,7 @@ def DIFM(linear_feature_columns, dnn_feature_columns,
     inputs_list = list(features.values())
 
     sparse_embedding_list, _ = input_from_feature_columns(features, dnn_feature_columns,
-                                                                         l2_reg_embedding, seed)
+                                                          l2_reg_embedding, seed)
 
     if not len(sparse_embedding_list) > 0:
         raise ValueError("there are no sparse features")

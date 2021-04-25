@@ -176,8 +176,7 @@ def get_linear_logit(features, feature_columns, units=1, use_bias=False, seed=10
             if sparse_feat_refine_weight is not None:
                 sparse_input = Lambda(lambda x: x[0] * tf.expand_dims(x[1], axis=1))(
                     [sparse_input, sparse_feat_refine_weight])
-            linear_logit = Linear(l2_reg, mode=0, use_bias=use_bias, seed=seed)(
-                sparse_input)
+            linear_logit = Linear(l2_reg, mode=0, use_bias=use_bias, seed=seed)(sparse_input)
         elif len(dense_input_list) > 0:
             dense_input = concat_func(dense_input_list)
             linear_logit = Linear(l2_reg, mode=1, use_bias=use_bias, seed=seed)(dense_input)

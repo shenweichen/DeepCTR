@@ -3,7 +3,8 @@
 Author:
     zanshuxun, zanshuxun@aliyun.com
 Reference:
-    [1] Yu Y, Wang Z, Yuan B. An Input-aware Factorization Machine for Sparse Prediction[C]//IJCAI. 2019: 1466-1472.(https://www.ijcai.org/Proceedings/2019/0203.pdf)
+    [1] Yu Y, Wang Z, Yuan B. An Input-aware Factorization Machine for Sparse Prediction[C]//IJCAI. 2019: 1466-1472.
+    (https://www.ijcai.org/Proceedings/2019/0203.pdf)
 """
 
 import tensorflow as tf
@@ -23,7 +24,6 @@ def IFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128)
 
     :param linear_feature_columns: An iterable containing all the features used by linear part of the model.
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
-    :param fm_group: list, group_name of features that will be used to do feature interactions.
     :param dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of DNN
     :param l2_reg_linear: float. L2 regularizer strength applied to linear part
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
