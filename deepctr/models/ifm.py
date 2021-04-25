@@ -7,12 +7,13 @@ Reference:
 """
 
 import tensorflow as tf
+from tensorflow.python.keras.layers import Lambda
 
 from ..feature_column import build_input_features, get_linear_logit, input_from_feature_columns, SparseFeat, \
     VarLenSparseFeat
 from ..layers.core import PredictionLayer, DNN
-from ..layers.interaction import FM, IFMSoftmax
-from ..layers.utils import concat_func, add_func, combined_dnn_input
+from ..layers.interaction import FM
+from ..layers.utils import concat_func, add_func, combined_dnn_input, softmax
 
 
 def IFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128),
@@ -56,13 +57,13 @@ def IFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128)
     dnn_output = tf.keras.layers.Dense(
         sparse_feat_num, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed=seed))(dnn_output)
     # input_aware_factor m_{x,i}
-    input_aware_factor = IFMSoftmax(sparse_feat_num)(dnn_output)
+    input_aware_factor = Lambda(lambda x: tf.to_float(tf.shape(x)[-1]) * softmax(x, dim=1))(dnn_output)
 
     linear_logit = get_linear_logit(features, linear_feature_columns, seed=seed, prefix='linear',
                                     l2_reg=l2_reg_linear, sparse_feat_refine_weight=input_aware_factor)
 
     fm_input = concat_func(sparse_embedding_list, axis=1)
-    refined_fm_input = tf.keras.layers.Lambda(lambda x: x[0] * tf.expand_dims(x[1], axis=-1))(
+    refined_fm_input = Lambda(lambda x: x[0] * tf.expand_dims(x[1], axis=-1))(
         [fm_input, input_aware_factor])
     fm_logit = FM()(refined_fm_input)
 
