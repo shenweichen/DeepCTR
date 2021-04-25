@@ -103,8 +103,9 @@ class Linear(tf.keras.layers.Layer):
         super(Linear, self).build(input_shape)  # Be sure to call this somewhere!
 
     def call(self, inputs, **kwargs):
+        sparse_feat_refine_weight = kwargs['sparse_feat_refine_weight']
         if self.mode == 0:
-            sparse_input, sparse_feat_refine_weight = inputs
+            sparse_input = inputs
             if sparse_feat_refine_weight is not None:
                 sparse_input = sparse_input * tf.expand_dims(sparse_feat_refine_weight, axis=1)
             linear_logit = reduce_sum(sparse_input, axis=-1, keep_dims=True)
@@ -113,7 +114,7 @@ class Linear(tf.keras.layers.Layer):
             fc = tf.tensordot(dense_input, self.kernel, axes=(-1, 0))
             linear_logit = fc
         else:
-            sparse_input, dense_input, sparse_feat_refine_weight = inputs
+            sparse_input, dense_input = inputs
             if sparse_feat_refine_weight is not None:
                 sparse_input = sparse_input * tf.expand_dims(sparse_feat_refine_weight, axis=1)
             fc = tf.tensordot(dense_input, self.kernel, axes=(-1, 0))
