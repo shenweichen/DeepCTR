@@ -1,9 +1,10 @@
+import tensorflow as tf
 from collections import namedtuple, OrderedDict
 from copy import copy
 from itertools import chain
 
 from tensorflow.python.keras.initializers import RandomNormal, Zeros
-from tensorflow.python.keras.layers import Input
+from tensorflow.python.keras.layers import Input, Lambda
 
 from .inputs import create_embedding_matrix, embedding_lookup, get_dense_input, varlen_embedding_lookup, \
     get_varlen_pooling_list, mergeDict
@@ -166,12 +167,17 @@ def get_linear_logit(features, feature_columns, units=1, use_bias=False, seed=10
         if len(linear_emb_list[i]) > 0 and len(dense_input_list) > 0:
             sparse_input = concat_func(linear_emb_list[i])
             dense_input = concat_func(dense_input_list)
-            linear_logit = Linear(l2_reg, mode=2, use_bias=use_bias, seed=seed)(
-                [sparse_input, dense_input], sparse_feat_refine_weight=sparse_feat_refine_weight)
+            if sparse_feat_refine_weight is not None:
+                sparse_input = Lambda(lambda x: x[0] * tf.expand_dims(x[1], axis=1))(
+                    [sparse_input, sparse_feat_refine_weight])
+            linear_logit = Linear(l2_reg, mode=2, use_bias=use_bias, seed=seed)([sparse_input, dense_input])
         elif len(linear_emb_list[i]) > 0:
             sparse_input = concat_func(linear_emb_list[i])
+            if sparse_feat_refine_weight is not None:
+                sparse_input = Lambda(lambda x: x[0] * tf.expand_dims(x[1], axis=1))(
+                    [sparse_input, sparse_feat_refine_weight])
             linear_logit = Linear(l2_reg, mode=0, use_bias=use_bias, seed=seed)(
-                sparse_input, sparse_feat_refine_weight=sparse_feat_refine_weight)
+                sparse_input)
         elif len(dense_input_list) > 0:
             dense_input = concat_func(dense_input_list)
             linear_logit = Linear(l2_reg, mode=1, use_bias=use_bias, seed=seed)(dense_input)
