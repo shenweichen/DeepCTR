@@ -700,13 +700,14 @@ class InteractingLayer(Layer):
             - [Song W, Shi C, Xiao Z, et al. AutoInt: Automatic Feature Interaction Learning via Self-Attentive Neural Networks[J]. arXiv preprint arXiv:1810.11921, 2018.](https://arxiv.org/abs/1810.11921)
     """
 
-    def __init__(self, att_embedding_size=8, head_num=2, use_res=True, seed=1024, **kwargs):
+    def __init__(self, att_embedding_size=8, head_num=2, use_res=True, scaling=False, seed=1024, **kwargs):
         if head_num <= 0:
             raise ValueError('head_num must be a int > 0')
         self.att_embedding_size = att_embedding_size
         self.head_num = head_num
         self.use_res = use_res
         self.seed = seed
+        self.scaling = scaling
         super(InteractingLayer, self).__init__(**kwargs)
 
     def build(self, input_shape):
@@ -748,6 +749,8 @@ class InteractingLayer(Layer):
 
         inner_product = tf.matmul(
             querys, keys, transpose_b=True)  # head_num None F F
+        if self.scaling:
+            inner_product /= self.att_embedding_size ** 0.5
         self.normalized_att_scores = softmax(inner_product)
 
         result = tf.matmul(self.normalized_att_scores,

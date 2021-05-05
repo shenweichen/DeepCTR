@@ -8,9 +8,9 @@ from .interaction import (CIN, FM, AFMLayer, BiInteractionPooling, CrossNet, Cro
                           FieldWiseBiInteraction, FwFMLayer)
 from .normalization import LayerNormalization
 from .sequence import (AttentionSequencePoolingLayer, BiasEncoding, BiLSTM,
-                       KMaxPooling, SequencePoolingLayer,WeightedSequenceLayer,
+                       KMaxPooling, SequencePoolingLayer, WeightedSequenceLayer,
                        Transformer, DynamicGRU)
-from .utils import NoMask, Hash,Linear,Add,combined_dnn_input
+from .utils import NoMask, Hash, Linear, Add, combined_dnn_input, softmax
 
 custom_objects = {'tf': tf,
                   'InnerProductLayer': InnerProductLayer,
@@ -36,12 +36,13 @@ custom_objects = {'tf': tf,
                   'KMaxPooling': KMaxPooling,
                   'FGCNNLayer': FGCNNLayer,
                   'Hash': Hash,
-                  'Linear':Linear,
+                  'Linear': Linear,
                   'DynamicGRU': DynamicGRU,
-                  'SENETLayer':SENETLayer,
-                  'BilinearInteraction':BilinearInteraction,
-                  'WeightedSequenceLayer':WeightedSequenceLayer,
-                  'Add':Add,
-                  'FieldWiseBiInteraction':FieldWiseBiInteraction,
-                  'FwFMLayer': FwFMLayer
+                  'SENETLayer': SENETLayer,
+                  'BilinearInteraction': BilinearInteraction,
+                  'WeightedSequenceLayer': WeightedSequenceLayer,
+                  'Add': Add,
+                  'FieldWiseBiInteraction': FieldWiseBiInteraction,
+                  'FwFMLayer': FwFMLayer,
+                  'softmax': softmax,
                   }
