@@ -25,6 +25,18 @@ def test_DCN(cross_num, hidden_size, sparse_feature_num, cross_parameterization)
     check_model(model, model_name, x, y)
 
 
+def test_DCN_2():
+    model_name = "DCN"
+
+    sample_size = SAMPLE_SIZE
+    x, y, feature_columns = get_test_data(sample_size, sparse_feature_num=3,
+                                          dense_feature_num=2)
+
+    model = DCN([], feature_columns, cross_num=1, cross_parameterization=cross_parameterization,
+                dnn_hidden_units=8, dnn_dropout=0.5)
+    check_model(model, model_name, x, y)
+
+
 @pytest.mark.parametrize(
     'cross_num,hidden_size,sparse_feature_num',
     [(1, (8,), 3)

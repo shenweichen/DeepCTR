@@ -180,9 +180,8 @@ def get_linear_logit(features, feature_columns, units=1, use_bias=False, seed=10
         elif len(dense_input_list) > 0:
             dense_input = concat_func(dense_input_list)
             linear_logit = Linear(l2_reg, mode=1, use_bias=use_bias, seed=seed)(dense_input)
-        else:
-            # raise NotImplementedError
-            return add_func([])
+        else:   #empty feature_columns
+            return Lambda(lambda x: tf.constant([[0.0]]))(features.values()[0])
         linear_logit_list.append(linear_logit)
 
     return concat_func(linear_logit_list)
