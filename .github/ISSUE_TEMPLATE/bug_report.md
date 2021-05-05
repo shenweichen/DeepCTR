@@ -20,7 +20,7 @@ Steps to reproduce the behavior:
 **Operating environment(运行环境):**
  - python version [e.g. 3.5, 3.7]
  - tensorflow version [e.g. 1.4.0, 1.15.0, 2.4.0]
- - deepctr version [e.g. 0.8.3,]
+ - deepctr version [e.g. 0.8.6,]
 
 **Additional context**
 Add any other context about the problem here.
