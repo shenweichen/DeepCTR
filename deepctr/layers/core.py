@@ -339,9 +339,9 @@ class MultiLossLayer(Layer):
         for y_true, y_pred, task, log_var in zip(ys_true, ys_pred, tasks, self.log_vars):
             precision = K.exp(-log_var)
             if task == 'binary':
-                loss = tf.keras.losses.BinaryCrossentropy()(y_true, y_pred)
+                loss = tf.keras.losses.binary_crossentropy(y_true, y_pred)
             else:
-                loss = tf.keras.losses.MeanSquaredError()(y_true, y_pred)
+                loss = tf.keras.losses.mean_squared_error(y_true, y_pred)
             total_loss += K.sum(precision * loss + log_var, -1)
         return K.mean(total_loss)
 

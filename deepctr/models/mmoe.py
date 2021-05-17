@@ -8,14 +8,14 @@ Reference:
 """
 import tensorflow as tf
 
-from ..inputs import input_from_feature_columns, build_input_features, combined_dnn_input
+from ..feature_column import build_input_features, input_from_feature_columns
+from ..layers.utils import combined_dnn_input
 from ..layers.core import PredictionLayer, DNN, MMOELayer, MultiLossLayer
-from ..layers.utils import concat_func
 from tensorflow.python.keras.layers import Input
 
 def MMOE(dnn_feature_columns, num_tasks, tasks, num_experts=4, expert_dim=8, use_uncertainty=True,
          dnn_hidden_units=(128, 128), l2_reg_embedding=1e-5, l2_reg_dnn=0,
-         task_dnn_units=None, init_std=0.0001, seed=1024, dnn_dropout=0, dnn_activation='relu'):
+         task_dnn_units=None, seed=1024, dnn_dropout=0, dnn_activation='relu'):
     """Instantiates the Multi-gate Mixture-of-Experts architecture.
 
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
@@ -28,7 +28,6 @@ def MMOE(dnn_feature_columns, num_tasks, tasks, num_experts=4, expert_dim=8, use
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
     :param l2_reg_dnn: float. L2 regularizer strength applied to DNN
     :param task_dnn_units: list,list of positive integer or empty list, the layer number and units in each layer of task-specific DNN
-    :param init_std: float,to use as the initialize std of embedding vector
     :param seed: integer ,to use as random seed.
     :param dnn_dropout: float in [0,1), the probability we will drop out a given DNN coordinate.
     :param dnn_activation: Activation function to use in DNN
@@ -49,10 +48,10 @@ def MMOE(dnn_feature_columns, num_tasks, tasks, num_experts=4, expert_dim=8, use
     inputs_list = list(features.values())
 
     sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
-                                                                         l2_reg_embedding, init_std, seed)
+                                                                         l2_reg_embedding, seed)
     dnn_input = combined_dnn_input(sparse_embedding_list, dense_value_list)
     dnn_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
-                  False, seed)(dnn_input)
+                  False, seed=seed)(dnn_input)
     mmoe_outs = MMOELayer(num_tasks, num_experts, expert_dim)(dnn_out)
     if task_dnn_units != None:
         mmoe_outs = [DNN(task_dnn_units, dnn_activation, l2_reg_dnn, dnn_dropout, False, seed)(mmoe_out) for mmoe_out in mmoe_outs]
