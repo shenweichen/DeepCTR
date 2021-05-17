@@ -1,6 +1,9 @@
 import pytest
 from packaging import version
-from tensorflow.python.keras.utils import CustomObjectScope
+try:
+    from tensorflow.python.keras.utils import CustomObjectScope
+except:
+    from tensorflow.keras.utils import CustomObjectScope
 import tensorflow as tf
 from deepctr.layers import sequence
 

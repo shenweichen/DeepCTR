@@ -2,7 +2,7 @@
 """
 
 Author:
-    Weichen Shen,wcshen1994@163.com
+    Weichen Shen,weichenswc@163.com
 
 """
 
@@ -79,7 +79,7 @@ class SequencePoolingLayer(Layer):
         mask = tf.tile(mask, [1, 1, embedding_size])
 
         if self.mode == "max":
-            hist = uiseq_embed_list - (1-mask) * 1e9
+            hist = uiseq_embed_list - (1 - mask) * 1e9
             return reduce_max(hist, 1, keep_dims=True)
 
         hist = reduce_sum(uiseq_embed_list * mask, 1, keep_dims=False)
@@ -417,12 +417,12 @@ class Transformer(Layer):
     """  Simplified version of Transformer  proposed in 《Attention is all you need》
 
       Input shape
-        - a list of two 3D tensor with shape ``(batch_size, timesteps, input_dim)`` if supports_masking=True.
-        - a list of two 4 tensors, first two tensors with shape ``(batch_size, timesteps, input_dim)``,last two tensors with shape ``(batch_size, 1)`` if supports_masking=False.
+        - a list of two 3D tensor with shape ``(batch_size, timesteps, input_dim)`` if ``supports_masking=True`` .
+        - a list of two 4 tensors, first two tensors with shape ``(batch_size, timesteps, input_dim)``,last two tensors with shape ``(batch_size, 1)`` if ``supports_masking=False`` .
 
 
       Output shape
-        - 3D tensor with shape: ``(batch_size, 1, input_dim)``.
+        - 3D tensor with shape: ``(batch_size, 1, input_dim)``  if ``output_type='mean'`` or ``output_type='sum'`` , else  ``(batch_size, timesteps, input_dim)`` .
 
 
       Arguments
@@ -436,6 +436,8 @@ class Transformer(Layer):
             - **blinding**: bool. Whether or not use blinding.
             - **seed**: A Python integer to use as random seed.
             - **supports_masking**:bool. Whether or not support masking.
+            - **attention_type**: str, Type of attention, the value must be one of { ``'scaled_dot_product'`` , ``'additive'`` }.
+            - **output_type**: ``'mean'`` , ``'sum'`` or `None`. Whether or not use average/sum pooling for output.
 
       References
             - [Vaswani, Ashish, et al. "Attention is all you need." Advances in Neural Information Processing Systems. 2017.](https://papers.nips.cc/paper/7181-attention-is-all-you-need.pdf)
@@ -443,7 +445,7 @@ class Transformer(Layer):
 
     def __init__(self, att_embedding_size=1, head_num=8, dropout_rate=0.0, use_positional_encoding=True, use_res=True,
                  use_feed_forward=True, use_layer_norm=False, blinding=True, seed=1024, supports_masking=False,
-                 **kwargs):
+                 attention_type="scaled_dot_product", output_type="mean", **kwargs):
         if head_num <= 0:
             raise ValueError('head_num must be a int > 0')
         self.att_embedding_size = att_embedding_size
@@ -456,6 +458,8 @@ class Transformer(Layer):
         self.dropout_rate = dropout_rate
         self.use_layer_norm = use_layer_norm
         self.blinding = blinding
+        self.attention_type = attention_type
+        self.output_type = output_type
         super(Transformer, self).__init__(**kwargs)
         self.supports_masking = supports_masking
 
@@ -464,7 +468,7 @@ class Transformer(Layer):
         if self.num_units != embedding_size:
             raise ValueError(
                 "att_embedding_size * head_num must equal the last dimension size of inputs,got %d * %d != %d" % (
-                self.att_embedding_size, self.head_num, embedding_size))
+                    self.att_embedding_size, self.head_num, embedding_size))
         self.seq_len_max = int(input_shape[0][-2])
         self.W_Query = self.add_weight(name='query', shape=[embedding_size, self.att_embedding_size * self.head_num],
                                        dtype=tf.float32,
@@ -475,6 +479,11 @@ class Transformer(Layer):
         self.W_Value = self.add_weight(name='value', shape=[embedding_size, self.att_embedding_size * self.head_num],
                                        dtype=tf.float32,
                                        initializer=tf.keras.initializers.TruncatedNormal(seed=self.seed + 2))
+        if self.attention_type == "additive":
+            self.b = self.add_weight('b', shape=[self.att_embedding_size], dtype=tf.float32,
+                                     initializer=tf.keras.initializers.glorot_uniform(seed=self.seed))
+            self.v = self.add_weight('v', shape=[self.att_embedding_size], dtype=tf.float32,
+                                     initializer=tf.keras.initializers.glorot_uniform(seed=self.seed))
         # if self.use_res:
         #     self.W_Res = self.add_weight(name='res', shape=[embedding_size, self.att_embedding_size * self.head_num], dtype=tf.float32,
         #                                  initializer=tf.keras.initializers.TruncatedNormal(seed=self.seed))
@@ -525,10 +534,18 @@ class Transformer(Layer):
         keys = tf.concat(tf.split(keys, self.head_num, axis=2), axis=0)
         values = tf.concat(tf.split(values, self.head_num, axis=2), axis=0)
 
-        # head_num*None T_q T_k
-        outputs = tf.matmul(querys, keys, transpose_b=True)
+        if self.attention_type == "scaled_dot_product":
+            # head_num*None T_q T_k
+            outputs = tf.matmul(querys, keys, transpose_b=True)
 
-        outputs = outputs / (keys.get_shape().as_list()[-1] ** 0.5)
+            outputs = outputs / (keys.get_shape().as_list()[-1] ** 0.5)
+        elif self.attention_type == "additive":
+            querys_reshaped = tf.expand_dims(querys, axis=-2)
+            keys_reshaped = tf.expand_dims(keys, axis=-3)
+            outputs = tf.tanh(tf.nn.bias_add(querys_reshaped + keys_reshaped, self.b))
+            outputs = tf.squeeze(tf.tensordot(outputs, tf.expand_dims(self.v, axis=-1), axes=[-1, 0]), axis=-1)
+        else:
+            NotImplementedError
 
         key_masks = tf.tile(key_masks, [self.head_num, 1])
 
@@ -579,7 +596,12 @@ class Transformer(Layer):
             if self.use_layer_norm:
                 result = self.ln(result)
 
-        return reduce_mean(result, axis=1, keep_dims=True)
+        if self.output_type == "mean":
+            return reduce_mean(result, axis=1, keep_dims=True)
+        elif self.output_type == "sum":
+            return reduce_sum(result, axis=1, keep_dims=True)
+        else:
+            return result
 
     def compute_output_shape(self, input_shape):
 
@@ -593,7 +615,7 @@ class Transformer(Layer):
                   'dropout_rate': self.dropout_rate, 'use_res': self.use_res,
                   'use_positional_encoding': self.use_positional_encoding, 'use_feed_forward': self.use_feed_forward,
                   'use_layer_norm': self.use_layer_norm, 'seed': self.seed, 'supports_masking': self.supports_masking,
-                  'blinding': self.blinding}
+                  'blinding': self.blinding, 'attention_type': self.attention_type, 'output_type': self.output_type}
         base_config = super(Transformer, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 

@@ -1,4 +1,14 @@
 # History
+- 03/13/2021 : [v0.8.5](https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.5) released.Add [BST](./Features.html#bst-behavior-sequence-transformer) model.
+- 02/12/2021 : [v0.8.4](https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.4) released.Fix bug in DCN-Mix. 
+- 01/06/2021 : [v0.8.3](https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.3) released.Add [DCN-Mix](./Features.html#dcn-mix-improved-deep-cross-network-with-mix-of-experts-and-matrix-kernel) model.Support `transform_fn` in `DenseFeat`.
+- 10/11/2020 : [v0.8.2](https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.2) released.Refactor `DNN` Layer.
+- 09/12/2020 : [v0.8.1](https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.1) released.Improve the reproducibility & fix some bugs.
+- 06/27/2020 : [v0.8.0](https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.0) released.
+  - Support `Tensorflow Estimator` for large scale data and distributed training. [example: Estimator with TFRecord](https://deepctr-doc.readthedocs.io/en/latest/Examples.html#estimator-with-tfrecord-classification-criteo) 
+  - Support different initializers for different embedding weights and loading pretrained embeddings. [example](https://deepctr-doc.readthedocs.io/en/latest/FAQ.html#how-to-use-pretrained-weights-to-initialize-embedding-weights-and-frozen-embedding-weights)
+  - Add new model `FwFM`.
+- 05/17/2020 : [v0.7.5](https://github.com/shenweichen/DeepCTR/releases/tag/v0.7.5) released.Fix numerical instability in `LayerNormalization`.
 - 03/15/2020 : [v0.7.4](https://github.com/shenweichen/DeepCTR/releases/tag/v0.7.4) released.Add [FLEN](./Features.html#flen-field-leveraged-embedding-network) and `FieldWiseBiInteraction`.
 - 03/04/2020 : [v0.7.3](https://github.com/shenweichen/DeepCTR/releases/tag/v0.7.3) released.Fix the inconsistency of prediction results when the model is loaded with trained weights.
 - 02/08/2020 : [v0.7.2](https://github.com/shenweichen/DeepCTR/releases/tag/v0.7.2) released.Fix some bugs.
@@ -15,7 +25,7 @@
 - 05/04/2019 : [v0.4.0](https://github.com/shenweichen/DeepCTR/releases/tag/v0.4.0) released.Support [feature hashing on the fly](./Examples.html#classification-criteo-with-feature-hashing-on-the-fly) and python2.7.
 - 04/27/2019 : [v0.3.4](https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.4) released.Add [FGCNN](./Features.html#fgcnn-feature-generation-by-convolutional-neural-network) and `FGCNNLayer`.
 - 04/21/2019 : [v0.3.3](https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.3) released.Add [CCPM](./Features.html#ccpm-convolutional-click-prediction-model).
-- 03/30/2019 : [v0.3.2](https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.2) released.Add [DIEN](./Features.html#dien-deep-interest-evolution-network) and [NFFM](./Features.html#nffm-field-aware-neural-factorization-machine)  Model.
+- 03/30/2019 : [v0.3.2](https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.2) released.Add [DIEN](./Features.html#dien-deep-interest-evolution-network) and [ONN](./Features.html#onn-operation-aware-neural-networks-for-user-response-prediction)  Model.
 - 02/17/2019 : [v0.3.1](https://github.com/shenweichen/DeepCTR/releases/tag/v0.3.1) released.Refactor layers ,add `BiLSTM` and `Transformer`.
 - 01/24/2019 : [v0.2.3](https://github.com/shenweichen/DeepCTR/releases/tag/v0.2.3) released.Use a new feature config generation method and fix bugs.
 - 01/01/2019 : [v0.2.2](https://github.com/shenweichen/DeepCTR/releases/tag/v0.2.2) released.Add [sequence(multi-value) input support](./Examples.html#multi-value-input-movielens) for `AFM,AutoInt,DCN,DeepFM,FNN,NFM,PNN,xDeepFM` models.

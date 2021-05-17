@@ -3,7 +3,7 @@ from sklearn.metrics import log_loss, roc_auc_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
-from deepctr.inputs import SparseFeat, get_feature_names
+from deepctr.feature_column import SparseFeat,get_feature_names
 from deepctr.models import FLEN
 
 if __name__ == "__main__":
@@ -38,7 +38,7 @@ if __name__ == "__main__":
                       )
 
     fixlen_feature_columns = [
-        SparseFeat(name, vocabulary_size=data[name].nunique(), embedding_dim=16, use_hash=False, dtype='int32',
+        SparseFeat(name, vocabulary_size=data[name].max() + 1, embedding_dim=16, use_hash=False, dtype='int32',
                    group_name=field_info[name]) for name in sparse_features]
 
     dnn_feature_columns = fixlen_feature_columns
@@ -48,7 +48,7 @@ if __name__ == "__main__":
 
     # 3.generate input data for model
 
-    train, test = train_test_split(data, test_size=0.2)
+    train, test = train_test_split(data, test_size=0.2, random_state=2020)
     train_model_input = {name: train[name] for name in feature_names}
     test_model_input = {name: test[name] for name in feature_names}
 

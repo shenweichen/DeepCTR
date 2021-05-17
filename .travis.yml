@@ -59,7 +59,7 @@ script:
 
 notifications:
   recipients:
-    - wcshen1994@163.com
+    - weichenswc@163.com
 
   on_success: change
   on_failure: change
