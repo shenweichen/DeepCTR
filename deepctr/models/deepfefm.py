@@ -21,8 +21,8 @@ from ..layers.interaction import FEFMLayer
 from ..layers.utils import concat_func, combined_dnn_input, reduce_sum
 
 
-def DeepFEFM(linear_feature_columns, dnn_feature_columns, fm_group=[DEFAULT_GROUP_NAME], embedding_size=48,
-             use_fefm=True, dnn_hidden_units=(1024, 1024, 1024), l2_reg_linear=0.000001, l2_reg_embedding_feat=0.00001,
+def DeepFEFM(linear_feature_columns, dnn_feature_columns, embedding_size=48, use_fefm=True,
+             dnn_hidden_units=(1024, 1024, 1024), l2_reg_linear=0.000001, l2_reg_embedding_feat=0.00001,
              l2_reg_embedding_field=0.0000001, l2_reg_dnn=0, seed=1024, dnn_dropout=0.2, exclude_feature_embed_in_dnn=False,
              use_linear=True, use_fefm_embed_in_dnn=True, dnn_activation='relu', dnn_use_bn=False, task='binary'):
     """Instantiates the DeepFEFM Network architecture or the shallow FEFM architecture (Ablation studies supported)
@@ -60,7 +60,7 @@ def DeepFEFM(linear_feature_columns, dnn_feature_columns, fm_group=[DEFAULT_GROU
 
     fefm_interaction_embedding = concat_func([FEFMLayer(num_fields=len(v), embedding_size=embedding_size,
                                                regularizer=l2_reg_embedding_field)(concat_func(v, axis=1))
-                                     for k, v in group_embedding_dict.items() if k in fm_group], axis=1)
+                                     for k, v in group_embedding_dict.items() if k in [DEFAULT_GROUP_NAME]], axis=1)
 
     dnn_input = combined_dnn_input(list(chain.from_iterable(group_embedding_dict.values())), dense_value_list)
 
