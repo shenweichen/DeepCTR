@@ -54,7 +54,7 @@ def MMOE(dnn_feature_columns, num_tasks, tasks, num_experts=4, expert_dim=8, use
                   False, seed=seed)(dnn_input)
     mmoe_outs = MMOELayer(num_tasks, num_experts, expert_dim)(dnn_out)
     if task_dnn_units != None:
-        mmoe_outs = [DNN(task_dnn_units, dnn_activation, l2_reg_dnn, dnn_dropout, False, seed)(mmoe_out) for mmoe_out in mmoe_outs]
+        mmoe_outs = [DNN(task_dnn_units, dnn_activation, l2_reg_dnn, dnn_dropout, False, seed=seed)(mmoe_out) for mmoe_out in mmoe_outs]
 
     task_outputs = []
     for mmoe_out, task in zip(mmoe_outs, tasks):
