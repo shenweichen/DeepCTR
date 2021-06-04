@@ -15,12 +15,12 @@ DEFAULT_GROUP_NAME = "default_group"
 
 
 class SparseFeat(namedtuple('SparseFeat',
-                            ['name', 'vocabulary_size', 'embedding_dim', 'use_hash', 'dtype', 'embeddings_initializer',
+                            ['name', 'vocabulary_size', 'embedding_dim', 'use_hash', 'vocabulary_path', 'dtype', 'embeddings_initializer',
                              'embedding_name',
                              'group_name', 'trainable'])):
     __slots__ = ()
 
-    def __new__(cls, name, vocabulary_size, embedding_dim=4, use_hash=False, dtype="int32", embeddings_initializer=None,
+    def __new__(cls, name, vocabulary_size, embedding_dim=4, use_hash=False, vocabulary_path=None, dtype="int32", embeddings_initializer=None,
                 embedding_name=None,
                 group_name=DEFAULT_GROUP_NAME, trainable=True):
 
@@ -32,7 +32,7 @@ class SparseFeat(namedtuple('SparseFeat',
         if embedding_name is None:
             embedding_name = name
 
-        return super(SparseFeat, cls).__new__(cls, name, vocabulary_size, embedding_dim, use_hash, dtype,
+        return super(SparseFeat, cls).__new__(cls, name, vocabulary_size, embedding_dim, use_hash, vocabulary_path, dtype,
                                               embeddings_initializer,
                                               embedding_name, group_name, trainable)
 
@@ -63,6 +63,10 @@ class VarLenSparseFeat(namedtuple('VarLenSparseFeat',
     @property
     def use_hash(self):
         return self.sparsefeat.use_hash
+
+    @property
+    def vocabulary_path(self):
+        return self.sparsefeat.vocabulary_path
 
     @property
     def dtype(self):

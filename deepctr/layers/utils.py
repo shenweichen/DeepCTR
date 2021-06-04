@@ -30,9 +30,14 @@ class Hash(tf.keras.layers.Layer):
     if mask_zero = True,0 or 0.0 will be set to 0,other value will be set in range[1,num_buckets)
     """
 
-    def __init__(self, num_buckets, mask_zero=False, **kwargs):
+    def __init__(self, num_buckets, mask_zero=False, vocabulary_path=None, default_value=0, **kwargs):
         self.num_buckets = num_buckets
         self.mask_zero = mask_zero
+        self.vocabulary_path = vocabulary_path
+        self.default_value = default_value
+        if self.vocabulary_path:
+            initializer = tf.lookup.TextFileInitializer(vocabulary_path, 'string', 1, 'int64', 0, delimiter=',')
+            self.hash_table = tf.lookup.StaticHashTable(initializer, default_value=self.default_value)
         super(Hash, self).__init__(**kwargs)
 
     def build(self, input_shape):
@@ -41,12 +46,15 @@ class Hash(tf.keras.layers.Layer):
 
     def call(self, x, mask=None, **kwargs):
 
-
         if x.dtype != tf.string:
             zero = tf.as_string(tf.zeros([1], dtype=x.dtype))
             x = tf.as_string(x, )
         else:
             zero = tf.as_string(tf.zeros([1], dtype='int32'))
+
+        if self.vocabulary_path:
+            hash_x = self.hash_table.lookup(x)
+            return hash_x
 
         num_buckets = self.num_buckets if not self.mask_zero else self.num_buckets - 1
         try:
@@ -60,8 +68,9 @@ class Hash(tf.keras.layers.Layer):
             hash_x = (hash_x + 1) * mask
 
         return hash_x
+
     def get_config(self, ):
-        config = {'num_buckets': self.num_buckets, 'mask_zero': self.mask_zero, }
+        config = {'num_buckets': self.num_buckets, 'mask_zero': self.mask_zero, 'vocabulary_path': self.vocabulary_path, 'default_value': self.default_value}
         base_config = super(Hash, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 

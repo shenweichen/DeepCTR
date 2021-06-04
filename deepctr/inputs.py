@@ -51,7 +51,7 @@ def get_embedding_vec_list(embedding_dict, input_dict, sparse_feature_columns, r
         feat_name = fg.name
         if len(return_feat_list) == 0 or feat_name in return_feat_list:
             if fg.use_hash:
-                lookup_idx = Hash(fg.vocabulary_size, mask_zero=(feat_name in mask_feat_list))(input_dict[feat_name])
+                lookup_idx = Hash(fg.vocabulary_size, mask_zero=(feat_name in mask_feat_list), vocabulary_path=fg.vocabulary_path)(input_dict[feat_name])
             else:
                 lookup_idx = input_dict[feat_name]
 
@@ -80,7 +80,7 @@ def embedding_lookup(sparse_embedding_dict, sparse_input_dict, sparse_feature_co
         embedding_name = fc.embedding_name
         if (len(return_feat_list) == 0 or feature_name in return_feat_list):
             if fc.use_hash:
-                lookup_idx = Hash(fc.vocabulary_size, mask_zero=(feature_name in mask_feat_list))(
+                lookup_idx = Hash(fc.vocabulary_size, mask_zero=(feature_name in mask_feat_list), vocabulary_path=fc.vocabulary_path)(
                     sparse_input_dict[feature_name])
             else:
                 lookup_idx = sparse_input_dict[feature_name]
@@ -97,7 +97,7 @@ def varlen_embedding_lookup(embedding_dict, sequence_input_dict, varlen_sparse_f
         feature_name = fc.name
         embedding_name = fc.embedding_name
         if fc.use_hash:
-            lookup_idx = Hash(fc.vocabulary_size, mask_zero=True)(sequence_input_dict[feature_name])
+            lookup_idx = Hash(fc.vocabulary_size, mask_zero=True, vocabulary_path=fc.vocabulary_path)(sequence_input_dict[feature_name])
         else:
             lookup_idx = sequence_input_dict[feature_name]
         varlen_embedding_vec_dict[feature_name] = embedding_dict[embedding_name](lookup_idx)
