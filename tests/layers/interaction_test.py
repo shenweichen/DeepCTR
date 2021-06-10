@@ -1,7 +1,13 @@
 import pytest
-#from tensorflow.python.keras.layers import PReLU
-from tensorflow.python.keras.utils import CustomObjectScope
 
+try:
+    from tensorflow.python.keras.utils import CustomObjectScope
+    from tensorflow.python.keras.regularizers import l2
+    from tensorflow.python.keras.initializers import TruncatedNormal
+except:
+    from tensorflow.keras.utils import CustomObjectScope
+    from tensorflow.keras.regularizers import l2
+    from tensorflow.keras.initializers import TruncatedNormal
 from deepctr import layers
 
 from tests.utils import layer_test
@@ -11,18 +17,26 @@ FIELD_SIZE = 4
 EMBEDDING_SIZE = 3
 SEQ_LENGTH = 10
 
+@pytest.mark.parametrize(
+    'reg_strength',
+    [0.000001]
+)
+def test_FwFM(reg_strength):
+    with CustomObjectScope({'FwFMLayer': layers.FwFMLayer}):
+        layer_test(layers.FwFMLayer, kwargs={'num_fields': FIELD_SIZE, 'regularizer': reg_strength},
+                   input_shape=(BATCH_SIZE, FIELD_SIZE, EMBEDDING_SIZE))
 
 @pytest.mark.parametrize(
 
     'layer_num',
 
-    [0,1]
+    [0, 1]
 
 )
-def test_CrossNet(layer_num,):
+def test_CrossNet(layer_num, ):
     with CustomObjectScope({'CrossNet': layers.CrossNet}):
         layer_test(layers.CrossNet, kwargs={
-                   'layer_num': layer_num, }, input_shape=(2, 3))
+            'layer_num': layer_num, }, input_shape=(2, 3))
 
 
 # def test_CrossNet_invalid():
@@ -41,7 +55,7 @@ def test_CrossNet(layer_num,):
 def test_InnerProductLayer(reduce_sum):
     with CustomObjectScope({'InnerProductLayer': layers.InnerProductLayer}):
         layer_test(layers.InnerProductLayer, kwargs={
-            'reduce_sum': reduce_sum}, input_shape=[(BATCH_SIZE, 1, EMBEDDING_SIZE)]*FIELD_SIZE)
+            'reduce_sum': reduce_sum}, input_shape=[(BATCH_SIZE, 1, EMBEDDING_SIZE)] * FIELD_SIZE)
 
 
 @pytest.mark.parametrize(
@@ -53,7 +67,7 @@ def test_InnerProductLayer(reduce_sum):
 def test_OutterProductLayer(kernel_type):
     with CustomObjectScope({'OutterProductLayer': layers.OutterProductLayer}):
         layer_test(layers.OutterProductLayer, kwargs={
-            'kernel_type': kernel_type}, input_shape=[(BATCH_SIZE, 1, EMBEDDING_SIZE)]*FIELD_SIZE)
+            'kernel_type': kernel_type}, input_shape=[(BATCH_SIZE, 1, EMBEDDING_SIZE)] * FIELD_SIZE)
 
 
 def test_BiInteractionPooling():
@@ -70,13 +84,13 @@ def test_FM():
 
 def test_AFMLayer():
     with CustomObjectScope({'AFMLayer': layers.AFMLayer}):
-        layer_test(layers.AFMLayer, kwargs={'dropout_rate':0.5}, input_shape=[(
-            BATCH_SIZE, 1, EMBEDDING_SIZE)]*FIELD_SIZE)
+        layer_test(layers.AFMLayer, kwargs={'dropout_rate': 0.5}, input_shape=[(
+            BATCH_SIZE, 1, EMBEDDING_SIZE)] * FIELD_SIZE)
 
 
 @pytest.mark.parametrize(
     'layer_size,split_half',
-    [((10,),False),((10,8),True)
+    [((10,), False), ((10, 8), True)
      ]
 )
 def test_CIN(layer_size, split_half):
@@ -99,17 +113,18 @@ def test_CIN(layer_size, split_half):
 
 @pytest.mark.parametrize(
     'head_num,use_res',
-    [(1,True),(2,False,)]
+    [(1, True), (2, False,)]
 )
-def test_InteractingLayer(head_num, use_res,):
+def test_InteractingLayer(head_num, use_res, ):
     with CustomObjectScope({'InteractingLayer': layers.InteractingLayer}):
         layer_test(layers.InteractingLayer, kwargs={"head_num": head_num, "use_res":
-                                                    use_res, }, input_shape=(
+            use_res, }, input_shape=(
             BATCH_SIZE, FIELD_SIZE, EMBEDDING_SIZE))
+
 
 def test_FGCNNLayer():
     with CustomObjectScope({'FGCNNLayer': layers.FGCNNLayer}):
-        layer_test(layers.FGCNNLayer, kwargs={'filters':(4, 6,),'kernel_width':(7, 7,)}, input_shape=(
+        layer_test(layers.FGCNNLayer, kwargs={'filters': (4, 6,), 'kernel_width': (7, 7,)}, input_shape=(
             BATCH_SIZE, FIELD_SIZE, EMBEDDING_SIZE))
 
 
@@ -121,12 +136,10 @@ def test_FGCNNLayer():
 
 @pytest.mark.parametrize(
     'bilinear_type',
-    ['all','each','interaction'
+    ['all', 'each', 'interaction'
      ]
 )
 def test_BilinearInteraction(bilinear_type):
     with CustomObjectScope({'BilinearInteraction': layers.BilinearInteraction}):
-        layer_test(layers.BilinearInteraction, kwargs={'bilinear_type':bilinear_type}, input_shape=[(
-            BATCH_SIZE, 1, EMBEDDING_SIZE)]*FIELD_SIZE)
-
-
+        layer_test(layers.BilinearInteraction, kwargs={'bilinear_type': bilinear_type}, input_shape=[(
+            BATCH_SIZE, 1, EMBEDDING_SIZE)] * FIELD_SIZE)

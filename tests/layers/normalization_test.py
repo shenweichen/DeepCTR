@@ -1,6 +1,8 @@
 import pytest
-from tensorflow.python.keras.utils import CustomObjectScope
-
+try:
+    from tensorflow.python.keras.utils import CustomObjectScope
+except:
+    from tensorflow.keras.utils import CustomObjectScope
 from deepctr import layers
 from tests.layers.interaction_test import BATCH_SIZE, FIELD_SIZE, EMBEDDING_SIZE
 from tests.utils import layer_test

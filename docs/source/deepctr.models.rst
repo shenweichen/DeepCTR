@@ -10,6 +10,7 @@ Submodules
    deepctr.models.autoint
    deepctr.models.ccpm
    deepctr.models.dcn
+   deepctr.models.dcnmix
    deepctr.models.deepfm
    deepctr.models.dien
    deepctr.models.din

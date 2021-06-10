@@ -2,15 +2,15 @@ import tensorflow as tf
 
 from .activation import Dice
 from .core import DNN, LocalActivationUnit, PredictionLayer
-from .interaction import (CIN, FM, AFMLayer, BiInteractionPooling, CrossNet,
+from .interaction import (CIN, FM, AFMLayer, BiInteractionPooling, CrossNet, CrossNetMix,
                           InnerProductLayer, InteractingLayer,
-                          OutterProductLayer, FGCNNLayer,SENETLayer,BilinearInteraction,
-                          FieldWiseBiInteraction)
+                          OutterProductLayer, FGCNNLayer, SENETLayer, BilinearInteraction,
+                          FieldWiseBiInteraction, FwFMLayer)
 from .normalization import LayerNormalization
 from .sequence import (AttentionSequencePoolingLayer, BiasEncoding, BiLSTM,
                        KMaxPooling, SequencePoolingLayer,WeightedSequenceLayer,
                        Transformer, DynamicGRU)
-from .utils import NoMask, Hash,Linear,Add
+from .utils import NoMask, Hash,Linear,Add,combined_dnn_input
 
 custom_objects = {'tf': tf,
                   'InnerProductLayer': InnerProductLayer,
@@ -20,6 +20,7 @@ custom_objects = {'tf': tf,
                   'FM': FM,
                   'AFMLayer': AFMLayer,
                   'CrossNet': CrossNet,
+                  'CrossNetMix': CrossNetMix,
                   'BiInteractionPooling': BiInteractionPooling,
                   'LocalActivationUnit': LocalActivationUnit,
                   'Dice': Dice,
@@ -41,5 +42,6 @@ custom_objects = {'tf': tf,
                   'BilinearInteraction':BilinearInteraction,
                   'WeightedSequenceLayer':WeightedSequenceLayer,
                   'Add':Add,
-                  'FieldWiseBiInteraction':FieldWiseBiInteraction
+                  'FieldWiseBiInteraction':FieldWiseBiInteraction,
+                  'FwFMLayer': FwFMLayer
                   }

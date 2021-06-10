@@ -1,8 +1,9 @@
 import pytest
 import tensorflow as tf
 from packaging import version
+
 from deepctr.models import ONN
-from ..utils import check_model, get_test_data,SAMPLE_SIZE
+from ..utils import check_model, get_test_data, SAMPLE_SIZE
 
 
 @pytest.mark.parametrize(

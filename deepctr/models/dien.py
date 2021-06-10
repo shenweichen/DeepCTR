@@ -1,20 +1,21 @@
 # -*- coding:utf-8 -*-
 """
 Author:
-    Weichen Shen,wcshen1994@163.com
+    Weichen Shen, weichenswc@163.com
 
 Reference:
     [1] Zhou G, Mou N, Fan Y, et al. Deep Interest Evolution Network for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1809.03672, 2018. (https://arxiv.org/pdf/1809.03672.pdf)
 """
 
-
 import tensorflow as tf
-from tensorflow.python.keras.layers import (Concatenate, Dense, Input, Permute, multiply)
+from tensorflow.python.keras.layers import (Concatenate, Dense, Permute, multiply)
 
-from ..inputs import build_input_features, get_varlen_pooling_list,create_embedding_matrix,embedding_lookup,varlen_embedding_lookup,SparseFeat,DenseFeat,VarLenSparseFeat,get_dense_input,combined_dnn_input
+from ..feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, build_input_features
+from ..inputs import get_varlen_pooling_list, create_embedding_matrix, embedding_lookup, varlen_embedding_lookup, \
+    get_dense_input
 from ..layers.core import DNN, PredictionLayer
 from ..layers.sequence import AttentionSequencePoolingLayer, DynamicGRU
-from ..layers.utils import concat_func,reduce_mean
+from ..layers.utils import concat_func, reduce_mean, combined_dnn_input
 
 
 def auxiliary_loss(h_states, click_seq, noclick_seq, mask, stag=None):
@@ -34,9 +35,11 @@ def auxiliary_loss(h_states, click_seq, noclick_seq, mask, stag=None):
 
     noclick_input_ = tf.concat([h_states, noclick_seq], -1)
 
-    click_prop_ = auxiliary_net(click_input_, stag=stag)[:, :, 0]
+    auxiliary_nn = DNN([100, 50, 1], activation='sigmoid')
 
-    noclick_prop_ = auxiliary_net(noclick_input_, stag=stag)[
+    click_prop_ = auxiliary_nn(click_input_, stag=stag)[:, :, 0]
+
+    noclick_prop_ = auxiliary_nn(noclick_input_, stag=stag)[
                     :, :, 0]  # [B,T-1]
 
     try:
@@ -54,51 +57,12 @@ def auxiliary_loss(h_states, click_seq, noclick_seq, mask, stag=None):
                             tf.reshape(tf.compat.v1.log(1.0 - noclick_prop_),
                                        [-1, tf.shape(noclick_seq)[1]]) * mask
 
-
     loss_ = reduce_mean(click_loss_ + noclick_loss_)
 
     return loss_
 
-
-def auxiliary_net(in_, stag='auxiliary_net'):
-    try:
-        bn1 = tf.layers.batch_normalization(
-            inputs=in_, name='bn1' + stag, reuse=tf.AUTO_REUSE)
-    except:
-        bn1 = tf.compat.v1.layers.batch_normalization(
-            inputs=in_, name='bn1' + stag, reuse=tf.compat.v1.AUTO_REUSE)
-
-    try:#todo
-        dnn1 = tf.layers.dense(bn1, 100, activation=None,
-                               name='f1' + stag, reuse=tf.AUTO_REUSE)
-    except:
-        dnn1 = tf.compat.v1.layers.dense(bn1, 100, activation=None,
-                               name='f1' + stag, reuse=tf.compat.v1.AUTO_REUSE)
-
-
-    dnn1 = tf.nn.sigmoid(dnn1)
-    try:
-        dnn2 = tf.layers.dense(dnn1, 50, activation=None,
-                           name='f2' + stag, reuse=tf.AUTO_REUSE)
-    except:
-        dnn2 = tf.compat.v1.layers.dense(dnn1, 50, activation=None,
-                           name='f2' + stag, reuse=tf.compat.v1.AUTO_REUSE)
-
-    dnn2 = tf.nn.sigmoid(dnn2)
-    try:
-        dnn3 = tf.layers.dense(dnn2, 1, activation=None,
-                               name='f3' + stag, reuse=tf.AUTO_REUSE)
-    except:
-        dnn3 = tf.compat.v1.layers.dense(dnn2, 1, activation=None,
-                               name='f3' + stag, reuse=tf.compat.v1.AUTO_REUSE)
-
-    y_hat = tf.nn.sigmoid(dnn3)
-
-    return y_hat
-
-
 def interest_evolution(concat_behavior, deep_input_item, user_behavior_length, gru_type="GRU", use_neg=False,
-                       neg_concat_behavior=None,att_hidden_size=(64, 16), att_activation='sigmoid',
+                       neg_concat_behavior=None, att_hidden_size=(64, 16), att_activation='sigmoid',
                        att_weight_normalization=False, ):
     if gru_type not in ["GRU", "AIGRU", "AGRU", "AUGRU"]:
         raise ValueError("gru_type error ")
@@ -147,7 +111,7 @@ def DIEN(dnn_feature_columns, history_feature_list,
          gru_type="GRU", use_negsampling=False, alpha=1.0, use_bn=False, dnn_hidden_units=(200, 80),
          dnn_activation='relu',
          att_hidden_units=(64, 16), att_activation="dice", att_weight_normalization=True,
-         l2_reg_dnn=0, l2_reg_embedding=1e-6, dnn_dropout=0, init_std=0.0001, seed=1024, task='binary'):
+         l2_reg_dnn=0, l2_reg_embedding=1e-6, dnn_dropout=0, seed=1024, task='binary'):
     """Instantiates the Deep Interest Evolution Network architecture.
 
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
@@ -170,29 +134,9 @@ def DIEN(dnn_feature_columns, history_feature_list,
     :return: A Keras model instance.
 
     """
-    # check_feature_config_dict(feature_columns)
-    #
-    # sparse_input, dense_input, user_behavior_input, user_behavior_length = get_input(
-    #     feature_columns, seq_feature_list, hist_len_max)
-    # sparse_embedding_dict = {feat.name: Embedding(feat.dimension, embedding_size,
-    #                                               embeddings_initializer=RandomNormal(
-    #                                                   mean=0.0, stddev=init_std, seed=seed),
-    #                                               embeddings_regularizer=l2(
-    #                                                   l2_reg_embedding),
-    #                                               name='sparse_emb_' + str(i) + '-' + feat.name) for i, feat in
-    #                          enumerate(feature_columns["sparse"])}
-    #
-    # query_emb_list = get_embedding_vec_list(sparse_embedding_dict, sparse_input, feature_columns["sparse"], return_feat_list=seq_feature_list)
-    # keys_emb_list = get_embedding_vec_list(sparse_embedding_dict, user_behavior_input, feature_columns['sparse'], return_feat_list=seq_feature_list)
-    # deep_input_emb_list = get_embedding_vec_list(sparse_embedding_dict, sparse_input, feature_columns['sparse'])
-    #
-    # query_emb = concat_fun(query_emb_list)
-    # keys_emb = concat_fun(keys_emb_list)
-    # deep_input_emb = concat_fun(deep_input_emb_list)
-
     features = build_input_features(dnn_feature_columns)
 
-    user_behavior_length = Input(shape=(1,), name='seq_length')
+    user_behavior_length = features["seq_length"]
 
     sparse_feature_columns = list(
         filter(lambda x: isinstance(x, SparseFeat), dnn_feature_columns)) if dnn_feature_columns else []
@@ -217,33 +161,30 @@ def DIEN(dnn_feature_columns, history_feature_list,
 
     inputs_list = list(features.values())
 
-    embedding_dict = create_embedding_matrix(dnn_feature_columns, l2_reg_embedding, init_std, seed, prefix="",
+    embedding_dict = create_embedding_matrix(dnn_feature_columns, l2_reg_embedding, seed, prefix="",
                                              seq_mask_zero=False)
 
     query_emb_list = embedding_lookup(embedding_dict, features, sparse_feature_columns,
-                                      return_feat_list=history_feature_list,to_list=True)
+                                      return_feat_list=history_feature_list, to_list=True)
 
     keys_emb_list = embedding_lookup(embedding_dict, features, history_feature_columns,
-                                     return_feat_list=history_fc_names,to_list=True)
+                                     return_feat_list=history_fc_names, to_list=True)
     dnn_input_emb_list = embedding_lookup(embedding_dict, features, sparse_feature_columns,
-                                          mask_feat_list=history_feature_list,to_list=True)
+                                          mask_feat_list=history_feature_list, to_list=True)
     dense_value_list = get_dense_input(features, dense_feature_columns)
 
     sequence_embed_dict = varlen_embedding_lookup(embedding_dict, features, sparse_varlen_feature_columns)
-    sequence_embed_list = get_varlen_pooling_list(sequence_embed_dict, features, sparse_varlen_feature_columns,to_list=True)
+    sequence_embed_list = get_varlen_pooling_list(sequence_embed_dict, features, sparse_varlen_feature_columns,
+                                                  to_list=True)
     dnn_input_emb_list += sequence_embed_list
-
-
     keys_emb = concat_func(keys_emb_list)
     deep_input_emb = concat_func(dnn_input_emb_list)
     query_emb = concat_func(query_emb_list)
 
-
-
     if use_negsampling:
 
         neg_uiseq_embed_list = embedding_lookup(embedding_dict, features, neg_history_feature_columns,
-                                                neg_history_fc_names,to_list=True)
+                                                neg_history_fc_names, to_list=True)
 
         neg_concat_behavior = concat_func(neg_uiseq_embed_list)
 
@@ -260,21 +201,11 @@ def DIEN(dnn_feature_columns, history_feature_list,
     deep_input_emb = tf.keras.layers.Flatten()(deep_input_emb)
 
     dnn_input = combined_dnn_input([deep_input_emb], dense_value_list)
-    output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn,
-                 dnn_dropout, use_bn, seed)(dnn_input)
-    final_logit = Dense(1, use_bias=False)(output)
+    output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, use_bn, seed=seed)(dnn_input)
+    final_logit = Dense(1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(output)
     output = PredictionLayer(task)(final_logit)
 
-    #model_input_list = get_inputs_list(
-    #    [sparse_input, dense_input, user_behavior_input])
-    model_input_list = inputs_list
-
-    #if use_negsampling:
-    #    model_input_list += list(neg_user_behavior_input.values())
-
-    model_input_list += [user_behavior_length]
-
-    model = tf.keras.models.Model(inputs=model_input_list, outputs=output)
+    model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
 
     if use_negsampling:
         model.add_loss(alpha * aux_loss_1)
