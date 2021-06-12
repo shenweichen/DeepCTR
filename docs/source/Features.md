@@ -338,6 +338,15 @@ Dual Input-aware Factorization Machines (DIFMs) can adaptively reweight the orig
 
 [Lu W, Yu Y, Chang Y, et al. A Dual Input-aware Factorization Machine for CTR Prediction[C]//IJCAI. 2020: 3139-3145.](https://www.ijcai.org/Proceedings/2020/0434.pdf)
 
+### DeepFEFM(Deep Field-Embedded Factorization Machine)
+
+FEFM learns symmetric matrix embeddings for each field pair along with the usual single vector embeddings for each feature. FEFM has significantly lower model complexity than FFM and roughly the same complexity as FwFM.
+[**DeepFEFM Model API**](./deepctr.models.deepfefm.html)  
+
+![DeepFEFM](../pics/DeepFEFM.jpg)
+
+[Pande H. Field-Embedded Factorization Machines for Click-through rate prediction[J]. arXiv preprint arXiv:2009.09931, 2020.](https://arxiv.org/pdf/2009.09931)
+
 
 ## Layers
 

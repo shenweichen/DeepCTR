@@ -25,5 +25,6 @@ DeepCTR Models API
    FLEN<deepctr.models.flen>
    IFM<deepctr.models.ifm>
    DIFM<deepctr.models.difm>
+   DeepFEFM<deepctr.models.deepfefm>
 
    

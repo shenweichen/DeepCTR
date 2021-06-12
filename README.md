@@ -115,7 +115,7 @@ If you find this code useful in your research, please cite it using the followin
       </td>
       <td>
         ​ <a href="https://github.com/TanTingyi"><img width="70" height="70" src="https://github.com/TanTingyi.png?s=40" alt="pic"></a><br>
-         <a href="https://github.com/TanTingyi">LeoCai</a>
+         <a href="https://github.com/TanTingyi">Tan Tingyi</a>
          <p>  Chongqing University <br> of  Posts and <br> Telecommunications   </p>​
       </td>
     </tr>

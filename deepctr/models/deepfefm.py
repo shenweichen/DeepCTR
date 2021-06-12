@@ -58,7 +58,7 @@ def DeepFEFM(linear_feature_columns, dnn_feature_columns, embedding_size=48, use
                                                                         l2_reg_embedding_feat,
                                                                         seed, support_group=True)
 
-    fefm_interaction_embedding = concat_func([FEFMLayer(num_fields=len(v), embedding_size=embedding_size,
+    fefm_interaction_embedding = concat_func([FEFMLayer(
                                                regularizer=l2_reg_embedding_field)(concat_func(v, axis=1))
                                      for k, v in group_embedding_dict.items() if k in [DEFAULT_GROUP_NAME]], axis=1)
 
