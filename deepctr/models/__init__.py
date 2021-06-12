@@ -21,6 +21,7 @@ from .fibinet import FiBiNET
 from .flen import FLEN
 from .fwfm import FwFM
 from .bst import BST
+from .deepfefm import DeepFEFM
 
 __all__ = ["AFM", "CCPM", "DCN", "IFM", "DIFM", "DCNMix", "MLR",  "DeepFM", "MLR", "NFM", "DIN", "DIEN", "FNN", "PNN",
-           "WDL", "xDeepFM", "AutoInt", "ONN", "FGCNN", "DSIN", "FiBiNET", 'FLEN', "FwFM", "BST"]
+           "WDL", "xDeepFM", "AutoInt", "ONN", "FGCNN", "DSIN", "FiBiNET", 'FLEN', "FwFM", "BST", "DeepFEFM"]
