@@ -5,12 +5,13 @@ from .core import DNN, LocalActivationUnit, PredictionLayer
 from .interaction import (CIN, FM, AFMLayer, BiInteractionPooling, CrossNet, CrossNetMix,
                           InnerProductLayer, InteractingLayer,
                           OutterProductLayer, FGCNNLayer, SENETLayer, BilinearInteraction,
-                          FieldWiseBiInteraction, FwFMLayer)
+                          FieldWiseBiInteraction, FwFMLayer, FEFMLayer)
 from .normalization import LayerNormalization
 from .sequence import (AttentionSequencePoolingLayer, BiasEncoding, BiLSTM,
                        KMaxPooling, SequencePoolingLayer, WeightedSequenceLayer,
                        Transformer, DynamicGRU)
-from .utils import NoMask, Hash, Linear, Add, combined_dnn_input, softmax
+
+from .utils import NoMask, Hash, Linear, Add, combined_dnn_input, softmax, reduce_sum
 
 custom_objects = {'tf': tf,
                   'InnerProductLayer': InnerProductLayer,
@@ -45,4 +46,6 @@ custom_objects = {'tf': tf,
                   'FieldWiseBiInteraction': FieldWiseBiInteraction,
                   'FwFMLayer': FwFMLayer,
                   'softmax': softmax,
+                  'FEFMLayer': FEFMLayer,
+                  'reduce_sum': reduce_sum
                   }

@@ -32,8 +32,7 @@ def test_DCN_2():
     x, y, feature_columns = get_test_data(sample_size, sparse_feature_num=3,
                                           dense_feature_num=2)
 
-    model = DCN([], feature_columns, cross_num=1, cross_parameterization=cross_parameterization,
-                dnn_hidden_units=8, dnn_dropout=0.5)
+    model = DCN([], feature_columns, cross_num=1, dnn_hidden_units=(8,), dnn_dropout=0.5)
     check_model(model, model_name, x, y)
 
 
