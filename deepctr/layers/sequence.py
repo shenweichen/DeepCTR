@@ -800,7 +800,7 @@ class DynamicGRU(Layer):
             self.gru_cell = VecAttGRUCell(self.num_units)
         else:
             try:
-                self.gru_cell = tf.keras.layers.GRUCell(self.num_units)
+                self.gru_cell = tf.nn.rnn_cell.GRUCell(self.num_units)  # tf.keras.layers.GRUCell
             except:
                 self.gru_cell = tf.compat.v1.nn.rnn_cell.GRUCell(self.num_units)
 
