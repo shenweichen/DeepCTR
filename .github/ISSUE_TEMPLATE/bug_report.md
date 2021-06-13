@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 **Describe the bug(问题描述)**
-A clear and concise description of what the bug is.
+A clear and concise description of what the bug is.Better with standalone code to reproduce the issue.
 
 **To Reproduce(复现步骤)**
 Steps to reproduce the behavior:

@@ -493,13 +493,12 @@ class Transformer(Layer):
             self.fw2 = self.add_weight('fw2', shape=[4 * self.num_units, self.num_units], dtype=tf.float32,
                                        initializer=tf.keras.initializers.glorot_uniform(seed=self.seed))
 
-        # if self.use_positional_encoding:
-        #
-        #     self.kpe = Position_Embedding(input_shape[0][-1].value)
-        #     self.qpe = Position_Embedding(input_shape[1][-1].value)
         self.dropout = tf.keras.layers.Dropout(
             self.dropout_rate, seed=self.seed)
         self.ln = LayerNormalization()
+        if self.use_positional_encoding:
+            self.query_pe = PositionEncoding()
+            self.key_pe = PositionEncoding()
         # Be sure to call this somewhere!
         super(Transformer, self).build(input_shape)
 
@@ -521,8 +520,8 @@ class Transformer(Layer):
             key_masks = tf.squeeze(key_masks, axis=1)
 
         if self.use_positional_encoding:
-            queries = positional_encoding(queries)
-            keys = positional_encoding(queries)
+            queries = self.query_pe(queries)
+            keys = self.key_pe(queries)
 
         querys = tf.tensordot(queries, self.W_Query,
                               axes=(-1, 0))  # None T_q D*head_num
@@ -670,6 +669,64 @@ def positional_encoding(inputs,
     return outputs + inputs
 
 
+class PositionEncoding(Layer):
+    def __init__(self, pos_embedding_trainable=True,
+                 zero_pad=False,
+                 scale=True, **kwargs):
+        self.pos_embedding_trainable = pos_embedding_trainable
+        self.zero_pad = zero_pad
+        self.scale = scale
+        super(PositionEncoding, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+        # Create a trainable weight variable for this layer.
+        _, T, num_units = input_shape  # inputs.get_shape().as_list()
+        # First part of the PE function: sin and cos argument
+        position_enc = np.array([
+            [pos / np.power(10000, 2. * i / num_units)
+             for i in range(num_units)]
+            for pos in range(T)])
+
+        # Second part, apply the cosine to even columns and sin to odds.
+        position_enc[:, 0::2] = np.sin(position_enc[:, 0::2])  # dim 2i
+        position_enc[:, 1::2] = np.cos(position_enc[:, 1::2])  # dim 2i+1
+
+        self.lookup_table = self.add_weight("lookup_table", (T, num_units),
+                                            initializer=tf.initializers.identity(position_enc),
+                                            trainable=self.pos_embedding_trainable)
+
+        # Be sure to call this somewhere!
+        super(PositionEncoding, self).build(input_shape)
+
+    def call(self, inputs, mask=None):
+        _, T, num_units = inputs.get_shape().as_list()
+        position_ind = tf.expand_dims(tf.range(T), 0)
+
+        if self.zero_pad:
+            self.lookup_table = tf.concat((tf.zeros(shape=[1, num_units]),
+                                           self.lookup_table[1:, :]), 0)
+
+        outputs = tf.nn.embedding_lookup(self.lookup_table, position_ind)
+
+        if self.scale:
+            outputs = outputs * num_units ** 0.5
+        return outputs + inputs
+
+    def compute_output_shape(self, input_shape):
+
+        return input_shape
+
+    def compute_mask(self, inputs, mask=None):
+        return mask
+
+    def get_config(self, ):
+
+        config = {'pos_embedding_trainable': self.pos_embedding_trainable, 'zero_pad': self.zero_pad,
+                  'scale': self.scale}
+        base_config = super(PositionEncoding, self).get_config()
+        return dict(list(base_config.items()) + list(config.items()))
+
+
 class BiasEncoding(Layer):
     def __init__(self, sess_max_count, seed=1024, **kwargs):
         self.sess_max_count = sess_max_count
@@ -743,7 +800,7 @@ class DynamicGRU(Layer):
             self.gru_cell = VecAttGRUCell(self.num_units)
         else:
             try:
-                self.gru_cell = tf.nn.rnn_cell.GRUCell(self.num_units)
+                self.gru_cell = tf.keras.layers.GRUCell(self.num_units)
             except:
                 self.gru_cell = tf.compat.v1.nn.rnn_cell.GRUCell(self.num_units)
 

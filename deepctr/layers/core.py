@@ -190,7 +190,7 @@ class DNN(Layer):
             if self.use_bn:
                 fc = self.bn_layers[i](fc, training=training)
 
-            fc = self.activation_layers[i](fc)
+            fc = self.activation_layers[i](fc, training=training)
 
             fc = self.dropout_layers[i](fc, training=training)
             deep_input = fc
