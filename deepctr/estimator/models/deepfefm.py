@@ -18,7 +18,7 @@ from ...layers.interaction import FEFMLayer
 from ...layers.utils import concat_func, add_func, combined_dnn_input, reduce_sum
 
 
-def DeepFEFMEstimator(linear_feature_columns, dnn_feature_columns, embedding_size=48,
+def DeepFEFMEstimator(linear_feature_columns, dnn_feature_columns,
                       dnn_hidden_units=(1024, 1024, 1024), l2_reg_linear=0.000001, l2_reg_embedding_feat=0.00001,
                       l2_reg_embedding_field=0.0000001, l2_reg_dnn=0, seed=1024, dnn_dropout=0.2,
                       dnn_activation='relu', dnn_use_bn=False, task='binary', model_dir=None,
@@ -28,7 +28,6 @@ def DeepFEFMEstimator(linear_feature_columns, dnn_feature_columns, embedding_siz
 
     :param linear_feature_columns: An iterable containing all the features used by linear part of the model.
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
-    :param embedding_size: positive integer,sparse feature embedding_size
     :param dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of DNN
     :param l2_reg_linear: float. L2 regularizer strength applied to linear part
     :param l2_reg_embedding_feat: float. L2 regularizer strength applied to embedding vector of features

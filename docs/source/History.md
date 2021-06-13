@@ -1,5 +1,5 @@
 # History
-- 05/06/2021 : [v0.8.6](https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.6) released.Add [IFM]() [DIFM](), [FEFM and DeepFEFM]() model.
+- 06/13/2021 : [v0.8.6](https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.6) released.Add [IFM](./Features.html#ifm-input-aware-factorization-machine) [DIFM](./Features.html#difm-dual-input-aware-factorization-machine), [FEFM and DeepFEFM](./Features.html#deepfefm-deep-field-embedded-factorization-machine) model.
 - 03/13/2021 : [v0.8.5](https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.5) released.Add [BST](./Features.html#bst-behavior-sequence-transformer) model.
 - 02/12/2021 : [v0.8.4](https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.4) released.Fix bug in DCN-Mix. 
 - 01/06/2021 : [v0.8.3](https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.3) released.Add [DCN-Mix](./Features.html#dcn-mix-improved-deep-cross-network-with-mix-of-experts-and-matrix-kernel) model.Support `transform_fn` in `DenseFeat`.

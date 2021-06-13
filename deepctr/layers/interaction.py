@@ -1422,8 +1422,6 @@ class FEFMLayer(Layer):
             ``(batch_size, (num_fields * (num_fields-1))/2)`` # concatenated FEFM interaction embeddings
 
       Arguments
-        - **num_fields** : integer for number of fields
-        - **embedding_size** : integer for embedding dimension
         - **regularizer** : L2 regularizer weight for the field pair matrix embeddings parameters of FEFM
 
       References
@@ -1432,8 +1430,6 @@ class FEFMLayer(Layer):
     """
 
     def __init__(self, regularizer, **kwargs):
-        #self.num_fields = num_fields
-        #self.embedding_size = embedding_size
         self.regularizer = regularizer
         super(FEFMLayer, self).__init__(**kwargs)
 
@@ -1442,9 +1438,6 @@ class FEFMLayer(Layer):
             raise ValueError("Unexpected inputs dimensions % d,\
                                 expect to be 3 dimensions" % (len(input_shape)))
 
-        # if input_shape[1] != self.num_fields:
-        #     raise ValueError("Mismatch in number of fields {} and \
-        #             concatenated embeddings dims {}".format(self.num_fields, input_shape[2]))
         self.num_fields  = int(input_shape[1])
         self.field_embeddings = {}
         embedding_size = int(input_shape[2])
@@ -1464,9 +1457,6 @@ class FEFMLayer(Layer):
                 "Unexpected inputs dimensions %d, expect to be 3 dimensions"
                 % (K.ndim(inputs)))
 
-        # if inputs.shape[1] != self.num_fields:
-        #     raise ValueError("Mismatch in number of fields {} and \
-        #             concatenated embeddings dims {}".format(self.num_fields, inputs.shape[1]))
 
         pairwise_inner_prods = []
         for fi, fj in itertools.combinations(range(self.num_fields), 2):
@@ -1489,8 +1479,6 @@ class FEFMLayer(Layer):
     def get_config(self):
         config = super(FEFMLayer, self).get_config().copy()
         config.update({
-            #'num_fields': self.num_fields,
             'regularizer': self.regularizer,
-            #'embedding_size': self.embedding_size
         })
         return config

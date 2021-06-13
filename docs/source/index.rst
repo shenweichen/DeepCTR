@@ -42,7 +42,7 @@ You can read the latest code and related projects
 
 News
 -----
-06/12/2021 : Add `BST <./Features.html#bst-behavior-sequence-transformer>`_ . `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.5>`_
+06/13/2021 : Add `IFM <./Features.html#ifm-input-aware-factorization-machine>`_ , `DIFM <./Features.html#difm-dual-input-aware-factorization-machine>`_ and `DeepFEFM <./Features.html#deepfefm-deep-field-embedded-factorization-machine>`_ . `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.6>`_
 
 03/13/2021 : Add `BST <./Features.html#bst-behavior-sequence-transformer>`_ . `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.5>`_
 
