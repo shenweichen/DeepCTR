@@ -40,7 +40,7 @@ jobs:
         pip install -q requests
         pip install -e .
     - name: Test with pytest
-      timeout-minutes: 120
+      timeout-minutes: 180
       run: |
         pip install -q pytest
         pip install -q pytest-cov

@@ -82,7 +82,7 @@ def BST(dnn_feature_columns, history_feature_list, transformer_num=1, att_head_n
     hist_emb = concat_func(hist_emb_list)
 
     transformer_output = hist_emb
-    for i in range(transformer_num):
+    for _ in range(transformer_num):
         att_embedding_size = transformer_output.get_shape().as_list()[-1] // att_head_num
         transformer_layer = Transformer(att_embedding_size=att_embedding_size, head_num=att_head_num,
                                         dropout_rate=dnn_dropout, use_positional_encoding=True, use_res=True,
