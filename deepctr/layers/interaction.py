@@ -1438,9 +1438,10 @@ class FEFMLayer(Layer):
             raise ValueError("Unexpected inputs dimensions % d,\
                                 expect to be 3 dimensions" % (len(input_shape)))
 
-        self.num_fields  = int(input_shape[1])
-        self.field_embeddings = {}
+        self.num_fields = int(input_shape[1])
         embedding_size = int(input_shape[2])
+
+        self.field_embeddings = {}
         for fi, fj in itertools.combinations(range(self.num_fields), 2):
             field_pair_id = str(fi) + "-" + str(fj)
             self.field_embeddings[field_pair_id] = self.add_weight(name='field_embeddings' + field_pair_id,
@@ -1456,7 +1457,6 @@ class FEFMLayer(Layer):
             raise ValueError(
                 "Unexpected inputs dimensions %d, expect to be 3 dimensions"
                 % (K.ndim(inputs)))
-
 
         pairwise_inner_prods = []
         for fi, fj in itertools.combinations(range(self.num_fields), 2):
@@ -1474,7 +1474,8 @@ class FEFMLayer(Layer):
         return concat_vec
 
     def compute_output_shape(self, input_shape):
-        return (None, (self.num_fields * (self.num_fields-1))/2)
+        num_fields = int(input_shape[1])
+        return (None, (num_fields * (num_fields - 1)) / 2)
 
     def get_config(self):
         config = super(FEFMLayer, self).get_config().copy()
