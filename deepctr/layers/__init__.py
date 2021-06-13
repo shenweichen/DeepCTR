@@ -9,7 +9,7 @@ from .interaction import (CIN, FM, AFMLayer, BiInteractionPooling, CrossNet, Cro
 from .normalization import LayerNormalization
 from .sequence import (AttentionSequencePoolingLayer, BiasEncoding, BiLSTM,
                        KMaxPooling, SequencePoolingLayer, WeightedSequenceLayer,
-                       Transformer, DynamicGRU)
+                       Transformer, DynamicGRU,PositionEncoding)
 
 from .utils import NoMask, Hash, Linear, Add, combined_dnn_input, softmax, reduce_sum
 
@@ -47,5 +47,6 @@ custom_objects = {'tf': tf,
                   'FwFMLayer': FwFMLayer,
                   'softmax': softmax,
                   'FEFMLayer': FEFMLayer,
-                  'reduce_sum': reduce_sum
+                  'reduce_sum': reduce_sum,
+                  'PositionEncoding':PositionEncoding
                   }
