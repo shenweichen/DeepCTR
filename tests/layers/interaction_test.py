@@ -20,8 +20,7 @@ SEQ_LENGTH = 10
 
 def test_FEFMLayer():
     with CustomObjectScope({'FEFMLayer': layers.FEFMLayer}):
-        layer_test(layers.FEFMLayer, kwargs={'num_fields': FIELD_SIZE, 'embedding_size': EMBEDDING_SIZE,
-                                             'regularizer': 0.000001},
+        layer_test(layers.FEFMLayer, kwargs={'regularizer': 0.000001},
                    input_shape=(BATCH_SIZE, FIELD_SIZE, EMBEDDING_SIZE))
 
 @pytest.mark.parametrize(
