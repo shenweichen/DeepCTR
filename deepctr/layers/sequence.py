@@ -680,7 +680,7 @@ class PositionEncoding(Layer):
 
     def build(self, input_shape):
         # Create a trainable weight variable for this layer.
-        _, T, num_units = input_shape  # inputs.get_shape().as_list()
+        _, T, num_units = input_shape.as_list()  # inputs.get_shape().as_list()
         # First part of the PE function: sin and cos argument
         position_enc = np.array([
             [pos / np.power(10000, 2. * i / num_units)
