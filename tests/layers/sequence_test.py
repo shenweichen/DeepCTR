@@ -68,8 +68,7 @@ def test_SequencePoolingLayer(mode, supports_masking, input_shape):
 @pytest.mark.parametrize(
 
     'merge_mode',
-    ['concat', 'ave', 'fw', 'bw', 'sum', 'mul', None
-     ]
+    ['concat', 'ave', 'fw', 'bw', 'sum', 'mul']
 
 )
 def test_BiLSTM(merge_mode):
