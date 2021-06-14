@@ -44,27 +44,29 @@ class Head(_Head):
             _summary_key(self._name, "prediction/mean"): metrics.mean(predictions, weights=weights),
             _summary_key(self._name, "label/mean"): metrics.mean(labels, weights=weights),
         }
-        tf.summary.scalar("prediction/mean", metric_ops[_summary_key(self._name, "prediction/mean")][1])
-        tf.summary.scalar("label/mean", metric_ops[_summary_key(self._name, "label/mean")][1])
+
+        summary_scalar("prediction/mean", metric_ops[_summary_key(self._name, "prediction/mean")][1])
+        summary_scalar("label/mean", metric_ops[_summary_key(self._name, "label/mean")][1])
+
 
         mean_loss = losses.compute_weighted_loss(
             unweighted_loss, weights=1.0, reduction=losses.Reduction.MEAN)
 
         if self._task == "binary":
             metric_ops[_summary_key(self._name, "LogLoss")] = metrics.mean(mean_loss, weights=weights, )
-            tf.summary.scalar("LogLoss", mean_loss)
+            summary_scalar("LogLoss", mean_loss)
 
             metric_ops[_summary_key(self._name, "AUC")] = metrics.auc(labels, predictions, weights=weights)
-            tf.summary.scalar("AUC", metric_ops[_summary_key(self._name, "AUC")][1])
+            summary_scalar("AUC", metric_ops[_summary_key(self._name, "AUC")][1])
         else:
 
             metric_ops[_summary_key(self._name, "MSE")] = metrics.mean_squared_error(labels, predictions,
                                                                                      weights=weights)
-            tf.summary.scalar("MSE", mean_loss)
+            summary_scalar("MSE", mean_loss)
 
             metric_ops[_summary_key(self._name, "MAE")] = metrics.mean_absolute_error(labels, predictions,
                                                                                       weights=weights)
-            tf.summary.scalar("MAE", metric_ops[_summary_key(self._name, "MAE")][1])
+            summary_scalar("MAE", metric_ops[_summary_key(self._name, "MAE")][1])
 
         return metric_ops
 
@@ -206,3 +208,10 @@ def to_float(x, name="ToFloat"):
         return tf.to_float(x, name)
     except AttributeError:
         return tf.compat.v1.to_float(x, name)
+
+
+def summary_scalar(name, data):
+    try:
+        tf.summary.scalar(name, data)
+    except AttributeError:  # tf version 2.5.0+:AttributeError: module 'tensorflow._api.v2.summary' has no attribute 'scalar'
+        tf.compat.v1.summary.scalar(name, data)

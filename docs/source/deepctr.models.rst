@@ -25,6 +25,9 @@ Submodules
    deepctr.models.wdl
    deepctr.models.xdeepfm
    deepctr.models.flen
+   deepctr.models.ifm
+   deepctr.models.difm
+   deepctr.models.deepfefm
 
 Module contents
 ---------------

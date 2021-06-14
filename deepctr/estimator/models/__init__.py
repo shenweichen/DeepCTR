@@ -10,3 +10,4 @@ from .nfm import NFMEstimator
 from .pnn import PNNEstimator
 from .wdl import WDLEstimator
 from .xdeepfm import xDeepFMEstimator
+from .deepfefm import DeepFEFMEstimator

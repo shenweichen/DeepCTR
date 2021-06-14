@@ -189,8 +189,11 @@ class DNN(Layer):
 
             if self.use_bn:
                 fc = self.bn_layers[i](fc, training=training)
-
-            fc = self.activation_layers[i](fc)
+            try:
+                fc = self.activation_layers[i](fc, training=training)
+            except TypeError as e:  # TypeError: call() got an unexpected keyword argument 'training'
+                print("make sure the activation function use training flag properly", e)
+                fc = self.activation_layers[i](fc)
 
             fc = self.dropout_layers[i](fc, training=training)
             deep_input = fc

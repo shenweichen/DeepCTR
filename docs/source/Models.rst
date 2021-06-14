@@ -23,5 +23,8 @@ DeepCTR Models API
    FGCNN<deepctr.models.fgcnn>
    FiBiNET<deepctr.models.fibinet>
    FLEN<deepctr.models.flen>
+   IFM<deepctr.models.ifm>
+   DIFM<deepctr.models.difm>
+   DeepFEFM<deepctr.models.deepfefm>
 
    

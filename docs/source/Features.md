@@ -319,6 +319,35 @@ A large-scale CTR prediction model with efficient usage of field information to 
 
 [Chen W, Zhan L, Ci Y, Lin C. FLEN: Leveraging Field for Scalable CTR Prediction[J]. arXiv preprint arXiv:1911.04690, 2019.](https://arxiv.org/pdf/1911.04690.pdf)
 
+### IFM(Input-aware Factorization Machine)
+
+IFM improves FMs by explicitly considering the impact of each individual input upon the representation of features, which learns a unique input-aware factor for the same feature in different instances via a neural network.
+
+[**IFM Model API**](./deepctr.models.ifm.html)  
+
+![IFM](../pics/IFM.jpg)
+
+[Yu Y, Wang Z, Yuan B. An Input-aware Factorization Machine for Sparse Prediction[C]//IJCAI. 2019: 1466-1472.](https://www.ijcai.org/Proceedings/2019/0203.pdf)
+
+### DIFM(Dual Input-aware Factorization Machine)
+
+Dual Input-aware Factorization Machines (DIFMs) can adaptively reweight the original feature representations at the bit-wise and vector-wise levels simultaneously.
+[**DIFM Model API**](./deepctr.models.difm.html)  
+
+![DIFM](../pics/DIFM.jpg)
+
+[Lu W, Yu Y, Chang Y, et al. A Dual Input-aware Factorization Machine for CTR Prediction[C]//IJCAI. 2020: 3139-3145.](https://www.ijcai.org/Proceedings/2020/0434.pdf)
+
+### DeepFEFM(Deep Field-Embedded Factorization Machine)
+
+FEFM learns symmetric matrix embeddings for each field pair along with the usual single vector embeddings for each feature. FEFM has significantly lower model complexity than FFM and roughly the same complexity as FwFM.
+[**DeepFEFM Model API**](./deepctr.models.deepfefm.html)  
+
+![DeepFEFM](../pics/DeepFEFM.jpg)
+
+[Pande H. Field-Embedded Factorization Machines for Click-through rate prediction[J]. arXiv preprint arXiv:2009.09931, 2020.](https://arxiv.org/pdf/2009.09931)
+
+
 ## Layers
 
 The models of deepctr are modular,
