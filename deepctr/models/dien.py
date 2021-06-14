@@ -213,4 +213,5 @@ def DIEN(dnn_feature_columns, history_feature_list,
         tf.keras.backend.get_session().run(tf.global_variables_initializer())
     except:
         tf.compat.v1.keras.backend.get_session().run(tf.compat.v1.global_variables_initializer())
+        tf.compat.v1.experimental.output_all_intermediates(True)
     return model

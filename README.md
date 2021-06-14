@@ -11,7 +11,7 @@
 
 [![Documentation Status](https://readthedocs.org/projects/deepctr-doc/badge/?version=latest)](https://deepctr-doc.readthedocs.io/)
 ![CI status](https://github.com/shenweichen/deepctr/workflows/CI/badge.svg)
-[![Coverage Status](https://coveralls.io/repos/github/shenweichen/DeepCTR/badge.svg?branch=master)](https://coveralls.io/github/shenweichen/DeepCTR?branch=master)
+[![codecov](https://codecov.io/gh/shenweichen/DeepCTR/branch/master/graph/badge.svg)](https://codecov.io/gh/shenweichen/DeepCTR)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/d4099734dc0e4bab91d332ead8c0bdd0)](https://www.codacy.com/gh/shenweichen/DeepCTR?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=shenweichen/DeepCTR&amp;utm_campaign=Badge_Grade)
 [![Disscussion](https://img.shields.io/badge/chat-wechat-brightgreen?style=flat)](./README.md#DisscussionGroup)
 [![License](https://img.shields.io/github/license/shenweichen/deepctr.svg)](https://github.com/shenweichen/deepctr/blob/master/LICENSE)
@@ -81,7 +81,7 @@ If you find this code useful in your research, please cite it using the followin
 ## DisscussionGroup
 
 - [Discussions](https://github.com/shenweichen/DeepCTR/discussions)
-- 公众号：**浅梦的学习笔记**  
+- 公众号：**浅梦学习笔记**  
 - wechat ID: **deepctrbot**
 
   ![wechat](./docs/pics/code.png)
@@ -115,7 +115,7 @@ If you find this code useful in your research, please cite it using the followin
       </td>
       <td>
         ​ <a href="https://github.com/TanTingyi"><img width="70" height="70" src="https://github.com/TanTingyi.png?s=40" alt="pic"></a><br>
-         <a href="https://github.com/TanTingyi">LeoCai</a>
+         <a href="https://github.com/TanTingyi">Tan Tingyi</a>
          <p>  Chongqing University <br> of  Posts and <br> Telecommunications   </p>​
       </td>
     </tr>

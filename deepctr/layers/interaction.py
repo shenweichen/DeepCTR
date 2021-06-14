@@ -1422,8 +1422,6 @@ class FEFMLayer(Layer):
             ``(batch_size, (num_fields * (num_fields-1))/2)`` # concatenated FEFM interaction embeddings
 
       Arguments
-        - **num_fields** : integer for number of fields
-        - **embedding_size** : integer for embedding dimension
         - **regularizer** : L2 regularizer weight for the field pair matrix embeddings parameters of FEFM
 
       References
@@ -1431,9 +1429,7 @@ class FEFMLayer(Layer):
          https://arxiv.org/pdf/2009.09931.pdf
     """
 
-    def __init__(self, num_fields, embedding_size, regularizer, **kwargs):
-        self.num_fields = num_fields
-        self.embedding_size = embedding_size
+    def __init__(self, regularizer, **kwargs):
         self.regularizer = regularizer
         super(FEFMLayer, self).__init__(**kwargs)
 
@@ -1442,16 +1438,14 @@ class FEFMLayer(Layer):
             raise ValueError("Unexpected inputs dimensions % d,\
                                 expect to be 3 dimensions" % (len(input_shape)))
 
-        if input_shape[1] != self.num_fields:
-            raise ValueError("Mismatch in number of fields {} and \
-                    concatenated embeddings dims {}".format(self.num_fields, input_shape[2]))
+        self.num_fields = int(input_shape[1])
+        embedding_size = int(input_shape[2])
 
         self.field_embeddings = {}
-
         for fi, fj in itertools.combinations(range(self.num_fields), 2):
             field_pair_id = str(fi) + "-" + str(fj)
             self.field_embeddings[field_pair_id] = self.add_weight(name='field_embeddings' + field_pair_id,
-                                                                   shape=(self.embedding_size, self.embedding_size),
+                                                                   shape=(embedding_size, embedding_size),
                                                                    initializer=TruncatedNormal(),
                                                                    regularizer=l2(self.regularizer),
                                                                    trainable=True)
@@ -1463,10 +1457,6 @@ class FEFMLayer(Layer):
             raise ValueError(
                 "Unexpected inputs dimensions %d, expect to be 3 dimensions"
                 % (K.ndim(inputs)))
-
-        if inputs.shape[1] != self.num_fields:
-            raise ValueError("Mismatch in number of fields {} and \
-                    concatenated embeddings dims {}".format(self.num_fields, inputs.shape[1]))
 
         pairwise_inner_prods = []
         for fi, fj in itertools.combinations(range(self.num_fields), 2):
@@ -1484,13 +1474,12 @@ class FEFMLayer(Layer):
         return concat_vec
 
     def compute_output_shape(self, input_shape):
-        return (None, (self.num_fields * (self.num_fields-1))/2)
+        num_fields = int(input_shape[1])
+        return (None, (num_fields * (num_fields - 1)) / 2)
 
     def get_config(self):
         config = super(FEFMLayer, self).get_config().copy()
         config.update({
-            'num_fields': self.num_fields,
             'regularizer': self.regularizer,
-            'embedding_size': self.embedding_size
         })
         return config

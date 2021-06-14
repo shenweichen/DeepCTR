@@ -9,7 +9,7 @@ from tensorflow.python.keras.layers import Input, Lambda
 from .inputs import create_embedding_matrix, embedding_lookup, get_dense_input, varlen_embedding_lookup, \
     get_varlen_pooling_list, mergeDict
 from .layers import Linear
-from .layers.utils import concat_func, add_func
+from .layers.utils import concat_func
 
 DEFAULT_GROUP_NAME = "default_group"
 

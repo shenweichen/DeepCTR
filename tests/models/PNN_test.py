@@ -30,7 +30,7 @@ def test_PNNEstimator(use_inner, use_outter, sparse_feature_num):
     if not Estimator_TEST_TF1 and tf.__version__ < "2.2.0":
         return
     sample_size = SAMPLE_SIZE
-    linear_feature_columns, dnn_feature_columns, input_fn = get_test_data_estimator(sample_size,
+    _, dnn_feature_columns, input_fn = get_test_data_estimator(sample_size,
                                                                                     sparse_feature_num=sparse_feature_num,
                                                                                     dense_feature_num=sparse_feature_num)
 

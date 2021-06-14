@@ -21,16 +21,16 @@ from ..layers.interaction import FEFMLayer
 from ..layers.utils import concat_func, combined_dnn_input, reduce_sum
 
 
-def DeepFEFM(linear_feature_columns, dnn_feature_columns, embedding_size=48, use_fefm=True,
-             dnn_hidden_units=(1024, 1024, 1024), l2_reg_linear=0.000001, l2_reg_embedding_feat=0.00001,
-             l2_reg_embedding_field=0.0000001, l2_reg_dnn=0, seed=1024, dnn_dropout=0.2, exclude_feature_embed_in_dnn=False,
+def DeepFEFM(linear_feature_columns, dnn_feature_columns, use_fefm=True,
+             dnn_hidden_units=(128, 128), l2_reg_linear=0.00001, l2_reg_embedding_feat=0.00001,
+             l2_reg_embedding_field=0.00001, l2_reg_dnn=0, seed=1024, dnn_dropout=0.0,
+             exclude_feature_embed_in_dnn=False,
              use_linear=True, use_fefm_embed_in_dnn=True, dnn_activation='relu', dnn_use_bn=False, task='binary'):
     """Instantiates the DeepFEFM Network architecture or the shallow FEFM architecture (Ablation studies supported)
 
     :param linear_feature_columns: An iterable containing all the features used by linear part of the model.
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
     :param fm_group: list, group_name of features that will be used to do feature interactions.
-    :param embedding_size: positive integer,sparse feature embedding_size
     :param use_fefm: bool,use FEFM logit or not (doesn't effect FEFM embeddings in DNN, controls only the use of final FEFM logit)
     :param dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of DNN
     :param l2_reg_linear: float. L2 regularizer strength applied to linear part
@@ -58,9 +58,10 @@ def DeepFEFM(linear_feature_columns, dnn_feature_columns, embedding_size=48, use
                                                                         l2_reg_embedding_feat,
                                                                         seed, support_group=True)
 
-    fefm_interaction_embedding = concat_func([FEFMLayer(num_fields=len(v), embedding_size=embedding_size,
-                                               regularizer=l2_reg_embedding_field)(concat_func(v, axis=1))
-                                     for k, v in group_embedding_dict.items() if k in [DEFAULT_GROUP_NAME]], axis=1)
+    fefm_interaction_embedding = concat_func([FEFMLayer(
+        regularizer=l2_reg_embedding_field)(concat_func(v, axis=1))
+                                              for k, v in group_embedding_dict.items() if k in [DEFAULT_GROUP_NAME]],
+                                             axis=1)
 
     dnn_input = combined_dnn_input(list(chain.from_iterable(group_embedding_dict.values())), dense_value_list)
 

@@ -493,13 +493,12 @@ class Transformer(Layer):
             self.fw2 = self.add_weight('fw2', shape=[4 * self.num_units, self.num_units], dtype=tf.float32,
                                        initializer=tf.keras.initializers.glorot_uniform(seed=self.seed))
 
-        # if self.use_positional_encoding:
-        #
-        #     self.kpe = Position_Embedding(input_shape[0][-1].value)
-        #     self.qpe = Position_Embedding(input_shape[1][-1].value)
         self.dropout = tf.keras.layers.Dropout(
             self.dropout_rate, seed=self.seed)
         self.ln = LayerNormalization()
+        if self.use_positional_encoding:
+            self.query_pe = PositionEncoding()
+            self.key_pe = PositionEncoding()
         # Be sure to call this somewhere!
         super(Transformer, self).build(input_shape)
 
@@ -521,8 +520,8 @@ class Transformer(Layer):
             key_masks = tf.squeeze(key_masks, axis=1)
 
         if self.use_positional_encoding:
-            queries = positional_encoding(queries)
-            keys = positional_encoding(queries)
+            queries = self.query_pe(queries)
+            keys = self.key_pe(queries)
 
         querys = tf.tensordot(queries, self.W_Query,
                               axes=(-1, 0))  # None T_q D*head_num
@@ -545,7 +544,7 @@ class Transformer(Layer):
             outputs = tf.tanh(tf.nn.bias_add(querys_reshaped + keys_reshaped, self.b))
             outputs = tf.squeeze(tf.tensordot(outputs, tf.expand_dims(self.v, axis=-1), axes=[-1, 0]), axis=-1)
         else:
-            NotImplementedError
+            raise ValueError("attention_type must be scaled_dot_product or additive")
 
         key_masks = tf.tile(key_masks, [self.head_num, 1])
 
@@ -620,54 +619,62 @@ class Transformer(Layer):
         return dict(list(base_config.items()) + list(config.items()))
 
 
-def positional_encoding(inputs,
-                        pos_embedding_trainable=True,
-                        zero_pad=False,
-                        scale=True,
-                        ):
-    '''Sinusoidal Positional_Encoding.
+class PositionEncoding(Layer):
+    def __init__(self, pos_embedding_trainable=True,
+                 zero_pad=False,
+                 scale=True, **kwargs):
+        self.pos_embedding_trainable = pos_embedding_trainable
+        self.zero_pad = zero_pad
+        self.scale = scale
+        super(PositionEncoding, self).__init__(**kwargs)
 
-    Args:
+    def build(self, input_shape):
+        # Create a trainable weight variable for this layer.
+        _, T, num_units = input_shape.as_list()  # inputs.get_shape().as_list()
+        # First part of the PE function: sin and cos argument
+        position_enc = np.array([
+            [pos / np.power(10000, 2. * i / num_units)
+             for i in range(num_units)]
+            for pos in range(T)])
 
-      - inputs: A 2d Tensor with shape of (N, T).
-      - num_units: Output dimensionality
-      - zero_pad: Boolean. If True, all the values of the first row (id = 0) should be constant zero
-      - scale: Boolean. If True, the output will be multiplied by sqrt num_units(check details from paper)
-      - scope: Optional scope for `variable_scope`.
-      - reuse: Boolean, whether to reuse the weights of a previous layer by the same name.
+        # Second part, apply the cosine to even columns and sin to odds.
+        position_enc[:, 0::2] = np.sin(position_enc[:, 0::2])  # dim 2i
+        position_enc[:, 1::2] = np.cos(position_enc[:, 1::2])  # dim 2i+1
 
-    Returns:
+        self.lookup_table = self.add_weight("lookup_table", (T, num_units),
+                                            initializer=tf.initializers.identity(position_enc),
+                                            trainable=self.pos_embedding_trainable)
 
-      - A 'Tensor' with one more rank than inputs's, with the dimensionality should be 'num_units'
-    '''
+        # Be sure to call this somewhere!
+        super(PositionEncoding, self).build(input_shape)
 
-    _, T, num_units = inputs.get_shape().as_list()
-    # with tf.variable_scope(scope, reuse=reuse):
-    position_ind = tf.expand_dims(tf.range(T), 0)
-    # First part of the PE function: sin and cos argument
-    position_enc = np.array([
-        [pos / np.power(10000, 2. * i / num_units)
-         for i in range(num_units)]
-        for pos in range(T)])
+    def call(self, inputs, mask=None):
+        _, T, num_units = inputs.get_shape().as_list()
+        position_ind = tf.expand_dims(tf.range(T), 0)
 
-    # Second part, apply the cosine to even columns and sin to odds.
-    position_enc[:, 0::2] = np.sin(position_enc[:, 0::2])  # dim 2i
-    position_enc[:, 1::2] = np.cos(position_enc[:, 1::2])  # dim 2i+1
+        if self.zero_pad:
+            self.lookup_table = tf.concat((tf.zeros(shape=[1, num_units]),
+                                           self.lookup_table[1:, :]), 0)
 
-    # Convert to a tensor
+        outputs = tf.nn.embedding_lookup(self.lookup_table, position_ind)
 
-    if pos_embedding_trainable:
-        lookup_table = K.variable(position_enc, dtype=tf.float32)
+        if self.scale:
+            outputs = outputs * num_units ** 0.5
+        return outputs + inputs
 
-    if zero_pad:
-        lookup_table = tf.concat((tf.zeros(shape=[1, num_units]),
-                                  lookup_table[1:, :]), 0)
+    def compute_output_shape(self, input_shape):
 
-    outputs = tf.nn.embedding_lookup(lookup_table, position_ind)
+        return input_shape
 
-    if scale:
-        outputs = outputs * num_units ** 0.5
-    return outputs + inputs
+    def compute_mask(self, inputs, mask=None):
+        return mask
+
+    def get_config(self, ):
+
+        config = {'pos_embedding_trainable': self.pos_embedding_trainable, 'zero_pad': self.zero_pad,
+                  'scale': self.scale}
+        base_config = super(PositionEncoding, self).get_config()
+        return dict(list(base_config.items()) + list(config.items()))
 
 
 class BiasEncoding(Layer):
@@ -743,7 +750,7 @@ class DynamicGRU(Layer):
             self.gru_cell = VecAttGRUCell(self.num_units)
         else:
             try:
-                self.gru_cell = tf.nn.rnn_cell.GRUCell(self.num_units)
+                self.gru_cell = tf.nn.rnn_cell.GRUCell(self.num_units)  # tf.keras.layers.GRUCell
             except:
                 self.gru_cell = tf.compat.v1.nn.rnn_cell.GRUCell(self.num_units)
 
@@ -839,3 +846,53 @@ class KMaxPooling(Layer):
         config = {'k': self.k, 'axis': self.axis}
         base_config = super(KMaxPooling, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
+
+
+# def positional_encoding(inputs,
+#                         pos_embedding_trainable=True,
+#                         zero_pad=False,
+#                         scale=True,
+#                         ):
+#     '''Sinusoidal Positional_Encoding.
+#
+#     Args:
+#
+#       - inputs: A 2d Tensor with shape of (N, T).
+#       - num_units: Output dimensionality
+#       - zero_pad: Boolean. If True, all the values of the first row (id = 0) should be constant zero
+#       - scale: Boolean. If True, the output will be multiplied by sqrt num_units(check details from paper)
+#       - scope: Optional scope for `variable_scope`.
+#       - reuse: Boolean, whether to reuse the weights of a previous layer by the same name.
+#
+#     Returns:
+#
+#       - A 'Tensor' with one more rank than inputs's, with the dimensionality should be 'num_units'
+#     '''
+#
+#     _, T, num_units = inputs.get_shape().as_list()
+#     # with tf.variable_scope(scope, reuse=reuse):
+#     position_ind = tf.expand_dims(tf.range(T), 0)
+#     # First part of the PE function: sin and cos argument
+#     position_enc = np.array([
+#         [pos / np.power(10000, 2. * i / num_units)
+#          for i in range(num_units)]
+#         for pos in range(T)])
+#
+#     # Second part, apply the cosine to even columns and sin to odds.
+#     position_enc[:, 0::2] = np.sin(position_enc[:, 0::2])  # dim 2i
+#     position_enc[:, 1::2] = np.cos(position_enc[:, 1::2])  # dim 2i+1
+#
+#     # Convert to a tensor
+#
+#     if pos_embedding_trainable:
+#         lookup_table = K.variable(position_enc, dtype=tf.float32)
+#
+#     if zero_pad:
+#         lookup_table = tf.concat((tf.zeros(shape=[1, num_units]),
+#                                   lookup_table[1:, :]), 0)
+#
+#     outputs = tf.nn.embedding_lookup(lookup_table, position_ind)
+#
+#     if scale:
+#         outputs = outputs * num_units ** 0.5
+#     return outputs + inputs
