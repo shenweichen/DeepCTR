@@ -544,7 +544,7 @@ class Transformer(Layer):
             outputs = tf.tanh(tf.nn.bias_add(querys_reshaped + keys_reshaped, self.b))
             outputs = tf.squeeze(tf.tensordot(outputs, tf.expand_dims(self.v, axis=-1), axes=[-1, 0]), axis=-1)
         else:
-            NotImplementedError
+            raise ValueError("attention_type must be scaled_dot_product or additive")
 
         key_masks = tf.tile(key_masks, [self.head_num, 1])
 
