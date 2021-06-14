@@ -19,8 +19,8 @@ from ...layers.utils import concat_func, add_func, combined_dnn_input, reduce_su
 
 
 def DeepFEFMEstimator(linear_feature_columns, dnn_feature_columns,
-                      dnn_hidden_units=(1024, 1024, 1024), l2_reg_linear=0.000001, l2_reg_embedding_feat=0.00001,
-                      l2_reg_embedding_field=0.0000001, l2_reg_dnn=0, seed=1024, dnn_dropout=0.2,
+                      dnn_hidden_units=(128, 128), l2_reg_linear=0.00001, l2_reg_embedding_feat=0.00001,
+                      l2_reg_embedding_field=0.00001, l2_reg_dnn=0, seed=1024, dnn_dropout=0.0,
                       dnn_activation='relu', dnn_use_bn=False, task='binary', model_dir=None,
                       config=None, linear_optimizer='Ftrl', dnn_optimizer='Adagrad', training_chief_hooks=None):
     """Instantiates the DeepFEFM Network architecture or the shallow FEFM architecture (Ablation support not provided
@@ -62,9 +62,10 @@ def DeepFEFMEstimator(linear_feature_columns, dnn_feature_columns,
                                                                                  l2_reg_embedding=l2_reg_embedding_feat)
 
             fefm_interaction_embedding = FEFMLayer(
-                                   regularizer=l2_reg_embedding_field)(concat_func(sparse_embedding_list, axis=1))
+                regularizer=l2_reg_embedding_field)(concat_func(sparse_embedding_list, axis=1))
 
-            fefm_logit = tf.keras.layers.Lambda(lambda x: reduce_sum(x, axis=1, keep_dims=True))(fefm_interaction_embedding)
+            fefm_logit = tf.keras.layers.Lambda(lambda x: reduce_sum(x, axis=1, keep_dims=True))(
+                fefm_interaction_embedding)
 
             final_logit_components.append(fefm_logit)
 
@@ -86,6 +87,3 @@ def DeepFEFMEstimator(linear_feature_columns, dnn_feature_columns,
                                 training_chief_hooks=training_chief_hooks)
 
     return tf.estimator.Estimator(_model_fn, model_dir=model_dir, config=config)
-
-
-

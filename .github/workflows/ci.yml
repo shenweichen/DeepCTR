@@ -23,6 +23,8 @@ jobs:
         exclude:
           - python-version: 3.7
             tf-version: 1.4.0
+          - python-version: 3.7
+            tf-version: 1.15.0
 
     steps:
     
