@@ -619,56 +619,6 @@ class Transformer(Layer):
         return dict(list(base_config.items()) + list(config.items()))
 
 
-def positional_encoding(inputs,
-                        pos_embedding_trainable=True,
-                        zero_pad=False,
-                        scale=True,
-                        ):
-    '''Sinusoidal Positional_Encoding.
-
-    Args:
-
-      - inputs: A 2d Tensor with shape of (N, T).
-      - num_units: Output dimensionality
-      - zero_pad: Boolean. If True, all the values of the first row (id = 0) should be constant zero
-      - scale: Boolean. If True, the output will be multiplied by sqrt num_units(check details from paper)
-      - scope: Optional scope for `variable_scope`.
-      - reuse: Boolean, whether to reuse the weights of a previous layer by the same name.
-
-    Returns:
-
-      - A 'Tensor' with one more rank than inputs's, with the dimensionality should be 'num_units'
-    '''
-
-    _, T, num_units = inputs.get_shape().as_list()
-    # with tf.variable_scope(scope, reuse=reuse):
-    position_ind = tf.expand_dims(tf.range(T), 0)
-    # First part of the PE function: sin and cos argument
-    position_enc = np.array([
-        [pos / np.power(10000, 2. * i / num_units)
-         for i in range(num_units)]
-        for pos in range(T)])
-
-    # Second part, apply the cosine to even columns and sin to odds.
-    position_enc[:, 0::2] = np.sin(position_enc[:, 0::2])  # dim 2i
-    position_enc[:, 1::2] = np.cos(position_enc[:, 1::2])  # dim 2i+1
-
-    # Convert to a tensor
-
-    if pos_embedding_trainable:
-        lookup_table = K.variable(position_enc, dtype=tf.float32)
-
-    if zero_pad:
-        lookup_table = tf.concat((tf.zeros(shape=[1, num_units]),
-                                  lookup_table[1:, :]), 0)
-
-    outputs = tf.nn.embedding_lookup(lookup_table, position_ind)
-
-    if scale:
-        outputs = outputs * num_units ** 0.5
-    return outputs + inputs
-
-
 class PositionEncoding(Layer):
     def __init__(self, pos_embedding_trainable=True,
                  zero_pad=False,
@@ -896,3 +846,53 @@ class KMaxPooling(Layer):
         config = {'k': self.k, 'axis': self.axis}
         base_config = super(KMaxPooling, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
+
+
+# def positional_encoding(inputs,
+#                         pos_embedding_trainable=True,
+#                         zero_pad=False,
+#                         scale=True,
+#                         ):
+#     '''Sinusoidal Positional_Encoding.
+#
+#     Args:
+#
+#       - inputs: A 2d Tensor with shape of (N, T).
+#       - num_units: Output dimensionality
+#       - zero_pad: Boolean. If True, all the values of the first row (id = 0) should be constant zero
+#       - scale: Boolean. If True, the output will be multiplied by sqrt num_units(check details from paper)
+#       - scope: Optional scope for `variable_scope`.
+#       - reuse: Boolean, whether to reuse the weights of a previous layer by the same name.
+#
+#     Returns:
+#
+#       - A 'Tensor' with one more rank than inputs's, with the dimensionality should be 'num_units'
+#     '''
+#
+#     _, T, num_units = inputs.get_shape().as_list()
+#     # with tf.variable_scope(scope, reuse=reuse):
+#     position_ind = tf.expand_dims(tf.range(T), 0)
+#     # First part of the PE function: sin and cos argument
+#     position_enc = np.array([
+#         [pos / np.power(10000, 2. * i / num_units)
+#          for i in range(num_units)]
+#         for pos in range(T)])
+#
+#     # Second part, apply the cosine to even columns and sin to odds.
+#     position_enc[:, 0::2] = np.sin(position_enc[:, 0::2])  # dim 2i
+#     position_enc[:, 1::2] = np.cos(position_enc[:, 1::2])  # dim 2i+1
+#
+#     # Convert to a tensor
+#
+#     if pos_embedding_trainable:
+#         lookup_table = K.variable(position_enc, dtype=tf.float32)
+#
+#     if zero_pad:
+#         lookup_table = tf.concat((tf.zeros(shape=[1, num_units]),
+#                                   lookup_table[1:, :]), 0)
+#
+#     outputs = tf.nn.embedding_lookup(lookup_table, position_ind)
+#
+#     if scale:
+#         outputs = outputs * num_units ** 0.5
+#     return outputs + inputs

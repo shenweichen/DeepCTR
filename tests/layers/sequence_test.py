@@ -68,7 +68,7 @@ def test_SequencePoolingLayer(mode, supports_masking, input_shape):
 @pytest.mark.parametrize(
 
     'merge_mode',
-    ['concat', 'ave', 'fw',
+    ['concat', 'ave', 'fw', 'bw', 'sum', 'mul', None
      ]
 
 )
@@ -85,7 +85,7 @@ def test_Transformer():
     with CustomObjectScope({'Transformer': sequence.Transformer}):
         layer_test(sequence.Transformer,
                    kwargs={'att_embedding_size': 1, 'head_num': 8, 'use_layer_norm': True, 'supports_masking': False,
-                           'dropout_rate': 0.5},
+                           'attention_type': 'additive', 'dropout_rate': 0.5, 'output_type': 'sum'},
                    input_shape=[(BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE), (BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE),
                                 (BATCH_SIZE, 1), (BATCH_SIZE, 1)])
 
