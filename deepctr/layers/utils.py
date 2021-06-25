@@ -46,12 +46,12 @@ class Hash(tf.keras.layers.Layer):
     0
 
     Args:
-        num_buckets: An `int` that is >= 1. The number of buckets or the vocabulary size + 1 
+        num_buckets: An `int` that is >= 1. The number of buckets or the vocabulary size + 1
             when `vocabulary_path` is setup.
-        mask_zero: default is False. The `Hash` value will hash input `0` or `0.0` to value `0` when 
+        mask_zero: default is False. The `Hash` value will hash input `0` or `0.0` to value `0` when
             the `mask_zero` is `True`. `mask_zero` is not used when `vocabulary_path` is setup.
-        vocabulary_path: default `None`. The `CSV` text file path of the vocabulary hash, which contains 
-            two columns seperated by delimiter `comma`, the first column is the value and the second is 
+        vocabulary_path: default `None`. The `CSV` text file path of the vocabulary hash, which contains
+            two columns seperated by delimiter `comma`, the first column is the value and the second is
             the key. The key data type is `string`, the value data type is `int`. The path must
             be accessible from wherever `Hash` is initialized.
         default_value: default '0'. The default value if a key is missing in the table.
