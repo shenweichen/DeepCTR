@@ -25,9 +25,37 @@ class NoMask(tf.keras.layers.Layer):
 
 
 class Hash(tf.keras.layers.Layer):
-    """
-    hash the input to [0,num_buckets)
-    if mask_zero = True,0 or 0.0 will be set to 0,other value will be set in range[1,num_buckets)
+    """Looks up keys in a table when setup `vocabulary_path`, which outputs the corresponding values.
+    If `vocabulary_path` is not set, `Hash` will hash the input to [0,num_buckets). When `mask_zero` = True,
+    input value `0` or `0.0` will be set to `0`, and other value will be set in range [1,num_buckets).
+
+    The following snippet initializes a `Hash` with `vocabulary_path` file with the first column as keys and
+    second column as values:
+
+    * `1,emerson`
+    * `2,lake`
+    * `3,palmer`
+
+    >>> hash = Hash(
+    ...   num_buckets=3+1,
+    ...   vocabulary_path=filename,
+    ...   default_value=0)
+    >>> hash(tf.constant('lake')).numpy()
+    2
+    >>> hash(tf.constant('lakeemerson')).numpy()
+    0
+
+    Args:
+        num_buckets: An `int` that is >= 1. The number of buckets or the vocabulary size + 1 
+            when `vocabulary_path` is setup.
+        mask_zero: default is False. The `Hash` value will hash input `0` or `0.0` to value `0` when 
+            the `mask_zero` is `True`. `mask_zero` is not used when `vocabulary_path` is setup.
+        vocabulary_path: default `None`. The `CSV` text file path of the vocabulary hash, which contains 
+            two columns seperated by delimiter `comma`, the first column is the value and the second is 
+            the key. The key data type is `string`, the value data type is `int`. The path must
+            be accessible from wherever `Hash` is initialized.
+        default_value: default '0'. The default value if a key is missing in the table.
+        **kwargs: Additional keyword arguments.
     """
 
     def __init__(self, num_buckets, mask_zero=False, vocabulary_path=None, default_value=0, **kwargs):
