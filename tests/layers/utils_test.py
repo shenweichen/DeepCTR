@@ -4,7 +4,11 @@ from deepctr.feature_column import SparseFeat
 
 
 def test_hash():
-
+    try:
+        import tensorflow.python.ops.numpy_ops.np_config as np_config
+        np_config.enable_numpy_behavior()
+    finally:
+        pass
     vocab_path = "./tests/layers/vocabulary_example.csv"
     vocab_size = 3+1
     sf = SparseFeat('user_id', vocab_size, vocabulary_path=vocab_path)
