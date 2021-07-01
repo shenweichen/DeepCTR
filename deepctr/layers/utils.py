@@ -97,6 +97,9 @@ class Hash(tf.keras.layers.Layer):
 
         return hash_x
 
+    def compute_output_shape(self, input_shape):
+        return input_shape
+
     def get_config(self, ):
         config = {'num_buckets': self.num_buckets, 'mask_zero': self.mask_zero, 'vocabulary_path': self.vocabulary_path, 'default_value': self.default_value}
         base_config = super(Hash, self).get_config()
