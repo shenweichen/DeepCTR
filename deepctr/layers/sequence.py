@@ -560,10 +560,10 @@ class Transformer(Layer):
         if self.blinding:
             try:
                 outputs = tf.matrix_set_diag(outputs, tf.ones_like(outputs)[
-                                                      :, :, 0] * (-2 ** 32 + 1))
+                    :, :, 0] * (-2 ** 32 + 1))
             except:
                 outputs = tf.compat.v1.matrix_set_diag(outputs, tf.ones_like(outputs)[
-                                                                :, :, 0] * (-2 ** 32 + 1))
+                    :, :, 0] * (-2 ** 32 + 1))
 
         outputs -= reduce_max(outputs, axis=-1, keep_dims=True)
         outputs = softmax(outputs)
@@ -640,7 +640,8 @@ class PositionEncoding(Layer):
         # Second part, apply the cosine to even columns and sin to odds.
         position_enc[:, 0::2] = np.sin(position_enc[:, 0::2])  # dim 2i
         position_enc[:, 1::2] = np.cos(position_enc[:, 1::2])  # dim 2i+1
-
+        if self.zero_pad:
+            position_enc[0, :] = np.zeros(num_units)
         self.lookup_table = self.add_weight("lookup_table", (T, num_units),
                                             initializer=tf.initializers.identity(position_enc),
                                             trainable=self.pos_embedding_trainable)
@@ -651,13 +652,7 @@ class PositionEncoding(Layer):
     def call(self, inputs, mask=None):
         _, T, num_units = inputs.get_shape().as_list()
         position_ind = tf.expand_dims(tf.range(T), 0)
-
-        if self.zero_pad:
-            self.lookup_table = tf.concat((tf.zeros(shape=[1, num_units]),
-                                           self.lookup_table[1:, :]), 0)
-
         outputs = tf.nn.embedding_lookup(self.lookup_table, position_ind)
-
         if self.scale:
             outputs = outputs * num_units ** 0.5
         return outputs + inputs
