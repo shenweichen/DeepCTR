@@ -21,9 +21,6 @@ def test_Hash(num_buckets, mask_zero, vocabulary_path, input_data, expected_outp
     if tf.version.VERSION < '2.0.0':
         return
     with CustomObjectScope({'Hash': Hash}):
-        sess = tf.compat.v1.get_default_session()
-        if sess:
-            sess.run(tf.compat.v1.tables_initializer())
         layer_test(Hash, kwargs={'num_buckets': num_buckets, 'mask_zero': mask_zero, 'vocabulary_path': vocabulary_path},
                    input_dtype=tf.string, input_data=np.array(input_data, dtype='str'),
                    expected_output_dtype=tf.int64, expected_output=expected_output)
