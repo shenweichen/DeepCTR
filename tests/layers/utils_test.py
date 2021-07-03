@@ -18,7 +18,7 @@ except:
     ]
 )
 def test_Hash(num_buckets, mask_zero, vocabulary_path, input_data, expected_output):
-    if tf.version.VERSION < '2.0.0':
+    if not hasattr(tf, 'version') or tf.version.VERSION < '2.0.0':
         return
 
     with CustomObjectScope({'Hash': Hash}):
