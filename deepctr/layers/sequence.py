@@ -633,8 +633,7 @@ class PositionEncoding(Layer):
         _, T, num_units = input_shape.as_list()  # inputs.get_shape().as_list()
         # First part of the PE function: sin and cos argument
         position_enc = np.array([
-            [pos / np.power(10000, 2. * i / num_units)
-             for i in range(num_units)]
+            [pos / np.power(10000, 2. * (i//2) / num_units) for i in range(num_units)]
             for pos in range(T)])
 
         # Second part, apply the cosine to even columns and sin to odds.
