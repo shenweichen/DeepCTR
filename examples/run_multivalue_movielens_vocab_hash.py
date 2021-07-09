@@ -6,9 +6,10 @@ import numpy as np
 import pandas as pd
 import shutil
 from tensorflow.python.keras.preprocessing.sequence import pad_sequences
-import tensorflow as tf
-if hasattr(tf, 'version') and tf.version.VERSION >= '1.14.0':
+try:
     import tensorflow.compat.v1 as tf
+except:
+    import tensorflow as tf
 
 
 def init_vocab(df, tmpdir):

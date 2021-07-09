@@ -8,10 +8,10 @@ Author:
 import tensorflow as tf
 from tensorflow.python.keras.layers import Flatten
 from tensorflow.python.ops.lookup_ops import TextFileInitializer
-if hasattr(tf, 'VERSION') and tf.VERSION.title() <= '1.4.0':
-    from tensorflow.python.ops.lookup_ops import HashTable as StaticHashTable
-else:
+try:
     from tensorflow.python.ops.lookup_ops import StaticHashTable
+except:
+    from tensorflow.python.ops.lookup_ops import HashTable as StaticHashTable
 
 
 class NoMask(tf.keras.layers.Layer):
