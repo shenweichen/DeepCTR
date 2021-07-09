@@ -1,12 +1,12 @@
+from deepctr.models import DeepFM
+from deepctr.feature_column import SparseFeat, VarLenSparseFeat, get_feature_names
 import functools
 import os
 import numpy as np
 import pandas as pd
 import shutil
 from tensorflow.python.keras.preprocessing.sequence import pad_sequences
-
-from deepctr.feature_column import SparseFeat, VarLenSparseFeat, get_feature_names
-from deepctr.models import DeepFM
+import tensorflow as tf
 
 
 def init_vocab(df, tmpdir):
@@ -107,8 +107,15 @@ if __name__ == "__main__":
     # 4.Define Model,compile and train
     model = DeepFM(linear_feature_columns, dnn_feature_columns, task='regression')
     model.compile("adam", "mse", metrics=['mse'], )
-    history = model.fit(model_input, data[target].values,
-                        batch_size=256, epochs=10, verbose=2, validation_split=0.2, )
-
+    if not hasattr(tf, 'version') or tf.version.VERSION < '2.0.0':
+        with tf.compat.v1.Session() as sess:
+            sess.run(tf.compat.v1.tables_initializer())
+            history = model.fit(model_input, data[target].values,
+                                batch_size=256, epochs=10, verbose=2, validation_split=0.2, )
+    else:
+        history = model.fit(model_input, data[target].values,
+                            batch_size=256, epochs=10, verbose=2, validation_split=0.2, )
     if os.path.exists(metadir):
         shutil.rmtree(metadir)
+
+# %%

@@ -7,6 +7,7 @@ Author:
 """
 import tensorflow as tf
 from tensorflow.python.keras.layers import Flatten
+from tensorflow.python.ops.lookup_ops import TextFileInitializer, StaticHashTable
 
 
 class NoMask(tf.keras.layers.Layer):
@@ -64,8 +65,8 @@ class Hash(tf.keras.layers.Layer):
         self.vocabulary_path = vocabulary_path
         self.default_value = default_value
         if self.vocabulary_path:
-            initializer = tf.lookup.TextFileInitializer(vocabulary_path, 'string', 1, 'int64', 0, delimiter=',')
-            self.hash_table = tf.lookup.StaticHashTable(initializer, default_value=self.default_value)
+            initializer = TextFileInitializer(vocabulary_path, 'string', 1, 'int64', 0, delimiter=',')
+            self.hash_table = StaticHashTable(initializer, default_value=self.default_value)
         super(Hash, self).__init__(**kwargs)
 
     def build(self, input_shape):
