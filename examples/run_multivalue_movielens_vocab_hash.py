@@ -7,6 +7,8 @@ import pandas as pd
 import shutil
 from tensorflow.python.keras.preprocessing.sequence import pad_sequences
 import tensorflow as tf
+if hasattr(tf, 'version') and tf.version.VERSION >= '1.14.0':
+    import tensorflow.compat.v1 as tf
 
 
 def init_vocab(df, tmpdir):
@@ -108,8 +110,8 @@ if __name__ == "__main__":
     model = DeepFM(linear_feature_columns, dnn_feature_columns, task='regression')
     model.compile("adam", "mse", metrics=['mse'], )
     if not hasattr(tf, 'version') or tf.version.VERSION < '2.0.0':
-        with tf.compat.v1.Session() as sess:
-            sess.run(tf.compat.v1.tables_initializer())
+        with tf.Session() as sess:
+            sess.run(tf.tables_initializer())
             history = model.fit(model_input, data[target].values,
                                 batch_size=256, epochs=10, verbose=2, validation_split=0.2, )
     else:

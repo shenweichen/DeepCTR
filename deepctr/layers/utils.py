@@ -7,7 +7,11 @@ Author:
 """
 import tensorflow as tf
 from tensorflow.python.keras.layers import Flatten
-from tensorflow.python.ops.lookup_ops import TextFileInitializer, StaticHashTable
+from tensorflow.python.ops.lookup_ops import TextFileInitializer
+if hasattr(tf, 'VERSION') and tf.VERSION.title() <= '1.4.0':
+    from tensorflow.python.ops.lookup_ops import HashTable as StaticHashTable
+else:
+    from tensorflow.python.ops.lookup_ops import StaticHashTable
 
 
 class NoMask(tf.keras.layers.Layer):
