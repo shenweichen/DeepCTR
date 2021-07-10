@@ -561,7 +561,7 @@ class Transformer(Layer):
             try:
                 outputs = tf.matrix_set_diag(outputs, tf.ones_like(outputs)[
                     :, :, 0] * (-2 ** 32 + 1))
-            except:
+            except AttributeError as e:
                 outputs = tf.compat.v1.matrix_set_diag(outputs, tf.ones_like(outputs)[
                     :, :, 0] * (-2 ** 32 + 1))
 

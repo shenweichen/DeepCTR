@@ -8,7 +8,7 @@ import shutil
 from tensorflow.python.keras.preprocessing.sequence import pad_sequences
 try:
     import tensorflow.compat.v1 as tf
-except:
+except ImportError as e:
     import tensorflow as tf
 
 

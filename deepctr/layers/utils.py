@@ -10,7 +10,7 @@ from tensorflow.python.keras.layers import Flatten
 from tensorflow.python.ops.lookup_ops import TextFileInitializer
 try:
     from tensorflow.python.ops.lookup_ops import StaticHashTable
-except:
+except ImportError as e:
     from tensorflow.python.ops.lookup_ops import HashTable as StaticHashTable
 
 
