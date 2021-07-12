@@ -23,12 +23,13 @@ DNN based CTR prediction models usually have following 4 modules:
 
 ## Feature Columns
 ### SparseFeat
-``SparseFeat`` is a namedtuple with signature ``SparseFeat(name, vocabulary_size, embedding_dim, use_hash, dtype, embeddings_initializer, embedding_name, group_name, trainable)``
+``SparseFeat`` is a namedtuple with signature ``SparseFeat(name, vocabulary_size, embedding_dim, use_hash, vocabulary_path, dtype, embeddings_initializer, embedding_name, group_name, trainable)``
 
 - name : feature name
 - vocabulary_size : number of unique feature values for sprase feature or hashing space when `use_hash=True`
 - embedding_dim : embedding dimension
-- use_hash : defualt `False`.If `True` the input will be hashed to space of size `vocabulary_size`.
+- use_hash : default `False`.If `True` the input will be hashed to space of size `vocabulary_size`.
+- vocabulary_path : default `None`. The `CSV` text file path of the vocabulary table used by `tf.lookup.TextFileInitializer`, which assigns one entry in the table for each line in the file. One entry contains two columns seperated by comma, the first is the value column, the second is the key column. The `0` value is reserved to use if a key is missing in the table, so hash value need start from `1`.
 - dtype : default `int32`.dtype of input tensor.
 - embeddings_initializer : initializer for the `embeddings` matrix.
 - embedding_name : default `None`. If None, the embedding_name will be same as `name`.

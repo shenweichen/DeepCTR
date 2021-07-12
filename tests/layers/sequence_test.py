@@ -79,8 +79,6 @@ def test_BiLSTM(merge_mode):
 
 
 def test_Transformer():
-    if tf.__version__ >= '2.0.0':
-        tf.compat.v1.disable_eager_execution()  # todo
     with CustomObjectScope({'Transformer': sequence.Transformer}):
         layer_test(sequence.Transformer,
                    kwargs={'att_embedding_size': 1, 'head_num': 8, 'use_layer_norm': True, 'supports_masking': False,
@@ -102,7 +100,7 @@ def test_KMaxPooling():
      ]
 )
 def test_PositionEncoding(pos_embedding_trainable, zero_pad):
-    with CustomObjectScope({'PositionEncoding': sequence.PositionEncoding}):
+    with CustomObjectScope({'PositionEncoding': sequence.PositionEncoding, "tf": tf}):
         layer_test(sequence.PositionEncoding,
                    kwargs={'pos_embedding_trainable': pos_embedding_trainable, 'zero_pad': zero_pad},
                    input_shape=(BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE))

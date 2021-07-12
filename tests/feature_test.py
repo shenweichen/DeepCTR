@@ -1,6 +1,8 @@
 from deepctr.models import DeepFM
-from deepctr.feature_column import SparseFeat, DenseFeat,get_feature_names
+from deepctr.feature_column import SparseFeat, DenseFeat, VarLenSparseFeat, get_feature_names
 import numpy as np
+
+
 def test_long_dense_vector():
 
     feature_columns = [SparseFeat('user_id', 4, ), SparseFeat('item_id', 5, ), DenseFeat("pic_vec", 5)]
@@ -17,3 +19,11 @@ def test_long_dense_vector():
     model = DeepFM(feature_columns, feature_columns[:-1])
     model.compile('adagrad', 'binary_crossentropy')
     model.fit(model_input, label)
+
+
+def test_feature_column_sparsefeat_vocabulary_path():
+    vocab_path = "./dummy_test.csv"
+    sf = SparseFeat('user_id', 4, vocabulary_path=vocab_path)
+    assert sf.vocabulary_path == vocab_path
+    vlsf = VarLenSparseFeat(sf, 6)
+    assert vlsf.vocabulary_path == vocab_path
