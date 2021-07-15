@@ -1,91 +1,75 @@
 # -*- coding:utf-8 -*-
 """
 Author:
-    Weichen Shen,wcshen1994@163.com
+    Weichen Shen, weichenswc@163.com
 
 Reference:
-    [1] Qu, Yanru, et al. "Product-based neural networks for user response prediction." Data Mining (ICDM), 2016 IEEE 16th International Conference on. IEEE, 2016.(https://arxiv.org/pdf/1611.00144.pdf)
+    [1] Qu Y, Cai H, Ren K, et al. Product-based neural networks for user response prediction[C]//Data Mining (ICDM), 2016 IEEE 16th International Conference on. IEEE, 2016: 1149-1154.(https://arxiv.org/pdf/1611.00144.pdf)
 """
 
-from tensorflow.python.keras.layers import Dense, Embedding, Concatenate, Reshape
-from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.initializers import RandomNormal
-from tensorflow.python.keras.regularizers import l2
+import tensorflow as tf
+
+from ..feature_column import build_input_features, input_from_feature_columns
+from ..layers.core import PredictionLayer, DNN
+from ..layers.interaction import InnerProductLayer, OutterProductLayer
+from ..layers.utils import concat_func, combined_dnn_input
 
 
-from ..layers import PredictionLayer, MLP, InnerProductLayer, OutterProductLayer
-from ..utils import get_input
-
-
-def PNN(feature_dim_dict, embedding_size=4, hidden_size=[32], l2_reg_embedding=1e-5, l2_reg_deep=0,
-        init_std=0.0001, seed=1024, keep_prob=1, activation='relu',
-        final_activation='sigmoid', use_inner=True, use_outter=False, kernel_type='mat', ):
+def PNN(dnn_feature_columns, dnn_hidden_units=(128, 128), l2_reg_embedding=1e-5, l2_reg_dnn=0,
+        seed=1024, dnn_dropout=0, dnn_activation='relu', use_inner=True, use_outter=False, kernel_type='mat',
+        task='binary'):
     """Instantiates the Product-based Neural Network architecture.
 
-    :param feature_dim_dict: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
-    :param embedding_size: positive integer,sparse feature embedding_size
-    :param hidden_size: list,list of positive integer or empty list, the layer number and units in each layer of deep net
+    :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
+    :param dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of deep net
     :param l2_reg_embedding: float . L2 regularizer strength applied to embedding vector
-    :param l2_reg_deep: float. L2 regularizer strength applied to deep net
-    :param init_std: float,to use as the initialize std of embedding vector
+    :param l2_reg_dnn: float. L2 regularizer strength applied to DNN
     :param seed: integer ,to use as random seed.
-    :param keep_prob: float in (0,1]. keep_prob used in deep net
-    :param activation: Activation function to use in deep net
-    :param final_activation: str,output activation,usually ``'sigmoid'`` or ``'linear'``
+    :param dnn_dropout: float in [0,1), the probability we will drop out a given DNN coordinate.
+    :param dnn_activation: Activation function to use in DNN
     :param use_inner: bool,whether use inner-product or not.
     :param use_outter: bool,whether use outter-product or not.
-    :param kernel_type: str,kerneo_type used in outter-product,can be ``'mat'``,``'vec'``or``'num'``
+    :param kernel_type: str,kernel_type used in outter-product,can be ``'mat'`` , ``'vec'`` or ``'num'``
+    :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
     :return: A Keras model instance.
     """
-    if not isinstance(feature_dim_dict,
-                      dict) or "sparse" not in feature_dim_dict or "dense" not in feature_dim_dict:
-        raise ValueError(
-            "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
-    if kernel_type not in ['mat','vec','num']:
-        raise  ValueError("kernel_type must be mat,vec or num")
-    sparse_input, dense_input = get_input(feature_dim_dict, None)
-    sparse_embedding = [Embedding(feature_dim_dict["sparse"][feat], embedding_size,
-                                  embeddings_initializer=RandomNormal(
-        mean=0.0, stddev=init_std, seed=seed),
-        embeddings_regularizer=l2(
-        l2_reg_embedding),
-        name='sparse_emb_' + str(i) + '-' + feat) for i, feat in
-        enumerate(feature_dim_dict["sparse"])]
 
-    embed_list = [sparse_embedding[i](sparse_input[i])
-                  for i in range(len(feature_dim_dict["sparse"]))]
+    if kernel_type not in ['mat', 'vec', 'num']:
+        raise ValueError("kernel_type must be mat,vec or num")
 
-    if len(dense_input) > 0:
-        continuous_embedding_list = list(
-            map(Dense(embedding_size, use_bias=False, kernel_regularizer=l2(l2_reg_embedding), ),
-                dense_input))
-        continuous_embedding_list = list(
-            map(Reshape((1, embedding_size)), continuous_embedding_list))
-        embed_list += continuous_embedding_list
+    features = build_input_features(dnn_feature_columns)
 
+    inputs_list = list(features.values())
 
-    inner_product = InnerProductLayer()(embed_list)
-    outter_product = OutterProductLayer(kernel_type)(embed_list)
+    sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
+                                                                         l2_reg_embedding, seed)
+    inner_product = tf.keras.layers.Flatten()(
+        InnerProductLayer()(sparse_embedding_list))
+    outter_product = OutterProductLayer(kernel_type)(sparse_embedding_list)
 
     # ipnn deep input
-    linear_signal = Reshape(
-        [len(embed_list)*embedding_size])(Concatenate()(embed_list))
+    linear_signal = tf.keras.layers.Reshape(
+        [sum(map(lambda x: int(x.shape[-1]), sparse_embedding_list))])(concat_func(sparse_embedding_list))
 
     if use_inner and use_outter:
-        deep_input = Concatenate()(
+        deep_input = tf.keras.layers.Concatenate()(
             [linear_signal, inner_product, outter_product])
     elif use_inner:
-        deep_input = Concatenate()([linear_signal, inner_product])
+        deep_input = tf.keras.layers.Concatenate()(
+            [linear_signal, inner_product])
     elif use_outter:
-        deep_input = Concatenate()([linear_signal, outter_product])
+        deep_input = tf.keras.layers.Concatenate()(
+            [linear_signal, outter_product])
     else:
         deep_input = linear_signal
 
-    deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
-                   False, seed)(deep_input)
-    deep_logit = Dense(1, use_bias=False, activation=None)(deep_out)
-    final_logit = deep_logit
-    output = PredictionLayer(final_activation)(final_logit)
-    model = Model(inputs=sparse_input + dense_input,
-                  outputs=output)
+    dnn_input = combined_dnn_input([deep_input], dense_value_list)
+    dnn_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, False, seed=seed)(dnn_input)
+    dnn_logit = tf.keras.layers.Dense(
+        1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(dnn_out)
+
+    output = PredictionLayer(task)(dnn_logit)
+
+    model = tf.keras.models.Model(inputs=inputs_list,
+                                  outputs=output)
     return model

@@ -1,103 +1,96 @@
 # -*- coding:utf-8 -*-
 """
 Author:
-    Weichen Shen,wcshen1994@163.com
+    Weichen Shen, weichenswc@163.com
 
 Reference:
-    [1] Deep Interest Network for Click-Through Rate Prediction (https://arxiv.org/pdf/1706.06978.pdf)
+    [1] Zhou G, Zhu X, Song C, et al. Deep interest network for click-through rate prediction[C]//Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. ACM, 2018: 1059-1068. (https://arxiv.org/pdf/1706.06978.pdf)
 """
+import tensorflow as tf
 
-from tensorflow.python.keras.layers import Input, Dense, Embedding, Concatenate, Reshape
-from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.initializers import RandomNormal, TruncatedNormal
-from tensorflow.python.keras.regularizers import l2
-
-from ..layers import MLP
-from ..sequence import SequencePoolingLayer, AttentionSequencePoolingLayer
-from ..activations import Dice
-
-
-def get_input(feature_dim_dict, seq_feature_list, seq_max_len):
-    sparse_input = {feat: Input(shape=(1,), name='sparse_' + str(i) + '-' + feat) for i, feat in
-                    enumerate(feature_dim_dict["sparse"])}
-
-    user_behavior_input = {feat: Input(shape=(seq_max_len,), name='seq_' + str(i) + '-' + feat) for i, feat in
-                           enumerate(seq_feature_list)}
-
-    user_behavior_length = Input(shape=(1,), name='seq_length')
-
-    return sparse_input, user_behavior_input, user_behavior_length
+from ..feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, build_input_features
+from ..inputs import create_embedding_matrix, embedding_lookup, get_dense_input, varlen_embedding_lookup, \
+    get_varlen_pooling_list
+from ..layers.core import DNN, PredictionLayer
+from ..layers.sequence import AttentionSequencePoolingLayer
+from ..layers.utils import concat_func, NoMask, combined_dnn_input
 
 
-def DIN(feature_dim_dict, seq_feature_list, embedding_size=4, hist_len_max=16,
-        use_din=True, use_bn=True, hidden_size=[200, 80], activation=Dice(), att_hidden_size=[80, 40], att_activation='sigmoid', att_weight_normalization=True,
-        l2_reg_deep=5e-5, l2_reg_embedding=0, final_activation='sigmoid', keep_prob=1, init_std=0.0001, seed=1024, ):
+def DIN(dnn_feature_columns, history_feature_list, dnn_use_bn=False,
+        dnn_hidden_units=(200, 80), dnn_activation='relu', att_hidden_size=(80, 40), att_activation="dice",
+        att_weight_normalization=False, l2_reg_dnn=0, l2_reg_embedding=1e-6, dnn_dropout=0, seed=1024,
+        task='binary'):
     """Instantiates the Deep Interest Network architecture.
 
-    :param feature_dim_dict: dict,to indicate sparse field (**now only support sparse feature**)like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':[]}
-    :param seq_feature_list: list,to indicate  sequence sparse field (**now only support sparse feature**),must be a subset of ``feature_dim_dict["sparse"]``
-    :param embedding_size: positive integer,sparse feature embedding_size.
-    :param hist_len_max: positive int, to indicate the max length of seq input
-    :param use_din: bool, whether use din pooling or not.If set to ``False``,use **sum pooling**
-    :param use_bn: bool. Whether use BatchNormalization before activation or not.in deep net
-    :param hidden_size: list,list of positive integer or empty list, the layer number and units in each layer of deep net
-    :param activation: Activation function to use in deep net
+    :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
+    :param history_feature_list: list,to indicate  sequence sparse field
+    :param dnn_use_bn: bool. Whether use BatchNormalization before activation or not in deep net
+    :param dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of deep net
+    :param dnn_activation: Activation function to use in deep net
     :param att_hidden_size: list,list of positive integer , the layer number and units in each layer of attention net
     :param att_activation: Activation function to use in attention net
     :param att_weight_normalization: bool.Whether normalize the attention score of local activation unit.
-    :param l2_reg_deep: float. L2 regularizer strength applied to deep net
+    :param l2_reg_dnn: float. L2 regularizer strength applied to DNN
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
-    :param final_activation: str,output activation,usually ``'sigmoid'`` or ``'linear'``
-    :param keep_prob: float in (0,1]. keep_prob used in deep net
-    :param init_std: float,to use as the initialize std of embedding vector
+    :param dnn_dropout: float in [0,1), the probability we will drop out a given DNN coordinate.
     :param seed: integer ,to use as random seed.
+    :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
     :return: A Keras model instance.
 
     """
-    for feature_dim_dict in [feature_dim_dict]:
-        if not isinstance(feature_dim_dict,
-                          dict) or "sparse" not in feature_dim_dict or "dense" not in feature_dim_dict:
-            raise ValueError(
-                "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
-    if len(feature_dim_dict['dense']) > 0:
-        raise ValueError('Now DIN only support sparse input')
-    sparse_input, user_behavior_input, user_behavior_length = get_input(
-        feature_dim_dict, seq_feature_list, hist_len_max)
-    sparse_embedding_dict = {feat: Embedding(feature_dim_dict["sparse"][feat], embedding_size,
-                                             embeddings_initializer=RandomNormal(
-                                                 mean=0.0, stddev=init_std, seed=seed),
-                                             embeddings_regularizer=l2(
-                                                 l2_reg_embedding),
-                                             name='sparse_emb_' + str(i) + '-' + feat) for i, feat in
-                             enumerate(feature_dim_dict["sparse"])}
-    query_emb_list = [sparse_embedding_dict[feat](
-        sparse_input[feat]) for feat in seq_feature_list]
-    keys_emb_list = [sparse_embedding_dict[feat](
-        user_behavior_input[feat]) for feat in seq_feature_list]
-    deep_input_emb_list = [sparse_embedding_dict[feat](
-        sparse_input[feat]) for feat in feature_dim_dict["sparse"]]
 
-    query_emb = Concatenate()(query_emb_list) if len(
-        query_emb_list) > 1 else query_emb_list[0]
-    keys_emb = Concatenate()(keys_emb_list) if len(
-        keys_emb_list) > 1 else keys_emb_list[0]
-    deep_input_emb = Concatenate()(deep_input_emb_list) if len(
-        deep_input_emb_list) > 1 else deep_input_emb_list[0]
+    features = build_input_features(dnn_feature_columns)
 
-    if use_din:
-        hist = AttentionSequencePoolingLayer(att_hidden_size, att_activation, weight_normalization=att_weight_normalization)([
-            query_emb, keys_emb, user_behavior_length])
-    else:
-        hist = SequencePoolingLayer(hist_len_max, 'sum')(
-            [keys_emb, user_behavior_length])
+    sparse_feature_columns = list(
+        filter(lambda x: isinstance(x, SparseFeat), dnn_feature_columns)) if dnn_feature_columns else []
+    dense_feature_columns = list(
+        filter(lambda x: isinstance(x, DenseFeat), dnn_feature_columns)) if dnn_feature_columns else []
+    varlen_sparse_feature_columns = list(
+        filter(lambda x: isinstance(x, VarLenSparseFeat), dnn_feature_columns)) if dnn_feature_columns else []
 
-    deep_input_emb = Concatenate()([deep_input_emb, hist])
-    output = MLP(hidden_size, activation, l2_reg_deep,
-                 keep_prob, use_bn, seed,)(deep_input_emb)
-    output = Dense(1, final_activation)(output)
-    output = Reshape([1])(output)
-    model_input_list = list(sparse_input.values(
-    ))+list(user_behavior_input.values()) + [user_behavior_length]
+    history_feature_columns = []
+    sparse_varlen_feature_columns = []
+    history_fc_names = list(map(lambda x: "hist_" + x, history_feature_list))
+    for fc in varlen_sparse_feature_columns:
+        feature_name = fc.name
+        if feature_name in history_fc_names:
+            history_feature_columns.append(fc)
+        else:
+            sparse_varlen_feature_columns.append(fc)
 
-    model = Model(inputs=model_input_list, outputs=output)
+    inputs_list = list(features.values())
+
+    embedding_dict = create_embedding_matrix(dnn_feature_columns, l2_reg_embedding, seed, prefix="")
+
+    query_emb_list = embedding_lookup(embedding_dict, features, sparse_feature_columns, history_feature_list,
+                                      history_feature_list, to_list=True)
+    keys_emb_list = embedding_lookup(embedding_dict, features, history_feature_columns, history_fc_names,
+                                     history_fc_names, to_list=True)
+    dnn_input_emb_list = embedding_lookup(embedding_dict, features, sparse_feature_columns,
+                                          mask_feat_list=history_feature_list, to_list=True)
+    dense_value_list = get_dense_input(features, dense_feature_columns)
+
+    sequence_embed_dict = varlen_embedding_lookup(embedding_dict, features, sparse_varlen_feature_columns)
+    sequence_embed_list = get_varlen_pooling_list(sequence_embed_dict, features, sparse_varlen_feature_columns,
+                                                  to_list=True)
+
+    dnn_input_emb_list += sequence_embed_list
+
+    keys_emb = concat_func(keys_emb_list, mask=True)
+    deep_input_emb = concat_func(dnn_input_emb_list)
+    query_emb = concat_func(query_emb_list, mask=True)
+    hist = AttentionSequencePoolingLayer(att_hidden_size, att_activation,
+                                         weight_normalization=att_weight_normalization, supports_masking=True)([
+        query_emb, keys_emb])
+
+    deep_input_emb = tf.keras.layers.Concatenate()([NoMask()(deep_input_emb), hist])
+    deep_input_emb = tf.keras.layers.Flatten()(deep_input_emb)
+    dnn_input = combined_dnn_input([deep_input_emb], dense_value_list)
+    output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed)(dnn_input)
+    final_logit = tf.keras.layers.Dense(1, use_bias=False,
+                                        kernel_initializer=tf.keras.initializers.glorot_normal(seed))(output)
+
+    output = PredictionLayer(task)(final_logit)
+
+    model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
     return model

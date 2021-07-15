@@ -1,20 +1,46 @@
+# -*- coding:utf-8 -*-
+"""
 
-from tensorflow.python.keras.layers import Input
+Author:
+    Weichen Shen,weichenswc@163.com
+
+"""
+
+import json
+import logging
+from threading import Thread
+
+import requests
+
+try:
+    from packaging.version import parse
+except ImportError:
+    from pip._vendor.packaging.version import parse
 
 
+def check_version(version):
+    """Return version of package on pypi.python.org using json."""
 
+    def check(version):
+        try:
+            url_pattern = 'https://pypi.python.org/pypi/deepctr/json'
+            req = requests.get(url_pattern)
+            latest_version = parse('0')
+            version = parse(version)
+            if req.status_code == requests.codes.ok:
+                j = json.loads(req.text.encode('utf-8'))
+                releases = j.get('releases', [])
+                for release in releases:
+                    ver = parse(release)
+                    if ver.is_prerelease or ver.is_postrelease:
+                        continue
+                    latest_version = max(latest_version, ver)
+                if latest_version > version:
+                    logging.warning(
+                        '\nDeepCTR version {0} detected. Your version is {1}.\nUse `pip install -U deepctr` to upgrade.Changelog: https://github.com/shenweichen/DeepCTR/releases/tag/v{0}'.format(
+                            latest_version, version))
+        except:
+            print("Please check the latest version manually on https://pypi.org/project/deepctr/#history")
+            return
 
-def get_input(feature_dim_dict, bias_feature_dim_dict=None):
-    sparse_input = [Input(shape=(1,), name='sparse_' + str(i) + '-' + feat) for i, feat in
-                    enumerate(feature_dim_dict["sparse"])]
-    dense_input = [Input(shape=(1,), name='dense_' + str(i) + '-' + feat) for i, feat in
-                   enumerate(feature_dim_dict["dense"])]
-    if bias_feature_dim_dict is None:
-        return sparse_input, dense_input
-    else:
-        bias_sparse_input = [Input(shape=(1,), name='bias_sparse_' + str(i) + '-' + feat) for i, feat in
-                             enumerate(bias_feature_dim_dict["sparse"])]
-        bias_dense_input = [Input(shape=(1,), name='bias_dense_' + str(i) + '-' + feat) for i, feat in
-                            enumerate(bias_feature_dim_dict["dense"])]
-        return sparse_input, dense_input, bias_sparse_input, bias_dense_input
-
+    Thread(target=check, args=(version,)).start()

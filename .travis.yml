@@ -1,0 +1,70 @@
+#sudo: required
+#dist: trusty xenial
+language: python
+
+python:
+  - "2.7" #time out
+  #- "3.4"
+  - "3.5"
+  - "3.6"
+  #- "3.7"
+
+env:
+#  - TF_VERSION=1.13.1
+#  - TF_VERSION=1.12.2
+  - TF_VERSION=1.4.0
+  #Not Support- TF_VERSION=1.7.0
+  #Not Support- TF_VERSION=1.7.1
+  #Not Support- TF_VERSION=1.8.0
+  #- TF_VERSION=1.8.0
+  #  - TF_VERSION=1.11.0
+  #- TF_VERSION=1.6.0
+  - TF_VERSION=2.0.0b1
+  #- TF_VERSION=1.13.2
+  - TF_VERSION=1.14.0
+
+matrix:
+  allow_failures:
+    - python: "2.7"
+      env: TF_VERSION=1.6.0 # to speed up
+    - python: "2.7"
+      env: TF_VERSION=2.0.0b1
+    - python: "3.4"
+    - python: "3.5"
+    - python: "3.7"
+    - env: TF_VERSION=1.5.0 #local is ok,but sometimes CI is failed
+    - env: TF_VERSION=1.7.0
+    - env: TF_VERSION=1.7.1
+    - env: TF_VERSION=1.8.0
+    - env: TF_VERSION=1.12.0 # too slow
+    - env: TF_VERSION=1.13.1 # too slow
+    - env: TF_VERSION=1.13.2 # too slow
+    - env: TF_VERSION=1.14.0 # too slow
+
+  fast_finish: true
+
+cache: pip
+# command to install dependencies
+install:
+  - pip install -q pytest-cov==2.4.0 #>=2.4.0,<2.6
+  - pip install -q python-coveralls
+  - pip install -q codacy-coverage
+  - pip install -q tensorflow==$TF_VERSION
+  - pip install -q pandas
+  - pip install -q packaging
+  - pip install -e .
+# command to run tests
+script:
+  - pytest --cov=deepctr
+
+notifications:
+  recipients:
+    - weichenswc@163.com
+
+  on_success: change
+  on_failure: change
+
+after_success:
+  - coveralls
+  - coverage xml
+  - python-codacy-coverage -r coverage.xml

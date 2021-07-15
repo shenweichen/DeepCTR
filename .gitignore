@@ -1,3 +1,8 @@
+*.h5
+*.ipynb
+.pytest_cache/
+.vscode/
+tests/unused/*
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

@@ -1,101 +1,61 @@
 # -*- coding:utf-8 -*-
 """
 Author:
-    Weichen Shen,wcshen1994@163.com
+    Weichen Shen, weichenswc@163.com
 
 Reference:
-    [1] Neural Factorization Machines for Sparse Predictive Analytics (https://arxiv.org/abs/1708.05027)
+    [1] He X, Chua T S. Neural factorization machines for sparse predictive analytics[C]//Proceedings of the 40th International ACM SIGIR conference on Research and Development in Information Retrieval. ACM, 2017: 355-364. (https://arxiv.org/abs/1708.05027)
 """
+import tensorflow as tf
 
-from tensorflow.python.keras.layers import Dense, Embedding, Concatenate, Reshape, Dropout, add
-from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.initializers import RandomNormal
-from tensorflow.python.keras.regularizers import l2
-
-
-
-from ..layers import PredictionLayer, MLP, BiInteractionPooling
-from ..utils import get_input
+from ..feature_column import build_input_features, get_linear_logit, input_from_feature_columns
+from ..layers.core import PredictionLayer, DNN
+from ..layers.interaction import BiInteractionPooling
+from ..layers.utils import concat_func, add_func, combined_dnn_input
 
 
-def NFM(feature_dim_dict, embedding_size=8,
-        hidden_size=[32, 32], l2_reg_embedding=1e-5, l2_reg_linear=1e-5, l2_reg_deep=0,
-        init_std=0.0001, seed=1024, keep_prob=1, activation='relu', final_activation='sigmoid',
-        ):
+def NFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128),
+        l2_reg_embedding=1e-5, l2_reg_linear=1e-5, l2_reg_dnn=0, seed=1024, bi_dropout=0,
+        dnn_dropout=0, dnn_activation='relu', task='binary'):
     """Instantiates the Neural Factorization Machine architecture.
 
-    :param feature_dim_dict: dict,to indicate sparse field and dense field like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_4','field_5']}
-    :param embedding_size: positive integer,sparse feature embedding_size
-    :param hidden_size: list,list of positive integer or empty list, the layer number and units in each layer of deep net
+    :param linear_feature_columns: An iterable containing all the features used by linear part of the model.
+    :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
+    :param dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of deep net
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
     :param l2_reg_linear: float. L2 regularizer strength applied to linear part.
-    :param l2_reg_deep: float . L2 regularizer strength applied to deep net
-    :param init_std: float,to use as the initialize std of embedding vector
+    :param l2_reg_dnn: float . L2 regularizer strength applied to DNN
     :param seed: integer ,to use as random seed.
-    :param keep_prob: float in (0,1]. keep_prob used in deep net
-    :param activation: Activation function to use in deep net
-    :param final_activation: str,output activation,usually ``'sigmoid'`` or ``'linear'``
+    :param biout_dropout: When not ``None``, the probability we will drop out the output of BiInteractionPooling Layer.
+    :param dnn_dropout: float in [0,1), the probability we will drop out a given DNN coordinate.
+    :param dnn_activation: Activation function to use in deep net
+    :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
     :return: A Keras model instance.
     """
-    if not isinstance(feature_dim_dict,
-                      dict) or "sparse" not in feature_dim_dict or "dense" not in feature_dim_dict:
-        raise ValueError(
-            "feature_dim must be a dict like {'sparse':{'field_1':4,'field_2':3,'field_3':2},'dense':['field_5',]}")
 
-    sparse_input, dense_input = get_input(feature_dim_dict, None)
-    sparse_embedding, linear_embedding = get_embeddings(
-        feature_dim_dict, embedding_size, init_std, seed, l2_reg_embedding, l2_reg_linear)
+    features = build_input_features(
+        linear_feature_columns + dnn_feature_columns)
 
-    embed_list = [sparse_embedding[i](sparse_input[i])
-                  for i in range(len(sparse_input))]
-    linear_term = add([linear_embedding[i](sparse_input[i])
-                       for i in range(len(sparse_input))])
-    linear_term = Reshape([1])(linear_term)
+    inputs_list = list(features.values())
 
-    if len(dense_input) > 0:
-        continuous_embedding_list = list(
-            map(Dense(embedding_size, use_bias=False, kernel_regularizer=l2(l2_reg_embedding), ),
-                dense_input))
-        continuous_embedding_list = list(
-            map(Reshape((1, embedding_size)), continuous_embedding_list))
-        embed_list += continuous_embedding_list
+    linear_logit = get_linear_logit(features, linear_feature_columns, seed=seed, prefix='linear',
+                                    l2_reg=l2_reg_linear)
 
-        dense_input_ = dense_input[0] if len(
-            dense_input) == 1 else Concatenate()(dense_input)
-        linear_dense_logit = Dense(
-            1, activation=None, use_bias=False, kernel_regularizer=l2(l2_reg_linear))(dense_input_)
-        linear_term = add([linear_dense_logit, linear_term])
+    sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
+                                                                         l2_reg_embedding, seed)
 
-    fm_input = Concatenate(axis=1)(embed_list)
-
+    fm_input = concat_func(sparse_embedding_list, axis=1)
     bi_out = BiInteractionPooling()(fm_input)
-    bi_out = Dropout(1 - keep_prob)(bi_out)
-    deep_out = MLP(hidden_size, activation, l2_reg_deep, keep_prob,
-                   False, seed)(bi_out)
-    deep_logit = Dense(1, use_bias=False, activation=None)(deep_out)
+    if bi_dropout:
+        bi_out = tf.keras.layers.Dropout(bi_dropout)(bi_out, training=None)
+    dnn_input = combined_dnn_input([bi_out], dense_value_list)
+    dnn_output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, False, seed=seed)(dnn_input)
+    dnn_logit = tf.keras.layers.Dense(
+        1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(dnn_output)
 
-    final_logit = linear_term  # TODO add bias term
+    final_logit = add_func([linear_logit, dnn_logit])
 
-    if len(hidden_size) > 0:
-        final_logit = add([final_logit, deep_logit])
+    output = PredictionLayer(task)(final_logit)
 
-    output = PredictionLayer(final_activation)(final_logit)
-    print(output)
-    model = Model(inputs=sparse_input + dense_input, outputs=output)
+    model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
     return model
-
-
-def get_embeddings(feature_dim_dict, embedding_size, init_std, seed, l2_rev_V, l2_reg_w):
-    sparse_embedding = [Embedding(feature_dim_dict["sparse"][feat], embedding_size,
-                                  embeddings_initializer=RandomNormal(
-                                      mean=0.0, stddev=init_std, seed=seed),
-                                  embeddings_regularizer=l2(l2_rev_V),
-                                  name='sparse_emb_' + str(i) + '-' + feat) for i, feat in
-                        enumerate(feature_dim_dict["sparse"])]
-    linear_embedding = [Embedding(feature_dim_dict["sparse"][feat], 1,
-                                  embeddings_initializer=RandomNormal(mean=0.0, stddev=init_std,
-                                                                      seed=seed), embeddings_regularizer=l2(l2_reg_w),
-                                  name='linear_emb_' + str(i) + '-' + feat) for
-                        i, feat in enumerate(feature_dim_dict["sparse"])]
-
-    return sparse_embedding, linear_embedding
