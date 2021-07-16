@@ -1,3 +1,11 @@
+"""
+Author:
+    Mincai Lai, laimc@shanghaitech.edu.cn
+
+Reference:
+    [1] Caruana R. Multitask learning[J]. Machine learning, 1997.(http://reports-archive.adm.cs.cmu.edu/anon/1997/CMU-CS-97-203.pdf)
+"""
+
 import tensorflow as tf
 
 from deepctr.feature_column import build_input_features, input_from_feature_columns

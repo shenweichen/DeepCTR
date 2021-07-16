@@ -1,3 +1,11 @@
+"""
+Author:
+    Mincai Lai, laimc@shanghaitech.edu.cn
+
+Reference:
+    [1] Ma J, Zhao Z, Yi X, et al. Modeling task relationships in multi-task learning with multi-gate mixture-of-experts[C]//Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. 2018.(https://dl.acm.org/doi/abs/10.1145/3219819.3220007)
+"""
+
 import tensorflow as tf
 
 from deepctr.feature_column import build_input_features, input_from_feature_columns

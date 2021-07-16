@@ -1,3 +1,11 @@
+"""
+Author:
+    Mincai Lai, laimc@shanghaitech.edu.cn
+
+Reference:
+    [1] Ma X, Zhao L, Huang G, et al. Entire space multi-task model: An effective approach for estimating post-click conversion rate[C]//The 41st International ACM SIGIR Conference on Research & Development in Information Retrieval. 2018.(https://arxiv.org/abs/1804.07931)
+"""
+
 import tensorflow as tf
 
 from deepctr.feature_column import build_input_features, input_from_feature_columns

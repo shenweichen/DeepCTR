@@ -1,3 +1,11 @@
+"""
+Author:
+    Mincai Lai, laimc@shanghaitech.edu.cn
+
+Reference:
+    [1] Tang H, Liu J, Zhao M, et al. Progressive layered extraction (ple): A novel multi-task learning (mtl) model for personalized recommendations[C]//Fourteenth ACM Conference on Recommender Systems. 2020.(https://dl.acm.org/doi/10.1145/3383313.3412236)
+"""
+
 import tensorflow as tf
 
 from deepctr.feature_column import build_input_features, input_from_feature_columns
