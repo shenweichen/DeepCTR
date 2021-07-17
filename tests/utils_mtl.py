@@ -4,6 +4,7 @@ import os
 import numpy as np
 import tensorflow as tf
 from tensorflow.python.keras.models import load_model, save_model
+from tensorflow.keras.metrics import AUC
 from deepctr.layers import custom_objects
 from deepctr.feature_column import SparseFeat, DenseFeat, DEFAULT_GROUP_NAME
 
@@ -60,11 +61,11 @@ def check_mtl_model(model, model_name, x, y_list, task_types, check_model_io=Tru
     """
     loss_list = []
     metric_list = []
-    for type in task_types:
-        if type=='binary':
+    for i in range(len(task_types)):
+        if task_types[i]=='binary':
             loss_list.append('binary_crossentropy')
-            metric_list.append('AUC')
-        elif type=='regression':
+            metric_list.append(AUC(name='auc_task%d'%i))
+        elif task_types[i]=='regression':
             loss_list.append('mean_squared_error')
             metric_list.append('mae')
     print('loss:', loss_list)

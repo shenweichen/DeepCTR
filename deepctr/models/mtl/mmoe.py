@@ -10,7 +10,7 @@ import tensorflow as tf
 
 from deepctr.feature_column import build_input_features, input_from_feature_columns
 from deepctr.layers.core import PredictionLayer, DNN
-from deepctr.layers.utils import combined_dnn_input
+from deepctr.layers.utils import combined_dnn_input, reduce_sum
 
 def MMOE(dnn_feature_columns, num_tasks, task_types, task_names, num_experts=4, 
          expert_dnn_units=[32,32],  gate_dnn_units=None, tower_dnn_units_lists=[[16,8],[16,8]],
@@ -78,7 +78,7 @@ def MMOE(dnn_feature_columns, num_tasks, task_types, task_names, num_experts=4,
 
         #gate multiply the expert
         gate_mul_expert = tf.keras.layers.Multiply(name='gate_mul_expert_'+task_names[i])([expert_concat, gate_out]) 
-        gate_mul_expert = tf.math.reduce_sum(gate_mul_expert, axis=1) #sum pooling in the expert ndim
+        gate_mul_expert = reduce_sum(gate_mul_expert, axis=1, keep_dims=True) #sum pooling in the expert ndim
         mmoe_outs.append(gate_mul_expert)
     
     task_outs = []
