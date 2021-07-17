@@ -2,14 +2,51 @@
 
 import os
 import numpy as np
-
+import tensorflow as tf
 from tensorflow.python.keras.models import load_model, save_model
 from deepctr.layers import custom_objects
+from deepctr.feature_column import SparseFeat, DenseFeat, DEFAULT_GROUP_NAME
 
-def get_mtl_test_data():
-    test_data = np.load('adult_mini.npy', allow_pickle=True)
-    #(x, y_list, feature_columns)
-    return test_data[0], test_data[1], test_data[2]
+def get_mtl_test_data(sample_size=1000, embedding_size=4, sparse_feature_num=3, dense_feature_num=3, task_types=['binary','binary'], include_length=False,
+                  hash_flag=False, prefix='', use_group=False):
+    feature_columns = []
+    model_input = {}
+
+    for i in range(sparse_feature_num):
+        if use_group:
+            group_name = str(i % 3)
+        else:
+            group_name = DEFAULT_GROUP_NAME
+        dim = np.random.randint(1, 10)
+        feature_columns.append(
+            SparseFeat(prefix + 'sparse_feature_' + str(i), dim, embedding_size, use_hash=hash_flag, dtype=tf.int32, group_name=group_name))
+
+    for i in range(dense_feature_num):
+        def transform_fn(x): return (x - 0.0) / 1.0
+        feature_columns.append(
+            DenseFeat(
+                prefix + 'dense_feature_' + str(i),
+                1,
+                dtype=tf.float32,
+                transform_fn=transform_fn
+            )
+        )
+
+    for fc in feature_columns:
+        if isinstance(fc, SparseFeat):
+            model_input[fc.name] = np.random.randint(0, fc.vocabulary_size, sample_size)
+        elif isinstance(fc, DenseFeat):
+            model_input[fc.name] = np.random.random(sample_size)
+    y_list = [] #multi label
+    for task in task_types:
+        if task=='binary':
+            y = np.random.randint(0, 2, sample_size)
+            y_list.append(y)
+        else:
+            y = np.random.random(sample_size)
+            y_list.append(y)
+
+    return model_input, y_list, feature_columns
 
 def check_mtl_model(model, model_name, x, y_list, task_types, check_model_io=True):
     """
