@@ -47,8 +47,9 @@ def test_PLE():
     check_mtl_model(model, model_name, x, y_list, task_types=['binary', 'binary'])
 
 if __name__ == "__main__":
-    test_Shared_Bottom()
-    test_ESSM()
-    test_MMOE()
-    test_CGC()
-    test_PLE()
+    pass
+    # test_Shared_Bottom()
+    # test_ESSM()
+    # test_MMOE()
+    # test_CGC()
+    # test_PLE()
