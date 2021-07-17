@@ -1,36 +1,15 @@
 #test utils for multi task learning
 
 import os
-import pandas as pd
-from sklearn.preprocessing import LabelEncoder, MinMaxScaler
+import numpy as np
 
 from tensorflow.python.keras.models import load_model, save_model
 from deepctr.layers import custom_objects
-from deepctr.feature_column import SparseFeat, DenseFeat, get_feature_names
 
 def get_mtl_test_data():
-    data = pd.read_csv('./adult_mini.csv')
-    #define dense and sparse features
-    columns = data.columns.values.tolist()
-    dense_features = ['fnlwgt', 'capital_gain', 'capital_loss', 'hours_per_week']
-    sparse_features = [col for col in columns if col not in dense_features and col not in ['label_income', 'label_marital']]
-
-    data[sparse_features] = data[sparse_features].fillna('-1', )
-    data[dense_features] = data[dense_features].fillna(0, )
-    mms = MinMaxScaler(feature_range=(0, 1))
-    data[dense_features] = mms.fit_transform(data[dense_features])
-    for feat in sparse_features:
-        lbe = LabelEncoder()
-        data[feat] = lbe.fit_transform(data[feat])
-    fixlen_feature_columns = [SparseFeat(feat, data[feat].max()+1, embedding_dim=16)for feat in sparse_features] \
-    + [DenseFeat(feat, 1,) for feat in dense_features]
-    dnn_feature_columns = fixlen_feature_columns
-    feature_names = get_feature_names(dnn_feature_columns)
-    #define X,y1,y2,yn...
-    model_input = {name: data[name] for name in feature_names}
-    y1 = data['label_income'].values
-    y2 = data['label_marital'].values
-    return model_input, [y1, y2], dnn_feature_columns
+    test_data = np.load('adult_mini.npy', allow_pickle=True)
+    #(x, y_list, feature_columns)
+    return test_data[0], test_data[1], test_data[2]
 
 def check_mtl_model(model, model_name, x, y_list, task_types, check_model_io=True):
     """
