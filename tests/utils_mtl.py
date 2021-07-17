@@ -4,7 +4,7 @@ import os
 import numpy as np
 import tensorflow as tf
 from tensorflow.python.keras.models import load_model, save_model
-from tensorflow.keras.metrics import AUC
+from tensorflow.python.keras.metrics import AUC
 from deepctr.layers import custom_objects
 from deepctr.feature_column import SparseFeat, DenseFeat, DEFAULT_GROUP_NAME
 
