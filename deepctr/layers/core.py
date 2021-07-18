@@ -68,8 +68,8 @@ class LocalActivationUnit(Layer):
                              'inputs of a two inputs with shape (None,1,embedding_size) and (None,T,embedding_size)'
                              'Got different shapes: %s,%s' % (input_shape[0], input_shape[1]))
         size = 4 * \
-               int(input_shape[0][-1]
-                   ) if len(self.hidden_units) == 0 else self.hidden_units[-1]
+            int(input_shape[0][-1]
+                ) if len(self.hidden_units) == 0 else self.hidden_units[-1]
         self.kernel = self.add_weight(shape=(size, 1),
                                       initializer=glorot_normal(
                                           seed=self.seed),
@@ -77,9 +77,6 @@ class LocalActivationUnit(Layer):
         self.bias = self.add_weight(
             shape=(1,), initializer=Zeros(), name="bias")
         self.dnn = DNN(self.hidden_units, self.activation, self.l2_reg, self.dropout_rate, self.use_bn, seed=self.seed)
-
-        self.dense = tf.keras.layers.Lambda(lambda x: tf.nn.bias_add(tf.tensordot(
-            x[0], x[1], axes=(-1, 0)), x[2]))
 
         super(LocalActivationUnit, self).build(
             input_shape)  # Be sure to call this somewhere!
@@ -96,7 +93,7 @@ class LocalActivationUnit(Layer):
 
         att_out = self.dnn(att_input, training=training)
 
-        attention_score = self.dense([att_out, self.kernel, self.bias])
+        attention_score = tf.nn.bias_add(tf.tensordot(att_out, self.kernel, axes=(-1, 0)), self.bias)
 
         return attention_score
 
