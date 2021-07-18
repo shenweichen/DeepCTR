@@ -91,11 +91,11 @@ def PLE(dnn_feature_columns, num_tasks, task_types, task_names, num_levels=2, nu
             else:  #in origin paper, gate is one Dense layer with softmax.
                 gate_input = dnn_input        
             gate_out = tf.keras.layers.Dense(cur_expert_num, use_bias=False, activation='softmax', name=level_name+'gate_softmax_specific_'+task_names[i])(gate_input)
-            gate_out = tf.tile(tf.expand_dims(gate_out, axis=-1), [1, 1, expert_dnn_units[-1]]) 
+            gate_out = tf.keras.layers.Lambda(lambda x: tf.tile(tf.expand_dims(x, axis=-1), [1, 1, expert_dnn_units[-1]]))(gate_out) 
 
             #gate multiply the expert
             gate_mul_expert = tf.keras.layers.Multiply(name=level_name+'gate_mul_expert_specific_'+task_names[i])([expert_concat, gate_out]) 
-            gate_mul_expert = reduce_sum(gate_mul_expert, axis=1, keep_dims=True) #sum pooling in the expert ndim
+            gate_mul_expert = tf.keras.layers.Lambda(lambda x: reduce_sum(x, axis=1, keep_dims=True))(gate_mul_expert)
             cgc_outs.append(gate_mul_expert)
         
         #task_shared gate, if the level not in last, add one shared gate
@@ -114,11 +114,11 @@ def PLE(dnn_feature_columns, num_tasks, task_types, task_names, num_levels=2, nu
                 gate_input = dnn_input  
                 
             gate_out = tf.keras.layers.Dense(cur_expert_num, use_bias=False, activation='softmax', name=level_name+'gate_softmax_shared_'+str(i))(gate_input)
-            gate_out = tf.tile(tf.expand_dims(gate_out, axis=-1), [1, 1, expert_dnn_units[-1]]) 
+            gate_out = tf.keras.layers.Lambda(lambda x: tf.tile(tf.expand_dims(x, axis=-1), [1, 1, expert_dnn_units[-1]]))(gate_out) 
 
             #gate multiply the expert
             gate_mul_expert = tf.keras.layers.Multiply(name=level_name+'gate_mul_expert_shared_'+task_names[i])([expert_concat, gate_out]) 
-            gate_mul_expert = reduce_sum(gate_mul_expert, axis=1, keep_dims=True) #sum pooling in the expert ndim
+            gate_mul_expert = tf.keras.layers.Lambda(lambda x: reduce_sum(x, axis=1, keep_dims=True))(gate_mul_expert)
             cgc_outs.append(gate_mul_expert)
         return cgc_outs
     

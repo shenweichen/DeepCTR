@@ -74,11 +74,12 @@ def MMOE(dnn_feature_columns, num_tasks, task_types, task_names, num_experts=4,
         else:  #in origin paper, gate is one Dense layer with softmax.
             gate_input = dnn_input
         gate_out = tf.keras.layers.Dense(num_experts, use_bias=False, activation='softmax', name='gate_softmax_'+task_names[i])(gate_input)
-        gate_out = tf.tile(tf.expand_dims(gate_out, axis=-1), [1, 1, expert_dnn_units[-1]]) #let the shape of gate_out be (num_experts, output dim of expert_network)
+        #let the shape of gate_out be (num_experts, output dim of expert_network)
+        gate_out = tf.keras.layers.Lambda(lambda x: tf.tile(tf.expand_dims(x, axis=-1), [1, 1, expert_dnn_units[-1]]))(gate_out) 
 
         #gate multiply the expert
         gate_mul_expert = tf.keras.layers.Multiply(name='gate_mul_expert_'+task_names[i])([expert_concat, gate_out]) 
-        gate_mul_expert = reduce_sum(gate_mul_expert, axis=1, keep_dims=True) #sum pooling in the expert ndim
+        gate_mul_expert = tf.keras.layers.Lambda(lambda x: reduce_sum(x, axis=1, keep_dims=True))(gate_mul_expert)
         mmoe_outs.append(gate_mul_expert)
     
     task_outs = []
