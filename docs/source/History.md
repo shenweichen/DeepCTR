@@ -1,4 +1,5 @@
 # History
+- 07/18/2021 : [v0.8.7](https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.7) released.Support pre-defined key-value vocabulary in `Hash` Layer. [example](./Examples.html#hash-layer-with-pre-defined-key-value-vocabulary)
 - 06/14/2021 : [v0.8.6](https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.6) released.Add [IFM](./Features.html#ifm-input-aware-factorization-machine) [DIFM](./Features.html#difm-dual-input-aware-factorization-machine), [FEFM and DeepFEFM](./Features.html#deepfefm-deep-field-embedded-factorization-machine) model.
 - 03/13/2021 : [v0.8.5](https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.5) released.Add [BST](./Features.html#bst-behavior-sequence-transformer) model.
 - 02/12/2021 : [v0.8.4](https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.4) released.Fix bug in DCN-Mix. 
