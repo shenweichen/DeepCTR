@@ -324,7 +324,7 @@ if __name__ == "__main__":
 ```
 ## Hash Layer with pre-defined key-value vocabulary 
 
-This examples how to use pre-defined key-value vocabulary in `Hash` Layer.
+This examples how to use pre-defined key-value vocabulary in `Hash` Layer.`movielens_age_vocabulary.csv` stores the key-value mapping for `age` feature.
 
 ```python
 from deepctr.models import DeepFM
