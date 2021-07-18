@@ -86,7 +86,7 @@ fixlen_feature_columns = [SparseFeat(feat, vocabulary_size=data[feat].max() + 1,
 ```
 - Feature Hashing on the fly
 ```python
-fixlen_feature_columns = [SparseFeat(feat, vocabulary_size=1e6,embedding_dim=4, use_hash=True, dtype='string')  # since the input is string
+fixlen_feature_columns = [SparseFeat(feat, vocabulary_size=1e6,embedding_dim=4, use_hash=True, dtype='string')  # the input is string
                               for feat in sparse_features] + [DenseFeat(feat, 1, )
                           for feat in dense_features]
 ```
