@@ -4,7 +4,6 @@ import numpy as np
 
 
 def test_long_dense_vector():
-
     feature_columns = [SparseFeat('user_id', 4, ), SparseFeat('item_id', 5, ), DenseFeat("pic_vec", 5)]
     fixlen_feature_names = get_feature_names(feature_columns)
 
@@ -24,6 +23,8 @@ def test_long_dense_vector():
 def test_feature_column_sparsefeat_vocabulary_path():
     vocab_path = "./dummy_test.csv"
     sf = SparseFeat('user_id', 4, vocabulary_path=vocab_path)
-    assert sf.vocabulary_path == vocab_path
+    if sf.vocabulary_path != vocab_path:
+        raise ValueError("sf.vocabulary_path is invalid")
     vlsf = VarLenSparseFeat(sf, 6)
-    assert vlsf.vocabulary_path == vocab_path
+    if vlsf.vocabulary_path != vocab_path:
+        raise ValueError("vlsf.vocabulary_path is invalid")

@@ -105,7 +105,7 @@ If you find this code useful in your research, please cite it using the followin
       <td>
          <a href="https://github.com/zanshuxun"><img width="70" height="70" src="https://github.com/zanshuxun.png?s=40" alt="pic"></a><br>
          <a href="https://github.com/zanshuxun">Zan Shuxun</a> ​
-        <p>Beijing University <br> of  Posts and <br> Telecommunications  </p>​
+        <p>Alibaba Group  </p>​
       </td>
       <td>
         ​ <a href="https://github.com/pandeconscious"><img width="70" height="70" src="https://github.com/pandeconscious.png?s=40" alt="pic"></a><br>
