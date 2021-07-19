@@ -10,13 +10,13 @@ import tensorflow as tf
 
 from deepctr.feature_column import build_input_features, input_from_feature_columns
 from deepctr.layers.core import PredictionLayer, DNN
-from deepctr.layers.utils import combined_dnn_input 
+from deepctr.layers.utils import combined_dnn_input
 
-def Shared_Bottom(dnn_feature_columns, num_tasks, task_types, task_names,
+def Shared_Bottom(dnn_feature_columns, num_tasks=None, task_types=None, task_names=None,
                   bottom_dnn_units=[128, 128], tower_dnn_units_lists=[[64,32], [64,32]],
                   l2_reg_embedding=0.00001, l2_reg_dnn=0, seed=1024, dnn_dropout=0,dnn_activation='relu', dnn_use_bn=False):
     """Instantiates the Shared_Bottom multi-task learning Network architecture.
-    
+
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
     :param num_tasks:  integer, number of tasks, equal to number of outputs, must be greater than 1.
     :param task_types: list of str, indicating the loss of each tasks, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss. e.g. ['binary', 'regression']

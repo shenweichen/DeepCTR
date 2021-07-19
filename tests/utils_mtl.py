@@ -7,8 +7,9 @@ from tensorflow.python.keras.models import load_model, save_model
 from deepctr.layers import custom_objects
 from deepctr.feature_column import SparseFeat, DenseFeat, DEFAULT_GROUP_NAME
 
-def get_mtl_test_data(sample_size=1000, embedding_size=4, sparse_feature_num=3, dense_feature_num=3, task_types=['binary','binary'], include_length=False,
-                  hash_flag=False, prefix='', use_group=False):
+def get_mtl_test_data(sample_size=1000, embedding_size=4, sparse_feature_num=3,
+                      dense_feature_num=3, task_types=['binary','binary'],
+                      hash_flag=False, prefix='', use_group=False):
     feature_columns = []
     model_input = {}
 
@@ -60,11 +61,11 @@ def check_mtl_model(model, model_name, x, y_list, task_types, check_model_io=Tru
     """
     loss_list = []
     metric_list = []
-    for i in range(len(task_types)):
-        if task_types[i]=='binary':
+    for task_type in task_types:
+        if task_type=='binary':
             loss_list.append('binary_crossentropy')
             metric_list.append('accuracy')
-        elif task_types[i]=='regression':
+        elif task_type=='regression':
             loss_list.append('mean_squared_error')
             metric_list.append('mae')
     print('loss:', loss_list)
