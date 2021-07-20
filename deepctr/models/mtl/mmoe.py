@@ -41,7 +41,7 @@ def MMOE(dnn_feature_columns, num_tasks=None, task_types=None, task_names=None, 
 
     if len(task_types) != num_tasks:
         raise ValueError("num_tasks must be equal to the length of task_types")
-        
+
     for task_type in task_types:
         if task_type not in ['binary', 'regression']:
             raise ValueError("task must be binary or regression, {} is illegal".format(task_type))
