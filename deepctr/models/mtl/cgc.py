@@ -11,7 +11,7 @@ from deepctr.feature_column import build_input_features, input_from_feature_colu
 from deepctr.layers.core import PredictionLayer, DNN
 from deepctr.layers.utils import combined_dnn_input, reduce_sum
 
-def CGC(dnn_feature_columns, num_tasks= None, task_types=None, task_names=None, num_experts_specific=8, num_experts_shared=4,
+def CGC(dnn_feature_columns, num_tasks=None, task_types=None, task_names=None, num_experts_specific=8, num_experts_shared=4,
         expert_dnn_units=[64,64],  gate_dnn_units=None, tower_dnn_units_lists=[[16,16],[16,16]],
         l2_reg_embedding=1e-5, l2_reg_dnn=0, seed=1024, dnn_dropout=0, dnn_activation='relu', dnn_use_bn=False):
     """Instantiates the Customized Gate Control block of Progressive Layered Extraction architecture.
@@ -20,14 +20,14 @@ def CGC(dnn_feature_columns, num_tasks= None, task_types=None, task_names=None, 
     :param num_tasks: integer, number of tasks, equal to number of outputs, must be greater than 1.
     :param task_types: list of str, indicating the loss of each tasks, ``"binary"`` for  binary logloss, ``"regression"`` for regression loss. e.g. ['binary', 'regression']
     :param task_names: list of str, indicating the predict target of each tasks
-    
+
     :param num_experts_specific: integer, number of task-specific experts.
     :param num_experts_shared: integer, number of task-shared experts.
 
     :param expert_dnn_units: list, list of positive integer, its length must be greater than 1, the layer number and units in each layer of expert DNN
     :param gate_dnn_units: list, list of positive integer or None, the layer number and units in each layer of gate DNN, default value is None. e.g.[8, 8].
     :param tower_dnn_units_lists: list, list of positive integer list, its length must be euqal to num_tasks, the layer number and units in each layer of task-specific DNN
-    
+
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
     :param l2_reg_dnn: float. L2 regularizer strength applied to DNN
     :param seed: integer ,to use as random seed.
@@ -36,16 +36,16 @@ def CGC(dnn_feature_columns, num_tasks= None, task_types=None, task_names=None, 
     :param dnn_use_bn: bool. Whether use BatchNormalization before activation or not in DNN
     :return: a Keras model instance
     """
-    
+
     if num_tasks <= 1:
         raise ValueError("num_tasks must be greater than 1")
     if len(task_types) != num_tasks:
         raise ValueError("num_tasks must be equal to the length of task_types")
-        
+
     for task_type in task_types:
         if task_type not in ['binary', 'regression']:
             raise ValueError("task must be binary or regression, {} is illegal".format(task_type))
-            
+
     if num_tasks != len(tower_dnn_units_lists):
         raise ValueError("the length of tower_dnn_units_lists must be euqal to num_tasks")
 
@@ -56,7 +56,7 @@ def CGC(dnn_feature_columns, num_tasks= None, task_types=None, task_names=None, 
     sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
                                                                          l2_reg_embedding, seed)
     dnn_input = combined_dnn_input(sparse_embedding_list, dense_value_list)
-    
+
     expert_outputs = []
     #build task-specific expert layer
     for i in range(num_tasks):
@@ -68,7 +68,7 @@ def CGC(dnn_feature_columns, num_tasks= None, task_types=None, task_names=None, 
     for i in range(num_experts_shared):
         expert_network = DNN(expert_dnn_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed, name='expert_shared_'+str(i))(dnn_input)
         expert_outputs.append(expert_network)
-        
+
     #build one Extraction Layer
     cgc_outs = []
     for i in range(num_tasks):
@@ -77,22 +77,22 @@ def CGC(dnn_feature_columns, num_tasks= None, task_types=None, task_names=None, 
         cur_experts = expert_outputs[i * num_experts_specific:(i + 1) * num_experts_specific] + expert_outputs[-int(num_experts_shared):] #task_specific + task_shared
         expert_concat = tf.keras.layers.concatenate(cur_experts, axis=1, name='expert_concat_'+task_names[i])
         expert_concat = tf.keras.layers.Reshape([cur_expert_num, expert_dnn_units[-1]], name='expert_reshape_'+task_names[i])(expert_concat)
-        
+
         #build gate layers
         if gate_dnn_units!=None:
             gate_network = DNN(gate_dnn_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed, name='gate_'+task_names[i])(dnn_input)
             gate_input = gate_network
         else:  #in origin paper, gate is one Dense layer with softmax.
             gate_input = dnn_input
-            
+
         gate_out = tf.keras.layers.Dense(cur_expert_num, use_bias=False, activation='softmax', name='gate_softmax_'+task_names[i])(gate_input)
         gate_out = tf.keras.layers.Lambda(lambda x: tf.tile(tf.expand_dims(x, axis=-1), [1, 1, expert_dnn_units[-1]]))(gate_out)
-        
+
         #gate multiply the expert
         gate_mul_expert = tf.keras.layers.Multiply(name='gate_mul_expert_'+task_names[i])([expert_concat, gate_out])
         gate_mul_expert = tf.keras.layers.Lambda(lambda x: reduce_sum(x, axis=1, keep_dims=True))(gate_mul_expert)
         cgc_outs.append(gate_mul_expert)
-    
+
     task_outs = []
     for task_type, task_name, tower_dnn, cgc_out in zip(task_types, task_names, tower_dnn_units_lists, cgc_outs):
         #build tower layer
@@ -100,6 +100,6 @@ def CGC(dnn_feature_columns, num_tasks= None, task_types=None, task_names=None, 
         logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(tower_output)
         output = PredictionLayer(task_type, name=task_name)(logit)
         task_outs.append(output)
-        
+
     model = tf.keras.models.Model(inputs=inputs_list, outputs=task_outs)
     return model

@@ -39,7 +39,7 @@ def test_CGC():
         return
     model_name = "CGC"
     x, y_list, dnn_feature_columns = get_mtl_test_data()
-    
+
     model = CGC(dnn_feature_columns, num_tasks=2, task_types=['binary', 'binary'], task_names=['income','marital'],
                     num_experts_specific=4, num_experts_shared=4, expert_dnn_units=[16], gate_dnn_units=None, tower_dnn_units_lists=[[8],[8]])
     check_mtl_model(model, model_name, x, y_list, task_types=['binary', 'binary'])
@@ -49,7 +49,7 @@ def test_PLE():
         return
     model_name = "PLE"
     x, y_list, dnn_feature_columns = get_mtl_test_data()
-    
+
     model = PLE(dnn_feature_columns, num_tasks=2, task_types=['binary', 'binary'], task_names=['income','marital'],
                 num_levels=2, num_experts_specific=4, num_experts_shared=4, expert_dnn_units=[16],
                 gate_dnn_units=None,tower_dnn_units_lists=[[8],[8]])
@@ -57,8 +57,3 @@ def test_PLE():
 
 if __name__ == "__main__":
     pass
-    # test_Shared_Bottom()
-    # test_ESSM()
-    # test_MMOE()
-    # test_CGC()
-    # test_PLE()

@@ -37,17 +37,17 @@ def Shared_Bottom(dnn_feature_columns, num_tasks=None, task_types=None, task_nam
         raise ValueError("num_tasks must be greater than 1")
     if len(task_types) != num_tasks:
         raise ValueError("num_tasks must be equal to the length of task_types")
-        
+
     for task_type in task_types:
         if task_type not in ['binary', 'regression']:
             raise ValueError("task must be binary or regression, {} is illegal".format(task_type))
-            
+
     if num_tasks != len(tower_dnn_units_lists):
         raise ValueError("the length of tower_dnn_units_lists must be euqal to num_tasks")
 
     features = build_input_features(dnn_feature_columns)
     inputs_list = list(features.values())
-    
+
     sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns, l2_reg_embedding,seed)
 
     dnn_input = combined_dnn_input(sparse_embedding_list, dense_value_list)
@@ -56,7 +56,7 @@ def Shared_Bottom(dnn_feature_columns, num_tasks=None, task_types=None, task_nam
     tasks_output = []
     for task_type, task_name, tower_dnn in zip(task_types, task_names, tower_dnn_units_lists):
         tower_output = DNN(tower_dnn, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed, name='tower_'+task_name)(shared_bottom_output)
-        
+
         logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(tower_output)
         output = PredictionLayer(task_type, name=task_name)(logit) #regression->keep, binary classification->sigmoid
         tasks_output.append(output)

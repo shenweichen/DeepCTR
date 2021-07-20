@@ -34,26 +34,26 @@ def ESSM(dnn_feature_columns, task_type='binary', task_names=['ctr', 'ctcvr'],
     """
     if len(task_names)!=2:
         raise ValueError("the length of task_names must be equal to 2")
-    
+
     if len(tower_dnn_units_lists)!=2:
         raise ValueError("the length of tower_dnn_units_lists must be equal to 2")
-    
+
     features = build_input_features(dnn_feature_columns)
     inputs_list = list(features.values())
-    
+
     sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns, l2_reg_embedding,seed)
 
     dnn_input = combined_dnn_input(sparse_embedding_list, dense_value_list)
-    
+
     ctr_output = DNN(tower_dnn_units_lists[0], dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed)(dnn_input)
     cvr_output = DNN(tower_dnn_units_lists[1], dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed)(dnn_input)
-    
+
     ctr_logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(ctr_output)
     cvr_logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(cvr_output)
-    
+
     ctr_pred = PredictionLayer(task_type, name=task_names[0])(ctr_logit)
     cvr_pred = PredictionLayer(task_type)(cvr_logit)
-    
+
     ctcvr_pred = tf.keras.layers.Multiply(name=task_names[1])([ctr_pred, cvr_pred])#CTCVR = CTR * CVR
 
     model = tf.keras.models.Model(inputs=inputs_list, outputs=[ctr_pred, ctcvr_pred])
