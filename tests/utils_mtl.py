@@ -7,8 +7,8 @@ from tensorflow.python.keras.models import load_model, save_model
 from deepctr.layers import custom_objects
 from deepctr.feature_column import SparseFeat, DenseFeat, DEFAULT_GROUP_NAME
 
-def get_mtl_test_data(sample_size=10, embedding_size=4, sparse_feature_num=2,
-                      dense_feature_num=2, task_types=['binary','binary'],
+def get_mtl_test_data(sample_size=10, embedding_size=4, sparse_feature_num=1,
+                      dense_feature_num=1, task_types=['binary','binary'],
                       hash_flag=False, prefix='', use_group=False):
     feature_columns = []
     model_input = {}

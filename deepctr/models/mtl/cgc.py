@@ -86,7 +86,7 @@ def CGC(dnn_feature_columns, num_tasks=None, task_types=None, task_names=None, n
             gate_input = dnn_input
 
         gate_out = tf.keras.layers.Dense(cur_expert_num, use_bias=False, activation='softmax', name='gate_softmax_'+task_names[i])(gate_input)
-        gate_out = tf.keras.layers.Lambda(lambda x: tf.tile(tf.expand_dims(x, axis=-1), [1, 1, expert_dnn_units[-1]]))(gate_out)
+        gate_out = tf.keras.layers.Lambda(lambda x: tf.expand_dims(x, axis=-1))(gate_out)
 
         #gate multiply the expert
         gate_mul_expert = tf.keras.layers.Multiply(name='gate_mul_expert_'+task_names[i])([expert_concat, gate_out])

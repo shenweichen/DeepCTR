@@ -91,7 +91,7 @@ def PLE(dnn_feature_columns, num_tasks=None, task_types=None, task_names=None, n
             else:  #in origin paper, gate is one Dense layer with softmax.
                 gate_input = dnn_input
             gate_out = tf.keras.layers.Dense(cur_expert_num, use_bias=False, activation='softmax', name=level_name+'gate_softmax_specific_'+task_names[i])(gate_input)
-            gate_out = tf.keras.layers.Lambda(lambda x: tf.tile(tf.expand_dims(x, axis=-1), [1, 1, expert_dnn_units[-1]]))(gate_out)
+            gate_out = tf.keras.layers.Lambda(lambda x: tf.expand_dims(x, axis=-1))(gate_out)
 
             #gate multiply the expert
             gate_mul_expert = tf.keras.layers.Multiply(name=level_name+'gate_mul_expert_specific_'+task_names[i])([expert_concat, gate_out])
@@ -114,7 +114,7 @@ def PLE(dnn_feature_columns, num_tasks=None, task_types=None, task_names=None, n
                 gate_input = dnn_input
 
             gate_out = tf.keras.layers.Dense(cur_expert_num, use_bias=False, activation='softmax', name=level_name+'gate_softmax_shared_'+str(i))(gate_input)
-            gate_out = tf.keras.layers.Lambda(lambda x: tf.tile(tf.expand_dims(x, axis=-1), [1, 1, expert_dnn_units[-1]]))(gate_out)
+            gate_out = tf.keras.layers.Lambda(lambda x: tf.expand_dims(x, axis=-1))(gate_out)
 
             #gate multiply the expert
             gate_mul_expert = tf.keras.layers.Multiply(name=level_name+'gate_mul_expert_shared_'+task_names[i])([expert_concat, gate_out])
