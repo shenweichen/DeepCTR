@@ -8,13 +8,14 @@ Reference:
 
 import tensorflow as tf
 
-from deepctr.feature_column import build_input_features, input_from_feature_columns
-from deepctr.layers.core import PredictionLayer, DNN
-from deepctr.layers.utils import combined_dnn_input, reduce_sum
+from ...feature_column import build_input_features, input_from_feature_columns
+from ...layers.core import PredictionLayer, DNN
+from ...layers.utils import combined_dnn_input, reduce_sum
+
 
 def MMOE(dnn_feature_columns, num_tasks=None, task_types=None, task_names=None, num_experts=4,
-         expert_dnn_units=[32,32],  gate_dnn_units=None, tower_dnn_units_lists=[[16,8],[16,8]],
-         l2_reg_embedding=1e-5, l2_reg_dnn=0, seed=1024, dnn_dropout=0, dnn_activation='relu', dnn_use_bn=False):
+         expert_dnn_units=(128, 128), gate_dnn_units=None, tower_dnn_units_lists=((32,), (32,)),
+         l2_reg_embedding=0.00001, l2_reg_dnn=0, seed=1024, dnn_dropout=0, dnn_activation='relu', dnn_use_bn=False):
     """Instantiates the Multi-gate Mixture-of-Experts multi-task learning architecture.
 
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
@@ -57,34 +58,39 @@ def MMOE(dnn_feature_columns, num_tasks=None, task_types=None, task_names=None, 
                                                                          l2_reg_embedding, seed)
     dnn_input = combined_dnn_input(sparse_embedding_list, dense_value_list)
 
-    #build expert layer
+    # build expert layer
     expert_outs = []
     for i in range(num_experts):
-        expert_network = DNN(expert_dnn_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed, name='expert_'+str(i))(dnn_input)
+        expert_network = DNN(expert_dnn_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed,
+                             name='expert_' + str(i))(dnn_input)
         expert_outs.append(expert_network)
     expert_concat = tf.keras.layers.concatenate(expert_outs, axis=1, name='expert_concat')
-    expert_concat = tf.keras.layers.Reshape([num_experts, expert_dnn_units[-1]], name='expert_reshape')(expert_concat) #(num_experts, output dim of expert_network)
+    expert_concat = tf.keras.layers.Reshape([num_experts, expert_dnn_units[-1]], name='expert_reshape')(
+        expert_concat)  # (num_experts, output dim of expert_network)
 
     mmoe_outs = []
-    for i in range(num_tasks): #one mmoe layer: nums_tasks = num_gates
-        #build gate layers
-        if gate_dnn_units!=None:
-            gate_network = DNN(gate_dnn_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed, name='gate_'+task_names[i])(dnn_input)
+    for i in range(num_tasks):  # one mmoe layer: nums_tasks = num_gates
+        # build gate layers
+        if gate_dnn_units != None:
+            gate_network = DNN(gate_dnn_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed,
+                               name='gate_' + task_names[i])(dnn_input)
             gate_input = gate_network
-        else:  #in origin paper, gate is one Dense layer with softmax.
+        else:  # in origin paper, gate is one Dense layer with softmax.
             gate_input = dnn_input
-        gate_out = tf.keras.layers.Dense(num_experts, use_bias=False, activation='softmax', name='gate_softmax_'+task_names[i])(gate_input)
+        gate_out = tf.keras.layers.Dense(num_experts, use_bias=False, activation='softmax',
+                                         name='gate_softmax_' + task_names[i])(gate_input)
         gate_out = tf.keras.layers.Lambda(lambda x: tf.expand_dims(x, axis=-1))(gate_out)
 
-        #gate multiply the expert
-        gate_mul_expert = tf.keras.layers.Multiply(name='gate_mul_expert_'+task_names[i])([expert_concat, gate_out])
+        # gate multiply the expert
+        gate_mul_expert = tf.keras.layers.Multiply(name='gate_mul_expert_' + task_names[i])([expert_concat, gate_out])
         gate_mul_expert = tf.keras.layers.Lambda(lambda x: reduce_sum(x, axis=1, keep_dims=True))(gate_mul_expert)
         mmoe_outs.append(gate_mul_expert)
 
     task_outs = []
     for task_type, task_name, tower_dnn, mmoe_out in zip(task_types, task_names, tower_dnn_units_lists, mmoe_outs):
-        #build tower layer
-        tower_output = DNN(tower_dnn, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed, name='tower_'+task_name)(mmoe_out)
+        # build tower layer
+        tower_output = DNN(tower_dnn, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed,
+                           name='tower_' + task_name)(mmoe_out)
 
         logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(tower_output)
         output = PredictionLayer(task_type, name=task_name)(logit)
