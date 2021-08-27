@@ -83,7 +83,7 @@ def MMOE(dnn_feature_columns, num_tasks=None, task_types=None, task_names=None, 
 
         # gate multiply the expert
         gate_mul_expert = tf.keras.layers.Multiply(name='gate_mul_expert_' + task_names[i])([expert_concat, gate_out])
-        gate_mul_expert = tf.keras.layers.Lambda(lambda x: reduce_sum(x, axis=1, keep_dims=True))(gate_mul_expert)
+        gate_mul_expert = tf.keras.layers.Lambda(lambda x: reduce_sum(x, axis=1, keep_dims=False))(gate_mul_expert)
         mmoe_outs.append(gate_mul_expert)
 
     task_outs = []
