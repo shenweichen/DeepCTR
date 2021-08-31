@@ -30,7 +30,7 @@ def test_MMOE():
     model_name = "MMOE"
     x, y_list, dnn_feature_columns = get_mtl_test_data()
 
-    model = MMOE(dnn_feature_columns, num_experts=8, expert_dnn_hidden_units=[16], tower_dnn_hidden_units=[[8], [8]],
+    model = MMOE(dnn_feature_columns, num_experts=8, expert_dnn_hidden_units=(8,), tower_dnn_hidden_units=(8,),
                  gate_dnn_units=None, task_types=['binary', 'binary'], task_names=['income', 'marital'])
     check_mtl_model(model, model_name, x, y_list, task_types=['binary', 'binary'])
 
