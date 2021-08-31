@@ -25,7 +25,7 @@ from ..layers.utils import concat_func, combined_dnn_input
 
 
 def DSIN(dnn_feature_columns, sess_feature_list, sess_max_count=5, bias_encoding=False,
-         att_embedding_size=1, att_head_num=8, dnn_hidden_units=(200, 80), dnn_activation='sigmoid', dnn_dropout=0,
+         att_embedding_size=1, att_head_num=8, dnn_hidden_units=(256, 128, 64), dnn_activation='sigmoid', dnn_dropout=0,
          dnn_use_bn=False, l2_reg_dnn=0, l2_reg_embedding=1e-6, seed=1024, task='binary',
          ):
     """Instantiates the Deep Session Interest Network architecture.

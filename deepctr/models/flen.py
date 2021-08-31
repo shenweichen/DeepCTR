@@ -20,7 +20,7 @@ from ..layers.utils import concat_func, add_func, combined_dnn_input
 
 def FLEN(linear_feature_columns,
          dnn_feature_columns,
-         dnn_hidden_units=(128, 128),
+         dnn_hidden_units=(256, 128, 64),
          l2_reg_linear=0.00001,
          l2_reg_embedding=0.00001,
          l2_reg_dnn=0,
@@ -71,7 +71,8 @@ def FLEN(linear_feature_columns,
         dense_value_list)
     dnn_output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed)(dnn_input)
 
-    dnn_logit = tf.keras.layers.Dense(1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(concat_func([fm_mf_out, dnn_output]))
+    dnn_logit = tf.keras.layers.Dense(1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(
+        concat_func([fm_mf_out, dnn_output]))
 
     final_logit = add_func([linear_logit, dnn_logit])
     output = PredictionLayer(task)(final_logit)

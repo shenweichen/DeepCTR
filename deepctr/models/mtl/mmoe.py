@@ -13,9 +13,9 @@ from ...layers.core import PredictionLayer, DNN
 from ...layers.utils import combined_dnn_input, reduce_sum
 
 
-def MMOE(dnn_feature_columns, num_tasks=None, task_types=None, task_names=None, num_experts=4,
-         expert_dnn_units=(128, 128), gate_dnn_units=None, tower_dnn_units_lists=((32,), (32,)),
-         l2_reg_embedding=0.00001, l2_reg_dnn=0, seed=1024, dnn_dropout=0, dnn_activation='relu', dnn_use_bn=False):
+def MMOE(dnn_feature_columns, num_experts=3, expert_dnn_hidden_units=(256, 128), tower_dnn_hidden_units=(64,),
+         gate_dnn_units=None, l2_reg_embedding=0.00001, l2_reg_dnn=0, seed=1024, dnn_dropout=0, dnn_activation='relu',
+         dnn_use_bn=False, task_types=('binary', 'binary'), task_names=('ctr', 'ctcvr')):
     """Instantiates the Multi-gate Mixture-of-Experts multi-task learning architecture.
 
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
@@ -24,9 +24,9 @@ def MMOE(dnn_feature_columns, num_tasks=None, task_types=None, task_names=None, 
     :param task_names: list of str, indicating the predict target of each tasks
 
     :param num_experts: integer, number of experts.
-    :param expert_dnn_units: list, list of positive integer, its length must be greater than 1, the layer number and units in each layer of expert DNN
+    :param expert_dnn_hidden_units: list, list of positive integer, its length must be greater than 1, the layer number and units in each layer of expert DNN
     :param gate_dnn_units: list, list of positive integer or None, the layer number and units in each layer of gate DNN, default value is None. e.g.[8, 8].
-    :param tower_dnn_units_lists: list, list of positive integer list, its length must be euqal to num_tasks, the layer number and units in each layer of task-specific DNN
+    :param tower_dnn_hidden_units: list, list of positive integer list, its length must be euqal to num_tasks, the layer number and units in each layer of task-specific DNN
 
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
     :param l2_reg_dnn: float. L2 regularizer strength applied to DNN
@@ -36,7 +36,7 @@ def MMOE(dnn_feature_columns, num_tasks=None, task_types=None, task_names=None, 
     :param dnn_use_bn: bool. Whether use BatchNormalization before activation or not in DNN
     :return: a Keras model instance
     """
-
+    num_tasks = len(task_names)
     if num_tasks <= 1:
         raise ValueError("num_tasks must be greater than 1")
 
@@ -47,7 +47,7 @@ def MMOE(dnn_feature_columns, num_tasks=None, task_types=None, task_names=None, 
         if task_type not in ['binary', 'regression']:
             raise ValueError("task must be binary or regression, {} is illegal".format(task_type))
 
-    if num_tasks != len(tower_dnn_units_lists):
+    if num_tasks != len(tower_dnn_hidden_units):
         raise ValueError("the length of tower_dnn_units_lists must be euqal to num_tasks")
 
     features = build_input_features(dnn_feature_columns)
@@ -61,11 +61,11 @@ def MMOE(dnn_feature_columns, num_tasks=None, task_types=None, task_names=None, 
     # build expert layer
     expert_outs = []
     for i in range(num_experts):
-        expert_network = DNN(expert_dnn_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed,
+        expert_network = DNN(expert_dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed,
                              name='expert_' + str(i))(dnn_input)
         expert_outs.append(expert_network)
     expert_concat = tf.keras.layers.concatenate(expert_outs, axis=1, name='expert_concat')
-    expert_concat = tf.keras.layers.Reshape([num_experts, expert_dnn_units[-1]], name='expert_reshape')(
+    expert_concat = tf.keras.layers.Reshape([num_experts, expert_dnn_hidden_units[-1]], name='expert_reshape')(
         expert_concat)  # (num_experts, output dim of expert_network)
 
     mmoe_outs = []
@@ -87,9 +87,9 @@ def MMOE(dnn_feature_columns, num_tasks=None, task_types=None, task_names=None, 
         mmoe_outs.append(gate_mul_expert)
 
     task_outs = []
-    for task_type, task_name, tower_dnn, mmoe_out in zip(task_types, task_names, tower_dnn_units_lists, mmoe_outs):
+    for task_type, task_name, mmoe_out in zip(task_types, task_names, mmoe_outs):
         # build tower layer
-        tower_output = DNN(tower_dnn, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed,
+        tower_output = DNN(tower_dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed,
                            name='tower_' + task_name)(mmoe_out)
 
         logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(tower_output)

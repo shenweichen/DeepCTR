@@ -24,7 +24,8 @@ def unstack(input_tensor):
 
 def FGCNN(linear_feature_columns, dnn_feature_columns, conv_kernel_width=(7, 7, 7, 7), conv_filters=(14, 16, 18, 20),
           new_maps=(3, 3, 3, 3),
-          pooling_width=(2, 2, 2, 2), dnn_hidden_units=(128,), l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_dnn=0,
+          pooling_width=(2, 2, 2, 2), dnn_hidden_units=(256, 128, 64), l2_reg_linear=1e-5, l2_reg_embedding=1e-5,
+          l2_reg_dnn=0,
           dnn_dropout=0,
           seed=1024,
           task='binary', ):
@@ -77,7 +78,8 @@ def FGCNN(linear_feature_columns, dnn_feature_columns, conv_kernel_width=(7, 7, 
     dnn_input = tf.keras.layers.Flatten()(dnn_input)
 
     final_logit = DNN(dnn_hidden_units, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout)(dnn_input)
-    final_logit = tf.keras.layers.Dense(1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(final_logit)
+    final_logit = tf.keras.layers.Dense(1, use_bias=False,
+                                        kernel_initializer=tf.keras.initializers.glorot_normal(seed))(final_logit)
 
     final_logit = add_func([final_logit, linear_logit])
     output = PredictionLayer(task)(final_logit)

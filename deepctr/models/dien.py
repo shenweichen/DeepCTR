@@ -61,6 +61,7 @@ def auxiliary_loss(h_states, click_seq, noclick_seq, mask, stag=None):
 
     return loss_
 
+
 def interest_evolution(concat_behavior, deep_input_item, user_behavior_length, gru_type="GRU", use_neg=False,
                        neg_concat_behavior=None, att_hidden_size=(64, 16), att_activation='sigmoid',
                        att_weight_normalization=False, ):
@@ -108,7 +109,7 @@ def interest_evolution(concat_behavior, deep_input_item, user_behavior_length, g
 
 
 def DIEN(dnn_feature_columns, history_feature_list,
-         gru_type="GRU", use_negsampling=False, alpha=1.0, use_bn=False, dnn_hidden_units=(200, 80),
+         gru_type="GRU", use_negsampling=False, alpha=1.0, use_bn=False, dnn_hidden_units=(256, 128, 64),
          dnn_activation='relu',
          att_hidden_units=(64, 16), att_activation="dice", att_weight_normalization=True,
          l2_reg_dnn=0, l2_reg_embedding=1e-6, dnn_dropout=0, seed=1024, task='binary'):
