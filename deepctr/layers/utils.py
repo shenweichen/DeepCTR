@@ -8,6 +8,7 @@ Author:
 import tensorflow as tf
 from tensorflow.python.keras.layers import Flatten
 from tensorflow.python.ops.lookup_ops import TextFileInitializer
+
 try:
     from tensorflow.python.ops.lookup_ops import StaticHashTable
 except ImportError as e:
@@ -93,7 +94,7 @@ class Hash(tf.keras.layers.Layer):
         try:
             hash_x = tf.string_to_hash_bucket_fast(x, num_buckets,
                                                    name=None)  # weak hash
-        except:
+        except AttributeError:
             hash_x = tf.strings.to_hash_bucket_fast(x, num_buckets,
                                                     name=None)  # weak hash
         if self.mask_zero:
@@ -106,7 +107,8 @@ class Hash(tf.keras.layers.Layer):
         return input_shape
 
     def get_config(self, ):
-        config = {'num_buckets': self.num_buckets, 'mask_zero': self.mask_zero, 'vocabulary_path': self.vocabulary_path, 'default_value': self.default_value}
+        config = {'num_buckets': self.num_buckets, 'mask_zero': self.mask_zero, 'vocabulary_path': self.vocabulary_path,
+                  'default_value': self.default_value}
         base_config = super(Hash, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 

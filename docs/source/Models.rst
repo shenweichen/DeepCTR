@@ -26,5 +26,10 @@ DeepCTR Models API
    IFM<deepctr.models.ifm>
    DIFM<deepctr.models.difm>
    DeepFEFM<deepctr.models.deepfefm>
+   SharedBottom<deepctr.models.mtl.sharedbottom>
+   ESMM<deepctr.models.mtl.esmm>
+   MMOE<deepctr.models.mtl.mmoe>
+   CGC<deepctr.models.mtl.cgc>
+   PLE<deepctr.models.mtl.ple>
 
    

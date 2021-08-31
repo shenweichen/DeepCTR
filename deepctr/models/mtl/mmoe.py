@@ -14,7 +14,7 @@ from ...layers.utils import combined_dnn_input, reduce_sum
 
 
 def MMOE(dnn_feature_columns, num_experts=3, expert_dnn_hidden_units=(256, 128), tower_dnn_hidden_units=(64,),
-         gate_dnn_units=None, l2_reg_embedding=0.00001, l2_reg_dnn=0, seed=1024, dnn_dropout=0, dnn_activation='relu',
+         gate_dnn_hidden_units=None, l2_reg_embedding=0.00001, l2_reg_dnn=0, seed=1024, dnn_dropout=0, dnn_activation='relu',
          dnn_use_bn=False, task_types=('binary', 'binary'), task_names=('ctr', 'ctcvr')):
     """Instantiates the Multi-gate Mixture-of-Experts multi-task learning architecture.
 
@@ -25,7 +25,7 @@ def MMOE(dnn_feature_columns, num_experts=3, expert_dnn_hidden_units=(256, 128),
 
     :param num_experts: integer, number of experts.
     :param expert_dnn_hidden_units: list, list of positive integer, its length must be greater than 1, the layer number and units in each layer of expert DNN
-    :param gate_dnn_units: list, list of positive integer or None, the layer number and units in each layer of gate DNN, default value is None. e.g.[8, 8].
+    :param gate_dnn_hidden_units: list, list of positive integer or None, the layer number and units in each layer of gate DNN, default value is None. e.g.[8, 8].
     :param tower_dnn_hidden_units: list, list of positive integer list, its length must be euqal to num_tasks, the layer number and units in each layer of task-specific DNN
 
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
@@ -71,8 +71,8 @@ def MMOE(dnn_feature_columns, num_experts=3, expert_dnn_hidden_units=(256, 128),
     mmoe_outs = []
     for i in range(num_tasks):  # one mmoe layer: nums_tasks = num_gates
         # build gate layers
-        if gate_dnn_units != None:
-            gate_network = DNN(gate_dnn_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed,
+        if gate_dnn_hidden_units != None:
+            gate_network = DNN(gate_dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed,
                                name='gate_' + task_names[i])(dnn_input)
             gate_input = gate_network
         else:  # in origin paper, gate is one Dense layer with softmax.
