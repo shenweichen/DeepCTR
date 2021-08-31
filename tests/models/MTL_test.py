@@ -12,7 +12,7 @@ def test_Shared_Bottom():
     model_name = "Shared_Bottom"
     x, y_list, dnn_feature_columns = get_mtl_test_data()
 
-    model = SharedBottom(dnn_feature_columns, bottom_dnn_units=(8,), tower_dnn_units_lists=(8,),
+    model = SharedBottom(dnn_feature_columns, bottom_dnn_hidden_units=(8,), tower_dnn_hidden_units=(8,),
                          task_types=['binary', 'binary'], task_names=['label_income', 'label_marital'])
     check_mtl_model(model, model_name, x, y_list, task_types=['binary', 'binary'])
 

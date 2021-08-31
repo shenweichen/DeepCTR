@@ -19,17 +19,16 @@ def ESMM(dnn_feature_columns, tower_dnn_hidden_units=(256, 128, 64), l2_reg_embe
     """Instantiates the Entire Space Multi-Task Model architecture.
 
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
-    :param task_type:  str, indicating the loss of each tasks, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss.
-    :param task_names: list of str, indicating the predict target of each tasks. default value is ['ctr', 'ctcvr']
-
     :param tower_dnn_hidden_units:  layer number and units in each layer of task-specific DNN
-
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
     :param l2_reg_dnn: float. L2 regularizer strength applied to DNN
     :param seed: integer ,to use as random seed.
     :param dnn_dropout: float in [0,1), the probability we will drop out a given DNN coordinate.
     :param dnn_activation: Activation function to use in DNN
     :param dnn_use_bn: bool. Whether use BatchNormalization before activation or not in DNN
+    :param task_type:  str, indicating the loss of each tasks, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss.
+    :param task_names: list of str, indicating the predict target of each tasks. default value is ['ctr', 'ctcvr']
+
     :return: A Keras model instance.
     """
     if len(task_names) != 2:

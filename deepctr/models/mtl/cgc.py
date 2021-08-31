@@ -21,22 +21,20 @@ def CGC(dnn_feature_columns,
     """Instantiates the Customized Gate Control block of Progressive Layered Extraction architecture.
 
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
-    :param task_types: list of str, indicating the loss of each tasks, ``"binary"`` for  binary logloss, ``"regression"`` for regression loss. e.g. ['binary', 'regression']
-    :param task_names: list of str, indicating the predict target of each tasks
-
-    :param specific_expert_num: integer, number of task-specific experts.
     :param shared_expert_num: integer, number of task-shared experts.
-
+    :param specific_expert_num: integer, number of task-specific experts.
     :param expert_dnn_hidden_units: list, list of positive integer, its length must be greater than 1, the layer number and units in each layer of expert DNN
-    :param gate_dnn_hidden_units: list, list of positive integer or None, the layer number and units in each layer of gate DNN, default value is None. e.g.[8, 8].
     :param tower_dnn_hidden_units: list, list of positive integer list, its length must be euqal to num_tasks, the layer number and units in each layer of task-specific DNN
-
+    :param gate_dnn_hidden_units: list, list of positive integer or None, the layer number and units in each layer of gate DNN, default value is None. e.g.[8, 8].
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
     :param l2_reg_dnn: float. L2 regularizer strength applied to DNN
     :param seed: integer ,to use as random seed.
     :param dnn_dropout: float in [0,1), the probability we will drop out a given DNN coordinate.
     :param dnn_activation: Activation function to use in DNN
     :param dnn_use_bn: bool. Whether use BatchNormalization before activation or not in DNN
+    :param task_types: list of str, indicating the loss of each tasks, ``"binary"`` for  binary logloss, ``"regression"`` for regression loss. e.g. ['binary', 'regression']
+    :param task_names: list of str, indicating the predict target of each tasks
+
     :return: a Keras model instance
     """
 

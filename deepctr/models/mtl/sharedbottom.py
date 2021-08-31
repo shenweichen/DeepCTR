@@ -13,25 +13,23 @@ from ...layers.core import PredictionLayer, DNN
 from ...layers.utils import combined_dnn_input
 
 
-def SharedBottom(dnn_feature_columns, bottom_dnn_units=(256, 128), tower_dnn_units_lists=(64,),
+def SharedBottom(dnn_feature_columns, bottom_dnn_hidden_units=(256, 128), tower_dnn_hidden_units=(64,),
                  l2_reg_embedding=0.00001, l2_reg_dnn=0, seed=1024, dnn_dropout=0, dnn_activation='relu',
                  dnn_use_bn=False, task_types=('binary', 'binary'), task_names=('ctr', 'ctcvr')):
     """Instantiates the SharedBottom multi-task learning Network architecture.
 
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
-    :param num_tasks:  integer, number of tasks, equal to number of outputs, must be greater than 1.
-    :param task_types: list of str, indicating the loss of each tasks, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss. e.g. ['binary', 'regression']
-    :param task_names: list of str, indicating the predict target of each tasks
-
-    :param bottom_dnn_units: list,list of positive integer or empty list, the layer number and units in each layer of shared-bottom DNN
-    :param tower_dnn_units_lists: list, list of positive integer list, its length must be euqal to num_tasks, the layer number and units in each layer of task-specific DNN
-
+    :param bottom_dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of shared-bottom DNN
+    :param tower_dnn_hidden_units: list, list of positive integer list, its length must be euqal to num_tasks, the layer number and units in each layer of task-specific DNN
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
     :param l2_reg_dnn: float. L2 regularizer strength applied to DNN
     :param seed: integer ,to use as random seed.
     :param dnn_dropout: float in [0,1), the probability we will drop out a given DNN coordinate.
     :param dnn_activation: Activation function to use in DNN
     :param dnn_use_bn: bool. Whether use BatchNormalization before activation or not in DNN
+    :param task_types: list of str, indicating the loss of each tasks, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss. e.g. ['binary', 'regression']
+    :param task_names: list of str, indicating the predict target of each tasks
+
     :return: A Keras model instance.
     """
     num_tasks = len(task_names)
@@ -54,12 +52,12 @@ def SharedBottom(dnn_feature_columns, bottom_dnn_units=(256, 128), tower_dnn_uni
                                                                          l2_reg_embedding, seed)
 
     dnn_input = combined_dnn_input(sparse_embedding_list, dense_value_list)
-    shared_bottom_output = DNN(bottom_dnn_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed)(
+    shared_bottom_output = DNN(bottom_dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed)(
         dnn_input)
 
     tasks_output = []
     for task_type, task_name in zip(task_types, task_names):
-        tower_output = DNN(tower_dnn_units_lists, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed,
+        tower_output = DNN(tower_dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed,
                            name='tower_' + task_name)(shared_bottom_output)
 
         logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(tower_output)
