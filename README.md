@@ -113,6 +113,11 @@ If you find this code useful in your research, please cite it using the followin
         <p> Amazon   </p>​
       </td>
       <td>
+        ​ <a href="https://github.com/morningsky"><img width="70" height="70" src="https://github.com/morningsky.png?s=40" alt="pic"></a><br>
+        ​ <a href="https://github.com/morningsky">Lai Mincai</a>
+        <p> ShanghaiTech University </p>​
+      </td>
+      <td>
         ​ <a href="https://github.com/codewithzichao"><img width="70" height="70" src="https://github.com/codewithzichao.png?s=40" alt="pic"></a><br>
         ​ <a href="https://github.com/codewithzichao">Li Zichao</a>
         <p> Peking University   </p>​

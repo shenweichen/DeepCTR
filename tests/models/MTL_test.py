@@ -1,10 +1,10 @@
 # test multi task learning models
 
 from deepctr.models.mtl.cgc import CGC
-from deepctr.models.mtl.essm import ESSM
+from deepctr.models.mtl.esmm import ESMM
 from deepctr.models.mtl.mmoe import MMOE
 from deepctr.models.mtl.ple import PLE
-from deepctr.models.mtl.shared_bottom import SharedBottom
+from deepctr.models.mtl.sharedbottom import SharedBottom
 from ..utils_mtl import get_mtl_test_data, check_mtl_model
 
 
@@ -21,7 +21,7 @@ def test_ESSM():
     model_name = "ESSM"
     x, y_list, dnn_feature_columns = get_mtl_test_data()
 
-    model = ESSM(dnn_feature_columns, tower_dnn_hidden_units=(8,), task_type='binary',
+    model = ESMM(dnn_feature_columns, tower_dnn_hidden_units=(8,), task_type='binary',
                  task_names=['label_marital', 'label_income'])
     check_mtl_model(model, model_name, x, y_list, task_types=['binary', 'binary'])
 

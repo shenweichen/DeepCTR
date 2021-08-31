@@ -13,7 +13,7 @@ from ...layers.core import PredictionLayer, DNN
 from ...layers.utils import combined_dnn_input
 
 
-def ESSM(dnn_feature_columns, tower_dnn_hidden_units=(256, 128, 64), l2_reg_embedding=0.00001, l2_reg_dnn=0,
+def ESMM(dnn_feature_columns, tower_dnn_hidden_units=(256, 128, 64), l2_reg_embedding=0.00001, l2_reg_dnn=0,
          seed=1024, dnn_dropout=0, dnn_activation='relu', dnn_use_bn=False, task_type=('binary', 'binary'),
          task_names=('ctr', 'ctcvr')):
     """Instantiates the Entire Space Multi-Task Model architecture.
@@ -35,8 +35,8 @@ def ESSM(dnn_feature_columns, tower_dnn_hidden_units=(256, 128, 64), l2_reg_embe
     if len(task_names) != 2:
         raise ValueError("the length of task_names must be equal to 2")
 
-    if len(tower_dnn_hidden_units) != 2:
-        raise ValueError("the length of tower_dnn_units_lists must be equal to 2")
+    # if len(tower_dnn_hidden_units) != 2:
+    #     raise ValueError("the length of tower_dnn_units_lists must be equal to 2")
 
     features = build_input_features(dnn_feature_columns)
     inputs_list = list(features.values())
