@@ -177,11 +177,4 @@ print(eval_result)
 ```
 
 You can check the full code [here](./Examples.html#estimator-with-tfrecord-classification-criteo).
-
-
-
-
-
-
-
-
+You also can run a distributed training job with those estimator models on Kubernetes by the [ElasticDL](./distributed_estimator_on_k8s.html). 

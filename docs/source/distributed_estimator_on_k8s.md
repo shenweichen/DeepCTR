@@ -174,8 +174,8 @@ INFO:tensorflow:global_step/sec: 7.05433
 
 You only need to modify your `input_fn` with ElasticDL DataShardService.
 The DataShardService will split the sample indices into ranges and assign
-those ranges to workers. The worker only need to read samples by indices
-in those ranges.
+those ranges to workers for data-paralell. The worker only need to read
+samples by indices in those ranges.
 
 1. Create a DataShardService.
 
