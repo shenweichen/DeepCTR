@@ -45,14 +45,14 @@ def auxiliary_loss(h_states, click_seq, noclick_seq, mask, stag=None):
     try:
         click_loss_ = - tf.reshape(tf.log(click_prop_),
                                    [-1, tf.shape(click_seq)[1]]) * mask
-    except:
+    except AttributeError:
         click_loss_ = - tf.reshape(tf.compat.v1.log(click_prop_),
                                    [-1, tf.shape(click_seq)[1]]) * mask
     try:
         noclick_loss_ = - \
                             tf.reshape(tf.log(1.0 - noclick_prop_),
                                        [-1, tf.shape(noclick_seq)[1]]) * mask
-    except:
+    except AttributeError:
         noclick_loss_ = - \
                             tf.reshape(tf.compat.v1.log(1.0 - noclick_prop_),
                                        [-1, tf.shape(noclick_seq)[1]]) * mask

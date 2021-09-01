@@ -25,7 +25,7 @@ def gen_sequence(dim, max_len, sample_size):
 
 
 def get_test_data(sample_size=1000, embedding_size=4, sparse_feature_num=1, dense_feature_num=1,
-                  sequence_feature=['sum', 'mean', 'max', 'weight'], classification=True, include_length=False,
+                  sequence_feature=('sum', 'mean', 'max', 'weight'), classification=True, include_length=False,
                   hash_flag=False, prefix='', use_group=False):
     feature_columns = []
     model_input = {}
@@ -50,10 +50,12 @@ def get_test_data(sample_size=1000, embedding_size=4, sparse_feature_num=1, dens
             group_name = DEFAULT_GROUP_NAME
         dim = np.random.randint(1, 10)
         feature_columns.append(
-            SparseFeat(prefix + 'sparse_feature_' + str(i), dim, embedding_size, use_hash=hash_flag, dtype=tf.int32, group_name=group_name))
+            SparseFeat(prefix + 'sparse_feature_' + str(i), dim, embedding_size, use_hash=hash_flag, dtype=tf.int32,
+                       group_name=group_name))
 
     for i in range(dense_feature_num):
         def transform_fn(x): return (x - 0.0) / 1.0
+
         feature_columns.append(
             DenseFeat(
                 prefix + 'dense_feature_' + str(i),
@@ -365,20 +367,22 @@ def check_model(model, model_name, x, y, check_model_io=True):
     print(model_name + " test pass!")
 
 
-def get_test_data_estimator(sample_size=1000, embedding_size=4, sparse_feature_num=1, dense_feature_num=1, classification=True):
-
+def get_test_data_estimator(sample_size=1000, embedding_size=4, sparse_feature_num=1, dense_feature_num=1,
+                            classification=True):
     x = {}
     dnn_feature_columns = []
     linear_feature_columns = []
     voc_size = 4
     for i in range(sparse_feature_num):
-        name = 's_'+str(i)
+        name = 's_' + str(i)
         x[name] = np.random.randint(0, voc_size, sample_size)
-        dnn_feature_columns.append(tf.feature_column.embedding_column(tf.feature_column.categorical_column_with_identity(name, voc_size), embedding_size))
+        dnn_feature_columns.append(
+            tf.feature_column.embedding_column(tf.feature_column.categorical_column_with_identity(name, voc_size),
+                                               embedding_size))
         linear_feature_columns.append(tf.feature_column.categorical_column_with_identity(name, voc_size))
 
     for i in range(dense_feature_num):
-        name = 'd_'+str(i)
+        name = 'd_' + str(i)
         x[name] = np.random.random(sample_size)
         dnn_feature_columns.append(tf.feature_column.numeric_column(name))
         linear_feature_columns.append(tf.feature_column.numeric_column(name))
