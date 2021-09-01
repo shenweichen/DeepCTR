@@ -1,7 +1,8 @@
-# Train DeepCTR Estimator using ElasticDL on Kubernetes
+# Distributed Training of DeepCTR Estimator using ElasticDL on Kubernetes
 
-This document shows how to run an ElasticDL job to train a deepctr
-estimator model (DeepFM) using criteo dataset on Kubernetes.
+This document shows how to run an distributed training job of a deepctr
+estimator model (DeepFM) using [ElasticDL](https://github.com/sql-machine-learning/elasticdl)
+on Kubernetes.
 
 ## Prerequisites
 
@@ -20,12 +21,13 @@ estimator model (DeepFM) using criteo dataset on Kubernetes.
 ## Models
 
 In this tutorial, we use a [DeepFM estimator](https://github.com/shenweichen/DeepCTR/blob/master/deepctr/estimator/models/deepfm.py)
-model in DeepCTR. The complete program to train the model with dataset definition is in [ElasticDL
-model zoo]().
+model in DeepCTR. The complete program to train the model with the
+dataset definition is in [ElasticDL model zoo](https://github.com/sql-machine-learning/elasticdl/tree/develop/model_zoo/deepctr).
 
-## Datasets
+## Dataset
 
-In this tutorial, We use the criteo dataset in DeepCTR examples.
+In this tutorial, We use the [criteo dataset](https://github.com/shenweichen/DeepCTR/blob/master/examples/criteo_sample.txt)
+in DeepCTR examples.
 
 ```bash
 mkdir ./data
@@ -129,7 +131,6 @@ elasticdl train \
   --evaluator_resource_request="cpu=0.3,memory=1024Mi" \
   --evaluator_resource_limit="cpu=1,memory=2048Mi" \
   --job_name=test-deepfm-estimator \
-  --image_pull_policy=Never \
   --distribution_strategy=ParameterServerStrategy \
   --need_tf_config=true \
   --volume="host_path={criteo_data_path},mount_path=/data" \
