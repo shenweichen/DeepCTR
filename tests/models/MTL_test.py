@@ -51,7 +51,7 @@ def test_CGC(gate_dnn_hidden_units):
     x, y_list, dnn_feature_columns = get_mtl_test_data()
 
     model = CGC(dnn_feature_columns,
-                specific_expert_num=2, shared_expert_num=1, expert_dnn_hidden_units=(16,),
+                specific_expert_num=1, shared_expert_num=1, expert_dnn_hidden_units=(8,),
                 gate_dnn_hidden_units=gate_dnn_hidden_units,
                 tower_dnn_hidden_units=(8,), task_types=['binary', 'binary'], task_names=['income', 'marital'], )
     check_mtl_model(model, model_name, x, y_list, task_types=['binary', 'binary'])

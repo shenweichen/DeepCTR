@@ -14,7 +14,8 @@ from ...layers.utils import combined_dnn_input, reduce_sum
 
 
 def PLE(dnn_feature_columns, shared_expert_num=1, specific_expert_num=1, num_levels=2,
-        expert_dnn_hidden_units=(256,), tower_dnn_hidden_units=(64,), gate_dnn_hidden_units=None, l2_reg_embedding=0.00001,
+        expert_dnn_hidden_units=(256,), tower_dnn_hidden_units=(64,), gate_dnn_hidden_units=None,
+        l2_reg_embedding=0.00001,
         l2_reg_dnn=0, seed=1024, dnn_dropout=0, dnn_activation='relu', dnn_use_bn=False,
         task_types=('binary', 'binary'), task_names=('ctr', 'ctcvr')):
     """Instantiates the multi level of Customized Gate Control of Progressive Layered Extraction architecture.
@@ -65,14 +66,16 @@ def PLE(dnn_feature_columns, shared_expert_num=1, specific_expert_num=1, num_lev
         # build task-specific expert layer
         for i in range(num_tasks):
             for j in range(specific_expert_num):
-                expert_network = DNN(expert_dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed,
+                expert_network = DNN(expert_dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn,
+                                     seed=seed,
                                      name=level_name + 'task_' + task_names[i] + '_expert_specific_' + str(j))(
                     inputs[i])
                 expert_outputs.append(expert_network)
 
         # build task-shared expert layer
         for i in range(shared_expert_num):
-            expert_network = DNN(expert_dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed,
+            expert_network = DNN(expert_dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn,
+                                 seed=seed,
                                  name=level_name + 'expert_shared_' + str(i))(inputs[-1])
             expert_outputs.append(expert_network)
 
@@ -92,12 +95,13 @@ def PLE(dnn_feature_columns, shared_expert_num=1, specific_expert_num=1, num_lev
 
             # build gate layers
             if gate_dnn_hidden_units != None:
-                gate_network = DNN(gate_dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed,
+                gate_network = DNN(gate_dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn,
+                                   seed=seed,
                                    name=level_name + 'gate_specific_' + task_names[i])(
                     inputs[i])  # gate[i] for task input[i]
                 gate_input = gate_network
             else:  # in origin paper, gate is one Dense layer with softmax.
-                gate_input = dnn_input
+                gate_input = inputs[i]
             gate_out = tf.keras.layers.Dense(cur_expert_num, use_bias=False, activation='softmax',
                                              name=level_name + 'gate_softmax_specific_' + task_names[i])(gate_input)
             gate_out = tf.keras.layers.Lambda(lambda x: tf.expand_dims(x, axis=-1))(gate_out)
@@ -105,7 +109,7 @@ def PLE(dnn_feature_columns, shared_expert_num=1, specific_expert_num=1, num_lev
             # gate multiply the expert
             gate_mul_expert = tf.keras.layers.Multiply(name=level_name + 'gate_mul_expert_specific_' + task_names[i])(
                 [expert_concat, gate_out])
-            gate_mul_expert = tf.keras.layers.Lambda(lambda x: reduce_sum(x, axis=1, keep_dims=True))(gate_mul_expert)
+            gate_mul_expert = tf.keras.layers.Lambda(lambda x: reduce_sum(x, axis=1, keep_dims=False))(gate_mul_expert)
             cgc_outs.append(gate_mul_expert)
 
         # task_shared gate, if the level not in last, add one shared gate
@@ -121,11 +125,12 @@ def PLE(dnn_feature_columns, shared_expert_num=1, specific_expert_num=1, num_lev
 
             # build gate layers
             if gate_dnn_hidden_units != None:
-                gate_network = DNN(gate_dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed,
+                gate_network = DNN(gate_dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn,
+                                   seed=seed,
                                    name=level_name + 'gate_shared_' + str(i))(inputs[-1])  # gate for shared task input
                 gate_input = gate_network
             else:  # in origin paper, gate is one Dense layer with softmax.
-                gate_input = dnn_input
+                gate_input = inputs[-1]
 
             gate_out = tf.keras.layers.Dense(cur_expert_num, use_bias=False, activation='softmax',
                                              name=level_name + 'gate_softmax_shared_' + str(i))(gate_input)
@@ -134,7 +139,7 @@ def PLE(dnn_feature_columns, shared_expert_num=1, specific_expert_num=1, num_lev
             # gate multiply the expert
             gate_mul_expert = tf.keras.layers.Multiply(name=level_name + 'gate_mul_expert_shared_' + task_names[i])(
                 [expert_concat, gate_out])
-            gate_mul_expert = tf.keras.layers.Lambda(lambda x: reduce_sum(x, axis=1, keep_dims=True))(gate_mul_expert)
+            gate_mul_expert = tf.keras.layers.Lambda(lambda x: reduce_sum(x, axis=1, keep_dims=False))(gate_mul_expert)
             cgc_outs.append(gate_mul_expert)
         return cgc_outs
 

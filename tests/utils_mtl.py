@@ -70,10 +70,10 @@ def check_mtl_model(model, model_name, x, y_list, task_types, check_model_io=Tru
     for task_type in task_types:
         if task_type == 'binary':
             loss_list.append('binary_crossentropy')
-            metric_list.append('accuracy')
+            #metric_list.append('accuracy')
         elif task_type == 'regression':
             loss_list.append('mean_squared_error')
-            metric_list.append('mae')
+            #metric_list.append('mae')
     print('loss:', loss_list)
     print('metric:', metric_list)
     model.compile('adam', loss=loss_list, metrics=metric_list)
