@@ -1,7 +1,6 @@
 import pytest
 import tensorflow as tf
 
-from deepctr.models.mtl.cgc import CGC
 from deepctr.models.mtl.esmm import ESMM
 from deepctr.models.mtl.mmoe import MMOE
 from deepctr.models.mtl.ple import PLE
@@ -49,35 +48,17 @@ def test_MMOE(gate_dnn_hidden_units):
 
 
 @pytest.mark.parametrize(
-    'gate_dnn_hidden_units',
-    [None,
-     (4,)]
+    'num_levels,gate_dnn_hidden_units',
+    [(2, None),
+     (1, (4,))]
 )
-def test_CGC(gate_dnn_hidden_units):
-    if tf.__version__ == "1.15.0":  # slow in tf 1.15
-        return
-    model_name = "CGC"
-    x, y_list, dnn_feature_columns = get_mtl_test_data()
-
-    model = CGC(dnn_feature_columns,
-                specific_expert_num=1, shared_expert_num=1, expert_dnn_hidden_units=(8,),
-                gate_dnn_hidden_units=gate_dnn_hidden_units,
-                tower_dnn_hidden_units=(8,), task_types=['binary', 'binary'], task_names=['income', 'marital'], )
-    check_mtl_model(model, model_name, x, y_list, task_types=['binary', 'binary'])
-
-
-@pytest.mark.parametrize(
-    'gate_dnn_hidden_units',
-    [None,
-     (4,)]
-)
-def test_PLE(gate_dnn_hidden_units):
+def test_PLE(num_levels, gate_dnn_hidden_units):
     if tf.__version__ == "1.15.0":  # slow in tf 1.15
         return
     model_name = "PLE"
     x, y_list, dnn_feature_columns = get_mtl_test_data()
 
-    model = PLE(dnn_feature_columns, shared_expert_num=1, specific_expert_num=1, num_levels=2,
+    model = PLE(dnn_feature_columns, shared_expert_num=1, specific_expert_num=1, num_levels=num_levels,
                 expert_dnn_hidden_units=(8,), tower_dnn_hidden_units=(8,), gate_dnn_hidden_units=gate_dnn_hidden_units,
                 task_types=['binary', 'binary'], task_names=['income', 'marital'])
     check_mtl_model(model, model_name, x, y_list, task_types=['binary', 'binary'])

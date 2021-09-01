@@ -149,7 +149,6 @@ def PLE(dnn_feature_columns, shared_expert_num=1, specific_expert_num=1, num_lev
     for i in range(num_levels):
         if i == num_levels - 1:  # the last level
             ple_outputs = cgc_net(inputs=ple_inputs, level_name='level_' + str(i) + '_', is_last=True)
-            break
         else:
             ple_outputs = cgc_net(inputs=ple_inputs, level_name='level_' + str(i) + '_', is_last=False)
             ple_inputs = ple_outputs

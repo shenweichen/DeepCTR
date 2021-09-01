@@ -349,6 +349,31 @@ FEFM learns symmetric matrix embeddings for each field pair along with the usual
 [Pande H. Field-Embedded Factorization Machines for Click-through rate prediction[J]. arXiv preprint arXiv:2009.09931, 2020.](https://arxiv.org/pdf/2009.09931)
 
 
+## MultiTask Models
+### SharedBottom
+### ESMM
+
+ESMM models CVR in a brand-new perspective by making good use of sequential pattern of user actions, i.e., impression → click → conversion. The proposed Entire Space Multi-task Model (ESMM) can eliminate the two problems simultaneously by i) modeling CVR directly over the entire space, ii) employing a feature representation transfer learning strategy.
+[**ESMM Model API**](./deepctr.models.mtl.esmm.html)  
+
+![ESMM](../pics/multitaskmodels/ESMM.png)
+
+[Ma X, Zhao L, Huang G, et al. Entire space multi-task model: An effective approach for estimating post-click conversion rate[C]//The 41st International ACM SIGIR Conference on Research & Development in Information Retrieval. 2018.](https://arxiv.org/abs/1804.07931)
+
+### MMOE	
+Multi-gate Mixture-of-Experts (MMoE) explicitly learns to model task relationships from data. We adapt the Mixture-of- Experts (MoE) structure to multi-task learning by sharing the expert submodels across all tasks, while also having a gating network trained to optimize each task.
+[**MMOE Model API**](./deepctr.models.mtl.mmoe.html)  
+
+![MMOE](../pics/multitaskmodels/MMOE.png)
+
+[Ma J, Zhao Z, Yi X, et al. Modeling task relationships in multi-task learning with multi-gate mixture-of-experts[C]//Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. 2018.](https://dl.acm.org/doi/abs/10.1145/3219819.3220007)
+
+### PLE	
+PLE separates shared components and task-specific components explicitly and adopts a progressive rout- ing mechanism to extract and separate deeper semantic knowledge gradually, improving efficiency of joint representation learning and information routing across tasks in a general setup.[**PLE Model API**](./deepctr.models.mtl.ple.html)  
+
+![PLE](../pics/multitaskmodels/PLE.png)
+
+[Tang H, Liu J, Zhao M, et al. Progressive layered extraction (ple): A novel multi-task learning (mtl) model for personalized recommendations[C]//Fourteenth ACM Conference on Recommender Systems. 2020.](https://dl.acm.org/doi/10.1145/3383313.3412236)
 ## Layers
 
 The models of deepctr are modular,
