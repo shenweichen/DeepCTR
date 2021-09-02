@@ -17,4 +17,4 @@ Add any other context about the problem here.
 **Operating environment(运行环境):**
  - python version [e.g. 3.6]
  - tensorflow version [e.g. 1.4.0, 1.15.0, 2.5.0]
- - deepctr version [e.g. 0.8.6,]
+ - deepctr version [e.g. 0.9.0,]
