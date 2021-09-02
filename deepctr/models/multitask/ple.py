@@ -21,12 +21,12 @@ def PLE(dnn_feature_columns, shared_expert_num=1, specific_expert_num=1, num_lev
     """Instantiates the multi level of Customized Gate Control of Progressive Layered Extraction architecture.
 
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
-    :param specific_expert_num: integer, number of task-specific experts.
     :param shared_expert_num: integer, number of task-shared experts.
+    :param specific_expert_num: integer, number of task-specific experts.
     :param num_levels: integer, number of CGC levels.
-    :param expert_dnn_hidden_units: list, list of positive integer, its length must be greater than 1, the layer number and units in each layer of expert DNN.
-    :param tower_dnn_hidden_units: list, list of positive integer list, its length must be euqal to num_tasks, the layer number and units in each layer of task-specific DNN.
-    :param gate_dnn_hidden_units: list, list of positive integer or None, the layer number and units in each layer of gate DNN, default value is None. e.g.[8, 8].
+    :param expert_dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of expert DNN.
+    :param tower_dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of task-specific DNN.
+    :param gate_dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of gate DNN.
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector.
     :param l2_reg_dnn: float. L2 regularizer strength applied to DNN.
     :param seed: integer ,to use as random seed.
@@ -70,10 +70,10 @@ def PLE(dnn_feature_columns, shared_expert_num=1, specific_expert_num=1, num_lev
                 expert_outputs.append(expert_network)
 
         # build task-shared expert layer
-        for i in range(shared_expert_num):
+        for k in range(shared_expert_num):
             expert_network = DNN(expert_dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn,
                                  seed=seed,
-                                 name=level_name + 'expert_shared_' + str(i))(inputs[-1])
+                                 name=level_name + 'expert_shared_' + str(k))(inputs[-1])
             expert_outputs.append(expert_network)
 
         # task_specific gate (count = num_tasks)
@@ -86,19 +86,19 @@ def PLE(dnn_feature_columns, shared_expert_num=1, specific_expert_num=1, num_lev
 
             expert_concat = tf.keras.layers.concatenate(cur_experts, axis=1,
                                                         name=level_name + 'expert_concat_specific_' + task_names[i])
-            expert_concat = tf.keras.layers.Reshape([cur_expert_num, expert_dnn_hidden_units[-1]],
+            expert_concat = tf.keras.layers.Reshape([cur_expert_num, -1],
                                                     name=level_name + 'expert_reshape_specific_' + task_names[i])(
                 expert_concat)
 
             # build gate layers
-            if gate_dnn_hidden_units != None:
-                gate_network = DNN(gate_dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn,
-                                   seed=seed,
-                                   name=level_name + 'gate_specific_' + task_names[i])(
-                    inputs[i])  # gate[i] for task input[i]
-                gate_input = gate_network
-            else:  # in origin paper, gate is one Dense layer with softmax.
-                gate_input = inputs[i]
+            # if gate_dnn_hidden_units != None:
+            gate_input = DNN(gate_dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn,
+                             seed=seed,
+                             name=level_name + 'gate_specific_' + task_names[i])(
+                inputs[i])  # gate[i] for task input[i]
+            # gate_input = gate_network
+            # else:  # in origin paper, gate is one Dense layer with softmax.
+            #    gate_input = inputs[i]
             gate_out = tf.keras.layers.Dense(cur_expert_num, use_bias=False, activation='softmax',
                                              name=level_name + 'gate_softmax_specific_' + task_names[i])(gate_input)
             gate_out = tf.keras.layers.Lambda(lambda x: tf.expand_dims(x, axis=-1))(gate_out)
@@ -116,18 +116,18 @@ def PLE(dnn_feature_columns, shared_expert_num=1, specific_expert_num=1, num_lev
 
             expert_concat = tf.keras.layers.concatenate(cur_experts, axis=1,
                                                         name=level_name + 'expert_concat_shared')
-            expert_concat = tf.keras.layers.Reshape([cur_expert_num, expert_dnn_hidden_units[-1]],
+            expert_concat = tf.keras.layers.Reshape([cur_expert_num, -1],
                                                     name=level_name + 'expert_reshape_shared')(
                 expert_concat)
 
             # build gate layers
-            if gate_dnn_hidden_units != None:
-                gate_network = DNN(gate_dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn,
-                                   seed=seed,
-                                   name=level_name + 'gate_shared_' + str(i))(inputs[-1])  # gate for shared task input
-                gate_input = gate_network
-            else:  # in origin paper, gate is one Dense layer with softmax.
-                gate_input = inputs[-1]
+            # if gate_dnn_hidden_units != None:
+            gate_input = DNN(gate_dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn,
+                             seed=seed,
+                             name=level_name + 'gate_shared_' + str(i))(inputs[-1])  # gate for shared task input
+            #    gate_input = gate_network
+            # else:  # in origin paper, gate is one Dense layer with softmax.
+            #    gate_input = inputs[-1]
 
             gate_out = tf.keras.layers.Dense(cur_expert_num, use_bias=False, activation='softmax',
                                              name=level_name + 'gate_softmax_shared_' + str(i))(gate_input)

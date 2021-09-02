@@ -4,7 +4,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 
 from deepctr.feature_column import SparseFeat, DenseFeat, get_feature_names
-from deepctr.models import MMOE
+from deepctr.models import ESMM,MMOE
 
 if __name__ == "__main__":
     column_names = ['age', 'class_worker', 'det_ind_code', 'det_occ_code', 'education', 'wage_per_hour', 'hs_college',
@@ -54,7 +54,8 @@ if __name__ == "__main__":
     test_model_input = {name: test[name] for name in feature_names}
 
     # 4.Define Model,train,predict and evaluate
-    model = MMOE(dnn_feature_columns, task_types=['binary', 'binary'], task_names=['label_income', 'label_marital'])
+    model = MMOE(dnn_feature_columns, tower_dnn_hidden_units=[], task_types=['binary', 'binary'],
+                 task_names=['label_income', 'label_marital'])
     model.compile("adam", loss=["binary_crossentropy", "binary_crossentropy"],
                   metrics=['binary_crossentropy'], )
 

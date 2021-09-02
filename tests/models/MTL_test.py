@@ -22,31 +22,26 @@ def test_ESMM():
     model_name = "ESMM"
     x, y_list, dnn_feature_columns = get_mtl_test_data()
 
-    model = ESMM(dnn_feature_columns, tower_dnn_hidden_units=(8,), task_type='binary',
+    model = ESMM(dnn_feature_columns, tower_dnn_hidden_units=(8,), task_types=['binary', 'binary'],
                  task_names=['label_marital', 'label_income'])
     check_mtl_model(model, model_name, x, y_list, task_types=['binary', 'binary'])
 
 
-@pytest.mark.parametrize(
-    'gate_dnn_hidden_units',
-    [None,
-     (4,)]
-)
-def test_MMOE(gate_dnn_hidden_units):
+def test_MMOE():
     if tf.__version__ == "1.15.0":  # slow in tf 1.15
         return
     model_name = "MMOE"
     x, y_list, dnn_feature_columns = get_mtl_test_data()
 
     model = MMOE(dnn_feature_columns, num_experts=8, expert_dnn_hidden_units=(8,), tower_dnn_hidden_units=(8,),
-                 gate_dnn_hidden_units=gate_dnn_hidden_units, task_types=['binary', 'binary'],
+                 gate_dnn_hidden_units=(), task_types=['binary', 'binary'],
                  task_names=['income', 'marital'])
     check_mtl_model(model, model_name, x, y_list, task_types=['binary', 'binary'])
 
 
 @pytest.mark.parametrize(
     'num_levels,gate_dnn_hidden_units',
-    [(2, None),
+    [(2, ()),
      (1, (4,))]
 )
 def test_PLE(num_levels, gate_dnn_hidden_units):

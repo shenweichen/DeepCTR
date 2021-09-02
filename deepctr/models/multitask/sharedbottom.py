@@ -3,7 +3,7 @@ Author:
     Mincai Lai, laimc@shanghaitech.edu.cn
 
 Reference:
-    [1] Caruana R. Multitask learning[J]. Machine learning, 1997.(http://reports-archive.adm.cs.cmu.edu/anon/1997/CMU-CS-97-203.pdf)
+    [1] Ruder S. An overview of multi-task learning in deep neural networks[J]. arXiv preprint arXiv:1706.05098, 2017.(https://arxiv.org/pdf/1706.05098.pdf)
 """
 
 import tensorflow as tf
@@ -19,8 +19,8 @@ def SharedBottom(dnn_feature_columns, bottom_dnn_hidden_units=(256, 128), tower_
     """Instantiates the SharedBottom multi-task learning Network architecture.
 
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
-    :param bottom_dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of shared-bottom DNN
-    :param tower_dnn_hidden_units: list, list of positive integer list, its length must be euqal to num_tasks, the layer number and units in each layer of task-specific DNN
+    :param bottom_dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of shared bottom DNN.
+    :param tower_dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of task-specific DNN.
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
     :param l2_reg_dnn: float. L2 regularizer strength applied to DNN
     :param seed: integer ,to use as random seed.
@@ -58,7 +58,7 @@ def SharedBottom(dnn_feature_columns, bottom_dnn_hidden_units=(256, 128), tower_
                            name='tower_' + task_name)(shared_bottom_output)
 
         logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(tower_output)
-        output = PredictionLayer(task_type, name=task_name)(logit)  # regression->keep, binary classification->sigmoid
+        output = PredictionLayer(task_type, name=task_name)(logit)
         tasks_output.append(output)
 
     model = tf.keras.models.Model(inputs=inputs_list, outputs=tasks_output)

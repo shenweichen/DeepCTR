@@ -368,6 +368,15 @@ BST use the powerful Transformer model to capture the sequential signals underly
 
 ### SharedBottom
 
+Hard parameter sharing is the most commonly used approach to MTL in neural networks. It is generally applied by sharing the hidden layers between all tasks, while keeping several task-specific output layers.
+
+[**SharedBottom Model API**](./deepctr.models.multitask.sharedbottom.html)
+
+![SharedBottom](../pics/multitaskmodels/SharedBottom.png)
+
+[Ruder S. An overview of multi-task learning in deep neural networks[J]. arXiv preprint arXiv:1706.05098, 2017.](https://arxiv.org/pdf/1706.05098.pdf)
+
+
 ### ESMM(Entire Space Multi-task Model)
 
 ESMM models CVR in a brand-new perspective by making good use of sequential pattern of user actions, i.e., impression →
