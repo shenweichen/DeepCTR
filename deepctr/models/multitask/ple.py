@@ -43,6 +43,9 @@ def PLE(dnn_feature_columns, shared_expert_num=1, specific_expert_num=1, num_lev
     num_tasks = len(task_names)
     if num_tasks <= 1:
         raise ValueError("num_tasks must be greater than 1")
+    if specific_expert_num <= 0:
+        raise ValueError("specific_expert_num must be greater than 0")
+
     if len(task_types) != num_tasks:
         raise ValueError("num_tasks must be equal to the length of task_types")
 
@@ -86,11 +89,12 @@ def PLE(dnn_feature_columns, shared_expert_num=1, specific_expert_num=1, num_lev
             cur_experts = expert_outputs[i * specific_expert_num:(i + 1) * specific_expert_num] + expert_outputs[-int(
                 shared_expert_num):]  # task_specific + task_shared
 
-            expert_concat = tf.keras.layers.concatenate(cur_experts, axis=1,
-                                                        name=level_name + 'expert_concat_specific_' + task_names[i])
-            expert_concat = tf.keras.layers.Reshape([cur_expert_num, -1],
-                                                    name=level_name + 'expert_reshape_specific_' + task_names[i])(
-                expert_concat)
+            # expert_concat = tf.keras.layers.concatenate(cur_experts, axis=1,
+            #                                             name=level_name + 'expert_concat_specific_' + task_names[i])
+            # expert_concat = tf.keras.layers.Reshape([cur_expert_num, -1],
+            #                                         name=level_name + 'expert_reshape_specific_' + task_names[i])(
+            #     expert_concat)
+            expert_concat = tf.keras.layers.Lambda(lambda x: tf.stack(x, axis=1))(cur_experts)
 
             # build gate layers
             gate_input = DNN(gate_dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn,
@@ -102,9 +106,12 @@ def PLE(dnn_feature_columns, shared_expert_num=1, specific_expert_num=1, num_lev
             gate_out = tf.keras.layers.Lambda(lambda x: tf.expand_dims(x, axis=-1))(gate_out)
 
             # gate multiply the expert
-            gate_mul_expert = tf.keras.layers.Multiply(name=level_name + 'gate_mul_expert_specific_' + task_names[i])(
+            # gate_mul_expert = tf.keras.layers.Multiply(name=level_name + 'gate_mul_expert_specific_' + task_names[i])(
+            #     [expert_concat, gate_out])
+            # gate_mul_expert = tf.keras.layers.Lambda(lambda x: reduce_sum(x, axis=1, keep_dims=False))(gate_mul_expert)
+            gate_mul_expert = tf.keras.layers.Lambda(lambda x: reduce_sum(x[0] * x[1], axis=1, keep_dims=False),
+                                                     name=level_name + 'gate_mul_expert_specific_' + task_names[i])(
                 [expert_concat, gate_out])
-            gate_mul_expert = tf.keras.layers.Lambda(lambda x: reduce_sum(x, axis=1, keep_dims=False))(gate_mul_expert)
             cgc_outs.append(gate_mul_expert)
 
         # task_shared gate, if the level not in last, add one shared gate
@@ -112,25 +119,31 @@ def PLE(dnn_feature_columns, shared_expert_num=1, specific_expert_num=1, num_lev
             cur_expert_num = num_tasks * specific_expert_num + shared_expert_num
             cur_experts = expert_outputs  # all the expert include task-specific expert and task-shared expert
 
-            expert_concat = tf.keras.layers.concatenate(cur_experts, axis=1,
-                                                        name=level_name + 'expert_concat_shared')
-            expert_concat = tf.keras.layers.Reshape([cur_expert_num, -1],
-                                                    name=level_name + 'expert_reshape_shared')(
-                expert_concat)
+            # expert_concat = tf.keras.layers.concatenate(cur_experts, axis=1,
+            #                                             name=level_name + 'expert_concat_shared')
+            # expert_concat = tf.keras.layers.Reshape([cur_expert_num, -1],
+            #                                         name=level_name + 'expert_reshape_shared')(
+            #     expert_concat)
+            expert_concat = tf.keras.layers.Lambda(lambda x: tf.stack(x, axis=1))(cur_experts)
 
             # build gate layers
             gate_input = DNN(gate_dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn,
                              seed=seed,
-                             name=level_name + 'gate_shared_' + str(i))(inputs[-1])  # gate for shared task input
+                             name=level_name + 'gate_shared')(inputs[-1])  # gate for shared task input
 
             gate_out = tf.keras.layers.Dense(cur_expert_num, use_bias=False, activation='softmax',
-                                             name=level_name + 'gate_softmax_shared_' + str(i))(gate_input)
+                                             name=level_name + 'gate_softmax_shared')(gate_input)
             gate_out = tf.keras.layers.Lambda(lambda x: tf.expand_dims(x, axis=-1))(gate_out)
 
             # gate multiply the expert
-            gate_mul_expert = tf.keras.layers.Multiply(name=level_name + 'gate_mul_expert_shared_' + task_names[i])(
+            # gate_mul_expert = tf.keras.layers.Multiply(name=level_name + 'gate_mul_expert_shared_' + task_names[i])(
+            #     [expert_concat, gate_out])
+            # gate_mul_expert = tf.keras.layers.Lambda(lambda x: reduce_sum(x, axis=1, keep_dims=False))(gate_mul_expert)
+
+            gate_mul_expert = tf.keras.layers.Lambda(lambda x: reduce_sum(x[0] * x[1], axis=1, keep_dims=False),
+                                                     name=level_name + 'gate_mul_expert_shared')(
                 [expert_concat, gate_out])
-            gate_mul_expert = tf.keras.layers.Lambda(lambda x: reduce_sum(x, axis=1, keep_dims=False))(gate_mul_expert)
+
             cgc_outs.append(gate_mul_expert)
         return cgc_outs
 
