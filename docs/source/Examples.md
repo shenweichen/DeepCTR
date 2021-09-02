@@ -520,8 +520,11 @@ if __name__ == "__main__":
 
 The UCI census-income dataset is extracted from the 1994 census database. It contains 299,285 instances of demographic
 information of American adults. There are 40 features in total. We construct a multi-task learning problem from this
-dataset by setting some of the features as prediction targets : Task 1: Predict whether the income exceeds $50K; Task 2:
-Predict whether this person’s marital status is never married. This example shows how to use ``MMOE`` to solve a multi
+dataset by setting some of the features as prediction targets :
+- Task 1: Predict whether the income exceeds $50K;
+- Task 2: Predict whether this person’s marital status is never married.   
+
+This example shows how to use ``MMOE`` to solve a multi
 task learning problem. You can get the demo
 data [census-income.sample](https://github.com/shenweichen/DeepCTR/tree/master/examples/census-income.sample) and run
 the following codes.
