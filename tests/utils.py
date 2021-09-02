@@ -94,13 +94,15 @@ def get_test_data(sample_size=1000, embedding_size=4, sparse_feature_num=1, dens
     return model_input, y, feature_columns
 
 
-def layer_test(layer_cls, kwargs={}, input_shape=None, input_dtype=None,
+def layer_test(layer_cls, kwargs=None, input_shape=None, input_dtype=None,
 
                input_data=None, expected_output=None,
 
                expected_output_dtype=None, fixed_batch_size=False, supports_masking=False):
     # generate input data
 
+    if kwargs is None:
+        kwargs = {}
     if input_data is None:
 
         if not input_shape:
