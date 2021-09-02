@@ -11,7 +11,7 @@ from tensorflow.python.ops.lookup_ops import TextFileInitializer
 
 try:
     from tensorflow.python.ops.lookup_ops import StaticHashTable
-except ImportError as e:
+except ImportError:
     from tensorflow.python.ops.lookup_ops import HashTable as StaticHashTable
 
 
