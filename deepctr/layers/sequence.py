@@ -684,8 +684,12 @@ class BiasEncoding(Layer):
             embed_size = input_shape[2].value
             seq_len_max = input_shape[1].value
         else:
-            embed_size = input_shape[0][2].value
-            seq_len_max = input_shape[0][1].value
+            try:
+                embed_size = input_shape[0][2].value
+                seq_len_max = input_shape[0][1].value
+            except AttributeError:
+                embed_size = input_shape[0][2]
+                seq_len_max = input_shape[0][1]
 
         self.sess_bias_embedding = self.add_weight('sess_bias_embedding', shape=(self.sess_max_count, 1, 1),
                                                    initializer=TruncatedNormal(
