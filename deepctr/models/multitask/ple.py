@@ -43,8 +43,6 @@ def PLE(dnn_feature_columns, shared_expert_num=1, specific_expert_num=1, num_lev
     num_tasks = len(task_names)
     if num_tasks <= 1:
         raise ValueError("num_tasks must be greater than 1")
-    if specific_expert_num <= 0:
-        raise ValueError("specific_expert_num must be greater than 0")
 
     if len(task_types) != num_tasks:
         raise ValueError("num_tasks must be equal to the length of task_types")
@@ -64,7 +62,7 @@ def PLE(dnn_feature_columns, shared_expert_num=1, specific_expert_num=1, num_lev
     # single Extraction Layer
     def cgc_net(inputs, level_name, is_last=False):
         # inputs: [task1, task2, ... taskn, shared task]
-        expert_outputs = []
+        specific_expert_outputs = []
         # build task-specific expert layer
         for i in range(num_tasks):
             for j in range(specific_expert_num):
@@ -72,22 +70,25 @@ def PLE(dnn_feature_columns, shared_expert_num=1, specific_expert_num=1, num_lev
                                      seed=seed,
                                      name=level_name + 'task_' + task_names[i] + '_expert_specific_' + str(j))(
                     inputs[i])
-                expert_outputs.append(expert_network)
+                specific_expert_outputs.append(expert_network)
 
         # build task-shared expert layer
+        shared_expert_outputs = []
         for k in range(shared_expert_num):
             expert_network = DNN(expert_dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn,
                                  seed=seed,
                                  name=level_name + 'expert_shared_' + str(k))(inputs[-1])
-            expert_outputs.append(expert_network)
+            shared_expert_outputs.append(expert_network)
 
         # task_specific gate (count = num_tasks)
         cgc_outs = []
         for i in range(num_tasks):
             # concat task-specific expert and task-shared expert
             cur_expert_num = specific_expert_num + shared_expert_num
-            cur_experts = expert_outputs[i * specific_expert_num:(i + 1) * specific_expert_num] + expert_outputs[-int(
-                shared_expert_num):]  # task_specific + task_shared
+            # task_specific + task_shared
+            cur_experts = specific_expert_outputs[
+                          i * specific_expert_num:(i + 1) * specific_expert_num] + shared_expert_outputs
+
 
             # expert_concat = tf.keras.layers.concatenate(cur_experts, axis=1,
             #                                             name=level_name + 'expert_concat_specific_' + task_names[i])
@@ -117,7 +118,7 @@ def PLE(dnn_feature_columns, shared_expert_num=1, specific_expert_num=1, num_lev
         # task_shared gate, if the level not in last, add one shared gate
         if not is_last:
             cur_expert_num = num_tasks * specific_expert_num + shared_expert_num
-            cur_experts = expert_outputs  # all the expert include task-specific expert and task-shared expert
+            cur_experts = specific_expert_outputs + shared_expert_outputs  # all the expert include task-specific expert and task-shared expert
 
             # expert_concat = tf.keras.layers.concatenate(cur_experts, axis=1,
             #                                             name=level_name + 'expert_concat_shared')
