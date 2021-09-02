@@ -368,7 +368,7 @@ BST use the powerful Transformer model to capture the sequential signals underly
 
 ### SharedBottom
 
-### ESMM
+### ESMM(Entire Space Multi-task Model)
 
 ESMM models CVR in a brand-new perspective by making good use of sequential pattern of user actions, i.e., impression →
 click → conversion. The proposed Entire Space Multi-task Model (ESMM) can eliminate the two problems simultaneously by
@@ -380,7 +380,7 @@ i) modeling CVR directly over the entire space, ii) employing a feature represen
 
 [Ma X, Zhao L, Huang G, et al. Entire space multi-task model: An effective approach for estimating post-click conversion rate[C]//The 41st International ACM SIGIR Conference on Research & Development in Information Retrieval. 2018.](https://arxiv.org/abs/1804.07931)
 
-### MMOE
+### MMOE(Multi-gate Mixture-of-Experts)
 
 Multi-gate Mixture-of-Experts (MMoE) explicitly learns to model task relationships from data. We adapt the Mixture-of-
 Experts (MoE) structure to multi-task learning by sharing the expert submodels across all tasks, while also having a
@@ -392,7 +392,7 @@ gating network trained to optimize each task.
 
 [Ma J, Zhao Z, Yi X, et al. Modeling task relationships in multi-task learning with multi-gate mixture-of-experts[C]//Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. 2018.](https://dl.acm.org/doi/abs/10.1145/3219819.3220007)
 
-### PLE
+### PLE(Progressive Layered Extraction)
 
 PLE separates shared components and task-specific components explicitly and adopts a progressive rout- ing mechanism to
 extract and separate deeper semantic knowledge gradually, improving efficiency of joint representation learning and
