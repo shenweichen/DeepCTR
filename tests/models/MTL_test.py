@@ -1,10 +1,7 @@
 import pytest
 import tensorflow as tf
 
-from deepctr.models.mtl.esmm import ESMM
-from deepctr.models.mtl.mmoe import MMOE
-from deepctr.models.mtl.ple import PLE
-from deepctr.models.mtl.sharedbottom import SharedBottom
+from deepctr.models.multitask import SharedBottom, ESMM, MMOE, PLE
 from ..utils_mtl import get_mtl_test_data, check_mtl_model
 
 

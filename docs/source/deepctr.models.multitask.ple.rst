@@ -1,7 +1,7 @@
-deepctr.models.mtl.esmm module
+deepctr.models.multitask.ple module
 =============================
 
-.. automodule:: deepctr.models.mtl.esmm
+.. automodule:: deepctr.models.multitask.ple
     :members:
     :no-undoc-members:
     :no-show-inheritance:

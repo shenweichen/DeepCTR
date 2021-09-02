@@ -34,9 +34,6 @@ def ESMM(dnn_feature_columns, tower_dnn_hidden_units=(256, 128, 64), l2_reg_embe
     if len(task_names) != 2:
         raise ValueError("the length of task_names must be equal to 2")
 
-    # if len(tower_dnn_hidden_units) != 2:
-    #     raise ValueError("the length of tower_dnn_units_lists must be equal to 2")
-
     features = build_input_features(dnn_feature_columns)
     inputs_list = list(features.values())
 

@@ -16,12 +16,12 @@ from tensorflow.python.keras.layers import (Concatenate, Dense, Embedding,
 from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.regularizers import l2
 
-from ..feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, build_input_features
-from ..inputs import (get_embedding_vec_list, get_inputs_list, embedding_lookup, get_dense_input)
-from ..layers.core import DNN, PredictionLayer
-from ..layers.sequence import (AttentionSequencePoolingLayer, BiasEncoding,
-                               BiLSTM, Transformer)
-from ..layers.utils import concat_func, combined_dnn_input
+from ...feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, build_input_features
+from ...inputs import (get_embedding_vec_list, get_inputs_list, embedding_lookup, get_dense_input)
+from ...layers.core import DNN, PredictionLayer
+from ...layers.sequence import (AttentionSequencePoolingLayer, BiasEncoding,
+                                BiLSTM, Transformer)
+from ...layers.utils import concat_func, combined_dnn_input
 
 
 def DSIN(dnn_feature_columns, sess_feature_list, sess_max_count=5, bias_encoding=False,

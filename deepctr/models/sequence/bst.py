@@ -10,12 +10,12 @@ Reference:
 import tensorflow as tf
 from tensorflow.python.keras.layers import (Dense, Flatten)
 
-from ..feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, build_input_features
-from ..inputs import get_varlen_pooling_list, create_embedding_matrix, embedding_lookup, varlen_embedding_lookup, \
+from ...feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, build_input_features
+from ...inputs import get_varlen_pooling_list, create_embedding_matrix, embedding_lookup, varlen_embedding_lookup, \
     get_dense_input
-from ..layers.core import DNN, PredictionLayer
-from ..layers.sequence import Transformer, AttentionSequencePoolingLayer
-from ..layers.utils import concat_func, combined_dnn_input
+from ...layers.core import DNN, PredictionLayer
+from ...layers.sequence import Transformer, AttentionSequencePoolingLayer
+from ...layers.utils import concat_func, combined_dnn_input
 
 
 def BST(dnn_feature_columns, history_feature_list, transformer_num=1, att_head_num=8,

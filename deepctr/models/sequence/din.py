@@ -8,12 +8,12 @@ Reference:
 """
 import tensorflow as tf
 
-from ..feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, build_input_features
-from ..inputs import create_embedding_matrix, embedding_lookup, get_dense_input, varlen_embedding_lookup, \
+from ...feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, build_input_features
+from ...inputs import create_embedding_matrix, embedding_lookup, get_dense_input, varlen_embedding_lookup, \
     get_varlen_pooling_list
-from ..layers.core import DNN, PredictionLayer
-from ..layers.sequence import AttentionSequencePoolingLayer
-from ..layers.utils import concat_func, NoMask, combined_dnn_input
+from ...layers.core import DNN, PredictionLayer
+from ...layers.sequence import AttentionSequencePoolingLayer
+from ...layers.utils import concat_func, NoMask, combined_dnn_input
 
 
 def DIN(dnn_feature_columns, history_feature_list, dnn_use_bn=False,

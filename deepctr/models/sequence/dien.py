@@ -10,12 +10,12 @@ Reference:
 import tensorflow as tf
 from tensorflow.python.keras.layers import (Concatenate, Dense, Permute, multiply)
 
-from ..feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, build_input_features
-from ..inputs import get_varlen_pooling_list, create_embedding_matrix, embedding_lookup, varlen_embedding_lookup, \
+from ...feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, build_input_features
+from ...inputs import get_varlen_pooling_list, create_embedding_matrix, embedding_lookup, varlen_embedding_lookup, \
     get_dense_input
-from ..layers.core import DNN, PredictionLayer
-from ..layers.sequence import AttentionSequencePoolingLayer, DynamicGRU
-from ..layers.utils import concat_func, reduce_mean, combined_dnn_input
+from ...layers.core import DNN, PredictionLayer
+from ...layers.sequence import AttentionSequencePoolingLayer, DynamicGRU
+from ...layers.utils import concat_func, reduce_mean, combined_dnn_input
 
 
 def auxiliary_loss(h_states, click_seq, noclick_seq, mask, stag=None):

@@ -1,7 +1,7 @@
-deepctr.models.mtl.mmoe module
+deepctr.models.multitask.mmoe module
 =============================
 
-.. automodule:: deepctr.models.mtl.mmoe
+.. automodule:: deepctr.models.multitask.mmoe
     :members:
     :no-undoc-members:
     :no-show-inheritance:

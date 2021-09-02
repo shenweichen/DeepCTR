@@ -14,7 +14,8 @@ from ...layers.utils import combined_dnn_input, reduce_sum
 
 
 def MMOE(dnn_feature_columns, num_experts=3, expert_dnn_hidden_units=(256, 128), tower_dnn_hidden_units=(64,),
-         gate_dnn_hidden_units=None, l2_reg_embedding=0.00001, l2_reg_dnn=0, seed=1024, dnn_dropout=0, dnn_activation='relu',
+         gate_dnn_hidden_units=None, l2_reg_embedding=0.00001, l2_reg_dnn=0, seed=1024, dnn_dropout=0,
+         dnn_activation='relu',
          dnn_use_bn=False, task_types=('binary', 'binary'), task_names=('ctr', 'ctcvr')):
     """Instantiates the Multi-gate Mixture-of-Experts multi-task learning architecture.
 
@@ -44,9 +45,6 @@ def MMOE(dnn_feature_columns, num_experts=3, expert_dnn_hidden_units=(256, 128),
     for task_type in task_types:
         if task_type not in ['binary', 'regression']:
             raise ValueError("task must be binary or regression, {} is illegal".format(task_type))
-
-    # if num_tasks != len(tower_dnn_hidden_units):
-    #     raise ValueError("the length of tower_dnn_units_lists must be euqal to num_tasks")
 
     features = build_input_features(dnn_feature_columns)
 

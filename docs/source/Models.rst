@@ -13,10 +13,10 @@ DeepCTR Models API
    AFM<deepctr.models.afm>
    DCN<deepctr.models.dcn>
    DCNMix<deepctr.models.dcnmix>
-   DIN<deepctr.models.din>
-   DIEN<deepctr.models.dien>
-   DSIN<deepctr.models.dsin>
-   BST<deepctr.models.bst>
+   DIN<deepctr.models.sequence.din>
+   DIEN<deepctr.models.sequence.dien>
+   DSIN<deepctr.models.sequence.dsin>
+   BST<deepctr.models.sequence.bst>
    xDeepFM<deepctr.models.xdeepfm>
    AutoInt<deepctr.models.autoint>
    ONN<deepctr.models.onn>
@@ -26,10 +26,9 @@ DeepCTR Models API
    IFM<deepctr.models.ifm>
    DIFM<deepctr.models.difm>
    DeepFEFM<deepctr.models.deepfefm>
-   SharedBottom<deepctr.models.mtl.sharedbottom>
-   ESMM<deepctr.models.mtl.esmm>
-   MMOE<deepctr.models.mtl.mmoe>
-   CGC<deepctr.models.mtl.cgc>
-   PLE<deepctr.models.mtl.ple>
+   SharedBottom<deepctr.models.multitask.sharedbottom>
+   ESMM<deepctr.models.multitask.esmm>
+   MMOE<deepctr.models.multitask.mmoe>
+   PLE<deepctr.models.multitask.ple>
 
    

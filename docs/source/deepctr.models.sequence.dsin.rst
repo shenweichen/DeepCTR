@@ -1,7 +1,7 @@
-deepctr.models.dsin module
+deepctr.models.sequence.dsin module
 ==========================
 
-.. automodule:: deepctr.models.dsin
+.. automodule:: deepctr.models.sequence.dsin
     :members:
     :no-undoc-members:
     :no-show-inheritance:

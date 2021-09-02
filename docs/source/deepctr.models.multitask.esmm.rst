@@ -1,7 +1,7 @@
-deepctr.models.mtl.sharedbottom module
+deepctr.models.multitask.esmm module
 =============================
 
-.. automodule:: deepctr.models.mtl.sharedbottom
+.. automodule:: deepctr.models.multitask.esmm
     :members:
     :no-undoc-members:
     :no-show-inheritance:

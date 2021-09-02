@@ -1,7 +1,7 @@
 import numpy as np
 
 from deepctr.feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, get_feature_names
-from deepctr.models.din import DIN
+from deepctr.models.sequence.din import DIN
 from ..utils import check_model
 
 

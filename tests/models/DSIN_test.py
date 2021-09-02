@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from deepctr.feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, get_feature_names
-from deepctr.models.dsin import DSIN
+from deepctr.models.sequence.dsin import DSIN
 from ..utils import check_model
 
 

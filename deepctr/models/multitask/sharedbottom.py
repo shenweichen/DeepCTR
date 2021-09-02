@@ -42,9 +42,6 @@ def SharedBottom(dnn_feature_columns, bottom_dnn_hidden_units=(256, 128), tower_
         if task_type not in ['binary', 'regression']:
             raise ValueError("task must be binary or regression, {} is illegal".format(task_type))
 
-    # if num_tasks != len(tower_dnn_units_lists):
-    #     raise ValueError("the length of tower_dnn_units_lists must be euqal to num_tasks")
-
     features = build_input_features(dnn_feature_columns)
     inputs_list = list(features.values())
 

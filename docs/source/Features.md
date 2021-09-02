@@ -191,37 +191,6 @@ learn feature interactions.
 [Wang R, Shivanna R, Cheng D Z, et al. DCN V2: Improved Deep & Cross Network and Practical Lessons for Web-scale Learning to Rank Systems[J]. arXiv preprint arXiv:2008.13535, 2020.
 ](https://arxiv.org/abs/2008.13535)
 
-### DIN (Deep Interest Network)
-
-DIN introduce a attention method to learn from sequence(multi-valued) feature. Tradional method usually use sum/mean
-pooling on sequence feature. DIN use a local activation unit to get the activation score between candidate item and
-history items. User's interest are represented by weighted sum of user behaviors. user's interest vector and other
-embedding vectors are concatenated and fed into a MLP to get the prediction.
-
-[**DIN Model API**](./deepctr.models.din.html)
-
-[DIN example](https://github.com/shenweichen/DeepCTR/tree/master/examples/run_din.py)
-
-![DIN](../pics/DIN.png)
-
-[Zhou G, Zhu X, Song C, et al. Deep interest network for click-through rate prediction[C]//Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. ACM, 2018: 1059-1068.](https://arxiv.org/pdf/1706.06978.pdf)
-
-### DIEN (Deep Interest Evolution Network)
-
-Deep Interest Evolution Network (DIEN) uses interest extractor layer to capture temporal interests from history behavior
-sequence. At this layer, an auxiliary loss is proposed to supervise interest extracting at each step. As user interests
-are diverse, especially in the e-commerce system, interest evolving layer is proposed to capture interest evolving
-process that is relative to the target item. At interest evolving layer, attention mechanism is embedded into the
-sequential structure novelly, and the effects of relative interests are strengthened during interest evolution.
-
-[**DIEN Model API**](./deepctr.models.dien.html)
-
-[DIEN example](https://github.com/shenweichen/DeepCTR/tree/master/examples/run_dien.py)
-
-![DIEN](../pics/DIEN.png)
-
-[Zhou G, Mou N, Fan Y, et al. Deep Interest Evolution Network for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1809.03672, 2018.](https://arxiv.org/pdf/1809.03672.pdf)
-
 ### xDeepFM
 
 xDeepFM use a Compressed Interaction Network (CIN) to learn both low and high order feature interaction explicitly,and
@@ -277,33 +246,6 @@ to learn interactions from the augmented feature space.
 ![FGCNN](../pics/FGCNN.png)
 
 [Liu B, Tang R, Chen Y, et al. Feature Generation by Convolutional Neural Network for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1904.04447, 2019.](https://arxiv.org/pdf/1904.04447)
-
-### DSIN(Deep Session Interest  Network)
-
-Deep Session Interest Network (DSIN) extracts users' multiple historical sessions in their behavior sequences. First it
-uses self-attention mechanism with bias encoding to extract users' interests in each session. Then apply Bi-LSTM to
-model how users' interests evolve and interact among sessions. Finally, local activation unit is used to adaptively
-learn the influences of various session interests on the target item.
-
-[**DSIN Model API**](./deepctr.models.dsin.html)
-
-[DSIN example](https://github.com/shenweichen/DeepCTR/tree/master/examples/run_dsin.py)
-
-![DSIN](../pics/DSIN.png)
-
-[Feng Y, Lv F, Shen W, et al. Deep Session Interest Network for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1905.06482, 2019.](https://arxiv.org/abs/1905.06482)
-
-### BST(Behavior Sequence Transformer)
-
-BST use the powerful Transformer model to capture the sequential signals underlying users’ behavior sequences .
-
-[**BST Model API**](./deepctr.models.bst.html)
-
-[BST example](https://github.com/shenweichen/DeepCTR/tree/master/examples/run_din.py)
-
-![BST](../pics/BST.png)
-
-[Qiwei Chen, Huan Zhao, Wei Li, Pipei Huang, and Wenwu Ou. 2019. Behavior sequence transformer for e-commerce recommendation in Alibaba. In Proceedings of the 1st International Workshop on Deep Learning Practice for High-Dimensional Sparse Data (DLP-KDD '19). Association for Computing Machinery, New York, NY, USA, Article 12, 1–4. DOI:)](https://arxiv.org/pdf/1905.06874.pdf)
 
 ### FiBiNET(Feature Importance and Bilinear feature Interaction NETwork)
 
@@ -362,6 +304,66 @@ feature. FEFM has significantly lower model complexity than FFM and roughly the 
 
 [Pande H. Field-Embedded Factorization Machines for Click-through rate prediction[J]. arXiv preprint arXiv:2009.09931, 2020.](https://arxiv.org/pdf/2009.09931)
 
+## Sequence Models
+
+### DIN (Deep Interest Network)
+
+DIN introduce a attention method to learn from sequence(multi-valued) feature. Tradional method usually use sum/mean
+pooling on sequence feature. DIN use a local activation unit to get the activation score between candidate item and
+history items. User's interest are represented by weighted sum of user behaviors. user's interest vector and other
+embedding vectors are concatenated and fed into a MLP to get the prediction.
+
+[**DIN Model API**](./deepctr.models.sequence.din.html)
+
+[DIN example](https://github.com/shenweichen/DeepCTR/tree/master/examples/run_din.py)
+
+![DIN](../pics/DIN.png)
+
+[Zhou G, Zhu X, Song C, et al. Deep interest network for click-through rate prediction[C]//Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. ACM, 2018: 1059-1068.](https://arxiv.org/pdf/1706.06978.pdf)
+
+### DIEN (Deep Interest Evolution Network)
+
+Deep Interest Evolution Network (DIEN) uses interest extractor layer to capture temporal interests from history behavior
+sequence. At this layer, an auxiliary loss is proposed to supervise interest extracting at each step. As user interests
+are diverse, especially in the e-commerce system, interest evolving layer is proposed to capture interest evolving
+process that is relative to the target item. At interest evolving layer, attention mechanism is embedded into the
+sequential structure novelly, and the effects of relative interests are strengthened during interest evolution.
+
+[**DIEN Model API**](./deepctr.models.sequence.dien.html)
+
+[DIEN example](https://github.com/shenweichen/DeepCTR/tree/master/examples/run_dien.py)
+
+![DIEN](../pics/DIEN.png)
+
+[Zhou G, Mou N, Fan Y, et al. Deep Interest Evolution Network for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1809.03672, 2018.](https://arxiv.org/pdf/1809.03672.pdf)
+
+### DSIN(Deep Session Interest  Network)
+
+Deep Session Interest Network (DSIN) extracts users' multiple historical sessions in their behavior sequences. First it
+uses self-attention mechanism with bias encoding to extract users' interests in each session. Then apply Bi-LSTM to
+model how users' interests evolve and interact among sessions. Finally, local activation unit is used to adaptively
+learn the influences of various session interests on the target item.
+
+[**DSIN Model API**](./deepctr.models.sequence.dsin.html)
+
+[DSIN example](https://github.com/shenweichen/DeepCTR/tree/master/examples/run_dsin.py)
+
+![DSIN](../pics/DSIN.png)
+
+[Feng Y, Lv F, Shen W, et al. Deep Session Interest Network for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1905.06482, 2019.](https://arxiv.org/abs/1905.06482)
+
+### BST(Behavior Sequence Transformer)
+
+BST use the powerful Transformer model to capture the sequential signals underlying users’ behavior sequences .
+
+[**BST Model API**](./deepctr.models.sequence.bst.html)
+
+[BST example](https://github.com/shenweichen/DeepCTR/tree/master/examples/run_din.py)
+
+![BST](../pics/BST.png)
+
+[Qiwei Chen, Huan Zhao, Wei Li, Pipei Huang, and Wenwu Ou. 2019. Behavior sequence transformer for e-commerce recommendation in Alibaba. In Proceedings of the 1st International Workshop on Deep Learning Practice for High-Dimensional Sparse Data (DLP-KDD '19). Association for Computing Machinery, New York, NY, USA, Article 12, 1–4. DOI:)](https://arxiv.org/pdf/1905.06874.pdf)
+
 ## MultiTask Models
 
 ### SharedBottom
@@ -372,7 +374,7 @@ ESMM models CVR in a brand-new perspective by making good use of sequential patt
 click → conversion. The proposed Entire Space Multi-task Model (ESMM) can eliminate the two problems simultaneously by
 i) modeling CVR directly over the entire space, ii) employing a feature representation transfer learning strategy.
 
-[**ESMM Model API**](./deepctr.models.mtl.esmm.html)
+[**ESMM Model API**](./deepctr.models.multitask.esmm.html)
 
 ![ESMM](../pics/multitaskmodels/ESMM.png)
 
@@ -384,7 +386,7 @@ Multi-gate Mixture-of-Experts (MMoE) explicitly learns to model task relationshi
 Experts (MoE) structure to multi-task learning by sharing the expert submodels across all tasks, while also having a
 gating network trained to optimize each task.
 
-[**MMOE Model API**](./deepctr.models.mtl.mmoe.html)
+[**MMOE Model API**](./deepctr.models.multitask.mmoe.html)
 
 ![MMOE](../pics/multitaskmodels/MMOE.png)
 
@@ -396,7 +398,7 @@ PLE separates shared components and task-specific components explicitly and adop
 extract and separate deeper semantic knowledge gradually, improving efficiency of joint representation learning and
 information routing across tasks in a general setup.
 
-[**PLE Model API**](./deepctr.models.mtl.ple.html)
+[**PLE Model API**](./deepctr.models.multitask.ple.html)
 
 ![PLE](../pics/multitaskmodels/PLE.png)
 
