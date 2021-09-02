@@ -2,6 +2,8 @@
 Author:
     Mincai Lai, laimc@shanghaitech.edu.cn
 
+    Weichen Shen, weichenswc@163.com
+
 Reference:
     [1] Ruder S. An overview of multi-task learning in deep neural networks[J]. arXiv preprint arXiv:1706.05098, 2017.(https://arxiv.org/pdf/1706.05098.pdf)
 """

@@ -2,6 +2,8 @@
 Author:
     Mincai Lai, laimc@shanghaitech.edu.cn
 
+    Weichen Shen, weichenswc@163.com
+
 Reference:
     [1] Ma J, Zhao Z, Yi X, et al. Modeling task relationships in multi-task learning with multi-gate mixture-of-experts[C]//Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. 2018.(https://dl.acm.org/doi/abs/10.1145/3219819.3220007)
 """
@@ -70,9 +72,6 @@ def MMOE(dnn_feature_columns, num_experts=3, expert_dnn_hidden_units=(256, 128),
         # if gate_dnn_hidden_units != None:
         gate_input = DNN(gate_dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed,
                          name='gate_' + task_names[i])(dnn_input)
-        #    gate_input = gate_network
-        # else:  # in origin paper, gate is one Dense layer with softmax.
-        #    gate_input = dnn_input
         gate_out = tf.keras.layers.Dense(num_experts, use_bias=False, activation='softmax',
                                          name='gate_softmax_' + task_names[i])(gate_input)
         gate_out = tf.keras.layers.Lambda(lambda x: tf.expand_dims(x, axis=-1))(gate_out)

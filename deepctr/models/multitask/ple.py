@@ -2,6 +2,8 @@
 Author:
     Mincai Lai, laimc@shanghaitech.edu.cn
 
+    Weichen Shen, weichenswc@163.com
+
 Reference:
     [1] Tang H, Liu J, Zhao M, et al. Progressive layered extraction (ple): A novel multi-task learning (mtl) model for personalized recommendations[C]//Fourteenth ACM Conference on Recommender Systems. 2020.(https://dl.acm.org/doi/10.1145/3383313.3412236)
 """
@@ -14,7 +16,7 @@ from ...layers.utils import combined_dnn_input, reduce_sum
 
 
 def PLE(dnn_feature_columns, shared_expert_num=1, specific_expert_num=1, num_levels=2,
-        expert_dnn_hidden_units=(256,), tower_dnn_hidden_units=(64,), gate_dnn_hidden_units=None,
+        expert_dnn_hidden_units=(256,), tower_dnn_hidden_units=(64,), gate_dnn_hidden_units=(),
         l2_reg_embedding=0.00001,
         l2_reg_dnn=0, seed=1024, dnn_dropout=0, dnn_activation='relu', dnn_use_bn=False,
         task_types=('binary', 'binary'), task_names=('ctr', 'ctcvr')):
@@ -91,14 +93,10 @@ def PLE(dnn_feature_columns, shared_expert_num=1, specific_expert_num=1, num_lev
                 expert_concat)
 
             # build gate layers
-            # if gate_dnn_hidden_units != None:
             gate_input = DNN(gate_dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn,
                              seed=seed,
                              name=level_name + 'gate_specific_' + task_names[i])(
                 inputs[i])  # gate[i] for task input[i]
-            # gate_input = gate_network
-            # else:  # in origin paper, gate is one Dense layer with softmax.
-            #    gate_input = inputs[i]
             gate_out = tf.keras.layers.Dense(cur_expert_num, use_bias=False, activation='softmax',
                                              name=level_name + 'gate_softmax_specific_' + task_names[i])(gate_input)
             gate_out = tf.keras.layers.Lambda(lambda x: tf.expand_dims(x, axis=-1))(gate_out)
@@ -121,13 +119,9 @@ def PLE(dnn_feature_columns, shared_expert_num=1, specific_expert_num=1, num_lev
                 expert_concat)
 
             # build gate layers
-            # if gate_dnn_hidden_units != None:
             gate_input = DNN(gate_dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn,
                              seed=seed,
                              name=level_name + 'gate_shared_' + str(i))(inputs[-1])  # gate for shared task input
-            #    gate_input = gate_network
-            # else:  # in origin paper, gate is one Dense layer with softmax.
-            #    gate_input = inputs[-1]
 
             gate_out = tf.keras.layers.Dense(cur_expert_num, use_bias=False, activation='softmax',
                                              name=level_name + 'gate_softmax_shared_' + str(i))(gate_input)
