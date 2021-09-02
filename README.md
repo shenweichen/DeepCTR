@@ -18,18 +18,23 @@
 <!-- [![Gitter](https://badges.gitter.im/DeepCTR/community.svg)](https://gitter.im/DeepCTR/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) -->
 
 
-DeepCTR is a **Easy-to-use**,**Modular** and **Extendible** package of deep-learning based CTR models along with lots of core components layers which can be used to easily build custom models.You can use any complex model with `model.fit()`，and `model.predict()` .
+DeepCTR is a **Easy-to-use**,**Modular** and **Extendible** package of deep-learning based CTR models along with lots of
+core components layers which can be used to easily build custom models.You can use any complex model with `model.fit()`
+，and `model.predict()` .
 
-- Provide `tf.keras.Model` like interface for **quick experiment**. [example](https://deepctr-doc.readthedocs.io/en/latest/Quick-Start.html#getting-started-4-steps-to-deepctr)
-- Provide  `tensorflow estimator` interface for **large scale data** and **distributed training**. [example](https://deepctr-doc.readthedocs.io/en/latest/Quick-Start.html#getting-started-4-steps-to-deepctr-estimator-with-tfrecord)
+- Provide `tf.keras.Model` like interface for **quick experiment**
+  . [example](https://deepctr-doc.readthedocs.io/en/latest/Quick-Start.html#getting-started-4-steps-to-deepctr)
+- Provide  `tensorflow estimator` interface for **large scale data** and **distributed training**
+  . [example](https://deepctr-doc.readthedocs.io/en/latest/Quick-Start.html#getting-started-4-steps-to-deepctr-estimator-with-tfrecord)
 - It is compatible with both `tf 1.x`  and `tf 2.x`.
 
 Some related projects:
+
 - DeepMatch: https://github.com/shenweichen/DeepMatch
 - DeepCTR-Torch: https://github.com/shenweichen/DeepCTR-Torch
 
-
-Let's [**Get Started!**](https://deepctr-doc.readthedocs.io/en/latest/Quick-Start.html)([Chinese Introduction](https://zhuanlan.zhihu.com/p/53231955)) and [welcome to join us!](./CONTRIBUTING.md)
+Let's [**Get Started!**](https://deepctr-doc.readthedocs.io/en/latest/Quick-Start.html)([Chinese
+Introduction](https://zhuanlan.zhihu.com/p/53231955)) and [welcome to join us!](./CONTRIBUTING.md)
 
 ## Models List
 
@@ -59,14 +64,15 @@ Let's [**Get Started!**](https://deepctr-doc.readthedocs.io/en/latest/Quick-Star
 |                DCN V2                    | [arxiv 2020][DCN V2: Improved Deep & Cross Network and Practical Lessons for Web-scale Learning to Rank Systems](https://arxiv.org/abs/2008.13535)   |
 |                DIFM                 | [IJCAI 2020][A Dual Input-aware Factorization Machine for CTR Prediction](https://www.ijcai.org/Proceedings/2020/0434.pdf)   |
 |   FEFM and DeepFEFM                    | [arxiv 2020][Field-Embedded Factorization Machines for Click-through rate prediction](https://arxiv.org/abs/2009.09931)                                         |
-|              SharedBottom               | [An Overview of Multi-Task Learning in Deep Neural Networks](https://arxiv.org/pdf/1706.05098.pdf)  |
+|              SharedBottom               | [arxiv 2017][An Overview of Multi-Task Learning in Deep Neural Networks](https://arxiv.org/pdf/1706.05098.pdf)  |
 |   ESMM                    | [SIGIR 2018][Entire Space Multi-Task Model: An Effective Approach for Estimating Post-Click Conversion Rate](https://arxiv.org/abs/1804.07931)                       |
 |   MMOE                    | [KDD 2018][Modeling Task Relationships in Multi-task Learning with Multi-gate Mixture-of-Experts](https://dl.acm.org/doi/abs/10.1145/3219819.3220007)                   |
 |   PLE                    | [RecSys 2020][Progressive Layered Extraction (PLE): A Novel Multi-Task Learning (MTL) Model for Personalized Recommendations](https://dl.acm.org/doi/10.1145/3383313.3412236)                   |
+
 ## Citation
 
-- Weichen Shen. (2017). DeepCTR: Easy-to-use,Modular and Extendible package of deep-learning based CTR models. https://github.com/shenweichen/deepctr.
-
+- Weichen Shen. (2017). DeepCTR: Easy-to-use,Modular and Extendible package of deep-learning based CTR
+  models. https://github.com/shenweichen/deepctr.
 
 If you find this code useful in your research, please cite it using the following BibTeX:
 
@@ -84,11 +90,10 @@ If you find this code useful in your research, please cite it using the followin
 ## DisscussionGroup
 
 - [Discussions](https://github.com/shenweichen/DeepCTR/discussions)
-- 公众号：**浅梦学习笔记**  
-- wechat ID: **deepctrbot**
+- 公众号：**浅梦学习笔记**
+- wechat ID: **deepctrbot**
 
   ![wechat](./docs/pics/code.png)
-  
 
 ## Main contributors([welcome to join us!](./CONTRIBUTING.md))
 

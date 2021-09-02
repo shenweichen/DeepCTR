@@ -4,7 +4,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 
 from deepctr.feature_column import SparseFeat, DenseFeat, get_feature_names
-from deepctr.models import ESMM,MMOE
+from deepctr.models import MMOE
 
 if __name__ == "__main__":
     column_names = ['age', 'class_worker', 'det_ind_code', 'det_occ_code', 'education', 'wage_per_hour', 'hs_college',
