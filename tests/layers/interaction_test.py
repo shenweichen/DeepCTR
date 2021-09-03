@@ -2,7 +2,7 @@ import pytest
 
 try:
     from tensorflow.python.keras.utils import CustomObjectScope
-except:
+except ImportError:
     from tensorflow.keras.utils import CustomObjectScope
 from deepctr import layers
 

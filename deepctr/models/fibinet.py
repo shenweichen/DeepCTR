@@ -16,7 +16,7 @@ from ..layers.utils import concat_func, add_func, combined_dnn_input
 
 
 def FiBiNET(linear_feature_columns, dnn_feature_columns, bilinear_type='interaction', reduction_ratio=3,
-            dnn_hidden_units=(128, 128), l2_reg_linear=1e-5,
+            dnn_hidden_units=(256, 128, 64), l2_reg_linear=1e-5,
             l2_reg_embedding=1e-5, l2_reg_dnn=0, seed=1024, dnn_dropout=0, dnn_activation='relu',
             task='binary'):
     """Instantiates the Feature Importance and Bilinear feature Interaction NETwork architecture.

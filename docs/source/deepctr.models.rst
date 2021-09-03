@@ -28,6 +28,11 @@ Submodules
    deepctr.models.ifm
    deepctr.models.difm
    deepctr.models.deepfefm
+   deepctr.models.multitask.sharedbottom
+   deepctr.models.multitask.esmm
+   deepctr.models.multitask.mmoe
+   deepctr.models.multitask.ple
+
 
 Module contents
 ---------------

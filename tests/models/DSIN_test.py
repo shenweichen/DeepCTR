@@ -1,7 +1,8 @@
 import numpy as np
+import pytest
 
 from deepctr.feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, get_feature_names
-from deepctr.models.dsin import DSIN
+from deepctr.models.sequence.dsin import DSIN
 from ..utils import check_model
 
 
@@ -44,17 +45,21 @@ def get_xy_fd(hash_flag=False):
     x = {name: feature_dict[name] for name in get_feature_names(feature_columns)}
     x["sess_length"] = sess_number
 
-    y = [1, 0, 1]
+    y = np.array([1, 0, 1])
     return x, y, feature_columns, behavior_feature_list
 
 
-def test_DSIN():
+@pytest.mark.parametrize(
+    'bias_encoding',
+    [True, False]
+)
+def test_DSIN(bias_encoding):
     model_name = "DSIN"
 
     x, y, feature_columns, behavior_feature_list = get_xy_fd(True)
 
-    model = DSIN(feature_columns, behavior_feature_list, sess_max_count=2,
-                 dnn_hidden_units=[4, 4, 4], dnn_dropout=0.5, )
+    model = DSIN(feature_columns, behavior_feature_list, sess_max_count=2, bias_encoding=bias_encoding,
+                 dnn_hidden_units=[4, 4], dnn_dropout=0.5, )
     check_model(model, model_name, x, y)
 
 

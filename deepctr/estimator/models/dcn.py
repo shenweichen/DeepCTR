@@ -15,7 +15,7 @@ from ...layers.interaction import CrossNet
 from ...layers.utils import combined_dnn_input
 
 
-def DCNEstimator(linear_feature_columns, dnn_feature_columns, cross_num=2, dnn_hidden_units=(128, 128,),
+def DCNEstimator(linear_feature_columns, dnn_feature_columns, cross_num=2, dnn_hidden_units=(256, 128, 64),
                  l2_reg_linear=1e-5,
                  l2_reg_embedding=1e-5,
                  l2_reg_cross=1e-5, l2_reg_dnn=0, seed=1024, dnn_dropout=0, dnn_use_bn=False,

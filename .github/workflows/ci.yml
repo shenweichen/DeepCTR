@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         python-version: [3.6,3.7]
-        tf-version: [1.4.0,1.15.0,2.1.0,2.5.0]
+        tf-version: [1.4.0,1.15.0,2.2.0,2.5.0]
         
         exclude:
           - python-version: 3.7
@@ -28,10 +28,10 @@ jobs:
 
     steps:
     
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
     
     - name: Setup python environment
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v2.2.2
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -49,7 +49,7 @@ jobs:
         pip install -q python-coveralls
         pytest --cov=deepctr --cov-report=xml
     - name: Upload coverage to Codecov  
-      uses: codecov/codecov-action@v1.0.2
+      uses: codecov/codecov-action@v2.0.3
       with:
         token: ${{secrets.CODECOV_TOKEN}}
         file: ./coverage.xml

@@ -10,16 +10,16 @@ Reference:
 import tensorflow as tf
 from tensorflow.python.keras.layers import (Dense, Flatten)
 
-from ..feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, build_input_features
-from ..inputs import get_varlen_pooling_list, create_embedding_matrix, embedding_lookup, varlen_embedding_lookup, \
+from ...feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, build_input_features
+from ...inputs import get_varlen_pooling_list, create_embedding_matrix, embedding_lookup, varlen_embedding_lookup, \
     get_dense_input
-from ..layers.core import DNN, PredictionLayer
-from ..layers.sequence import Transformer, AttentionSequencePoolingLayer
-from ..layers.utils import concat_func, combined_dnn_input
+from ...layers.core import DNN, PredictionLayer
+from ...layers.sequence import Transformer, AttentionSequencePoolingLayer
+from ...layers.utils import concat_func, combined_dnn_input
 
 
 def BST(dnn_feature_columns, history_feature_list, transformer_num=1, att_head_num=8,
-        use_bn=False, dnn_hidden_units=(200, 80), dnn_activation='relu', l2_reg_dnn=0,
+        use_bn=False, dnn_hidden_units=(256, 128, 64), dnn_activation='relu', l2_reg_dnn=0,
         l2_reg_embedding=1e-6, dnn_dropout=0.0, seed=1024, task='binary'):
     """Instantiates the BST architecture.
 
