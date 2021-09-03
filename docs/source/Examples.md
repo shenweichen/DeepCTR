@@ -187,7 +187,6 @@ if __name__ == "__main__":
 ```
 
 ## Multi-value Input : Movielens
-----------------------------------
 
 The MovieLens data has been used for personalized tag recommendation,which contains 668, 953 tag applications of users
 on movies. Here is a small fraction of data include sparse fields and a multivalent field.
@@ -275,7 +274,6 @@ if __name__ == "__main__":
 ```
 
 ## Multi-value Input : Movielens with feature hashing on the fly
-----------------------------------
 
 ```python
 import numpy as np
@@ -300,7 +298,7 @@ if __name__ == "__main__":
     max_len = max(genres_length)
 
     # Notice : padding=`post`
-    genres_list = pad_sequences(genres_list, maxlen=max_len, padding='post', dtype=str, value=0)
+    genres_list = pad_sequences(genres_list, maxlen=max_len, padding='post', dtype=object, value=0).astype(str)
 
     # 2.set hashing space for each sparse field and generate feature config for sequence feature
 
@@ -358,7 +356,7 @@ if __name__ == "__main__":
     max_len = max(genres_length)
 
     # Notice : padding=`post`
-    genres_list = pad_sequences(genres_list, maxlen=max_len, padding='post', dtype=str, value=0)
+    genres_list = pad_sequences(genres_list, maxlen=max_len, padding='post', dtype=object, value=0).astype(str)
 
     # 2.set hashing space for each sparse field and generate feature config for sequence feature
 
@@ -521,11 +519,11 @@ if __name__ == "__main__":
 The UCI census-income dataset is extracted from the 1994 census database. It contains 299,285 instances of demographic
 information of American adults. There are 40 features in total. We construct a multi-task learning problem from this
 dataset by setting some of the features as prediction targets :
-- Task 1: Predict whether the income exceeds $50K;
-- Task 2: Predict whether this person’s marital status is never married.   
 
-This example shows how to use ``MMOE`` to solve a multi
-task learning problem. You can get the demo
+- Task 1: Predict whether the income exceeds $50K;
+- Task 2: Predict whether this person’s marital status is never married.
+
+This example shows how to use ``MMOE`` to solve a multi task learning problem. You can get the demo
 data [census-income.sample](https://github.com/shenweichen/DeepCTR/tree/master/examples/census-income.sample) and run
 the following codes.
 
@@ -572,29 +570,29 @@ if __name__ == "__main__":
         data[feat] = lbe.fit_transform(data[feat])
 
     fixlen_feature_columns = [SparseFeat(feat, data[feat].max() + 1, embedding_dim=4) for feat in sparse_features]
-                             + [DenseFeat(feat, 1, ) for feat in dense_features]
+    + [DenseFeat(feat, 1, ) for feat in dense_features]
 
     dnn_feature_columns = fixlen_feature_columns
     linear_feature_columns = fixlen_feature_columns
-
+    
     feature_names = get_feature_names(linear_feature_columns + dnn_feature_columns)
-
+    
     # 3.generate input data for model
-
+    
     train, test = train_test_split(data, test_size=0.2, random_state=2020)
     train_model_input = {name: train[name] for name in feature_names}
     test_model_input = {name: test[name] for name in feature_names}
-
+    
     # 4.Define Model,train,predict and evaluate
     model = MMOE(dnn_feature_columns, tower_dnn_hidden_units=[], task_types=['binary', 'binary'],
                  task_names=['label_income', 'label_marital'])
     model.compile("adam", loss=["binary_crossentropy", "binary_crossentropy"],
                   metrics=['binary_crossentropy'], )
-
+    
     history = model.fit(train_model_input, [train['label_income'].values, train['label_marital'].values],
                         batch_size=256, epochs=10, verbose=2, validation_split=0.2)
     pred_ans = model.predict(test_model_input, batch_size=256)
-
+    
     print("test income AUC", round(roc_auc_score(test['label_income'], pred_ans[0]), 4))
     print("test marital AUC", round(roc_auc_score(test['label_marital'], pred_ans[1]), 4))
 
