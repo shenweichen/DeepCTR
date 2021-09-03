@@ -89,12 +89,6 @@ def PLE(dnn_feature_columns, shared_expert_num=1, specific_expert_num=1, num_lev
             cur_experts = specific_expert_outputs[
                           i * specific_expert_num:(i + 1) * specific_expert_num] + shared_expert_outputs
 
-
-            # expert_concat = tf.keras.layers.concatenate(cur_experts, axis=1,
-            #                                             name=level_name + 'expert_concat_specific_' + task_names[i])
-            # expert_concat = tf.keras.layers.Reshape([cur_expert_num, -1],
-            #                                         name=level_name + 'expert_reshape_specific_' + task_names[i])(
-            #     expert_concat)
             expert_concat = tf.keras.layers.Lambda(lambda x: tf.stack(x, axis=1))(cur_experts)
 
             # build gate layers
@@ -107,9 +101,6 @@ def PLE(dnn_feature_columns, shared_expert_num=1, specific_expert_num=1, num_lev
             gate_out = tf.keras.layers.Lambda(lambda x: tf.expand_dims(x, axis=-1))(gate_out)
 
             # gate multiply the expert
-            # gate_mul_expert = tf.keras.layers.Multiply(name=level_name + 'gate_mul_expert_specific_' + task_names[i])(
-            #     [expert_concat, gate_out])
-            # gate_mul_expert = tf.keras.layers.Lambda(lambda x: reduce_sum(x, axis=1, keep_dims=False))(gate_mul_expert)
             gate_mul_expert = tf.keras.layers.Lambda(lambda x: reduce_sum(x[0] * x[1], axis=1, keep_dims=False),
                                                      name=level_name + 'gate_mul_expert_specific_' + task_names[i])(
                 [expert_concat, gate_out])
@@ -120,11 +111,6 @@ def PLE(dnn_feature_columns, shared_expert_num=1, specific_expert_num=1, num_lev
             cur_expert_num = num_tasks * specific_expert_num + shared_expert_num
             cur_experts = specific_expert_outputs + shared_expert_outputs  # all the expert include task-specific expert and task-shared expert
 
-            # expert_concat = tf.keras.layers.concatenate(cur_experts, axis=1,
-            #                                             name=level_name + 'expert_concat_shared')
-            # expert_concat = tf.keras.layers.Reshape([cur_expert_num, -1],
-            #                                         name=level_name + 'expert_reshape_shared')(
-            #     expert_concat)
             expert_concat = tf.keras.layers.Lambda(lambda x: tf.stack(x, axis=1))(cur_experts)
 
             # build gate layers
@@ -137,10 +123,6 @@ def PLE(dnn_feature_columns, shared_expert_num=1, specific_expert_num=1, num_lev
             gate_out = tf.keras.layers.Lambda(lambda x: tf.expand_dims(x, axis=-1))(gate_out)
 
             # gate multiply the expert
-            # gate_mul_expert = tf.keras.layers.Multiply(name=level_name + 'gate_mul_expert_shared_' + task_names[i])(
-            #     [expert_concat, gate_out])
-            # gate_mul_expert = tf.keras.layers.Lambda(lambda x: reduce_sum(x, axis=1, keep_dims=False))(gate_mul_expert)
-
             gate_mul_expert = tf.keras.layers.Lambda(lambda x: reduce_sum(x[0] * x[1], axis=1, keep_dims=False),
                                                      name=level_name + 'gate_mul_expert_shared')(
                 [expert_concat, gate_out])
