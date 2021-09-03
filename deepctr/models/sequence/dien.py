@@ -10,12 +10,12 @@ Reference:
 import tensorflow as tf
 from tensorflow.python.keras.layers import (Concatenate, Dense, Permute, multiply)
 
-from ..feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, build_input_features
-from ..inputs import get_varlen_pooling_list, create_embedding_matrix, embedding_lookup, varlen_embedding_lookup, \
+from ...feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, build_input_features
+from ...inputs import get_varlen_pooling_list, create_embedding_matrix, embedding_lookup, varlen_embedding_lookup, \
     get_dense_input
-from ..layers.core import DNN, PredictionLayer
-from ..layers.sequence import AttentionSequencePoolingLayer, DynamicGRU
-from ..layers.utils import concat_func, reduce_mean, combined_dnn_input
+from ...layers.core import DNN, PredictionLayer
+from ...layers.sequence import AttentionSequencePoolingLayer, DynamicGRU
+from ...layers.utils import concat_func, reduce_mean, combined_dnn_input
 
 
 def auxiliary_loss(h_states, click_seq, noclick_seq, mask, stag=None):
@@ -45,14 +45,14 @@ def auxiliary_loss(h_states, click_seq, noclick_seq, mask, stag=None):
     try:
         click_loss_ = - tf.reshape(tf.log(click_prop_),
                                    [-1, tf.shape(click_seq)[1]]) * mask
-    except:
+    except AttributeError:
         click_loss_ = - tf.reshape(tf.compat.v1.log(click_prop_),
                                    [-1, tf.shape(click_seq)[1]]) * mask
     try:
         noclick_loss_ = - \
                             tf.reshape(tf.log(1.0 - noclick_prop_),
                                        [-1, tf.shape(noclick_seq)[1]]) * mask
-    except:
+    except AttributeError:
         noclick_loss_ = - \
                             tf.reshape(tf.compat.v1.log(1.0 - noclick_prop_),
                                        [-1, tf.shape(noclick_seq)[1]]) * mask
@@ -60,6 +60,7 @@ def auxiliary_loss(h_states, click_seq, noclick_seq, mask, stag=None):
     loss_ = reduce_mean(click_loss_ + noclick_loss_)
 
     return loss_
+
 
 def interest_evolution(concat_behavior, deep_input_item, user_behavior_length, gru_type="GRU", use_neg=False,
                        neg_concat_behavior=None, att_hidden_size=(64, 16), att_activation='sigmoid',
@@ -108,7 +109,7 @@ def interest_evolution(concat_behavior, deep_input_item, user_behavior_length, g
 
 
 def DIEN(dnn_feature_columns, history_feature_list,
-         gru_type="GRU", use_negsampling=False, alpha=1.0, use_bn=False, dnn_hidden_units=(200, 80),
+         gru_type="GRU", use_negsampling=False, alpha=1.0, use_bn=False, dnn_hidden_units=(256, 128, 64),
          dnn_activation='relu',
          att_hidden_units=(64, 16), att_activation="dice", att_weight_normalization=True,
          l2_reg_dnn=0, l2_reg_embedding=1e-6, dnn_dropout=0, seed=1024, task='binary'):
@@ -211,7 +212,7 @@ def DIEN(dnn_feature_columns, history_feature_list,
         model.add_loss(alpha * aux_loss_1)
     try:
         tf.keras.backend.get_session().run(tf.global_variables_initializer())
-    except:
+    except AttributeError:
         tf.compat.v1.keras.backend.get_session().run(tf.compat.v1.global_variables_initializer())
         tf.compat.v1.experimental.output_all_intermediates(True)
     return model

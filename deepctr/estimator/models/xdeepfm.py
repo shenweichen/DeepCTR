@@ -15,7 +15,7 @@ from ...layers.interaction import CIN
 from ...layers.utils import concat_func, add_func, combined_dnn_input
 
 
-def xDeepFMEstimator(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(256, 256),
+def xDeepFMEstimator(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(256, 128, 64),
                      cin_layer_size=(128, 128,), cin_split_half=True, cin_activation='relu', l2_reg_linear=0.00001,
                      l2_reg_embedding=0.00001, l2_reg_dnn=0, l2_reg_cin=0, seed=1024, dnn_dropout=0,
                      dnn_activation='relu', dnn_use_bn=False, task='binary', model_dir=None, config=None,

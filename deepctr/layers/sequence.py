@@ -560,10 +560,10 @@ class Transformer(Layer):
         if self.blinding:
             try:
                 outputs = tf.matrix_set_diag(outputs, tf.ones_like(outputs)[
-                    :, :, 0] * (-2 ** 32 + 1))
+                                                      :, :, 0] * (-2 ** 32 + 1))
             except AttributeError:
                 outputs = tf.compat.v1.matrix_set_diag(outputs, tf.ones_like(outputs)[
-                    :, :, 0] * (-2 ** 32 + 1))
+                                                                :, :, 0] * (-2 ** 32 + 1))
 
         outputs -= reduce_max(outputs, axis=-1, keep_dims=True)
         outputs = softmax(outputs)
@@ -633,7 +633,7 @@ class PositionEncoding(Layer):
         _, T, num_units = input_shape.as_list()  # inputs.get_shape().as_list()
         # First part of the PE function: sin and cos argument
         position_enc = np.array([
-            [pos / np.power(10000, 2. * (i//2) / num_units) for i in range(num_units)]
+            [pos / np.power(10000, 2. * (i // 2) / num_units) for i in range(num_units)]
             for pos in range(T)])
 
         # Second part, apply the cosine to even columns and sin to odds.
@@ -684,8 +684,12 @@ class BiasEncoding(Layer):
             embed_size = input_shape[2].value
             seq_len_max = input_shape[1].value
         else:
-            embed_size = input_shape[0][2].value
-            seq_len_max = input_shape[0][1].value
+            try:
+                embed_size = input_shape[0][2].value
+                seq_len_max = input_shape[0][1].value
+            except AttributeError:
+                embed_size = input_shape[0][2]
+                seq_len_max = input_shape[0][1]
 
         self.sess_bias_embedding = self.add_weight('sess_bias_embedding', shape=(self.sess_max_count, 1, 1),
                                                    initializer=TruncatedNormal(
@@ -745,7 +749,7 @@ class DynamicGRU(Layer):
         else:
             try:
                 self.gru_cell = tf.nn.rnn_cell.GRUCell(self.num_units)  # tf.keras.layers.GRUCell
-            except:
+            except AttributeError:
                 self.gru_cell = tf.compat.v1.nn.rnn_cell.GRUCell(self.num_units)
 
         # Be sure to call this somewhere!
@@ -840,7 +844,6 @@ class KMaxPooling(Layer):
         config = {'k': self.k, 'axis': self.axis}
         base_config = super(KMaxPooling, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
-
 
 # def positional_encoding(inputs,
 #                         pos_embedding_trainable=True,

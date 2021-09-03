@@ -1,7 +1,7 @@
-deepctr.models.din module
+deepctr.models.sequence.din module
 =========================
 
-.. automodule:: deepctr.models.din
+.. automodule:: deepctr.models.sequence.din
     :members:
     :no-undoc-members:
     :no-show-inheritance:
