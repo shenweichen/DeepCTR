@@ -1,9 +1,10 @@
 import pytest
 import tensorflow as tf
 from tensorflow.python.keras.layers import PReLU
+
 try:
     from tensorflow.python.keras.utils import CustomObjectScope
-except:
+except ImportError:
     from tensorflow.keras.utils import CustomObjectScope
 from deepctr import layers
 from deepctr.layers import Dice
@@ -23,7 +24,8 @@ def test_LocalActivationUnit(hidden_units, activation):
         return
 
     with CustomObjectScope({'LocalActivationUnit': layers.LocalActivationUnit}):
-        layer_test(layers.LocalActivationUnit, kwargs={'hidden_units': hidden_units, 'activation': activation,'dropout_rate':0.5},
+        layer_test(layers.LocalActivationUnit,
+                   kwargs={'hidden_units': hidden_units, 'activation': activation, 'dropout_rate': 0.5},
                    input_shape=[(BATCH_SIZE, 1, EMBEDDING_SIZE), (BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE)])
 
 
@@ -36,8 +38,9 @@ def test_LocalActivationUnit(hidden_units, activation):
 )
 def test_DNN(hidden_units, use_bn):
     with CustomObjectScope({'DNN': layers.DNN}):
-        layer_test(layers.DNN, kwargs={'hidden_units': hidden_units, 'use_bn': use_bn,'dropout_rate':0.5}, input_shape=(
-            BATCH_SIZE, EMBEDDING_SIZE))
+        layer_test(layers.DNN, kwargs={'hidden_units': hidden_units, 'use_bn': use_bn, 'dropout_rate': 0.5},
+                   input_shape=(
+                       BATCH_SIZE, EMBEDDING_SIZE))
 
 
 @pytest.mark.parametrize(

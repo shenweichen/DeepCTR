@@ -18,7 +18,7 @@ from ..layers.utils import concat_func, add_func
 
 
 def CCPM(linear_feature_columns, dnn_feature_columns, conv_kernel_width=(6, 5), conv_filters=(4, 4),
-         dnn_hidden_units=(256,), l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_dnn=0, dnn_dropout=0,
+         dnn_hidden_units=(128, 64), l2_reg_linear=1e-5, l2_reg_embedding=1e-5, l2_reg_dnn=0, dnn_dropout=0,
          seed=1024, task='binary'):
     """Instantiates the Convolutional Click Prediction Model architecture.
 
@@ -69,7 +69,8 @@ def CCPM(linear_feature_columns, dnn_feature_columns, conv_kernel_width=(6, 5), 
 
     flatten_result = tf.keras.layers.Flatten()(pooling_result)
     dnn_out = DNN(dnn_hidden_units, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout)(flatten_result)
-    dnn_logit = tf.keras.layers.Dense(1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(dnn_out)
+    dnn_logit = tf.keras.layers.Dense(1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(
+        dnn_out)
 
     final_logit = add_func([dnn_logit, linear_logit])
 

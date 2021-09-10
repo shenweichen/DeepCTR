@@ -13,7 +13,7 @@ from ..layers.core import PredictionLayer, DNN
 from ..layers.utils import add_func, combined_dnn_input
 
 
-def FNN(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128),
+def FNN(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(256, 128, 64),
         l2_reg_embedding=1e-5, l2_reg_linear=1e-5, l2_reg_dnn=0, seed=1024, dnn_dropout=0,
         dnn_activation='relu', task='binary'):
     """Instantiates the Factorization-supported Neural Network architecture.

@@ -16,8 +16,8 @@ from ..utils import check_model, SAMPLE_SIZE, get_test_data
 )
 def test_MLRs(region_sparse, region_dense, base_sparse, base_dense, bias_sparse, bias_dense):
     model_name = "MLRs"
-    region_x, y, region_feature_columns = get_test_data(SAMPLE_SIZE, sparse_feature_num=region_sparse,
-                                                        dense_feature_num=region_dense, prefix='region')
+    _, y, region_feature_columns = get_test_data(SAMPLE_SIZE, sparse_feature_num=region_sparse,
+                                                 dense_feature_num=region_dense, prefix='region')
     base_x, y, base_feature_columns = get_test_data(SAMPLE_SIZE, sparse_feature_num=region_sparse,
                                                     dense_feature_num=region_dense, prefix='base')
     bias_x, y, bias_feature_columns = get_test_data(SAMPLE_SIZE, sparse_feature_num=region_sparse,
