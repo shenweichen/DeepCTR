@@ -116,9 +116,9 @@ history = model.fit(train_model_input, train[target].values,
 pred_ans = model.predict(test_model_input, batch_size=256)
 
 ```
+
 You can check the full code [here](./Examples.html#classification-criteo).
-
-
+You also can run a distributed training job with the keras model on Kubernetes using [ElasticDL](https://github.com/sql-machine-learning/elasticdl/blob/develop/docs/tutorials/elasticdl_deepctr_keras.md).
 
 ## Getting started: 4 steps to DeepCTR Estimator with TFRecord
 
@@ -177,11 +177,4 @@ print(eval_result)
 ```
 
 You can check the full code [here](./Examples.html#estimator-with-tfrecord-classification-criteo).
-
-
-
-
-
-
-
-
+You also can run a distributed training job with the estimator model on Kubernetes using [ElasticDL](https://github.com/sql-machine-learning/elasticdl/blob/develop/docs/tutorials/elasticdl_deepctr_estimator.md).
