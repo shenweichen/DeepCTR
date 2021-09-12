@@ -1,2 +1,2 @@
 tensorflow==2.5.1
-sphinx==3.5.0
+recommonmark==0.7.1
