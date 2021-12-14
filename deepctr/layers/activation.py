@@ -8,7 +8,7 @@ Author:
 
 import tensorflow as tf
 from tensorflow.python.keras.initializers import Zeros
-from tensorflow.python.keras.layers import Layer
+from tensorflow.python.keras.layers import Layer, Activation, BatchNormalization
 
 try:
     unicode
@@ -40,7 +40,7 @@ class Dice(Layer):
         super(Dice, self).__init__(**kwargs)
 
     def build(self, input_shape):
-        self.bn = tf.keras.layers.BatchNormalization(
+        self.bn = BatchNormalization(
             axis=self.axis, epsilon=self.epsilon, center=False, scale=False)
         self.alphas = self.add_weight(shape=(input_shape[-1],), initializer=Zeros(
         ), dtype=tf.float32, name='dice_alpha')  # name='alpha_'+self.name
@@ -67,7 +67,7 @@ def activation_layer(activation):
     if activation in ("dice", "Dice"):
         act_layer = Dice()
     elif isinstance(activation, (str, unicode)):
-        act_layer = tf.keras.layers.Activation(activation)
+        act_layer = Activation(activation)
     elif issubclass(activation, Layer):
         act_layer = activation()
     else:
