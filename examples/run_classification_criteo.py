@@ -3,14 +3,11 @@ from sklearn.metrics import log_loss, roc_auc_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 
-import sys
-sys.path.append('./6_Framework/6_2_CTR/DeepCTR')
-
 from deepctr.models import DeepFM
 from deepctr.feature_column import SparseFeat, DenseFeat, get_feature_names
 
 if __name__ == "__main__":
-    data = pd.read_csv('./6_Framework/6_2_CTR/DeepCTR' + './examples/criteo_sample.txt')
+    data = pd.read_csv('./criteo_sample.txt')
 
     sparse_features = ['C' + str(i) for i in range(1, 27)]
     dense_features = ['I' + str(i) for i in range(1, 14)]
