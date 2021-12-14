@@ -9,7 +9,7 @@ Author:
 import tensorflow as tf
 from tensorflow.python.keras import backend as K
 from tensorflow.python.keras.initializers import Zeros, glorot_normal
-from tensorflow.python.keras.layers import Layer
+from tensorflow.python.keras.layers import Layer, BatchNormalization, Dropout
 from tensorflow.python.keras.regularizers import l2
 
 from .activation import activation_layer
@@ -164,9 +164,9 @@ class DNN(Layer):
                                      initializer=Zeros(),
                                      trainable=True) for i in range(len(self.hidden_units))]
         if self.use_bn:
-            self.bn_layers = [tf.keras.layers.BatchNormalization() for _ in range(len(self.hidden_units))]
+            self.bn_layers = [BatchNormalization() for _ in range(len(self.hidden_units))]
 
-        self.dropout_layers = [tf.keras.layers.Dropout(self.dropout_rate, seed=self.seed + i) for i in
+        self.dropout_layers = [Dropout(self.dropout_rate, seed=self.seed + i) for i in
                                range(len(self.hidden_units))]
 
         self.activation_layers = [activation_layer(self.activation) for _ in range(len(self.hidden_units))]
