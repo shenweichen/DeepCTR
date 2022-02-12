@@ -147,3 +147,16 @@ def test_BilinearInteraction(bilinear_type):
     with CustomObjectScope({'BilinearInteraction': layers.BilinearInteraction}):
         layer_test(layers.BilinearInteraction, kwargs={'bilinear_type': bilinear_type}, input_shape=[(
             BATCH_SIZE, 1, EMBEDDING_SIZE)] * FIELD_SIZE)
+
+
+# EDCN bridge layer
+def test_ConcatenationBridge():
+    with CustomObjectScope({'ConcatenationBridge': layers.ConcatenationBridge}):
+        layer_test(layers.ConcatenationBridge, kwargs={}, input_shape=[(
+            BATCH_SIZE, EMBEDDING_SIZE)] * FIELD_SIZE)
+
+# EDCN bridge layer
+def test_AttentionPoolingLayer():
+    with CustomObjectScope({'AttentionPoolingLayer': layers.AttentionPoolingLayer}):
+        layer_test(layers.AttentionPoolingLayer, kwargs={}, input_shape=[(
+            BATCH_SIZE, EMBEDDING_SIZE)] * FIELD_SIZE)

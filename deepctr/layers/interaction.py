@@ -3,7 +3,8 @@
 
 Authors:
     Weichen Shen,weichenswc@163.com,
-    Harshit Pande
+    Harshit Pande,
+    Yi He, heyi_jack@163.com
 
 """
 
@@ -20,7 +21,7 @@ from tensorflow.python.layers import utils
 
 from .activation import activation_layer
 from .utils import concat_func, reduce_sum, softmax, reduce_mean
-
+from .core import DNN
 
 class AFMLayer(Layer):
     """Attentonal Factorization Machine models pairwise (order-2) feature
@@ -1482,4 +1483,145 @@ class FEFMLayer(Layer):
         config.update({
             'regularizer': self.regularizer,
         })
+        return config
+
+
+class ConcatenationBridge(Layer):
+    """ConcatenationBridge layer used in EDCN
+
+      Input shape
+        - A list of 3D tensor with shape: ``(batch_size,1,embedding_size)``. Its length is ``number of subnetworks``.
+
+      Output shape
+        - 2D tensor with shape: ``(batch_size, embedding_size)``.
+
+    Arguments
+       - **activation**: Activation function to use.
+
+        - **l2_reg**: float between 0 and 1. L2 regularizer strength applied to the kernel weights matrix.
+
+        - **seed**: A Python integer to use as random seed.
+
+      References
+        - [Enhancing Explicit and Implicit Feature Interactions via Information Sharing for Parallel Deep CTR Models.](https://dlp-kdd.github.io/assets/pdf/DLP-KDD_2021_paper_12.pdf)
+
+    """
+
+    def __init__(self, activation='relu', l2_reg=0, seed=1024, **kwargs):
+        self.activation = activation
+        self.l2_reg = l2_reg
+        self.seed = seed
+        super(ConcatenationBridge, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+        if not isinstance(input_shape, list) or len(input_shape) < 2:
+            raise ValueError('A `ConcatenationBridge` layer should be called '
+                             'on a list of at least 2 inputs')
+
+        self.dnn_dim = input_shape[0][-1]
+        self.dnn = DNN([self.dnn_dim],
+                       l2_reg=self.l2_reg,
+                       activation=self.activation,
+                       seed=self.seed)
+        super(ConcatenationBridge,
+              self).build(input_shape)  # Be sure to call this somewhere!
+
+    def call(self, inputs, **kwargs):
+        output = self.dnn(concat_func(inputs))
+        return output
+
+    def compute_output_shape(self, input_shape):
+        return (None, input_shape[0][-1])
+
+    def get_config(self):
+        base_config = super(ConcatenationBridge, self).get_config().copy()
+        config = {
+            'l2_reg': self.l2_reg,
+            'activation': self.activation,
+            'seed': self.seed
+        }
+        config.update(base_config)
+        return config
+
+
+class AttentionPoolingLayer(Layer):
+    """AttentionPoolingLayer layer used in EDCN
+
+      Input shape
+        - A list of 3D tensor with shape: ``(batch_size,1,embedding_size)``. Its length is ``number of subnetworks``.
+
+      Output shape
+        - 2D tensor with shape: ``(batch_size, embedding_size)``.
+
+    Arguments
+       - **activation**: Activation function to use.
+       
+        - **l2_reg**: float between 0 and 1. L2 regularizer strength applied to the kernel weights matrix.
+
+        - **seed**: A Python integer to use as random seed.
+
+      References
+        - [Enhancing Explicit and Implicit Feature Interactions via Information Sharing for Parallel Deep CTR Models.](https://dlp-kdd.github.io/assets/pdf/DLP-KDD_2021_paper_12.pdf)
+
+    """
+
+    def __init__(self, activation='relu', l2_reg=0, seed=1024, **kwargs):
+        self.activation = activation
+        self.l2_reg = l2_reg
+        self.seed = seed
+        super(AttentionPoolingLayer, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+        if not isinstance(input_shape, list) or len(input_shape) < 2:
+            raise ValueError(
+                'A `AttentionPoolingLayer` layer should be called '
+                'on a list of at least 2 inputs')
+
+        self.dnn_dim = input_shape[0][-1]
+
+        self.subnet_nums = len(input_shape)
+
+        self.dnn_list = []
+        self.projection_p_list = []
+
+        for i in range(self.subnet_nums):
+            self.dnn_list.append(
+                DNN([self.dnn_dim],
+                    l2_reg=self.l2_reg,
+                    activation=self.activation,
+                    seed=self.seed))
+
+            self.projection_p_list.append(
+                self.add_weight(shape=(self.dnn_dim, self.dnn_dim),
+                                initializer=glorot_normal(seed=self.seed),
+                                name=self.name + "_projection_p_" + str(i)))
+
+        super(AttentionPoolingLayer,
+              self).build(input_shape)  # Be sure to call this somewhere!
+
+    def call(self, inputs, **kwargs):
+        
+        output_list = []
+        for i in range(self.subnet_nums):
+            dnn_output = self.dnn_list[i](inputs[i])
+            project_output =tf.tensordot(dnn_output, self.projection_p_list[i], axes=(-1, 0)) 
+            attention_w = tf.keras.activations.softmax(project_output, axis = 1)
+
+            output_list.append(attention_w * inputs[i])
+
+        output = tf.add_n(output_list)
+    
+        return output
+
+    def compute_output_shape(self, input_shape):
+        return (None, input_shape[0][-1])
+
+    def get_config(self):
+        base_config = super(AttentionPoolingLayer, self).get_config().copy()
+        config = {
+            'l2_reg': self.l2_reg,
+            'activation': self.activation,
+            'seed': self.seed
+        }
+        config.update(base_config)
         return config
