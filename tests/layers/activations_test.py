@@ -1,7 +1,8 @@
 from deepctr.layers import activation
+
 try:
     from tensorflow.python.keras.utils import CustomObjectScope
-except:
+except ImportError:
     from tensorflow.keras.utils import CustomObjectScope
 from tests.utils import layer_test
 

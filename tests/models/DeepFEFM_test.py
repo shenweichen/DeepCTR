@@ -21,7 +21,7 @@ from ..utils import check_model, get_test_data, SAMPLE_SIZE, get_test_data_estim
      ]
 )
 def test_DeepFEFM(hidden_size, sparse_feature_num, use_fefm, use_linear, use_fefm_embed_in_dnn):
-    if tf.__version__ == "1.15.0":  # slow in tf 1.15
+    if tf.__version__ == "1.15.0" or tf.__version__ == "1.4.0":  # slow in tf 1.15
         return
     model_name = "DeepFEFM"
     sample_size = SAMPLE_SIZE

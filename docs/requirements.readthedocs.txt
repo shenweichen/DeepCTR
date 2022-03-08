@@ -1,1 +1,2 @@
-tensorflow==1.15.4
+tensorflow==2.5.1
+recommonmark==0.7.1

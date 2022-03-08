@@ -47,6 +47,6 @@ def input_from_feature_columns(features, feature_columns, l2_reg_embedding=0.0):
 def is_embedding(feature_column):
     try:
         from tensorflow.python.feature_column.feature_column_v2 import EmbeddingColumn
-    except:
+    except ImportError:
         EmbeddingColumn = _EmbeddingColumn
     return isinstance(feature_column, (_EmbeddingColumn, EmbeddingColumn))

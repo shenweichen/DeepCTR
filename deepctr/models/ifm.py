@@ -17,7 +17,7 @@ from ..layers.interaction import FM
 from ..layers.utils import concat_func, add_func, combined_dnn_input, softmax
 
 
-def IFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128),
+def IFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(256, 128, 64),
         l2_reg_linear=0.00001, l2_reg_embedding=0.00001, l2_reg_dnn=0, seed=1024, dnn_dropout=0,
         dnn_activation='relu', dnn_use_bn=False, task='binary'):
     """Instantiates the IFM Network architecture.
@@ -47,7 +47,7 @@ def IFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(128, 128)
     inputs_list = list(features.values())
 
     sparse_embedding_list, _ = input_from_feature_columns(features, dnn_feature_columns,
-                                                                         l2_reg_embedding, seed)
+                                                          l2_reg_embedding, seed)
     if not len(sparse_embedding_list) > 0:
         raise ValueError("there are no sparse features")
 

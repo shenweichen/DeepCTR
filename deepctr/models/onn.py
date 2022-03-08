@@ -20,13 +20,13 @@ from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.regularizers import l2
 
 from ..feature_column import SparseFeat, VarLenSparseFeat, build_input_features, get_linear_logit
-from ..inputs import (get_dense_input)
+from ..inputs import get_dense_input
 from ..layers.core import DNN, PredictionLayer
 from ..layers.sequence import SequencePoolingLayer
 from ..layers.utils import concat_func, Hash, NoMask, add_func, combined_dnn_input
 
 
-def ONN(linear_feature_columns, dnn_feature_columns, embedding_size=4, dnn_hidden_units=(128, 128),
+def ONN(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(256, 128, 64),
         l2_reg_embedding=1e-5, l2_reg_linear=1e-5, l2_reg_dnn=0, dnn_dropout=0,
         seed=1024, use_bn=True, reduce_sum=False, task='binary',
         ):
@@ -34,7 +34,6 @@ def ONN(linear_feature_columns, dnn_feature_columns, embedding_size=4, dnn_hidde
 
     :param linear_feature_columns: An iterable containing all the features used by linear part of the model.
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
-    :param embedding_size: positive integer,sparse feature embedding_size
     :param dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of deep net
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
     :param l2_reg_linear: float. L2 regularizer strength applied to linear part.
@@ -59,7 +58,7 @@ def ONN(linear_feature_columns, dnn_feature_columns, embedding_size=4, dnn_hidde
     varlen_sparse_feature_columns = list(
         filter(lambda x: isinstance(x, VarLenSparseFeat), dnn_feature_columns)) if dnn_feature_columns else []
 
-    sparse_embedding = {fc_j.embedding_name: {fc_i.embedding_name: Embedding(fc_j.vocabulary_size, embedding_size,
+    sparse_embedding = {fc_j.embedding_name: {fc_i.embedding_name: Embedding(fc_j.vocabulary_size, fc_j.embedding_dim,
                                                                              embeddings_initializer=RandomNormal(
                                                                                  mean=0.0, stddev=0.0001, seed=seed),
                                                                              embeddings_regularizer=l2(
