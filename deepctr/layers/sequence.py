@@ -8,9 +8,9 @@ Author:
 
 import numpy as np
 import tensorflow as tf
-from tensorflow.python.keras import backend as K
-from tensorflow.python.keras.initializers import TruncatedNormal
-from tensorflow.python.keras.layers import LSTM, Lambda, Layer
+from tensorflow.keras import backend as K
+from tensorflow.keras.initializers import TruncatedNormal
+from tensorflow.keras.layers import LSTM, Lambda, Layer
 
 from .core import LocalActivationUnit
 from .normalization import LayerNormalization

@@ -10,13 +10,13 @@ Authors:
 import itertools
 
 import tensorflow as tf
-from tensorflow.python.keras import backend as K
-from tensorflow.python.keras.backend import batch_dot
-from tensorflow.python.keras.initializers import (Zeros, glorot_normal,
+from tensorflow.keras import backend as K
+from tensorflow.keras.backend import batch_dot
+from tensorflow.keras.initializers import (Zeros, glorot_normal,
                                                   glorot_uniform, TruncatedNormal)
-from tensorflow.python.keras.layers import Layer
-from tensorflow.python.keras.regularizers import l2
-from tensorflow.python.layers import utils
+from tensorflow.keras.layers import Layer
+from tensorflow.keras.regularizers import l2
+from tensorflow.layers import utils
 
 from .activation import activation_layer
 from .utils import concat_func, reduce_sum, softmax, reduce_mean

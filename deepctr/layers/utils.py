@@ -6,13 +6,13 @@ Author:
 
 """
 import tensorflow as tf
-from tensorflow.python.keras.layers import Flatten
-from tensorflow.python.ops.lookup_ops import TextFileInitializer
+from tensorflow.keras.layers import Flatten
+from tensorflow.ops.lookup_ops import TextFileInitializer
 
 try:
-    from tensorflow.python.ops.lookup_ops import StaticHashTable
+    from tensorflow.ops.lookup_ops import StaticHashTable
 except ImportError:
-    from tensorflow.python.ops.lookup_ops import HashTable as StaticHashTable
+    from tensorflow.ops.lookup_ops import HashTable as StaticHashTable
 
 
 class NoMask(tf.keras.layers.Layer):
