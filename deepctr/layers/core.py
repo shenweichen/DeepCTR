@@ -7,10 +7,10 @@ Author:
 """
 
 import tensorflow as tf
-from tensorflow.python.keras import backend as K
-from tensorflow.python.keras.initializers import Zeros, glorot_normal
-from tensorflow.python.keras.layers import Layer
-from tensorflow.python.keras.regularizers import l2
+from tensorflow.keras import backend as K
+from tensorflow.keras.initializers import Zeros, glorot_normal
+from tensorflow.keras.layers import Layer
+from tensorflow.keras.regularizers import l2
 
 from .activation import activation_layer
 

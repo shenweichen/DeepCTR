@@ -6,9 +6,9 @@ Author:
 
 """
 
-from tensorflow.python.keras import backend as K
-from tensorflow.python.keras.initializers import Ones, Zeros
-from tensorflow.python.keras.layers import Layer
+from tensorflow.keras import backend as K
+from tensorflow.keras.initializers import Ones, Zeros
+from tensorflow.keras.layers import Layer
 
 
 class LayerNormalization(Layer):
