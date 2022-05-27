@@ -49,8 +49,8 @@ def DeepFM(linear_feature_columns, dnn_feature_columns, fm_group=(DEFAULT_GROUP_
     group_embedding_dict, dense_value_list = input_from_feature_columns(features, dnn_feature_columns, l2_reg_embedding,
                                                                         seed, support_group=True)
 
-    fm_logit = add_func([FM()(concat_func(v, axis=1))
-                         for k, v in group_embedding_dict.items() if k in fm_group])
+    tmp_logit = [FM()(concat_func(v, axis=1))
+                         for k, v in group_embedding_dict.items() if k in fm_group]
 
     dnn_input = combined_dnn_input(list(chain.from_iterable(
         group_embedding_dict.values())), dense_value_list)
@@ -58,7 +58,8 @@ def DeepFM(linear_feature_columns, dnn_feature_columns, fm_group=(DEFAULT_GROUP_
     dnn_logit = tf.keras.layers.Dense(
         1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed=seed))(dnn_output)
 
-    final_logit = add_func([linear_logit, fm_logit, dnn_logit])
+    tmp_logit.extend([linear_logit, dnn_logit])
+    final_logit = add_func(tmp_logit)
 
     output = PredictionLayer(task)(final_logit)
     model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
