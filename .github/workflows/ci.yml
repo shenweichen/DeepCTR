@@ -17,8 +17,8 @@ jobs:
     timeout-minutes: 180
     strategy:
       matrix:
-        python-version: [3.6,3.7]
-        tf-version: [1.4.0,1.15.0,2.2.0,2.5.0]
+        python-version: [3.6,3.7,3.8,3.9]
+        tf-version: [1.4.0,1.15.0,2.2.0,2.5.0,2.6.0,2.7.0,2.8.0,2.9.0]
         
         exclude:
           - python-version: 3.7
