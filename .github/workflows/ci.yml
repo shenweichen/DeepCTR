@@ -25,7 +25,16 @@ jobs:
             tf-version: 1.4.0
           - python-version: 3.7
             tf-version: 1.15.0
-
+          - python-version: 3.8
+            tf-version: 1.4.0
+          - python-version: 3.8
+            tf-version: 1.15.0
+          - python-version: 3.6
+            tf-version: 2.7.0
+          - python-version: 3.6
+            tf-version: 2.8.0
+          - python-version: 3.6
+            tf-version: 2.9.0
     steps:
     
     - uses: actions/checkout@v2
