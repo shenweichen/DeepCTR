@@ -54,6 +54,7 @@ jobs:
       run: |
         pip3 install -q tensorflow==${{ matrix.tf-version }}
         pip install -q numpy==1.19.5
+        pip install -q protobuf==3.19.0
         pip install -q requests
         pip install -e .
     - name: Test with pytest
