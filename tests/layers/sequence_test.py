@@ -4,7 +4,7 @@ from packaging import version
 try:
     from tensorflow.python.keras.utils.generic_utils import CustomObjectScope
 except ImportError:
-    from tensorflow.keras.utils import CustomObjectScope
+    from tensorflow.python.keras.utils import CustomObjectScope
 import tensorflow as tf
 from deepctr.layers import sequence
 
