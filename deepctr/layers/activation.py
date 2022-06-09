@@ -11,7 +11,11 @@ try:
     from tensorflow.python.ops.init_ops_v2 import Zeros
 except ImportError:
     from tensorflow.python.ops.init_ops import Zeros
-from tensorflow.python.keras.layers import Layer, Activation, BatchNormalization
+from tensorflow.python.keras.layers import Layer, Activation
+try:
+    from tensorflow.python.keras.layers import BatchNormalization
+except ImportError:
+    BatchNormalization = tf.keras.layers.BatchNormalization
 
 try:
     unicode

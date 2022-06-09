@@ -13,7 +13,12 @@ import itertools
 
 from tensorflow.python.keras import backend as K
 from tensorflow.python.keras.layers import (Dense, Embedding, Lambda,
-                                            multiply, BatchNormalization, Flatten)
+                                            multiply, Flatten)
+try:
+    from tensorflow.python.keras.layers import BatchNormalization
+except ImportError:
+    import tensorflow as tf
+    BatchNormalization = tf.keras.layers.BatchNormalization
 from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.regularizers import l2
 
