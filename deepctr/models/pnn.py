@@ -7,7 +7,8 @@ Reference:
     [1] Qu Y, Cai H, Ren K, et al. Product-based neural networks for user response prediction[C]//Data Mining (ICDM), 2016 IEEE 16th International Conference on. IEEE, 2016: 1149-1154.(https://arxiv.org/pdf/1611.00144.pdf)
 """
 
-import tensorflow as tf
+from tensorflow.python.keras.models import Model
+from tensorflow.python.keras.layers import Dense, Reshape, Flatten
 
 from ..feature_column import build_input_features, input_from_feature_columns
 from ..layers.core import PredictionLayer, DNN
@@ -43,33 +44,29 @@ def PNN(dnn_feature_columns, dnn_hidden_units=(256, 128, 64), l2_reg_embedding=0
 
     sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
                                                                          l2_reg_embedding, seed)
-    inner_product = tf.keras.layers.Flatten()(
+    inner_product = Flatten()(
         InnerProductLayer()(sparse_embedding_list))
     outter_product = OutterProductLayer(kernel_type)(sparse_embedding_list)
 
     # ipnn deep input
-    linear_signal = tf.keras.layers.Reshape(
+    linear_signal = Reshape(
         [sum(map(lambda x: int(x.shape[-1]), sparse_embedding_list))])(concat_func(sparse_embedding_list))
 
     if use_inner and use_outter:
-        deep_input = tf.keras.layers.Concatenate()(
-            [linear_signal, inner_product, outter_product])
+        deep_input = concat_func([linear_signal, inner_product, outter_product])
     elif use_inner:
-        deep_input = tf.keras.layers.Concatenate()(
-            [linear_signal, inner_product])
+        deep_input = concat_func([linear_signal, inner_product])
     elif use_outter:
-        deep_input = tf.keras.layers.Concatenate()(
-            [linear_signal, outter_product])
+        deep_input = concat_func([linear_signal, outter_product])
     else:
         deep_input = linear_signal
 
     dnn_input = combined_dnn_input([deep_input], dense_value_list)
     dnn_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, False, seed=seed)(dnn_input)
-    dnn_logit = tf.keras.layers.Dense(
-        1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(dnn_out)
+    dnn_logit = Dense(1, use_bias=False)(dnn_out)
 
     output = PredictionLayer(task)(dnn_logit)
 
-    model = tf.keras.models.Model(inputs=inputs_list,
-                                  outputs=output)
+    model = Model(inputs=inputs_list,
+                  outputs=output)
     return model

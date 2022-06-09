@@ -8,7 +8,8 @@ Reference:
 """
 
 import tensorflow as tf
-from tensorflow.python.keras.layers import Lambda
+from tensorflow.python.keras.models import Model
+from tensorflow.python.keras.layers import Dense, Lambda
 
 from ..feature_column import build_input_features, get_linear_logit, input_from_feature_columns, SparseFeat, \
     VarLenSparseFeat
@@ -54,8 +55,7 @@ def IFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(256, 128,
     dnn_input = combined_dnn_input(sparse_embedding_list, [])
     dnn_output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed)(dnn_input)
     # here, dnn_output is the m'_{x}
-    dnn_output = tf.keras.layers.Dense(
-        sparse_feat_num, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed=seed))(dnn_output)
+    dnn_output = Dense(sparse_feat_num, use_bias=False)(dnn_output)
     # input_aware_factor m_{x,i}
     input_aware_factor = Lambda(lambda x: tf.cast(tf.shape(x)[-1], tf.float32) * softmax(x, dim=1))(dnn_output)
 
@@ -70,5 +70,5 @@ def IFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(256, 128,
     final_logit = add_func([linear_logit, fm_logit])
 
     output = PredictionLayer(task)(final_logit)
-    model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
+    model = Model(inputs=inputs_list, outputs=output)
     return model

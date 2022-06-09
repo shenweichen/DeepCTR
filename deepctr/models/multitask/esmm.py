@@ -8,7 +8,8 @@ Reference:
     [1] Ma X, Zhao L, Huang G, et al. Entire space multi-task model: An effective approach for estimating post-click conversion rate[C]//The 41st International ACM SIGIR Conference on Research & Development in Information Retrieval. 2018.(https://arxiv.org/abs/1804.07931)
 """
 
-import tensorflow as tf
+from tensorflow.python.keras.models import Model
+from tensorflow.python.keras.layers import Dense, Multiply
 
 from ...feature_column import build_input_features, input_from_feature_columns
 from ...layers.core import PredictionLayer, DNN
@@ -53,13 +54,13 @@ def ESMM(dnn_feature_columns, tower_dnn_hidden_units=(256, 128, 64), l2_reg_embe
     cvr_output = DNN(tower_dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed)(
         dnn_input)
 
-    ctr_logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(ctr_output)
-    cvr_logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(cvr_output)
+    ctr_logit = Dense(1, use_bias=False)(ctr_output)
+    cvr_logit = Dense(1, use_bias=False)(cvr_output)
 
     ctr_pred = PredictionLayer('binary', name=task_names[0])(ctr_logit)
     cvr_pred = PredictionLayer('binary')(cvr_logit)
 
-    ctcvr_pred = tf.keras.layers.Multiply(name=task_names[1])([ctr_pred, cvr_pred])  # CTCVR = CTR * CVR
+    ctcvr_pred = Multiply(name=task_names[1])([ctr_pred, cvr_pred])  # CTCVR = CTR * CVR
 
-    model = tf.keras.models.Model(inputs=inputs_list, outputs=[ctr_pred, ctcvr_pred])
+    model = Model(inputs=inputs_list, outputs=[ctr_pred, ctcvr_pred])
     return model

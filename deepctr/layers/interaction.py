@@ -12,9 +12,14 @@ import itertools
 import tensorflow as tf
 from tensorflow.python.keras import backend as K
 from tensorflow.python.keras.backend import batch_dot
-from tensorflow.python.keras.initializers import (Zeros, glorot_normal,
-                                                  glorot_uniform, TruncatedNormal)
-from tensorflow.python.keras.layers import Layer
+
+try:
+    from tensorflow.python.ops.init_ops_v2 import Zeros, TruncatedNormal, glorot_normal, glorot_uniform
+except ImportError:
+    from tensorflow.python.ops.init_ops import Zeros, TruncatedNormal, glorot_normal_initializer as glorot_normal, \
+        glorot_uniform_initializer as glorot_uniform
+
+from tensorflow.python.keras.layers import Layer, MaxPooling2D, Conv2D, Dropout, Lambda, Dense, Flatten
 from tensorflow.python.keras.regularizers import l2
 from tensorflow.python.layers import utils
 
@@ -90,10 +95,10 @@ class AFMLayer(Layer):
                                             initializer=glorot_normal(seed=self.seed), name="projection_h")
         self.projection_p = self.add_weight(shape=(
             embedding_size, 1), initializer=glorot_normal(seed=self.seed), name="projection_p")
-        self.dropout = tf.keras.layers.Dropout(
+        self.dropout = Dropout(
             self.dropout_rate, seed=self.seed)
 
-        self.tensordot = tf.keras.layers.Lambda(
+        self.tensordot = Lambda(
             lambda x: tf.tensordot(x[0], x[1], axes=(-1, 0)))
 
         # Be sure to call this somewhere!
@@ -485,7 +490,7 @@ class CrossNetMix(Layer):
                                        regularizer=l2(self.l2_reg),
                                        trainable=True) for i in range(self.layer_num)]
 
-        self.gating = [tf.keras.layers.Dense(1, use_bias=False) for i in range(self.num_experts)]
+        self.gating = [Dense(1, use_bias=False) for i in range(self.num_experts)]
 
         self.bias = [self.add_weight(name='bias' + str(i),
                                      shape=(dim, 1),
@@ -964,15 +969,15 @@ class FGCNNLayer(Layer):
                 pooling_shape, (width, 1))
             pooling_shape = self._pooling_output_shape(
                 conv_output_shape, (pooling_width, 1))
-            self.conv_layers.append(tf.keras.layers.Conv2D(filters=filters, kernel_size=(width, 1), strides=(1, 1),
-                                                           padding='same',
-                                                           activation='tanh', use_bias=True, ))
+            self.conv_layers.append(Conv2D(filters=filters, kernel_size=(width, 1), strides=(1, 1),
+                                           padding='same',
+                                           activation='tanh', use_bias=True, ))
             self.pooling_layers.append(
-                tf.keras.layers.MaxPooling2D(pool_size=(pooling_width, 1)))
-            self.dense_layers.append(tf.keras.layers.Dense(pooling_shape[1] * embedding_size * new_filters,
-                                                           activation='tanh', use_bias=True))
+                MaxPooling2D(pool_size=(pooling_width, 1)))
+            self.dense_layers.append(Dense(pooling_shape[1] * embedding_size * new_filters,
+                                           activation='tanh', use_bias=True))
 
-        self.flatten = tf.keras.layers.Flatten()
+        self.flatten = Flatten()
 
         super(FGCNNLayer, self).build(
             input_shape)  # Be sure to call this somewhere!
@@ -1090,7 +1095,7 @@ class SENETLayer(Layer):
         self.W_2 = self.add_weight(shape=(
             reduction_size, self.filed_size), initializer=glorot_normal(seed=self.seed), name="W_2")
 
-        self.tensordot = tf.keras.layers.Lambda(
+        self.tensordot = Lambda(
             lambda x: tf.tensordot(x[0], x[1], axes=(-1, 0)))
 
         # Be sure to call this somewhere!

@@ -6,6 +6,7 @@ import sys
 
 import numpy as np
 import tensorflow as tf
+from packaging import version
 from numpy.testing import assert_allclose
 from tensorflow.python.keras import backend as K
 from tensorflow.python.keras.layers import Input, Masking
@@ -16,7 +17,15 @@ from deepctr.layers import custom_objects
 
 SAMPLE_SIZE = 8
 VOCABULARY_SIZE = 4
-Estimator_TEST_TF1 = True
+TEST_Estimator_TF1 = True
+
+
+def test_estimator_tf2(tf_version):
+    cur_version = version.parse(tf_version)
+    left_version = version.parse('2.2.0')
+    right_version = version.parse('2.6.0')
+    return left_version <= cur_version < right_version
+TEST_Estimator_TF2 = test_estimator_tf2(tf.__version__)
 
 
 def gen_sequence(dim, max_len, sample_size):

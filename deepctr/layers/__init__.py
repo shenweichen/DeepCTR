@@ -11,7 +11,7 @@ from .sequence import (AttentionSequencePoolingLayer, BiasEncoding, BiLSTM,
                        KMaxPooling, SequencePoolingLayer, WeightedSequenceLayer,
                        Transformer, DynamicGRU,PositionEncoding)
 
-from .utils import NoMask, Hash, Linear, Add, combined_dnn_input, softmax, reduce_sum
+from .utils import NoMask, Hash, Linear, _Add, combined_dnn_input, softmax, reduce_sum
 
 custom_objects = {'tf': tf,
                   'InnerProductLayer': InnerProductLayer,
@@ -42,7 +42,7 @@ custom_objects = {'tf': tf,
                   'SENETLayer': SENETLayer,
                   'BilinearInteraction': BilinearInteraction,
                   'WeightedSequenceLayer': WeightedSequenceLayer,
-                  'Add': Add,
+                  '_Add': _Add,
                   'FieldWiseBiInteraction': FieldWiseBiInteraction,
                   'FwFMLayer': FwFMLayer,
                   'softmax': softmax,

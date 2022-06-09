@@ -11,11 +11,9 @@ Reference:
 
 import itertools
 
-import tensorflow as tf
 from tensorflow.python.keras import backend as K
-from tensorflow.python.keras.initializers import RandomNormal
 from tensorflow.python.keras.layers import (Dense, Embedding, Lambda,
-                                            multiply)
+                                            multiply, BatchNormalization, Flatten)
 from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.regularizers import l2
 
@@ -59,8 +57,7 @@ def ONN(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(256, 128,
         filter(lambda x: isinstance(x, VarLenSparseFeat), dnn_feature_columns)) if dnn_feature_columns else []
 
     sparse_embedding = {fc_j.embedding_name: {fc_i.embedding_name: Embedding(fc_j.vocabulary_size, fc_j.embedding_dim,
-                                                                             embeddings_initializer=RandomNormal(
-                                                                                 mean=0.0, stddev=0.0001, seed=seed),
+                                                                             embeddings_initializer=fc_j.embeddings_initializer,
                                                                              embeddings_regularizer=l2(
                                                                                  l2_reg_embedding),
                                                                              mask_zero=isinstance(fc_j,
@@ -91,12 +88,12 @@ def ONN(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(256, 128,
                 element_wise_prod, axis=-1))(element_wise_prod)
         embed_list.append(element_wise_prod)
 
-    ffm_out = tf.keras.layers.Flatten()(concat_func(embed_list, axis=1))
+    ffm_out = Flatten()(concat_func(embed_list, axis=1))
     if use_bn:
-        ffm_out = tf.keras.layers.BatchNormalization()(ffm_out)
+        ffm_out = BatchNormalization()(ffm_out)
     dnn_input = combined_dnn_input([ffm_out], dense_value_list)
     dnn_out = DNN(dnn_hidden_units, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout)(dnn_input)
-    dnn_logit = Dense(1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(dnn_out)
+    dnn_logit = Dense(1, use_bias=False)(dnn_out)
 
     final_logit = add_func([dnn_logit, linear_logit])
 

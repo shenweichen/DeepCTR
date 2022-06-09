@@ -1,10 +1,9 @@
 import pytest
 import tensorflow as tf
 
-from deepctr.estimator import PNNEstimator
 from deepctr.models import PNN
 from ..utils import check_model, get_test_data, SAMPLE_SIZE, get_test_data_estimator, check_estimator, \
-    Estimator_TEST_TF1
+    TEST_Estimator_TF1, TEST_Estimator_TF2
 
 
 @pytest.mark.parametrize(
@@ -27,12 +26,14 @@ def test_PNN(use_inner, use_outter, sparse_feature_num):
      ]
 )
 def test_PNNEstimator(use_inner, use_outter, sparse_feature_num):
-    if not Estimator_TEST_TF1 and tf.__version__ < "2.2.0":
+    if not TEST_Estimator_TF1 and not TEST_Estimator_TF2:
         return
+    from deepctr.estimator import PNNEstimator
+
     sample_size = SAMPLE_SIZE
     _, dnn_feature_columns, input_fn = get_test_data_estimator(sample_size,
-                                                                                    sparse_feature_num=sparse_feature_num,
-                                                                                    dense_feature_num=sparse_feature_num)
+                                                               sparse_feature_num=sparse_feature_num,
+                                                               dense_feature_num=sparse_feature_num)
 
     model = PNNEstimator(dnn_feature_columns, dnn_hidden_units=[4, 4], dnn_dropout=0.5, use_inner=use_inner,
                          use_outter=use_outter)

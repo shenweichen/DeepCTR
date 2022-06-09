@@ -6,8 +6,13 @@ Author:
 
 """
 import tensorflow as tf
-from tensorflow.python.keras.layers import Flatten
+from tensorflow.python.keras.layers import Flatten, Concatenate, Layer, Add
 from tensorflow.python.ops.lookup_ops import TextFileInitializer
+try:
+    from tensorflow.python.ops.init_ops_v2 import glorot_normal_initializer as glorot_normal
+except ImportError:
+    from tensorflow.python.ops.init_ops import glorot_normal_initializer as glorot_normal
+from tensorflow.python.keras.regularizers import l2
 
 try:
     from tensorflow.python.ops.lookup_ops import StaticHashTable
@@ -15,7 +20,7 @@ except ImportError:
     from tensorflow.python.ops.lookup_ops import HashTable as StaticHashTable
 
 
-class NoMask(tf.keras.layers.Layer):
+class NoMask(Layer):
     def __init__(self, **kwargs):
         super(NoMask, self).__init__(**kwargs)
 
@@ -30,7 +35,7 @@ class NoMask(tf.keras.layers.Layer):
         return None
 
 
-class Hash(tf.keras.layers.Layer):
+class Hash(Layer):
     """Looks up keys in a table when setup `vocabulary_path`, which outputs the corresponding values.
     If `vocabulary_path` is not set, `Hash` will hash the input to [0,num_buckets). When `mask_zero` = True,
     input value `0` or `0.0` will be set to `0`, and other value will be set in range [1,num_buckets).
@@ -113,7 +118,7 @@ class Hash(tf.keras.layers.Layer):
         return dict(list(base_config.items()) + list(config.items()))
 
 
-class Linear(tf.keras.layers.Layer):
+class Linear(Layer):
 
     def __init__(self, l2_reg=0.0, mode=0, use_bias=False, seed=1024, **kwargs):
 
@@ -136,15 +141,15 @@ class Linear(tf.keras.layers.Layer):
             self.kernel = self.add_weight(
                 'linear_kernel',
                 shape=[int(input_shape[-1]), 1],
-                initializer=tf.keras.initializers.glorot_normal(self.seed),
-                regularizer=tf.keras.regularizers.l2(self.l2_reg),
+                initializer=glorot_normal(self.seed),
+                regularizer=l2(self.l2_reg),
                 trainable=True)
         elif self.mode == 2:
             self.kernel = self.add_weight(
                 'linear_kernel',
                 shape=[int(input_shape[1][-1]), 1],
-                initializer=tf.keras.initializers.glorot_normal(self.seed),
-                regularizer=tf.keras.regularizers.l2(self.l2_reg),
+                initializer=glorot_normal(self.seed),
+                regularizer=l2(self.l2_reg),
                 trainable=True)
 
         super(Linear, self).build(input_shape)  # Be sure to call this somewhere!
@@ -184,7 +189,7 @@ def concat_func(inputs, axis=-1, mask=False):
     if len(inputs) == 1:
         return inputs[0]
     else:
-        return tf.keras.layers.Concatenate(axis=axis)(inputs)
+        return Concatenate(axis=axis)(inputs)
 
 
 def reduce_mean(input_tensor,
@@ -255,13 +260,13 @@ def softmax(logits, dim=-1, name=None):
         return tf.nn.softmax(logits, axis=dim, name=name)
 
 
-class Add(tf.keras.layers.Layer):
+class _Add(Layer):
     def __init__(self, **kwargs):
-        super(Add, self).__init__(**kwargs)
+        super(_Add, self).__init__(**kwargs)
 
     def build(self, input_shape):
         # Be sure to call this somewhere!
-        super(Add, self).build(input_shape)
+        super(_Add, self).build(input_shape)
 
     def call(self, inputs, **kwargs):
         if not isinstance(inputs, list):
@@ -271,11 +276,11 @@ class Add(tf.keras.layers.Layer):
         if len(inputs) == 0:
             return tf.constant([[0.0]])
 
-        return tf.keras.layers.add(inputs)
+        return Add()(inputs)
 
 
 def add_func(inputs):
-    return Add()(inputs)
+    return _Add()(inputs)
 
 
 def combined_dnn_input(sparse_embedding_list, dense_value_list):

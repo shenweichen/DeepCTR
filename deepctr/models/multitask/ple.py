@@ -9,6 +9,8 @@ Reference:
 """
 
 import tensorflow as tf
+from tensorflow.python.keras.models import Model
+from tensorflow.python.keras.layers import Dense, Lambda
 
 from ...feature_column import build_input_features, input_from_feature_columns
 from ...layers.core import PredictionLayer, DNN
@@ -89,19 +91,19 @@ def PLE(dnn_feature_columns, shared_expert_num=1, specific_expert_num=1, num_lev
             cur_experts = specific_expert_outputs[
                           i * specific_expert_num:(i + 1) * specific_expert_num] + shared_expert_outputs
 
-            expert_concat = tf.keras.layers.Lambda(lambda x: tf.stack(x, axis=1))(cur_experts)
+            expert_concat = Lambda(lambda x: tf.stack(x, axis=1))(cur_experts)
 
             # build gate layers
             gate_input = DNN(gate_dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn,
                              seed=seed,
                              name=level_name + 'gate_specific_' + task_names[i])(
                 inputs[i])  # gate[i] for task input[i]
-            gate_out = tf.keras.layers.Dense(cur_expert_num, use_bias=False, activation='softmax',
+            gate_out = Dense(cur_expert_num, use_bias=False, activation='softmax',
                                              name=level_name + 'gate_softmax_specific_' + task_names[i])(gate_input)
-            gate_out = tf.keras.layers.Lambda(lambda x: tf.expand_dims(x, axis=-1))(gate_out)
+            gate_out = Lambda(lambda x: tf.expand_dims(x, axis=-1))(gate_out)
 
             # gate multiply the expert
-            gate_mul_expert = tf.keras.layers.Lambda(lambda x: reduce_sum(x[0] * x[1], axis=1, keep_dims=False),
+            gate_mul_expert = Lambda(lambda x: reduce_sum(x[0] * x[1], axis=1, keep_dims=False),
                                                      name=level_name + 'gate_mul_expert_specific_' + task_names[i])(
                 [expert_concat, gate_out])
             cgc_outs.append(gate_mul_expert)
@@ -111,19 +113,19 @@ def PLE(dnn_feature_columns, shared_expert_num=1, specific_expert_num=1, num_lev
             cur_expert_num = num_tasks * specific_expert_num + shared_expert_num
             cur_experts = specific_expert_outputs + shared_expert_outputs  # all the expert include task-specific expert and task-shared expert
 
-            expert_concat = tf.keras.layers.Lambda(lambda x: tf.stack(x, axis=1))(cur_experts)
+            expert_concat = Lambda(lambda x: tf.stack(x, axis=1))(cur_experts)
 
             # build gate layers
             gate_input = DNN(gate_dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn,
                              seed=seed,
                              name=level_name + 'gate_shared')(inputs[-1])  # gate for shared task input
 
-            gate_out = tf.keras.layers.Dense(cur_expert_num, use_bias=False, activation='softmax',
+            gate_out = Dense(cur_expert_num, use_bias=False, activation='softmax',
                                              name=level_name + 'gate_softmax_shared')(gate_input)
-            gate_out = tf.keras.layers.Lambda(lambda x: tf.expand_dims(x, axis=-1))(gate_out)
+            gate_out = Lambda(lambda x: tf.expand_dims(x, axis=-1))(gate_out)
 
             # gate multiply the expert
-            gate_mul_expert = tf.keras.layers.Lambda(lambda x: reduce_sum(x[0] * x[1], axis=1, keep_dims=False),
+            gate_mul_expert = Lambda(lambda x: reduce_sum(x[0] * x[1], axis=1, keep_dims=False),
                                                      name=level_name + 'gate_mul_expert_shared')(
                 [expert_concat, gate_out])
 
@@ -145,9 +147,9 @@ def PLE(dnn_feature_columns, shared_expert_num=1, specific_expert_num=1, num_lev
         # build tower layer
         tower_output = DNN(tower_dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed,
                            name='tower_' + task_name)(ple_out)
-        logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(tower_output)
+        logit = Dense(1, use_bias=False)(tower_output)
         output = PredictionLayer(task_type, name=task_name)(logit)
         task_outs.append(output)
 
-    model = tf.keras.models.Model(inputs=inputs_list, outputs=task_outs)
+    model = Model(inputs=inputs_list, outputs=task_outs)
     return model

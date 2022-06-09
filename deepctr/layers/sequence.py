@@ -9,8 +9,12 @@ Author:
 import numpy as np
 import tensorflow as tf
 from tensorflow.python.keras import backend as K
-from tensorflow.python.keras.initializers import TruncatedNormal
-from tensorflow.python.keras.layers import LSTM, Lambda, Layer
+
+try:
+    from tensorflow.python.ops.init_ops_v2 import TruncatedNormal
+except ImportError:
+    from tensorflow.python.ops.init_ops import TruncatedNormal
+from tensorflow.python.keras.layers import LSTM, Lambda, Layer, Dropout
 
 from .core import LocalActivationUnit
 from .normalization import LayerNormalization
@@ -493,7 +497,7 @@ class Transformer(Layer):
             self.fw2 = self.add_weight('fw2', shape=[4 * self.num_units, self.num_units], dtype=tf.float32,
                                        initializer=tf.keras.initializers.glorot_uniform(seed=self.seed))
 
-        self.dropout = tf.keras.layers.Dropout(
+        self.dropout = Dropout(
             self.dropout_rate, seed=self.seed)
         self.ln = LayerNormalization()
         if self.use_positional_encoding:
@@ -748,7 +752,7 @@ class DynamicGRU(Layer):
             self.gru_cell = VecAttGRUCell(self.num_units)
         else:
             try:
-                self.gru_cell = tf.nn.rnn_cell.GRUCell(self.num_units)  # tf.keras.layers.GRUCell
+                self.gru_cell = tf.nn.rnn_cell.GRUCell(self.num_units)  # GRUCell
             except AttributeError:
                 self.gru_cell = tf.compat.v1.nn.rnn_cell.GRUCell(self.num_units)
 
