@@ -9,8 +9,11 @@ import tensorflow as tf
 from deepctr.layers import sequence
 
 from tests.utils import layer_test
-
-tf.keras.backend.set_learning_phase(True)
+try:
+    tf.keras.backend.set_learning_phase(True)
+except ImportError:
+    from tensorflow.python.keras.backend import set_learning_phase
+    set_learning_phase(True)
 BATCH_SIZE = 4
 EMBEDDING_SIZE = 8
 SEQ_LENGTH = 10
