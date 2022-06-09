@@ -43,10 +43,10 @@ jobs:
             tf-version: 2.2.0
     steps:
     
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     
     - name: Setup python environment
-      uses: actions/setup-python@v2.2.2
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
 
@@ -64,7 +64,7 @@ jobs:
         pip install -q python-coveralls
         pytest --cov=deepctr --cov-report=xml
     - name: Upload coverage to Codecov  
-      uses: codecov/codecov-action@v2.0.3
+      uses: codecov/codecov-action@v3.1.0
       with:
         token: ${{secrets.CODECOV_TOKEN}}
         file: ./coverage.xml
