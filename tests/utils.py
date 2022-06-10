@@ -17,17 +17,17 @@ from deepctr.layers import custom_objects
 
 SAMPLE_SIZE = 8
 VOCABULARY_SIZE = 4
-TEST_Estimator_TF1 = True
 
 
-def test_estimator_tf2(tf_version):
+def test_estimator_version(tf_version):
     cur_version = version.parse(tf_version)
+    tf2_version = version.parse('2.0.0')
     left_version = version.parse('2.2.0')
     right_version = version.parse('2.6.0')
-    return left_version <= cur_version < right_version
+    return cur_version < tf2_version or left_version <= cur_version < right_version
 
 
-TEST_Estimator_TF2 = test_estimator_tf2(tf.__version__)
+TEST_Estimator = test_estimator_version(tf.__version__)
 
 
 def gen_sequence(dim, max_len, sample_size):

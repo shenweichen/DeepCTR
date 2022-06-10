@@ -1,8 +1,7 @@
 import pytest
 
 from deepctr.models import DCN
-from ..utils import check_model, get_test_data, SAMPLE_SIZE, get_test_data_estimator, check_estimator, \
-    TEST_Estimator_TF1, TEST_Estimator_TF2
+from ..utils import check_model, get_test_data, SAMPLE_SIZE, get_test_data_estimator, check_estimator, TEST_Estimator
 
 
 @pytest.mark.parametrize(
@@ -40,7 +39,7 @@ def test_DCN_2():
      ]
 )
 def test_DCNEstimator(cross_num, hidden_size, sparse_feature_num):
-    if not TEST_Estimator_TF1 and not TEST_Estimator_TF2:
+    if not TEST_Estimator:
         return
     from deepctr.estimator import DCNEstimator
 

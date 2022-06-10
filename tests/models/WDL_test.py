@@ -3,8 +3,7 @@ import tensorflow as tf
 from packaging import version
 
 from deepctr.models import WDL
-from ..utils import check_model, check_estimator, SAMPLE_SIZE, get_test_data, get_test_data_estimator, \
-    TEST_Estimator_TF1, TEST_Estimator_TF2
+from ..utils import check_model, check_estimator, SAMPLE_SIZE, get_test_data, get_test_data_estimator, TEST_Estimator
 
 
 @pytest.mark.parametrize(
@@ -31,7 +30,7 @@ def test_WDL(sparse_feature_num, dense_feature_num):
      ]
 )
 def test_WDLEstimator(sparse_feature_num, dense_feature_num):
-    if not TEST_Estimator_TF1 and not TEST_Estimator_TF2:
+    if not TEST_Estimator:
         return
     from deepctr.estimator import WDLEstimator
 

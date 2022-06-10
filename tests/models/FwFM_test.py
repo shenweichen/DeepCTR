@@ -1,9 +1,7 @@
 import pytest
-import tensorflow as tf
 
 from deepctr.models import FwFM
-from ..utils import check_model, get_test_data, SAMPLE_SIZE, get_test_data_estimator, check_estimator, \
-    TEST_Estimator_TF1, TEST_Estimator_TF2
+from ..utils import check_model, get_test_data, SAMPLE_SIZE, get_test_data_estimator, check_estimator, TEST_Estimator
 
 
 @pytest.mark.parametrize(
@@ -28,7 +26,7 @@ def test_FwFM(hidden_size, sparse_feature_num):
      ]
 )
 def test_FwFMEstimator(hidden_size, sparse_feature_num):
-    if not TEST_Estimator_TF1 and not TEST_Estimator_TF2:
+    if not TEST_Estimator:
         return
     from deepctr.estimator import FwFMEstimator
 

@@ -1,8 +1,7 @@
 import pytest
 
 from deepctr.models import DeepFM
-from ..utils import check_model, get_test_data, SAMPLE_SIZE, get_test_data_estimator, check_estimator, \
-    TEST_Estimator_TF1, TEST_Estimator_TF2
+from ..utils import check_model, get_test_data, SAMPLE_SIZE, get_test_data_estimator, check_estimator, TEST_Estimator
 
 
 @pytest.mark.parametrize(
@@ -29,7 +28,7 @@ def test_DeepFM(hidden_size, sparse_feature_num):
     ]  # (True, (32,), 3), (False, (32,), 1)
 )
 def test_DeepFMEstimator(hidden_size, sparse_feature_num):
-    if not TEST_Estimator_TF1 and not TEST_Estimator_TF2:
+    if not TEST_Estimator:
         return
     from deepctr.estimator import DeepFMEstimator
     sample_size = SAMPLE_SIZE

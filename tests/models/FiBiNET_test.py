@@ -1,8 +1,7 @@
 import pytest
 
 from deepctr.models import FiBiNET
-from ..utils import check_model, SAMPLE_SIZE, get_test_data, get_test_data_estimator, check_estimator, \
-    TEST_Estimator_TF1, TEST_Estimator_TF2
+from ..utils import check_model, SAMPLE_SIZE, get_test_data, get_test_data_estimator, check_estimator, TEST_Estimator
 
 
 @pytest.mark.parametrize(
@@ -25,7 +24,7 @@ def test_FiBiNET(bilinear_type):
     ["interaction"]
 )
 def test_FiBiNETEstimator(bilinear_type):
-    if not TEST_Estimator_TF1 and not TEST_Estimator_TF2:
+    if not TEST_Estimator:
         return
     from deepctr.estimator import FiBiNETEstimator
 
