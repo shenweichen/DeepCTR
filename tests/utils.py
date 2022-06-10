@@ -6,8 +6,8 @@ import sys
 
 import numpy as np
 import tensorflow as tf
-from packaging import version
 from numpy.testing import assert_allclose
+from packaging import version
 from tensorflow.python.keras import backend as K
 from tensorflow.python.keras.layers import Input, Masking
 from tensorflow.python.keras.models import Model, load_model, save_model
@@ -25,6 +25,8 @@ def test_estimator_tf2(tf_version):
     left_version = version.parse('2.2.0')
     right_version = version.parse('2.6.0')
     return left_version <= cur_version < right_version
+
+
 TEST_Estimator_TF2 = test_estimator_tf2(tf.__version__)
 
 
@@ -361,7 +363,12 @@ def check_model(model, model_name, x, y, check_model_io=True):
     :param check_model_io: test save/load model file or not
     :return:
     """
-
+    try:
+        session = tf.Session()
+        session.run(tf.global_variables_initializer)
+    except:
+        session = tf.compat.v1.Session()
+        session.run(tf.compat.v1.global_variables_initializer())
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
     model.fit(x, y, batch_size=100, epochs=1, validation_split=0.5)

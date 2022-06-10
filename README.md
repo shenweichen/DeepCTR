@@ -69,6 +69,42 @@ Introduction](https://zhuanlan.zhihu.com/p/53231955)) and [welcome to join us!](
 |   MMOE                    | [KDD 2018][Modeling Task Relationships in Multi-task Learning with Multi-gate Mixture-of-Experts](https://dl.acm.org/doi/abs/10.1145/3219819.3220007)                   |
 |   PLE                    | [RecSys 2020][Progressive Layered Extraction (PLE): A Novel Multi-Task Learning (MTL) Model for Personalized Recommendations](https://dl.acm.org/doi/10.1145/3383313.3412236)                   |
 
+## DisscussionGroup
+
+
+<html>
+    <table style="margin-left: 20px; margin-right: auto;">
+        <tr>
+            <td>
+                公众号：<b>浅梦学习笔记</b><br><br>
+                <a href="https://github.com/shenweichen">
+  <img align="center" src="./code.png" />
+</a>
+            </td>
+            <td>
+                微信：<b>deepctrbot</b><br><br>
+ <a href="https://github.com/shenweichen">
+  <img align="center" src="./deepctrbot.png" />
+</a>
+            </td>
+                        <td>
+                学习交流小组：<br><br>
+ <a href="https://github.com/shenweichen">
+  <img align="center" src="./xingqiu_github.png" />
+</a>
+            </td>
+        </tr>
+    </table>
+</html>
+
+
+- [Discussions](https://github.com/shenweichen/DeepCTR/discussions)
+- 公众号：**浅梦学习笔记**
+- wechat ID: **deepctrbot**
+
+  ![wechat](./docs/pics/code.png)
+
+
 ## Citation
 
 - Weichen Shen. (2017). DeepCTR: Easy-to-use,Modular and Extendible package of deep-learning based CTR
@@ -86,14 +122,6 @@ If you find this code useful in your research, please cite it using the followin
   howpublished = {\url{https://github.com/shenweichen/deepctr}},
 }
 ```
-
-## DisscussionGroup
-
-- [Discussions](https://github.com/shenweichen/DeepCTR/discussions)
-- 公众号：**浅梦学习笔记**
-- wechat ID: **deepctrbot**
-
-  ![wechat](./docs/pics/code.png)
 
 ## Main contributors([welcome to join us!](./CONTRIBUTING.md))
 
@@ -119,12 +147,12 @@ If you find this code useful in your research, please cite it using the followin
       <td>
         ​ <a href="https://github.com/morningsky"><img width="70" height="70" src="https://github.com/morningsky.png?s=40" alt="pic"></a><br>
         ​ <a href="https://github.com/morningsky">Lai Mincai</a>
-        <p> ShanghaiTech University </p>​
+        <p> ByteDance </p>​
       </td>
       <td>
         ​ <a href="https://github.com/codewithzichao"><img width="70" height="70" src="https://github.com/codewithzichao.png?s=40" alt="pic"></a><br>
         ​ <a href="https://github.com/codewithzichao">Li Zichao</a>
-        <p> Peking University   </p>​
+        <p> ByteDance   </p>​
       </td>
       <td>
         ​ <a href="https://github.com/TanTingyi"><img width="70" height="70" src="https://github.com/TanTingyi.png?s=40" alt="pic"></a><br>
