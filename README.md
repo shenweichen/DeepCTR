@@ -77,7 +77,7 @@ Introduction](https://zhuanlan.zhihu.com/p/53231955)) and [welcome to join us!](
         <tr>
             <td>
                 公众号：<b>浅梦学习笔记</b><br><br>
-                <a href="https://github.com/shenweichen">
+                <a href="https://github.com/shenweichen/AlgoNotes">
   <img align="center" src="./code.png" />
 </a>
             </td>
@@ -88,8 +88,8 @@ Introduction](https://zhuanlan.zhihu.com/p/53231955)) and [welcome to join us!](
 </a>
             </td>
                         <td>
-                学习交流小组：<br><br>
- <a href="https://github.com/shenweichen">
+                学习交流小组：<a href="https://t.zsxq.com/026UJEuzv">点击加入</a><br><br>
+ <a href="https://t.zsxq.com/026UJEuzv">
   <img align="center" src="./xingqiu_github.png" />
 </a>
             </td>

@@ -363,12 +363,6 @@ def check_model(model, model_name, x, y, check_model_io=True):
     :param check_model_io: test save/load model file or not
     :return:
     """
-    try:
-        session = tf.Session()
-        session.run(tf.global_variables_initializer)
-    except:
-        session = tf.compat.v1.Session()
-        session.run(tf.compat.v1.global_variables_initializer())
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
     model.fit(x, y, batch_size=100, epochs=1, validation_split=0.5)
