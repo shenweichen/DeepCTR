@@ -53,7 +53,7 @@ DisscussionGroup
 
 `Discussions <https://github.com/shenweichen/DeepCTR/discussions>`_  公众号：**浅梦学习笔记**  wechat ID: **deepctrbot**
 
-.. image:: ../pics/code.png
+.. image:: ../pics/code2.png
 
 .. toctree::
    :maxdepth: 2

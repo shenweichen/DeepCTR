@@ -71,6 +71,7 @@ Introduction](https://zhuanlan.zhihu.com/p/53231955)) and [welcome to join us!](
 
 ## DisscussionGroup
 
+- [Discussions](https://github.com/shenweichen/DeepCTR/discussions)
 
 <html>
     <table style="margin-left: 20px; margin-right: auto;">
@@ -83,7 +84,7 @@ Introduction](https://zhuanlan.zhihu.com/p/53231955)) and [welcome to join us!](
             </td>
             <td>
                 微信：<b>deepctrbot</b><br><br>
- <a href="https://github.com/shenweichen">
+ <a href="https://github.com/shenweichen/AlgoNotes">
   <img align="center" src="./docs/pics/deepctrbot.png" />
 </a>
             </td>
@@ -96,13 +97,6 @@ Introduction](https://zhuanlan.zhihu.com/p/53231955)) and [welcome to join us!](
         </tr>
     </table>
 </html>
-
-
-- [Discussions](https://github.com/shenweichen/DeepCTR/discussions)
-- 公众号：**浅梦学习笔记**
-- wechat ID: **deepctrbot**
-
-  ![wechat](./docs/pics/code.png)
 
 
 ## Citation
