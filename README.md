@@ -113,7 +113,7 @@ If you find this code useful in your research, please cite it using the followin
                 学习交流小组：<br><a href="https://t.zsxq.com/026UJEuzv">点击加入 </a>
 <a href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MjM5MzY4NzE3MA==&action=getalbum&album_id=1361647041096843265&scene=126#wechat_redirect">主题集合</a><br><br>
  <a href="https://t.zsxq.com/026UJEuzv">
-  <img align="center" src="./docs/pics/xingqiu_github.png" />
+  <img align="center" src="./docs/pics/planet_github.png" />
 </a>
             </td>
         </tr>
