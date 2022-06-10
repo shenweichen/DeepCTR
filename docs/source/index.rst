@@ -57,6 +57,8 @@ DisscussionGroup
 
 .. image:: ../pics/code2.jpg
 
+.. image:: ../pics/code3.jpg
+
 .. toctree::
    :maxdepth: 2
    :caption: Home:
