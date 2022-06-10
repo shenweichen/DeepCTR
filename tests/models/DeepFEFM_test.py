@@ -38,7 +38,8 @@ def test_DeepFEFM(hidden_size, sparse_feature_num, use_fefm, use_linear, use_fef
      ]
 )
 def test_DeepFEFMEstimator(hidden_size, sparse_feature_num):
-    if not TEST_Estimator:
+    import tensorflow as tf
+    if not TEST_Estimator or tf.__version__ == "1.4.0":
         return
     from deepctr.estimator import DeepFEFMEstimator
 
