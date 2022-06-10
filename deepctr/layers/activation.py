@@ -7,11 +7,13 @@ Author:
 """
 
 import tensorflow as tf
+
 try:
-    from tensorflow.python.ops.init_ops_v2 import Zeros
-except ImportError:
     from tensorflow.python.ops.init_ops import Zeros
+except ImportError:
+    from tensorflow.python.ops.init_ops_v2 import Zeros
 from tensorflow.python.keras.layers import Layer, Activation
+
 try:
     from tensorflow.python.keras.layers import BatchNormalization
 except ImportError:

@@ -14,10 +14,11 @@ from tensorflow.python.keras import backend as K
 from tensorflow.python.keras.backend import batch_dot
 
 try:
-    from tensorflow.python.ops.init_ops_v2 import Zeros, TruncatedNormal, glorot_normal, glorot_uniform
-except ImportError:
-    from tensorflow.python.ops.init_ops import Zeros, TruncatedNormal, glorot_normal_initializer as glorot_normal, \
+    from tensorflow.python.ops.init_ops import Zeros, Ones, Constant, TruncatedNormal, \
+        glorot_normal_initializer as glorot_normal, \
         glorot_uniform_initializer as glorot_uniform
+except ImportError:
+    from tensorflow.python.ops.init_ops_v2 import Zeros, Ones, Constant, TruncatedNormal, glorot_normal, glorot_uniform
 
 from tensorflow.python.keras.layers import Layer, MaxPooling2D, Conv2D, Dropout, Lambda, Dense, Flatten
 from tensorflow.python.keras.regularizers import l2
@@ -249,7 +250,7 @@ class CIN(Layer):
                                                 regularizer=l2(self.l2_reg)))
 
             self.bias.append(self.add_weight(name='bias' + str(i), shape=[size], dtype=tf.float32,
-                                             initializer=tf.keras.initializers.Zeros()))
+                                             initializer=Zeros()))
 
             if self.split_half:
                 if i != len(self.layer_size) - 1 and size % 2 > 0:
@@ -722,17 +723,17 @@ class InteractingLayer(Layer):
         embedding_size = int(input_shape[-1])
         self.W_Query = self.add_weight(name='query', shape=[embedding_size, self.att_embedding_size * self.head_num],
                                        dtype=tf.float32,
-                                       initializer=tf.keras.initializers.TruncatedNormal(seed=self.seed))
+                                       initializer=TruncatedNormal(seed=self.seed))
         self.W_key = self.add_weight(name='key', shape=[embedding_size, self.att_embedding_size * self.head_num],
                                      dtype=tf.float32,
-                                     initializer=tf.keras.initializers.TruncatedNormal(seed=self.seed + 1))
+                                     initializer=TruncatedNormal(seed=self.seed + 1))
         self.W_Value = self.add_weight(name='value', shape=[embedding_size, self.att_embedding_size * self.head_num],
                                        dtype=tf.float32,
-                                       initializer=tf.keras.initializers.TruncatedNormal(seed=self.seed + 2))
+                                       initializer=TruncatedNormal(seed=self.seed + 2))
         if self.use_res:
             self.W_Res = self.add_weight(name='res', shape=[embedding_size, self.att_embedding_size * self.head_num],
                                          dtype=tf.float32,
-                                         initializer=tf.keras.initializers.TruncatedNormal(seed=self.seed))
+                                         initializer=TruncatedNormal(seed=self.seed))
 
         # Be sure to call this somewhere!
         super(InteractingLayer, self).build(input_shape)
@@ -1250,14 +1251,14 @@ class FieldWiseBiInteraction(Layer):
         self.kernel_mf = self.add_weight(
             name='kernel_mf',
             shape=(int(self.num_fields * (self.num_fields - 1) / 2), 1),
-            initializer=tf.keras.initializers.Ones(),
+            initializer=Ones(),
             regularizer=None,
             trainable=True)
 
         self.kernel_fm = self.add_weight(
             name='kernel_fm',
             shape=(self.num_fields, 1),
-            initializer=tf.keras.initializers.Constant(value=0.5),
+            initializer=Constant(value=0.5),
             regularizer=None,
             trainable=True)
         if self.use_bias:

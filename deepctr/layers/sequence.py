@@ -11,9 +11,11 @@ import tensorflow as tf
 from tensorflow.python.keras import backend as K
 
 try:
-    from tensorflow.python.ops.init_ops_v2 import TruncatedNormal
+    from tensorflow.python.ops.init_ops import TruncatedNormal, glorot_uniform_initializer as glorot_uniform, \
+        identity_initializer as identity
 except ImportError:
-    from tensorflow.python.ops.init_ops import TruncatedNormal
+    from tensorflow.python.ops.init_ops_v2 import TruncatedNormal, glorot_uniform, identity
+
 from tensorflow.python.keras.layers import LSTM, Lambda, Layer, Dropout
 
 from .core import LocalActivationUnit
@@ -476,26 +478,26 @@ class Transformer(Layer):
         self.seq_len_max = int(input_shape[0][-2])
         self.W_Query = self.add_weight(name='query', shape=[embedding_size, self.att_embedding_size * self.head_num],
                                        dtype=tf.float32,
-                                       initializer=tf.keras.initializers.TruncatedNormal(seed=self.seed))
+                                       initializer=TruncatedNormal(seed=self.seed))
         self.W_key = self.add_weight(name='key', shape=[embedding_size, self.att_embedding_size * self.head_num],
                                      dtype=tf.float32,
-                                     initializer=tf.keras.initializers.TruncatedNormal(seed=self.seed + 1))
+                                     initializer=TruncatedNormal(seed=self.seed + 1))
         self.W_Value = self.add_weight(name='value', shape=[embedding_size, self.att_embedding_size * self.head_num],
                                        dtype=tf.float32,
-                                       initializer=tf.keras.initializers.TruncatedNormal(seed=self.seed + 2))
+                                       initializer=TruncatedNormal(seed=self.seed + 2))
         if self.attention_type == "additive":
             self.b = self.add_weight('b', shape=[self.att_embedding_size], dtype=tf.float32,
-                                     initializer=tf.keras.initializers.glorot_uniform(seed=self.seed))
+                                     initializer=glorot_uniform(seed=self.seed))
             self.v = self.add_weight('v', shape=[self.att_embedding_size], dtype=tf.float32,
-                                     initializer=tf.keras.initializers.glorot_uniform(seed=self.seed))
+                                     initializer=glorot_uniform(seed=self.seed))
         # if self.use_res:
         #     self.W_Res = self.add_weight(name='res', shape=[embedding_size, self.att_embedding_size * self.head_num], dtype=tf.float32,
-        #                                  initializer=tf.keras.initializers.TruncatedNormal(seed=self.seed))
+        #                                  initializer=TruncatedNormal(seed=self.seed))
         if self.use_feed_forward:
             self.fw1 = self.add_weight('fw1', shape=[self.num_units, 4 * self.num_units], dtype=tf.float32,
-                                       initializer=tf.keras.initializers.glorot_uniform(seed=self.seed))
+                                       initializer=glorot_uniform(seed=self.seed))
             self.fw2 = self.add_weight('fw2', shape=[4 * self.num_units, self.num_units], dtype=tf.float32,
-                                       initializer=tf.keras.initializers.glorot_uniform(seed=self.seed))
+                                       initializer=glorot_uniform(seed=self.seed))
 
         self.dropout = Dropout(
             self.dropout_rate, seed=self.seed)
@@ -646,7 +648,7 @@ class PositionEncoding(Layer):
         if self.zero_pad:
             position_enc[0, :] = np.zeros(num_units)
         self.lookup_table = self.add_weight("lookup_table", (T, num_units),
-                                            initializer=tf.initializers.identity(position_enc),
+                                            initializer=identity(position_enc),
                                             trainable=self.pos_embedding_trainable)
 
         # Be sure to call this somewhere!

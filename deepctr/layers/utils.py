@@ -8,10 +8,12 @@ Author:
 import tensorflow as tf
 from tensorflow.python.keras.layers import Flatten, Concatenate, Layer, Add
 from tensorflow.python.ops.lookup_ops import TextFileInitializer
+
 try:
-    from tensorflow.python.ops.init_ops_v2 import glorot_normal_initializer as glorot_normal
+    from tensorflow.python.ops.init_ops import Zeros, glorot_normal_initializer as glorot_normal
 except ImportError:
-    from tensorflow.python.ops.init_ops import glorot_normal_initializer as glorot_normal
+    from tensorflow.python.ops.init_ops_v2 import Zeros, glorot_normal
+
 from tensorflow.python.keras.regularizers import l2
 
 try:
@@ -135,7 +137,7 @@ class Linear(Layer):
         if self.use_bias:
             self.bias = self.add_weight(name='linear_bias',
                                         shape=(1,),
-                                        initializer=tf.keras.initializers.Zeros(),
+                                        initializer=Zeros(),
                                         trainable=True)
         if self.mode == 1:
             self.kernel = self.add_weight(
