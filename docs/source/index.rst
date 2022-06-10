@@ -42,7 +42,7 @@ You can read the latest code and related projects
 
 News
 -----
-06/10/2022 : Improve compatibility with tensorflow `2.x`.
+06/10/2022 : Improve compatibility with tensorflow `2.x`. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.9.1>`_
 
 09/03/2021 : Add multitask learning models: `SharedBottom <./Features.html#sharedbottom>`_ , `ESMM <./Features.html#esmm-entire-space-multi-task-model>`_ , `MMOE <./Features.html#mmoe-multi-gate-mixture-of-experts>`_ , `PLE <./Features.html#ple-progressive-layered-extraction>`_ .  `running example <./Examples.html#multitask-learning-mmoe>`_ `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.9.0>`_
 
