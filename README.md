@@ -89,7 +89,8 @@ Introduction](https://zhuanlan.zhihu.com/p/53231955)) and [welcome to join us!](
 </a>
             </td>
                         <td>
-                学习交流小组：<a href="https://t.zsxq.com/026UJEuzv">点击加入</a><br><br>
+                学习交流小组：<br><a href="https://t.zsxq.com/026UJEuzv">点击加入 </a>
+<a href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MjM5MzY4NzE3MA==&action=getalbum&album_id=1361647041096843265&scene=126#wechat_redirect">主题集合</a><br><br>
  <a href="https://t.zsxq.com/026UJEuzv">
   <img align="center" src="./docs/pics/xingqiu_github.png" />
 </a>
@@ -97,6 +98,8 @@ Introduction](https://zhuanlan.zhihu.com/p/53231955)) and [welcome to join us!](
         </tr>
     </table>
 </html>
+
+
 
 
 ## Citation
