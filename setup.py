@@ -9,7 +9,7 @@ REQUIRED_PACKAGES = [
 
 setuptools.setup(
     name="deepctr",
-    version="0.9.0",
+    version="0.9.1",
     author="Weichen Shen",
     author_email="weichenswc@163.com",
     description="Easy-to-use,Modular and Extendible package of deep learning based CTR(Click Through Rate) prediction models with tensorflow 1.x and 2.x .",
@@ -38,6 +38,7 @@ setuptools.setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Topic :: Scientific/Engineering',
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
         'Topic :: Software Development',

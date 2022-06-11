@@ -1,4 +1,6 @@
 import numpy as np
+import tensorflow as tf
+from packaging import version
 
 from deepctr.feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, get_feature_names
 from deepctr.models.sequence.din import DIN
@@ -42,8 +44,13 @@ def test_DIN():
     model_name = "DIN"
 
     x, y, feature_columns, behavior_feature_list = get_xy_fd(True)
+    cur_version = version.parse(tf.__version__)
+    if cur_version >= version.parse('2.8.0'):  # todo:
+        att_activation = 'sigmoid'
+    else:
+        att_activation = 'dice'
 
-    model = DIN(feature_columns, behavior_feature_list, dnn_hidden_units=[4, 4, 4],
+    model = DIN(feature_columns, behavior_feature_list, dnn_hidden_units=[4, 4, 4], att_activation=att_activation,
                 dnn_dropout=0.5)
     # todo test dice
 

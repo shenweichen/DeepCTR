@@ -7,7 +7,7 @@ Reference:
     Qiwei Chen, Huan Zhao, Wei Li, Pipei Huang, and Wenwu Ou. 2019. Behavior sequence transformer for e-commerce recommendation in Alibaba. In Proceedings of the 1st International Workshop on Deep Learning Practice for High-Dimensional Sparse Data (DLP-KDD '19). Association for Computing Machinery, New York, NY, USA, Article 12, 1–4. DOI:https://doi.org/10.1145/3326937.3341261
 """
 
-import tensorflow as tf
+from tensorflow.python.keras.models import Model
 from tensorflow.python.keras.layers import (Dense, Flatten)
 
 from ...feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, build_input_features
@@ -99,9 +99,9 @@ def BST(dnn_feature_columns, history_feature_list, transformer_num=1, att_head_n
 
     dnn_input = combined_dnn_input([deep_input_emb], dense_value_list)
     output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, use_bn, seed=seed)(dnn_input)
-    final_logit = Dense(1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(output)
+    final_logit = Dense(1, use_bias=False)(output)
     output = PredictionLayer(task)(final_logit)
 
-    model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
+    model = Model(inputs=inputs_list, outputs=output)
 
     return model

@@ -6,8 +6,9 @@ Reference:
     [1] Lu W, Yu Y, Chang Y, et al. A Dual Input-aware Factorization Machine for CTR Prediction[C]
     //IJCAI. 2020: 3139-3145.(https://www.ijcai.org/Proceedings/2020/0434.pdf)
 """
-
 import tensorflow as tf
+from tensorflow.python.keras.models import Model
+from tensorflow.python.keras.layers import Dense, Lambda, Flatten
 
 from ..feature_column import build_input_features, get_linear_logit, input_from_feature_columns, SparseFeat, \
     VarLenSparseFeat
@@ -57,14 +58,12 @@ def DIFM(linear_feature_columns, dnn_feature_columns,
 
     att_input = concat_func(sparse_embedding_list, axis=1)
     att_out = InteractingLayer(att_embedding_size, att_head_num, att_res, scaling=True)(att_input)
-    att_out = tf.keras.layers.Flatten()(att_out)
-    m_vec = tf.keras.layers.Dense(
-        sparse_feat_num, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed=seed))(att_out)
+    att_out = Flatten()(att_out)
+    m_vec = Dense(sparse_feat_num, use_bias=False)(att_out)
 
     dnn_input = combined_dnn_input(sparse_embedding_list, [])
     dnn_output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed)(dnn_input)
-    m_bit = tf.keras.layers.Dense(
-        sparse_feat_num, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed=seed))(dnn_output)
+    m_bit = Dense(sparse_feat_num, use_bias=False)(dnn_output)
 
     input_aware_factor = add_func([m_vec, m_bit])  # the complete input-aware factor m_x
 
@@ -72,12 +71,12 @@ def DIFM(linear_feature_columns, dnn_feature_columns,
                                     l2_reg=l2_reg_linear, sparse_feat_refine_weight=input_aware_factor)
 
     fm_input = concat_func(sparse_embedding_list, axis=1)
-    refined_fm_input = tf.keras.layers.Lambda(lambda x: x[0] * tf.expand_dims(x[1], axis=-1))(
+    refined_fm_input = Lambda(lambda x: x[0] * tf.expand_dims(x[1], axis=-1))(
         [fm_input, input_aware_factor])
     fm_logit = FM()(refined_fm_input)
 
     final_logit = add_func([linear_logit, fm_logit])
 
     output = PredictionLayer(task)(final_logit)
-    model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
+    model = Model(inputs=inputs_list, outputs=output)
     return model

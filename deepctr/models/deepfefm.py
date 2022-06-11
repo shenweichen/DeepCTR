@@ -13,12 +13,13 @@ Reference:
 
 from itertools import chain
 
-import tensorflow as tf
+from tensorflow.python.keras.models import Model
+from tensorflow.python.keras.layers import Dense, Lambda
 
 from ..feature_column import input_from_feature_columns, get_linear_logit, build_input_features, DEFAULT_GROUP_NAME
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import FEFMLayer
-from ..layers.utils import concat_func, combined_dnn_input, reduce_sum
+from ..layers.utils import concat_func, combined_dnn_input, reduce_sum, add_func
 
 
 def DeepFEFM(linear_feature_columns, dnn_feature_columns, use_fefm=True,
@@ -76,28 +77,27 @@ def DeepFEFM(linear_feature_columns, dnn_feature_columns, use_fefm=True,
 
     dnn_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed)(dnn_input)
 
-    dnn_logit = tf.keras.layers.Dense(
-        1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(dnn_out)
+    dnn_logit = Dense(1, use_bias=False, )(dnn_out)
 
-    fefm_logit = tf.keras.layers.Lambda(lambda x: reduce_sum(x, axis=1, keep_dims=True))(fefm_interaction_embedding)
+    fefm_logit = Lambda(lambda x: reduce_sum(x, axis=1, keep_dims=True))(fefm_interaction_embedding)
 
     if len(dnn_hidden_units) == 0 and use_fefm is False and use_linear is True:  # only linear
         final_logit = linear_logit
     elif len(dnn_hidden_units) == 0 and use_fefm is True and use_linear is True:  # linear + FEFM
-        final_logit = tf.keras.layers.add([linear_logit, fefm_logit])
+        final_logit = add_func([linear_logit, fefm_logit])
     elif len(dnn_hidden_units) > 0 and use_fefm is False and use_linear is True:  # linear +　Deep # Ablation1
-        final_logit = tf.keras.layers.add([linear_logit, dnn_logit])
+        final_logit = add_func([linear_logit, dnn_logit])
     elif len(dnn_hidden_units) > 0 and use_fefm is True and use_linear is True:  # linear + FEFM + Deep
-        final_logit = tf.keras.layers.add([linear_logit, fefm_logit, dnn_logit])
+        final_logit = add_func([linear_logit, fefm_logit, dnn_logit])
     elif len(dnn_hidden_units) == 0 and use_fefm is True and use_linear is False:  # only FEFM (shallow)
         final_logit = fefm_logit
     elif len(dnn_hidden_units) > 0 and use_fefm is False and use_linear is False:  # only Deep
         final_logit = dnn_logit
     elif len(dnn_hidden_units) > 0 and use_fefm is True and use_linear is False:  # FEFM + Deep # Ablation2
-        final_logit = tf.keras.layers.add([fefm_logit, dnn_logit])
+        final_logit = add_func([fefm_logit, dnn_logit])
     else:
         raise NotImplementedError
 
     output = PredictionLayer(task)(final_logit)
-    model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
+    model = Model(inputs=inputs_list, outputs=output)
     return model

@@ -10,6 +10,8 @@ Reference:
 
 """
 import tensorflow as tf
+from tensorflow.python.keras.models import Model
+from tensorflow.python.keras.layers import Dense, Lambda, Flatten, Concatenate
 
 from ..feature_column import build_input_features, get_linear_logit, input_from_feature_columns
 from ..layers.core import PredictionLayer, DNN
@@ -71,18 +73,17 @@ def FGCNN(linear_feature_columns, dnn_feature_columns, conv_kernel_width=(7, 7, 
         combined_input = concat_func([origin_input, new_features], axis=1)
     else:
         combined_input = origin_input
-    inner_product = tf.keras.layers.Flatten()(InnerProductLayer()(
-        tf.keras.layers.Lambda(unstack, mask=[None] * int(combined_input.shape[1]))(combined_input)))
-    linear_signal = tf.keras.layers.Flatten()(combined_input)
-    dnn_input = tf.keras.layers.Concatenate()([linear_signal, inner_product])
-    dnn_input = tf.keras.layers.Flatten()(dnn_input)
+    inner_product = Flatten()(
+        InnerProductLayer()(Lambda(unstack, mask=[None] * int(combined_input.shape[1]))(combined_input)))
+    linear_signal = Flatten()(combined_input)
+    dnn_input = Concatenate()([linear_signal, inner_product])
+    dnn_input = Flatten()(dnn_input)
 
     final_logit = DNN(dnn_hidden_units, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout)(dnn_input)
-    final_logit = tf.keras.layers.Dense(1, use_bias=False,
-                                        kernel_initializer=tf.keras.initializers.glorot_normal(seed))(final_logit)
+    final_logit = Dense(1, use_bias=False)(final_logit)
 
     final_logit = add_func([final_logit, linear_logit])
     output = PredictionLayer(task)(final_logit)
 
-    model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
+    model = Model(inputs=inputs_list, outputs=output)
     return model
