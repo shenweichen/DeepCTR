@@ -6,7 +6,8 @@ Author:
 Reference:
     [1] He X, Chua T S. Neural factorization machines for sparse predictive analytics[C]//Proceedings of the 40th International ACM SIGIR conference on Research and Development in Information Retrieval. ACM, 2017: 355-364. (https://arxiv.org/abs/1708.05027)
 """
-import tensorflow as tf
+from tensorflow.python.keras.models import Model
+from tensorflow.python.keras.layers import Dense, Dropout
 
 from ..feature_column import build_input_features, get_linear_logit, input_from_feature_columns
 from ..layers.core import PredictionLayer, DNN
@@ -47,15 +48,14 @@ def NFM(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(256, 128,
     fm_input = concat_func(sparse_embedding_list, axis=1)
     bi_out = BiInteractionPooling()(fm_input)
     if bi_dropout:
-        bi_out = tf.keras.layers.Dropout(bi_dropout)(bi_out, training=None)
+        bi_out = Dropout(bi_dropout)(bi_out, training=None)
     dnn_input = combined_dnn_input([bi_out], dense_value_list)
     dnn_output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, False, seed=seed)(dnn_input)
-    dnn_logit = tf.keras.layers.Dense(
-        1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(dnn_output)
+    dnn_logit = Dense(1, use_bias=False)(dnn_output)
 
     final_logit = add_func([linear_logit, dnn_logit])
 
     output = PredictionLayer(task)(final_logit)
 
-    model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
+    model = Model(inputs=inputs_list, outputs=output)
     return model

@@ -1,10 +1,8 @@
 import pytest
 import tensorflow as tf
 
-from deepctr.estimator import FNNEstimator
 from deepctr.models import FNN
-from ..utils import check_model, get_test_data, SAMPLE_SIZE, get_test_data_estimator, check_estimator, \
-    Estimator_TEST_TF1
+from ..utils import check_model, get_test_data, SAMPLE_SIZE, get_test_data_estimator, check_estimator, TEST_Estimator
 
 
 @pytest.mark.parametrize(
@@ -45,8 +43,10 @@ def test_FNN(sparse_feature_num, dense_feature_num):
      ]
 )
 def test_FNNEstimator(sparse_feature_num, dense_feature_num):
-    if not Estimator_TEST_TF1 and tf.__version__ < "2.2.0":
+    if not TEST_Estimator:
         return
+    from deepctr.estimator import FNNEstimator
+
     sample_size = SAMPLE_SIZE
     linear_feature_columns, dnn_feature_columns, input_fn = get_test_data_estimator(sample_size,
                                                                                     sparse_feature_num=sparse_feature_num,

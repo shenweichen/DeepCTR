@@ -7,9 +7,9 @@ from tests.layers.interaction_test import BATCH_SIZE, EMBEDDING_SIZE
 from tests.utils import layer_test
 
 try:
-    from tensorflow.python.keras.utils import CustomObjectScope
+    from tensorflow.python.keras.utils.generic_utils import CustomObjectScope
 except ImportError:
-    from tensorflow.keras.utils import CustomObjectScope
+    from tensorflow.python.keras.utils import CustomObjectScope
 
 
 @pytest.mark.parametrize(

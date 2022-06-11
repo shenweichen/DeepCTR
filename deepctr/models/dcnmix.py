@@ -10,7 +10,8 @@ Reference:
 
     [2] Wang R, Shivanna R, Cheng D Z, et al. DCN V2: Improved Deep & Cross Network and Practical Lessons for Web-scale Learning to Rank Systems[J]. 2020. (https://arxiv.org/abs/2008.13535)
 """
-import tensorflow as tf
+from tensorflow.python.keras.models import Model
+from tensorflow.python.keras.layers import Dense, Concatenate
 
 from ..feature_column import build_input_features, get_linear_logit, input_from_feature_columns
 from ..layers.core import PredictionLayer, DNN
@@ -60,24 +61,21 @@ def DCNMix(linear_feature_columns, dnn_feature_columns, cross_num=2,
         deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed)(dnn_input)
         cross_out = CrossNetMix(low_rank=low_rank, num_experts=num_experts, layer_num=cross_num,
                                 l2_reg=l2_reg_cross)(dnn_input)
-        stack_out = tf.keras.layers.Concatenate()([cross_out, deep_out])
-        final_logit = tf.keras.layers.Dense(
-            1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(stack_out)
+        stack_out = Concatenate()([cross_out, deep_out])
+        final_logit = Dense(1, use_bias=False)(stack_out)
     elif len(dnn_hidden_units) > 0:  # Only Deep
         deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed)(dnn_input)
-        final_logit = tf.keras.layers.Dense(
-            1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(deep_out)
+        final_logit = Dense(1, use_bias=False,)(deep_out)
     elif cross_num > 0:  # Only Cross
         cross_out = CrossNetMix(low_rank=low_rank, num_experts=num_experts, layer_num=cross_num,
                                 l2_reg=l2_reg_cross)(dnn_input)
-        final_logit = tf.keras.layers.Dense(
-            1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(cross_out)
+        final_logit = Dense(1, use_bias=False, )(cross_out)
     else:  # Error
         raise NotImplementedError
 
     final_logit = add_func([final_logit, linear_logit])
     output = PredictionLayer(task)(final_logit)
 
-    model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
+    model = Model(inputs=inputs_list, outputs=output)
 
     return model

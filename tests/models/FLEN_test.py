@@ -10,7 +10,7 @@ from ..utils import check_model, get_test_data, SAMPLE_SIZE
         ((3,), 6)
     ]  # (True, (32,), 3), (False, (32,), 1)
 )
-def test_DeepFM(hidden_size, sparse_feature_num):
+def test_FLEN(hidden_size, sparse_feature_num):
     model_name = "FLEN"
     sample_size = SAMPLE_SIZE
     x, y, feature_columns = get_test_data(sample_size, embedding_size=2, sparse_feature_num=sparse_feature_num,

@@ -89,11 +89,12 @@ If you find this code useful in your research, please cite it using the followin
 
 ## DisscussionGroup
 
-- [Discussions](https://github.com/shenweichen/DeepCTR/discussions)
-- 公众号：**浅梦学习笔记**
-- wechat ID: **deepctrbot**
+- [Github Discussions](https://github.com/shenweichen/DeepCTR/discussions)
+- Wechat Discussions
 
-  ![wechat](./docs/pics/code.png)
+|公众号：浅梦学习笔记|微信：deepctrbot|学习小组 [加入](https://t.zsxq.com/026UJEuzv) [主题集合](https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MjM5MzY4NzE3MA==&action=getalbum&album_id=1361647041096843265&scene=126#wechat_redirect)|
+|:--:|:--:|:--:|
+| [![公众号](./docs/pics/code.png)](https://github.com/shenweichen/AlgoNotes)| [![微信](./docs/pics/deepctrbot.png)](https://github.com/shenweichen/AlgoNotes)|[![学习小组](./docs/pics/planet_github.png)](https://t.zsxq.com/026UJEuzv)|
 
 ## Main contributors([welcome to join us!](./CONTRIBUTING.md))
 
@@ -119,12 +120,12 @@ If you find this code useful in your research, please cite it using the followin
       <td>
         ​ <a href="https://github.com/morningsky"><img width="70" height="70" src="https://github.com/morningsky.png?s=40" alt="pic"></a><br>
         ​ <a href="https://github.com/morningsky">Lai Mincai</a>
-        <p> ShanghaiTech University </p>​
+        <p> ByteDance </p>​
       </td>
       <td>
         ​ <a href="https://github.com/codewithzichao"><img width="70" height="70" src="https://github.com/codewithzichao.png?s=40" alt="pic"></a><br>
         ​ <a href="https://github.com/codewithzichao">Li Zichao</a>
-        <p> Peking University   </p>​
+        <p> ByteDance   </p>​
       </td>
       <td>
         ​ <a href="https://github.com/TanTingyi"><img width="70" height="70" src="https://github.com/TanTingyi.png?s=40" alt="pic"></a><br>

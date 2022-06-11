@@ -9,6 +9,8 @@ Reference:
 """
 
 import tensorflow as tf
+from tensorflow.python.keras.models import Model
+from tensorflow.python.keras.layers import Dense, Lambda
 
 from ...feature_column import build_input_features, input_from_feature_columns
 from ...layers.core import PredictionLayer, DNN
@@ -65,20 +67,20 @@ def MMOE(dnn_feature_columns, num_experts=3, expert_dnn_hidden_units=(256, 128),
                              name='expert_' + str(i))(dnn_input)
         expert_outs.append(expert_network)
 
-    expert_concat = tf.keras.layers.Lambda(lambda x: tf.stack(x, axis=1))(expert_outs)  # None,num_experts,dim
+    expert_concat = Lambda(lambda x: tf.stack(x, axis=1))(expert_outs)  # None,num_experts,dim
 
     mmoe_outs = []
     for i in range(num_tasks):  # one mmoe layer: nums_tasks = num_gates
         # build gate layers
         gate_input = DNN(gate_dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed,
                          name='gate_' + task_names[i])(dnn_input)
-        gate_out = tf.keras.layers.Dense(num_experts, use_bias=False, activation='softmax',
-                                         name='gate_softmax_' + task_names[i])(gate_input)
-        gate_out = tf.keras.layers.Lambda(lambda x: tf.expand_dims(x, axis=-1))(gate_out)
+        gate_out = Dense(num_experts, use_bias=False, activation='softmax',
+                         name='gate_softmax_' + task_names[i])(gate_input)
+        gate_out = Lambda(lambda x: tf.expand_dims(x, axis=-1))(gate_out)
 
         # gate multiply the expert
-        gate_mul_expert = tf.keras.layers.Lambda(lambda x: reduce_sum(x[0] * x[1], axis=1, keep_dims=False),
-                                                 name='gate_mul_expert_' + task_names[i])([expert_concat, gate_out])
+        gate_mul_expert = Lambda(lambda x: reduce_sum(x[0] * x[1], axis=1, keep_dims=False),
+                                 name='gate_mul_expert_' + task_names[i])([expert_concat, gate_out])
         mmoe_outs.append(gate_mul_expert)
 
     task_outs = []
@@ -87,9 +89,9 @@ def MMOE(dnn_feature_columns, num_experts=3, expert_dnn_hidden_units=(256, 128),
         tower_output = DNN(tower_dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed,
                            name='tower_' + task_name)(mmoe_out)
 
-        logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(tower_output)
+        logit = Dense(1, use_bias=False)(tower_output)
         output = PredictionLayer(task_type, name=task_name)(logit)
         task_outs.append(output)
 
-    model = tf.keras.models.Model(inputs=inputs_list, outputs=task_outs)
+    model = Model(inputs=inputs_list, outputs=task_outs)
     return model

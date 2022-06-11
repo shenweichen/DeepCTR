@@ -10,6 +10,8 @@ Reference:
 
 """
 import tensorflow as tf
+from tensorflow.python.keras.models import Model
+from tensorflow.python.keras.layers import Dense, Flatten, Conv2D, Lambda
 
 from ..feature_column import build_input_features, get_linear_logit, input_from_feature_columns
 from ..layers.core import DNN, PredictionLayer
@@ -54,7 +56,7 @@ def CCPM(linear_feature_columns, dnn_feature_columns, conv_kernel_width=(6, 5), 
     l = len(conv_filters)
 
     conv_input = concat_func(sparse_embedding_list, axis=1)
-    pooling_result = tf.keras.layers.Lambda(
+    pooling_result = Lambda(
         lambda x: tf.expand_dims(x, axis=3))(conv_input)
 
     for i in range(1, l + 1):
@@ -62,18 +64,18 @@ def CCPM(linear_feature_columns, dnn_feature_columns, conv_kernel_width=(6, 5), 
         width = conv_kernel_width[i - 1]
         k = max(1, int((1 - pow(i / l, l - i)) * n)) if i < l else 3
 
-        conv_result = tf.keras.layers.Conv2D(filters=filters, kernel_size=(width, 1), strides=(1, 1), padding='same',
-                                             activation='tanh', use_bias=True, )(pooling_result)
+        conv_result = Conv2D(filters=filters, kernel_size=(width, 1), strides=(1, 1), padding='same',
+                             activation='tanh', use_bias=True, )(pooling_result)
         pooling_result = KMaxPooling(
             k=min(k, int(conv_result.shape[1])), axis=1)(conv_result)
 
-    flatten_result = tf.keras.layers.Flatten()(pooling_result)
+    flatten_result = Flatten()(pooling_result)
     dnn_out = DNN(dnn_hidden_units, l2_reg=l2_reg_dnn, dropout_rate=dnn_dropout)(flatten_result)
-    dnn_logit = tf.keras.layers.Dense(1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(
+    dnn_logit = Dense(1, use_bias=False)(
         dnn_out)
 
     final_logit = add_func([dnn_logit, linear_logit])
 
     output = PredictionLayer(task)(final_logit)
-    model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
+    model = Model(inputs=inputs_list, outputs=output)
     return model
