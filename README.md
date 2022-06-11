@@ -69,9 +69,6 @@ Introduction](https://zhuanlan.zhihu.com/p/53231955)) and [welcome to join us!](
 |   MMOE                    | [KDD 2018][Modeling Task Relationships in Multi-task Learning with Multi-gate Mixture-of-Experts](https://dl.acm.org/doi/abs/10.1145/3219819.3220007)                   |
 |   PLE                    | [RecSys 2020][Progressive Layered Extraction (PLE): A Novel Multi-Task Learning (MTL) Model for Personalized Recommendations](https://dl.acm.org/doi/10.1145/3383313.3412236)                   |
 
-
-
-
 ## Citation
 
 - Weichen Shen. (2017). DeepCTR: Easy-to-use,Modular and Extendible package of deep-learning based CTR
@@ -92,34 +89,12 @@ If you find this code useful in your research, please cite it using the followin
 
 ## DisscussionGroup
 
-- [Discussions](https://github.com/shenweichen/DeepCTR/discussions)
+- [Github Discussions](https://github.com/shenweichen/DeepCTR/discussions)
+- Wechat Discussions
 
-<html>
-    <table style="margin-left: 20px; margin-right: auto;">
-        <tr>
-            <td>
-                公众号：<b>浅梦学习笔记</b><br><br>
-                <a href="https://github.com/shenweichen/AlgoNotes">
-  <img align="center" src="./docs/pics/code.png" />
-</a>
-            </td>
-            <td>
-                微信：<b>deepctrbot</b><br><br>
- <a href="https://github.com/shenweichen/AlgoNotes">
-  <img align="center" src="./docs/pics/deepctrbot.png" />
-</a>
-            </td>
-                        <td>
-                学习交流小组：<br><a href="https://t.zsxq.com/026UJEuzv">点击加入 </a>
-<a href="https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MjM5MzY4NzE3MA==&action=getalbum&album_id=1361647041096843265&scene=126#wechat_redirect">主题集合</a><br><br>
- <a href="https://t.zsxq.com/026UJEuzv">
-  <img align="center" src="./docs/pics/planet_github.png" />
-</a>
-            </td>
-        </tr>
-    </table>
-</html>
-
+|公众号：浅梦学习笔记|微信：deepctrbot|学习小组 [加入](https://t.zsxq.com/026UJEuzv) [主题集合](https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MjM5MzY4NzE3MA==&action=getalbum&album_id=1361647041096843265&scene=126#wechat_redirect)|
+|:--:|:--:|:--:|
+| [![公众号](./docs/pics/code.png)](https://github.com/shenweichen/AlgoNotes)| [![微信](./docs/pics/deepctrbot.png)](https://github.com/shenweichen/AlgoNotes)|[![学习小组](./docs/pics/planet_github.png)](https://t.zsxq.com/026UJEuzv)|
 
 ## Main contributors([welcome to join us!](./CONTRIBUTING.md))
 
