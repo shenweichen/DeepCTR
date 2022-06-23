@@ -36,10 +36,9 @@ def CAN(dnn_feature_columns, co_action_config, l2_reg_embedding=1e-5, seed=1024,
     can_output_list = []
     for conf in co_action_config:
         cur_can_layer = CoActionLayer(sequence_embed_dict[conf['target']], conf['co_action_conf'], name=conf['name'])
-        print(cur_can_layer.name)
+        print(cur_can_layer._layer_name)
         for his_pref_seq in conf['pref_seq']:
             can_output_list.append(cur_can_layer(sequence_embed_dict[his_pref_seq]))
-        print(can_output_list)
 
     can_output = concat_func(can_output_list)
     final_logit = Dense(1, use_bias=False)(can_output)

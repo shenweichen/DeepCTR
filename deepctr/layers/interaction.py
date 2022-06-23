@@ -1507,7 +1507,7 @@ class CoActionLayer(Layer):
 
         self._target_input = target_input
         self._co_action_config = co_action_config
-        self._name = name
+        self._layer_name = name
         self._weight_orders, self._bias_orders = self._build_mlp()
 
         super(CoActionLayer, self).__init__(**kwargs)
