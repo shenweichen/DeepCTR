@@ -1519,7 +1519,7 @@ class CoActionLayer(Layer):
 
         super(CoActionLayer, self).build(input_shape)  # Be sure to call this somewhere!
 
-    def build_mlp(self):
+    def _build_mlp(self):
         target_emb = tf.reduce_sum(self._target_input, axis=1)  # avoid target varlength
         weight_orders, bias_orders = [], []
         idx = 0
@@ -1548,7 +1548,7 @@ class CoActionLayer(Layer):
             if self._co_action_config['indep_action']:
                 weight, bias = self._weight_orders[i], self._bias_orders[i]
             else:
-                weight, bias = self._weight_orders[i], self._bias_orders[i]
+                weight, bias = self._weight_orders[0], self._bias_orders[0]
             for j, (w, b) in enumerate(zip(weight, bias)):
                 h = tf.matmul(h, w)
                 if b is not None:
@@ -1564,8 +1564,7 @@ class CoActionLayer(Layer):
         return out
 
     def call(self, inputs, **kwargs):
-        mask = tf.where(tf.sequence_mask(inputs, tf.shape(inputs)[1]), 1.0, 0.0)
-        result = self.co_action_op(inputs, mask)
+        result = self.co_action_op(inputs, mask=None)
         return result
 
     def compute_output_shape(self, input_shape):
