@@ -16,6 +16,33 @@ from ..layers.core import PredictionLayer
 from ..layers.interaction import CoActionLayer
 from ..layers.utils import concat_func
 
+
+# template_can_config = [
+#     {
+#         'name': 'co_action_for_item',
+#         'target': 'item_id',  # target emb need to reshape
+#         'pref_seq': ['hist_item_id', ],  # seq emb need to co-action
+#         'co_action_conf': {
+#             'target_emb_w': [[16, 8], [8, 4]],
+#             'target_emb_b': [0, 0],
+#             'indep_action': False,
+#             'orders': 3,  # exp non_linear trans
+#         }
+#     },
+#     {
+#         'name': 'co_action_for_cate',
+#         'target': 'cate_id',
+#         'pref_seq': ['hist_cate_id', ],
+#         'co_action_conf': {
+#             'target_emb_w': [[16, 8], [8, 4]],
+#             'target_emb_b': [0, 0],
+#             'indep_action': False,
+#             'orders': 3,  # exp non_linear trans
+#         }
+#     }
+# ]
+
+
 def CAN(dnn_feature_columns, co_action_config, l2_reg_embedding=1e-5, seed=1024, task='binary'):
     """Instantiates the CAN architecture.
 
