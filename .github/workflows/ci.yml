@@ -54,6 +54,7 @@ jobs:
 
     - name: Install dependencies
       run: |
+        apt update && apt install -y pkg-config libhdf5-dev
         pip3 install -q tensorflow==${{ matrix.tf-version }}
         pip install -q protobuf==3.19.0
         pip install -q requests
