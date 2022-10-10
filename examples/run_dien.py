@@ -1,3 +1,5 @@
+"""Simple example for DIEN model."""
+
 import numpy as np
 import tensorflow as tf
 from deepctr.feature_column import (DenseFeat, SparseFeat, VarLenSparseFeat,
@@ -6,6 +8,22 @@ from deepctr.models import DIEN
 
 
 def get_xy_fd(use_neg=False, hash_flag=False):
+    """Get features, labels, feature list.
+
+    _extended_summary_
+
+    Args:
+        use_neg (bool, optional): Whether se negative instance that samples 
+            from item set except the clicked item. Defaults to False.
+        hash_flag (bool, optional): Whether hash the input to [0,num_buckets).
+            Defaults to False.
+
+    Returns:
+        x (dict): features.
+        y (np.array): label.
+        feature_columns (list): feature columns.
+        behavior_feature_list (list): Features to activate the historical behaviors.
+    """
     feature_columns = [
         SparseFeat(
             'user', 3, embedding_dim=10, use_hash=hash_flag),
