@@ -24,8 +24,8 @@ def DeepFM(linear_feature_columns, dnn_feature_columns, fm_group=(DEFAULT_GROUP_
            dnn_activation='relu', dnn_use_bn=False, task='binary'):
     """Instantiates the DeepFM Network architecture.
 
-    :param linear_feature_columns: An iterable containing all the features used by linear part of the model.
-    :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
+    :param linear_feature_columns: An iterable containing all the features used by the linear part of the model.
+    :param dnn_feature_columns: An iterable containing all the features used by the deep part of the model.
     :param fm_group: list, group_name of features that will be used to do feature interactions.
     :param dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of DNN
     :param l2_reg_linear: float. L2 regularizer strength applied to linear part

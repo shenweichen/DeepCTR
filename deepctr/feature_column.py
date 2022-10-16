@@ -95,7 +95,7 @@ class VarLenSparseFeat(namedtuple('VarLenSparseFeat',
 class DenseFeat(namedtuple('DenseFeat', ['name', 'dimension', 'dtype', 'transform_fn'])):
     """ Dense feature
     Args:
-        name: feature name,
+        name: feature name.
         dimension: dimension of the feature, default = 1.
         dtype: dtype of the feature, default="float32".
         transform_fn: If not `None` , a function that can be used to transform
