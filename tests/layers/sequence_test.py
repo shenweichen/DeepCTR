@@ -81,11 +81,15 @@ def test_BiLSTM(merge_mode):
                    input_shape=(BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE))
 
 
-def test_Transformer():
+@pytest.mark.parametrize(
+    'attention_type',
+    ['scaled_dot_product', 'cos', 'ln', 'additive']
+)
+def test_Transformer(attention_type):
     with CustomObjectScope({'Transformer': sequence.Transformer}):
         layer_test(sequence.Transformer,
                    kwargs={'att_embedding_size': 1, 'head_num': 8, 'use_layer_norm': True, 'supports_masking': False,
-                           'attention_type': 'additive', 'dropout_rate': 0.5, 'output_type': 'sum'},
+                           'attention_type': attention_type, 'dropout_rate': 0.5, 'output_type': 'sum'},
                    input_shape=[(BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE), (BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE),
                                 (BATCH_SIZE, 1), (BATCH_SIZE, 1)])
 
