@@ -4,8 +4,8 @@ from deepctr.models import CAN
 from deepctr.feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, get_feature_names
 
 # for tf2.x
-# import tensorflow as tf
-# tf.compat.v1.disable_eager_execution()
+import tensorflow as tf
+tf.compat.v1.disable_eager_execution()
 
 def get_xy_fd():
 

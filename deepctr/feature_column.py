@@ -215,7 +215,7 @@ def input_from_feature_columns(features, feature_columns, l2_reg, seed, prefix='
 
 
 def input_from_seq_feature_columns(features, feature_columns, l2_reg, seed, prefix='', seq_mask_zero=True,
-                               support_dense=True):
+                               support_dense=True, support_group=True):
 
     varlen_sparse_feature_columns = list(
         filter(lambda x: isinstance(x, VarLenSparseFeat), feature_columns)) if feature_columns else []
@@ -228,3 +228,4 @@ def input_from_seq_feature_columns(features, feature_columns, l2_reg, seed, pref
 
     sequence_embed_dict = varlen_embedding_lookup(embedding_matrix_dict, features, varlen_sparse_feature_columns)
     return sequence_embed_dict, dense_value_list
+
