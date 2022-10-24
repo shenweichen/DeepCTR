@@ -147,3 +147,8 @@ def test_BilinearInteraction(bilinear_type):
     with CustomObjectScope({'BilinearInteraction': layers.BilinearInteraction}):
         layer_test(layers.BilinearInteraction, kwargs={'bilinear_type': bilinear_type}, input_shape=[(
             BATCH_SIZE, 1, EMBEDDING_SIZE)] * FIELD_SIZE)
+
+def test_CAN():
+    with CustomObjectScope({'CAN': layers.CoActionLayer}):
+        layer_test(layers.CoActionLayer, kwargs={}, input_shape=(
+            BATCH_SIZE, FIELD_SIZE, EMBEDDING_SIZE))

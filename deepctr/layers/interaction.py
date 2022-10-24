@@ -1489,3 +1489,83 @@ class FEFMLayer(Layer):
             'regularizer': self.regularizer,
         })
         return config
+
+class CoActionLayer(Layer):
+    """
+    build co-action output for target item(type) and user pref seq item(type)
+      Input shape
+        - 3D tensor with shape: ``(batch_size,field_size,embedding_size)``.
+
+      Output shape
+        - 2D tensor with shape: ``(batch_size, 2nd_mlp_dims)``.
+
+      References
+        - [CAN: Feature Co-Action for Click-Through Rate Prediction](https://arxiv.org/abs/2011.05625)
+    """
+
+    def __init__(self, target_input, co_action_config, name, **kwargs):
+
+        self._target_input = target_input
+        self._co_action_config = co_action_config
+        self._layer_name = name
+        self._weight_orders, self._bias_orders = self._build_mlp()
+
+        super(CoActionLayer, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+        if len(input_shape) != 3:
+            raise ValueError("Unexpected inputs dimensions % d,\
+                             expect to be 3 dimensions" % (len(input_shape)))
+
+        super(CoActionLayer, self).build(input_shape)  # Be sure to call this somewhere!
+
+    def _build_mlp(self):
+        target_emb = tf.reduce_sum(self._target_input, axis=1)  # avoid target varlength
+        weight_orders, bias_orders = [], []
+        idx = 0
+        for i in range(self._co_action_config['orders']):
+            weight, bias = [], []
+            for w, b in zip(self._co_action_config['target_emb_w'], self._co_action_config['target_emb_b']):
+                weight.append(tf.reshape(target_emb[:, idx:idx + w[0] * w[1]], [-1, w[0], w[1]]))
+                idx += w[0] * w[1]
+                if b == 0:
+                    bias.append(None)
+                else:
+                    bias.append(tf.reshape(target_emb[:, idx:idx + b], [-1, 1, b]))
+                    idx += b
+            weight_orders.append(weight)
+            bias_orders.append(bias)
+            if not self._co_action_config['indep_action']:
+                break
+        return weight_orders, bias_orders
+
+    def co_action_op(self, hist_pref_seq, mask=None):
+        inputs = []
+        for i in range(self._co_action_config['orders']):
+            inputs.append(tf.math.pow(hist_pref_seq, i + 1.0))
+        out_seq = []
+        for i, h in enumerate(inputs):
+            if self._co_action_config['indep_action']:
+                weight, bias = self._weight_orders[i], self._bias_orders[i]
+            else:
+                weight, bias = self._weight_orders[0], self._bias_orders[0]
+            for j, (w, b) in enumerate(zip(weight, bias)):
+                h = tf.matmul(h, w)
+                if b is not None:
+                    h = h + b
+                if j != len(weight) - 1:
+                    h = tf.nn.tanh(h)
+                out_seq.append(h)
+        out_seq = tf.concat(out_seq, 2)
+        if mask is not None:
+            mask = tf.expand_dims(mask, axis=-1)
+            out_seq = out_seq * mask
+        out = tf.reduce_sum(out_seq, 1)
+        return out
+
+    def call(self, inputs, **kwargs):
+        result = self.co_action_op(inputs, mask=None)
+        return result
+
+    def compute_output_shape(self, input_shape):
+        return (None, 1)

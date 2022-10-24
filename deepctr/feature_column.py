@@ -212,3 +212,20 @@ def input_from_feature_columns(features, feature_columns, l2_reg, seed, prefix='
     if not support_group:
         group_embedding_dict = list(chain.from_iterable(group_embedding_dict.values()))
     return group_embedding_dict, dense_value_list
+
+
+def input_from_seq_feature_columns(features, feature_columns, l2_reg, seed, prefix='', seq_mask_zero=True,
+                               support_dense=True, support_group=True):
+
+    varlen_sparse_feature_columns = list(
+        filter(lambda x: isinstance(x, VarLenSparseFeat), feature_columns)) if feature_columns else []
+
+    embedding_matrix_dict = create_embedding_matrix(feature_columns, l2_reg, seed, prefix=prefix,
+                                                    seq_mask_zero=seq_mask_zero)
+    dense_value_list = get_dense_input(features, feature_columns)
+    if not support_dense and len(dense_value_list) > 0:
+        raise ValueError("DenseFeat is not supported in dnn_feature_columns")
+
+    sequence_embed_dict = varlen_embedding_lookup(embedding_matrix_dict, features, varlen_sparse_feature_columns)
+    return sequence_embed_dict, dense_value_list
+
