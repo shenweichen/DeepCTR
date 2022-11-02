@@ -7,13 +7,12 @@ Author:
 """
 
 import tensorflow as tf
-from tensorflow.python.keras import backend as K
 
 try:
-    from tensorflow.python.ops.init_ops import Zeros, Ones
+    from tensorflow.python.ops.init_ops import Zeros
 except ImportError:
-    from tensorflow.python.ops.init_ops_v2 import Zeros, Ones
-from tensorflow.python.keras.layers import Layer, Activation, Flatten
+    from tensorflow.python.ops.init_ops_v2 import Zeros
+from tensorflow.python.keras.layers import Layer, Activation
 
 try:
     from tensorflow.python.keras.layers import BatchNormalization

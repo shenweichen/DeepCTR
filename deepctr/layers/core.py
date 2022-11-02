@@ -14,7 +14,7 @@ try:
 except ImportError:
     from tensorflow.python.ops.init_ops import Zeros, Ones, glorot_normal_initializer as glorot_normal
 
-from tensorflow.python.keras.layers import Layer, Dropout, Softmax
+from tensorflow.python.keras.layers import Layer, Dropout
 
 try:
     from tensorflow.python.keras.layers import BatchNormalization
@@ -309,7 +309,7 @@ class RegulationLayer(Layer):
             raise ValueError(
                 "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
 
-        feild_gating_score = Softmax(axis=1)(self.g * self.tau)
+        feild_gating_score = tf.nn.softmax(self.g * self.tau, 1)
         E = inputs * feild_gating_score
         return tf.reshape(E, [-1, self.field_num * self.embedding_size])
 
