@@ -3,17 +3,17 @@
 
 Author:
     Weichen Shen,weichenswc@163.com
-    Heyi, heyi_jack@163.com
 
 """
 
 import tensorflow as tf
 from tensorflow.python.keras import backend as K
+
 try:
-    from tensorflow.python.ops.init_ops import Zeros
+    from tensorflow.python.ops.init_ops import Zeros, Ones
 except ImportError:
-    from tensorflow.python.ops.init_ops_v2 import Zeros
-from tensorflow.python.keras.layers import Layer, Activation
+    from tensorflow.python.ops.init_ops_v2 import Zeros, Ones
+from tensorflow.python.keras.layers import Layer, Activation, Flatten, Softmax
 
 try:
     from tensorflow.python.keras.layers import BatchNormalization
@@ -24,71 +24,6 @@ try:
     unicode
 except NameError:
     unicode = str
-
-
-class RegulationLayer(Layer):
-    """Regulation module used in EDCN.
-
-      Input shape
-        - A list of 3D tensor with shape: ``(batch_size,1,embedding_size)``.
-
-      Output shape
-        - 2D tensor with shape: ``(batch_size, embedding_size * field_num)``.
-
-      Arguments
-        - **tau** : Positive float, the temperature coefficient to control
-        distribution of field-wise gating unit.
-
-        - **seed** : A Python integer to use as random seed.
-
-      References
-        - [Enhancing Explicit and Implicit Feature Interactions via Information Sharing for Parallel Deep CTR Models.](https://dlp-kdd.github.io/assets/pdf/DLP-KDD_2021_paper_12.pdf)
-    """
-
-    def __init__(self, tau = 0.1, **kwargs):
-        if tau == 0:
-            raise ValueError("RegulationLayer tau can not be zero.")
-        self.tau = 1.0 / tau
-        super(RegulationLayer, self).__init__(**kwargs)
-
-    def build(self, input_shape):
-
-        if not isinstance(input_shape, list) or len(input_shape) < 2:
-            raise ValueError('A `RegulationLayer` layer should be called '
-                             'on a list of at least 2 inputs')
-
-        self.field_num = len(input_shape)
-        self.g = self.add_weight(
-            shape=(self.field_num, 1, 1, 1), 
-            initializer=tf.keras.initializers.Constant(1.), 
-            name=self.name + '_field_weight')
-
-        self.flatten_layer = Flatten()
-
-        # Be sure to call this somewhere!
-        super(RegulationLayer, self).build(input_shape)
-
-    def call(self, inputs, **kwargs):
-
-        if K.ndim(inputs[0]) != 3:
-            raise ValueError(
-                "Unexpected inputs dimensions %d, expect to be 3 dimensions" % (K.ndim(inputs)))
-        feild_gating_score = tf.keras.activations.softmax(self.g * self.tau, axis = 0)
-        feild_gating_score = feild_gating_score* self.field_num
-        inputs = tf.stack(inputs, axis = 0)
-        E = inputs * feild_gating_score
-        E = tf.transpose(E, perm = [1,0,2,3])
-        E = self.flatten_layer(E)
-        return E
-
-    def compute_output_shape(self, input_shape):
-        return (None, input_shape[0][-1] * len(input_shape))
-
-    def get_config(self):
-        config = {'tau': self.tau}
-        base_config = super(RegulationLayer, self).get_config()
-        base_config.update(config)
-        return base_config
 
 
 class Dice(Layer):

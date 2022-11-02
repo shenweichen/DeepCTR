@@ -11,4 +11,3 @@ from .pnn import PNNEstimator
 from .wdl import WDLEstimator
 from .xdeepfm import xDeepFMEstimator
 from .deepfefm import DeepFEFMEstimator
-from .edcn import EDCNEstimator
