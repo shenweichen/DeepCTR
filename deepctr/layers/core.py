@@ -8,8 +8,18 @@ Author:
 
 import tensorflow as tf
 from tensorflow.python.keras import backend as K
-from tensorflow.python.keras.initializers import Zeros, glorot_normal
-from tensorflow.python.keras.layers import Layer
+
+try:
+    from tensorflow.python.ops.init_ops_v2 import Zeros, glorot_normal
+except ImportError:
+    from tensorflow.python.ops.init_ops import Zeros, glorot_normal_initializer as glorot_normal
+
+from tensorflow.python.keras.layers import Layer, Dropout
+
+try:
+    from tensorflow.python.keras.layers import BatchNormalization
+except ImportError:
+    BatchNormalization = tf.keras.layers.BatchNormalization
 from tensorflow.python.keras.regularizers import l2
 
 from .activation import activation_layer
@@ -68,8 +78,8 @@ class LocalActivationUnit(Layer):
                              'inputs of a two inputs with shape (None,1,embedding_size) and (None,T,embedding_size)'
                              'Got different shapes: %s,%s' % (input_shape[0], input_shape[1]))
         size = 4 * \
-            int(input_shape[0][-1]
-                ) if len(self.hidden_units) == 0 else self.hidden_units[-1]
+               int(input_shape[0][-1]
+                   ) if len(self.hidden_units) == 0 else self.hidden_units[-1]
         self.kernel = self.add_weight(shape=(size, 1),
                                       initializer=glorot_normal(
                                           seed=self.seed),
@@ -164,9 +174,9 @@ class DNN(Layer):
                                      initializer=Zeros(),
                                      trainable=True) for i in range(len(self.hidden_units))]
         if self.use_bn:
-            self.bn_layers = [tf.keras.layers.BatchNormalization() for _ in range(len(self.hidden_units))]
+            self.bn_layers = [BatchNormalization() for _ in range(len(self.hidden_units))]
 
-        self.dropout_layers = [tf.keras.layers.Dropout(self.dropout_rate, seed=self.seed + i) for i in
+        self.dropout_layers = [Dropout(self.dropout_rate, seed=self.seed + i) for i in
                                range(len(self.hidden_units))]
 
         self.activation_layers = [activation_layer(self.activation) for _ in range(len(self.hidden_units))]

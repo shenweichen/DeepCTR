@@ -42,18 +42,20 @@ You can read the latest code and related projects
 
 News
 -----
+10/15/2022 : Support python `3.9`,`3.10`. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.9.2>`_
+
+06/11/2022 : Improve compatibility with tensorflow `2.x`. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.9.1>`_
+
 09/03/2021 : Add multitask learning models: `SharedBottom <./Features.html#sharedbottom>`_ , `ESMM <./Features.html#esmm-entire-space-multi-task-model>`_ , `MMOE <./Features.html#mmoe-multi-gate-mixture-of-experts>`_ , `PLE <./Features.html#ple-progressive-layered-extraction>`_ .  `running example <./Examples.html#multitask-learning-mmoe>`_ `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.9.0>`_
-
-07/18/2021 : Support pre-defined key-value vocabulary in `Hash` Layer. `example <./Examples.html#hash-layer-with-pre-defined-key-value-vocabulary>`_ `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.7>`_
-
-06/14/2021 : Add `IFM <./Features.html#ifm-input-aware-factorization-machine>`_ , `DIFM <./Features.html#difm-dual-input-aware-factorization-machine>`_ and `DeepFEFM <./Features.html#deepfefm-deep-field-embedded-factorization-machine>`_ . `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.6>`_
 
 DisscussionGroup
 -----------------------
 
-`Discussions <https://github.com/shenweichen/DeepCTR/discussions>`_  公众号：**浅梦学习笔记**  wechat ID: **deepctrbot**
+  公众号：**浅梦学习笔记**  wechat ID: **deepctrbot**
 
-.. image:: ../pics/code.png
+  `Discussions <https://github.com/shenweichen/DeepCTR/discussions>`_ `学习小组主题集合 <https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MjM5MzY4NzE3MA==&action=getalbum&album_id=1361647041096843265&scene=126#wechat_redirect>`_
+
+.. image:: ../pics/code2.jpg
 
 .. toctree::
    :maxdepth: 2

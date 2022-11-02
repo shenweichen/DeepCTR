@@ -9,8 +9,14 @@ Author:
 import numpy as np
 import tensorflow as tf
 from tensorflow.python.keras import backend as K
-from tensorflow.python.keras.initializers import TruncatedNormal
-from tensorflow.python.keras.layers import LSTM, Lambda, Layer
+
+try:
+    from tensorflow.python.ops.init_ops import TruncatedNormal, glorot_uniform_initializer as glorot_uniform, \
+        identity_initializer as identity
+except ImportError:
+    from tensorflow.python.ops.init_ops_v2 import TruncatedNormal, glorot_uniform, identity
+
+from tensorflow.python.keras.layers import LSTM, Lambda, Layer, Dropout
 
 from .core import LocalActivationUnit
 from .normalization import LayerNormalization
@@ -436,7 +442,7 @@ class Transformer(Layer):
             - **blinding**: bool. Whether or not use blinding.
             - **seed**: A Python integer to use as random seed.
             - **supports_masking**:bool. Whether or not support masking.
-            - **attention_type**: str, Type of attention, the value must be one of { ``'scaled_dot_product'`` , ``'additive'`` }.
+            - **attention_type**: str, Type of attention, the value must be one of { ``'scaled_dot_product'`` , ``'cos'`` , ``'ln'`` , ``'additive'`` }.
             - **output_type**: ``'mean'`` , ``'sum'`` or `None`. Whether or not use average/sum pooling for output.
 
       References
@@ -472,28 +478,31 @@ class Transformer(Layer):
         self.seq_len_max = int(input_shape[0][-2])
         self.W_Query = self.add_weight(name='query', shape=[embedding_size, self.att_embedding_size * self.head_num],
                                        dtype=tf.float32,
-                                       initializer=tf.keras.initializers.TruncatedNormal(seed=self.seed))
+                                       initializer=TruncatedNormal(seed=self.seed))
         self.W_key = self.add_weight(name='key', shape=[embedding_size, self.att_embedding_size * self.head_num],
                                      dtype=tf.float32,
-                                     initializer=tf.keras.initializers.TruncatedNormal(seed=self.seed + 1))
+                                     initializer=TruncatedNormal(seed=self.seed + 1))
         self.W_Value = self.add_weight(name='value', shape=[embedding_size, self.att_embedding_size * self.head_num],
                                        dtype=tf.float32,
-                                       initializer=tf.keras.initializers.TruncatedNormal(seed=self.seed + 2))
+                                       initializer=TruncatedNormal(seed=self.seed + 2))
         if self.attention_type == "additive":
             self.b = self.add_weight('b', shape=[self.att_embedding_size], dtype=tf.float32,
-                                     initializer=tf.keras.initializers.glorot_uniform(seed=self.seed))
+                                     initializer=glorot_uniform(seed=self.seed))
             self.v = self.add_weight('v', shape=[self.att_embedding_size], dtype=tf.float32,
-                                     initializer=tf.keras.initializers.glorot_uniform(seed=self.seed))
+                                     initializer=glorot_uniform(seed=self.seed))
+        elif self.attention_type == "ln":
+            self.att_ln_q = LayerNormalization()
+            self.att_ln_k = LayerNormalization()
         # if self.use_res:
         #     self.W_Res = self.add_weight(name='res', shape=[embedding_size, self.att_embedding_size * self.head_num], dtype=tf.float32,
-        #                                  initializer=tf.keras.initializers.TruncatedNormal(seed=self.seed))
+        #                                  initializer=TruncatedNormal(seed=self.seed))
         if self.use_feed_forward:
             self.fw1 = self.add_weight('fw1', shape=[self.num_units, 4 * self.num_units], dtype=tf.float32,
-                                       initializer=tf.keras.initializers.glorot_uniform(seed=self.seed))
+                                       initializer=glorot_uniform(seed=self.seed))
             self.fw2 = self.add_weight('fw2', shape=[4 * self.num_units, self.num_units], dtype=tf.float32,
-                                       initializer=tf.keras.initializers.glorot_uniform(seed=self.seed))
+                                       initializer=glorot_uniform(seed=self.seed))
 
-        self.dropout = tf.keras.layers.Dropout(
+        self.dropout = Dropout(
             self.dropout_rate, seed=self.seed)
         self.ln = LayerNormalization()
         if self.use_positional_encoding:
@@ -523,28 +532,42 @@ class Transformer(Layer):
             queries = self.query_pe(queries)
             keys = self.key_pe(queries)
 
-        querys = tf.tensordot(queries, self.W_Query,
-                              axes=(-1, 0))  # None T_q D*head_num
-        keys = tf.tensordot(keys, self.W_key, axes=(-1, 0))
-        values = tf.tensordot(keys, self.W_Value, axes=(-1, 0))
+        Q = tf.tensordot(queries, self.W_Query,
+                         axes=(-1, 0))  # N T_q D*h
+        K = tf.tensordot(keys, self.W_key, axes=(-1, 0))
+        V = tf.tensordot(keys, self.W_Value, axes=(-1, 0))
 
-        # head_num*None T_q D
-        querys = tf.concat(tf.split(querys, self.head_num, axis=2), axis=0)
-        keys = tf.concat(tf.split(keys, self.head_num, axis=2), axis=0)
-        values = tf.concat(tf.split(values, self.head_num, axis=2), axis=0)
+        # h*N T_q D
+        Q_ = tf.concat(tf.split(Q, self.head_num, axis=2), axis=0)
+        K_ = tf.concat(tf.split(K, self.head_num, axis=2), axis=0)
+        V_ = tf.concat(tf.split(V, self.head_num, axis=2), axis=0)
 
         if self.attention_type == "scaled_dot_product":
-            # head_num*None T_q T_k
-            outputs = tf.matmul(querys, keys, transpose_b=True)
+            # h*N T_q T_k
+            outputs = tf.matmul(Q_, K_, transpose_b=True)
 
-            outputs = outputs / (keys.get_shape().as_list()[-1] ** 0.5)
+            outputs = outputs / (K_.get_shape().as_list()[-1] ** 0.5)
+        elif self.attention_type == "cos":
+            Q_cos = tf.nn.l2_normalize(Q_, dim=-1)
+            K_cos = tf.nn.l2_normalize(K_, dim=-1)
+
+            outputs = tf.matmul(Q_cos, K_cos, transpose_b=True)  # h*N T_q T_k
+
+            outputs = outputs * 20  # Scale
+        elif self.attention_type == 'ln':
+            Q_ = self.att_ln_q(Q_)
+            K_ = self.att_ln_k(K_)
+
+            outputs = tf.matmul(Q_, K_, transpose_b=True)  # h*N T_q T_k
+            # Scale
+            outputs = outputs / (K_.get_shape().as_list()[-1] ** 0.5)
         elif self.attention_type == "additive":
-            querys_reshaped = tf.expand_dims(querys, axis=-2)
-            keys_reshaped = tf.expand_dims(keys, axis=-3)
-            outputs = tf.tanh(tf.nn.bias_add(querys_reshaped + keys_reshaped, self.b))
+            Q_reshaped = tf.expand_dims(Q_, axis=-2)
+            K_reshaped = tf.expand_dims(K_, axis=-3)
+            outputs = tf.tanh(tf.nn.bias_add(Q_reshaped + K_reshaped, self.b))
             outputs = tf.squeeze(tf.tensordot(outputs, tf.expand_dims(self.v, axis=-1), axes=[-1, 0]), axis=-1)
         else:
-            raise ValueError("attention_type must be scaled_dot_product or additive")
+            raise ValueError("attention_type must be [scaled_dot_product,cos,ln,additive]")
 
         key_masks = tf.tile(key_masks, [self.head_num, 1])
 
@@ -577,7 +600,7 @@ class Transformer(Layer):
         outputs = self.dropout(outputs, training=training)
         # Weighted sum
         # ( h*N, T_q, C/h)
-        result = tf.matmul(outputs, values)
+        result = tf.matmul(outputs, V_)
         result = tf.concat(tf.split(result, self.head_num, axis=0), axis=2)
 
         if self.use_res:
@@ -642,7 +665,7 @@ class PositionEncoding(Layer):
         if self.zero_pad:
             position_enc[0, :] = np.zeros(num_units)
         self.lookup_table = self.add_weight("lookup_table", (T, num_units),
-                                            initializer=tf.initializers.identity(position_enc),
+                                            initializer=identity(position_enc),
                                             trainable=self.pos_embedding_trainable)
 
         # Be sure to call this somewhere!
@@ -748,7 +771,7 @@ class DynamicGRU(Layer):
             self.gru_cell = VecAttGRUCell(self.num_units)
         else:
             try:
-                self.gru_cell = tf.nn.rnn_cell.GRUCell(self.num_units)  # tf.keras.layers.GRUCell
+                self.gru_cell = tf.nn.rnn_cell.GRUCell(self.num_units)  # GRUCell
             except AttributeError:
                 self.gru_cell = tf.compat.v1.nn.rnn_cell.GRUCell(self.num_units)
 

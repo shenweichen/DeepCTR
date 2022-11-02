@@ -7,7 +7,8 @@ Reference:
     [1] Huang T, Zhang Z, Zhang J. FiBiNET: Combining Feature Importance and Bilinear feature Interaction for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1905.09433, 2019.
 """
 
-import tensorflow as tf
+from tensorflow.python.keras.models import Model
+from tensorflow.python.keras.layers import Dense, Flatten
 
 from ..feature_column import build_input_features, get_linear_logit, input_from_feature_columns
 from ..layers.core import PredictionLayer, DNN
@@ -54,14 +55,12 @@ def FiBiNET(linear_feature_columns, dnn_feature_columns, bilinear_type='interact
     bilinear_out = BilinearInteraction(
         bilinear_type=bilinear_type, seed=seed)(sparse_embedding_list)
 
-    dnn_input = combined_dnn_input(
-        [tf.keras.layers.Flatten()(concat_func([senet_bilinear_out, bilinear_out]))], dense_value_list)
+    dnn_input = combined_dnn_input([Flatten()(concat_func([senet_bilinear_out, bilinear_out]))], dense_value_list)
     dnn_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, False, seed=seed)(dnn_input)
-    dnn_logit = tf.keras.layers.Dense(
-        1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(dnn_out)
+    dnn_logit = Dense(1, use_bias=False)(dnn_out)
 
     final_logit = add_func([linear_logit, dnn_logit])
     output = PredictionLayer(task)(final_logit)
 
-    model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
+    model = Model(inputs=inputs_list, outputs=output)
     return model

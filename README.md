@@ -18,14 +18,12 @@
 <!-- [![Gitter](https://badges.gitter.im/DeepCTR/community.svg)](https://gitter.im/DeepCTR/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge) -->
 
 
-DeepCTR is a **Easy-to-use**,**Modular** and **Extendible** package of deep-learning based CTR models along with lots of
+DeepCTR is a **Easy-to-use**, **Modular** and **Extendible** package of deep-learning based CTR models along with lots of
 core components layers which can be used to easily build custom models.You can use any complex model with `model.fit()`
 ，and `model.predict()` .
 
-- Provide `tf.keras.Model` like interface for **quick experiment**
-  . [example](https://deepctr-doc.readthedocs.io/en/latest/Quick-Start.html#getting-started-4-steps-to-deepctr)
-- Provide  `tensorflow estimator` interface for **large scale data** and **distributed training**
-  . [example](https://deepctr-doc.readthedocs.io/en/latest/Quick-Start.html#getting-started-4-steps-to-deepctr-estimator-with-tfrecord)
+- Provide `tf.keras.Model` like interfaces for **quick experiment**. [example](https://deepctr-doc.readthedocs.io/en/latest/Quick-Start.html#getting-started-4-steps-to-deepctr)
+- Provide  `tensorflow estimator` interface for **large scale data** and **distributed training**. [example](https://deepctr-doc.readthedocs.io/en/latest/Quick-Start.html#getting-started-4-steps-to-deepctr-estimator-with-tfrecord)
 - It is compatible with both `tf 1.x`  and `tf 2.x`.
 
 Some related projects:
@@ -90,11 +88,12 @@ If you find this code useful in your research, please cite it using the followin
 
 ## DisscussionGroup
 
-- [Discussions](https://github.com/shenweichen/DeepCTR/discussions)
-- 公众号：**浅梦学习笔记**
-- wechat ID: **deepctrbot**
+- [Github Discussions](https://github.com/shenweichen/DeepCTR/discussions)
+- Wechat Discussions
 
-  ![wechat](./docs/pics/code.png)
+|公众号：浅梦学习笔记|微信：deepctrbot|学习小组 [加入](https://t.zsxq.com/026UJEuzv) [主题集合](https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MjM5MzY4NzE3MA==&action=getalbum&album_id=1361647041096843265&scene=126#wechat_redirect)|
+|:--:|:--:|:--:|
+| [![公众号](./docs/pics/code.png)](https://github.com/shenweichen/AlgoNotes)| [![微信](./docs/pics/deepctrbot.png)](https://github.com/shenweichen/AlgoNotes)|[![学习小组](./docs/pics/planet_github.png)](https://t.zsxq.com/026UJEuzv)|
 
 ## Main contributors([welcome to join us!](./CONTRIBUTING.md))
 
@@ -120,12 +119,12 @@ If you find this code useful in your research, please cite it using the followin
       <td>
         ​ <a href="https://github.com/morningsky"><img width="70" height="70" src="https://github.com/morningsky.png?s=40" alt="pic"></a><br>
         ​ <a href="https://github.com/morningsky">Lai Mincai</a>
-        <p> ShanghaiTech University </p>​
+        <p> ByteDance </p>​
       </td>
       <td>
         ​ <a href="https://github.com/codewithzichao"><img width="70" height="70" src="https://github.com/codewithzichao.png?s=40" alt="pic"></a><br>
         ​ <a href="https://github.com/codewithzichao">Li Zichao</a>
-        <p> Peking University   </p>​
+        <p> ByteDance   </p>​
       </td>
       <td>
         ​ <a href="https://github.com/TanTingyi"><img width="70" height="70" src="https://github.com/TanTingyi.png?s=40" alt="pic"></a><br>

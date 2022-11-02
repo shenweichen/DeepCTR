@@ -8,7 +8,8 @@ Reference:
 """
 
 import tensorflow as tf
-from tensorflow.python.keras.layers import (Concatenate, Dense, Permute, multiply)
+from tensorflow.python.keras.models import Model
+from tensorflow.python.keras.layers import (Concatenate, Dense, Permute, multiply, Flatten)
 
 from ...feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, build_input_features
 from ...inputs import get_varlen_pooling_list, create_embedding_matrix, embedding_lookup, varlen_embedding_lookup, \
@@ -199,14 +200,14 @@ def DIEN(dnn_feature_columns, history_feature_list,
 
     deep_input_emb = Concatenate()([deep_input_emb, hist])
 
-    deep_input_emb = tf.keras.layers.Flatten()(deep_input_emb)
+    deep_input_emb = Flatten()(deep_input_emb)
 
     dnn_input = combined_dnn_input([deep_input_emb], dense_value_list)
     output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, use_bn, seed=seed)(dnn_input)
     final_logit = Dense(1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(output)
     output = PredictionLayer(task)(final_logit)
 
-    model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
+    model = Model(inputs=inputs_list, outputs=output)
 
     if use_negsampling:
         model.add_loss(alpha * aux_loss_1)

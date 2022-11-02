@@ -2,10 +2,8 @@ import pytest
 import tensorflow as tf
 from packaging import version
 
-from deepctr.estimator import WDLEstimator
 from deepctr.models import WDL
-from ..utils import check_model, check_estimator, SAMPLE_SIZE, get_test_data, get_test_data_estimator, \
-    Estimator_TEST_TF1
+from ..utils import check_model, check_estimator, SAMPLE_SIZE, get_test_data, get_test_data_estimator, TEST_Estimator
 
 
 @pytest.mark.parametrize(
@@ -32,8 +30,10 @@ def test_WDL(sparse_feature_num, dense_feature_num):
      ]
 )
 def test_WDLEstimator(sparse_feature_num, dense_feature_num):
-    if not Estimator_TEST_TF1 and version.parse(tf.__version__) < version.parse('2.2.0'):
+    if not TEST_Estimator:
         return
+    from deepctr.estimator import WDLEstimator
+
     sample_size = SAMPLE_SIZE
 
     linear_feature_columns, dnn_feature_columns, input_fn = get_test_data_estimator(sample_size, sparse_feature_num,

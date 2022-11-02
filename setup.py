@@ -1,15 +1,21 @@
 import setuptools
 
-with open("README.md", "r") as fh:
+with open("README.md", "r",encoding='utf-8') as fh:
     long_description = fh.read()
 
-REQUIRED_PACKAGES = [
+import sys
+if sys.version_info < (3, 9):
+    REQUIRED_PACKAGES = [
     'h5py==2.10.0', 'requests'
-]
+    ]
+else:
+    REQUIRED_PACKAGES = [
+    'h5py==3.7.0', 'requests'
+    ]
 
 setuptools.setup(
     name="deepctr",
-    version="0.9.0",
+    version="0.9.2",
     author="Weichen Shen",
     author_email="weichenswc@163.com",
     description="Easy-to-use,Modular and Extendible package of deep learning based CTR(Click Through Rate) prediction models with tensorflow 1.x and 2.x .",
@@ -35,9 +41,11 @@ setuptools.setup(
         'Intended Audience :: Science/Research',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
         'Topic :: Scientific/Engineering',
         'Topic :: Scientific/Engineering :: Artificial Intelligence',
         'Topic :: Software Development',

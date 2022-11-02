@@ -8,7 +8,8 @@ Reference:
     [1] Ruder S. An overview of multi-task learning in deep neural networks[J]. arXiv preprint arXiv:1706.05098, 2017.(https://arxiv.org/pdf/1706.05098.pdf)
 """
 
-import tensorflow as tf
+from tensorflow.python.keras.models import Model
+from tensorflow.python.keras.layers import Dense
 
 from ...feature_column import build_input_features, input_from_feature_columns
 from ...layers.core import PredictionLayer, DNN
@@ -59,9 +60,9 @@ def SharedBottom(dnn_feature_columns, bottom_dnn_hidden_units=(256, 128), tower_
         tower_output = DNN(tower_dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed,
                            name='tower_' + task_name)(shared_bottom_output)
 
-        logit = tf.keras.layers.Dense(1, use_bias=False, activation=None)(tower_output)
+        logit = Dense(1, use_bias=False)(tower_output)
         output = PredictionLayer(task_type, name=task_name)(logit)
         tasks_output.append(output)
 
-    model = tf.keras.models.Model(inputs=inputs_list, outputs=tasks_output)
+    model = Model(inputs=inputs_list, outputs=tasks_output)
     return model

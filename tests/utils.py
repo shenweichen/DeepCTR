@@ -7,6 +7,7 @@ import sys
 import numpy as np
 import tensorflow as tf
 from numpy.testing import assert_allclose
+from packaging import version
 from tensorflow.python.keras import backend as K
 from tensorflow.python.keras.layers import Input, Masking
 from tensorflow.python.keras.models import Model, load_model, save_model
@@ -16,7 +17,17 @@ from deepctr.layers import custom_objects
 
 SAMPLE_SIZE = 8
 VOCABULARY_SIZE = 4
-Estimator_TEST_TF1 = True
+
+
+def test_estimator_version(tf_version):
+    cur_version = version.parse(tf_version)
+    tf2_version = version.parse('2.0.0')
+    left_version = version.parse('2.2.0')
+    right_version = version.parse('2.6.0')
+    return cur_version < tf2_version or left_version <= cur_version < right_version
+
+
+TEST_Estimator = test_estimator_version(tf.__version__)
 
 
 def gen_sequence(dim, max_len, sample_size):
@@ -352,7 +363,6 @@ def check_model(model, model_name, x, y, check_model_io=True):
     :param check_model_io: test save/load model file or not
     :return:
     """
-
     model.compile('adam', 'binary_crossentropy',
                   metrics=['binary_crossentropy'])
     model.fit(x, y, batch_size=100, epochs=1, validation_split=0.5)

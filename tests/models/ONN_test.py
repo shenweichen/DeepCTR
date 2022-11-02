@@ -11,7 +11,7 @@ from ..utils import check_model, get_test_data, SAMPLE_SIZE
     [2]
 )
 def test_ONN(sparse_feature_num):
-    if version.parse(tf.__version__) >= version.parse('2.0.0'):
+    if version.parse(tf.__version__) >= version.parse('1.15.0'):
         return
     model_name = "ONN"
 

@@ -2,15 +2,18 @@ import pytest
 from packaging import version
 
 try:
-    from tensorflow.python.keras.utils import CustomObjectScope
+    from tensorflow.python.keras.utils.generic_utils import CustomObjectScope
 except ImportError:
-    from tensorflow.keras.utils import CustomObjectScope
+    from tensorflow.python.keras.utils import CustomObjectScope
 import tensorflow as tf
 from deepctr.layers import sequence
 
 from tests.utils import layer_test
-
-tf.keras.backend.set_learning_phase(True)
+try:
+    tf.keras.backend.set_learning_phase(True)
+except ImportError:
+    from tensorflow.python.keras.backend import set_learning_phase
+    set_learning_phase(True)
 BATCH_SIZE = 4
 EMBEDDING_SIZE = 8
 SEQ_LENGTH = 10
@@ -78,11 +81,15 @@ def test_BiLSTM(merge_mode):
                    input_shape=(BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE))
 
 
-def test_Transformer():
+@pytest.mark.parametrize(
+    'attention_type',
+    ['scaled_dot_product', 'cos', 'ln', 'additive']
+)
+def test_Transformer(attention_type):
     with CustomObjectScope({'Transformer': sequence.Transformer}):
         layer_test(sequence.Transformer,
                    kwargs={'att_embedding_size': 1, 'head_num': 8, 'use_layer_norm': True, 'supports_masking': False,
-                           'attention_type': 'additive', 'dropout_rate': 0.5, 'output_type': 'sum'},
+                           'attention_type': attention_type, 'dropout_rate': 0.5, 'output_type': 'sum'},
                    input_shape=[(BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE), (BATCH_SIZE, SEQ_LENGTH, EMBEDDING_SIZE),
                                 (BATCH_SIZE, 1), (BATCH_SIZE, 1)])
 

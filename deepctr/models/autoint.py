@@ -9,7 +9,8 @@ Reference:
 
 """
 
-import tensorflow as tf
+from tensorflow.python.keras.models import Model
+from tensorflow.python.keras.layers import Flatten, Concatenate, Dense
 
 from ..feature_column import build_input_features, get_linear_logit, input_from_feature_columns
 from ..layers.core import PredictionLayer, DNN
@@ -59,28 +60,25 @@ def AutoInt(linear_feature_columns, dnn_feature_columns, att_layer_num=3, att_em
     for _ in range(att_layer_num):
         att_input = InteractingLayer(
             att_embedding_size, att_head_num, att_res)(att_input)
-    att_output = tf.keras.layers.Flatten()(att_input)
+    att_output = Flatten()(att_input)
 
     dnn_input = combined_dnn_input(sparse_embedding_list, dense_value_list)
 
     if len(dnn_hidden_units) > 0 and att_layer_num > 0:  # Deep & Interacting Layer
         deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed)(dnn_input)
-        stack_out = tf.keras.layers.Concatenate()([att_output, deep_out])
-        final_logit = tf.keras.layers.Dense(
-            1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(stack_out)
+        stack_out = Concatenate()([att_output, deep_out])
+        final_logit = Dense(1, use_bias=False)(stack_out)
     elif len(dnn_hidden_units) > 0:  # Only Deep
         deep_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed)(dnn_input, )
-        final_logit = tf.keras.layers.Dense(
-            1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(deep_out)
+        final_logit = Dense(1, use_bias=False)(deep_out)
     elif att_layer_num > 0:  # Only Interacting Layer
-        final_logit = tf.keras.layers.Dense(
-            1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(att_output)
+        final_logit = Dense(1, use_bias=False)(att_output)
     else:  # Error
         raise NotImplementedError
 
     final_logit = add_func([final_logit, linear_logit])
     output = PredictionLayer(task)(final_logit)
 
-    model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
+    model = Model(inputs=inputs_list, outputs=output)
 
     return model

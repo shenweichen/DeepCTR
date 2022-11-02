@@ -9,8 +9,7 @@ Reference:
     (https://arxiv.org/abs/1708.04617)
 
 """
-import tensorflow as tf
-
+from tensorflow.python.keras.models import Model
 from ..feature_column import build_input_features, get_linear_logit, DEFAULT_GROUP_NAME, input_from_feature_columns
 from ..layers.core import PredictionLayer
 from ..layers.interaction import AFMLayer, FM
@@ -58,5 +57,5 @@ def AFM(linear_feature_columns, dnn_feature_columns, fm_group=DEFAULT_GROUP_NAME
     final_logit = add_func([linear_logit, fm_logit])
     output = PredictionLayer(task)(final_logit)
 
-    model = tf.keras.models.Model(inputs=inputs_list, outputs=output)
+    model = Model(inputs=inputs_list, outputs=output)
     return model
