@@ -13,7 +13,7 @@ try:
     from tensorflow.python.ops.init_ops import Zeros, Ones
 except ImportError:
     from tensorflow.python.ops.init_ops_v2 import Zeros, Ones
-from tensorflow.python.keras.layers import Layer, Activation, Flatten, Softmax
+from tensorflow.python.keras.layers import Layer, Activation, Flatten
 
 try:
     from tensorflow.python.keras.layers import BatchNormalization
