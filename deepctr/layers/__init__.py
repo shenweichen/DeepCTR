@@ -1,11 +1,11 @@
 import tensorflow as tf
 
 from .activation import Dice
-from .core import DNN, LocalActivationUnit, PredictionLayer
+from .core import DNN, LocalActivationUnit, PredictionLayer, RegulationLayer
 from .interaction import (CIN, FM, AFMLayer, BiInteractionPooling, CrossNet, CrossNetMix,
                           InnerProductLayer, InteractingLayer,
                           OutterProductLayer, FGCNNLayer, SENETLayer, BilinearInteraction,
-                          FieldWiseBiInteraction, FwFMLayer, FEFMLayer)
+                          FieldWiseBiInteraction, FwFMLayer, FEFMLayer, BridgeLayer)
 from .normalization import LayerNormalization
 from .sequence import (AttentionSequencePoolingLayer, BiasEncoding, BiLSTM,
                        KMaxPooling, SequencePoolingLayer, WeightedSequenceLayer,
@@ -28,6 +28,7 @@ custom_objects = {'tf': tf,
                   'SequencePoolingLayer': SequencePoolingLayer,
                   'AttentionSequencePoolingLayer': AttentionSequencePoolingLayer,
                   'CIN': CIN,
+                  'RegulationLayer': RegulationLayer,
                   'InteractingLayer': InteractingLayer,
                   'LayerNormalization': LayerNormalization,
                   'BiLSTM': BiLSTM,
@@ -48,5 +49,6 @@ custom_objects = {'tf': tf,
                   'softmax': softmax,
                   'FEFMLayer': FEFMLayer,
                   'reduce_sum': reduce_sum,
-                  'PositionEncoding':PositionEncoding
+                  'PositionEncoding': PositionEncoding,
+                  'BridgeLayer': BridgeLayer
                   }

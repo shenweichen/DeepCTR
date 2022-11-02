@@ -3,7 +3,8 @@
 
 Authors:
     Weichen Shen,weichenswc@163.com,
-    Harshit Pande
+    Harshit Pande,
+    Yi He, heyi_jack@163.com
 
 """
 
@@ -26,6 +27,7 @@ from tensorflow.python.layers import utils
 
 from .activation import activation_layer
 from .utils import concat_func, reduce_sum, softmax, reduce_mean
+from .core import DNN
 
 
 class AFMLayer(Layer):
@@ -1488,4 +1490,75 @@ class FEFMLayer(Layer):
         config.update({
             'regularizer': self.regularizer,
         })
+        return config
+
+
+class BridgeLayer(Layer):  # ridge
+    """AttentionPoolingLayer layer used in EDCN
+
+      Input shape
+        - A list of 3D tensor with shape: ``(batch_size,1,embedding_size)``. Its length is ``number of subnetworks``.
+
+      Output shape
+        - 2D tensor with shape: ``(batch_size, embedding_size)``.
+
+    Arguments
+       - **activation**: Activation function to use.
+       
+        - **l2_reg**: float between 0 and 1. L2 regularizer strength applied to the kernel weights matrix.
+
+        - **seed**: A Python integer to use as random seed.
+
+      References
+        - [Enhancing Explicit and Implicit Feature Interactions via Information Sharing for Parallel Deep CTR Models.](https://dlp-kdd.github.io/assets/pdf/DLP-KDD_2021_paper_12.pdf)
+
+    """
+
+    def __init__(self, bridge_type='attention_pooling', activation='relu', l2_reg=0, seed=1024, **kwargs):
+        self.bridge_type = bridge_type
+        self.activation = activation
+        self.l2_reg = l2_reg
+        self.seed = seed
+
+        super(BridgeLayer, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+        if not isinstance(input_shape, list) or len(input_shape) < 2:
+            raise ValueError(
+                'A `AttentionPoolingLayer` layer should be called '
+                'on a list of at least 2 inputs')
+
+        self.dnn_dim = int(input_shape[0][-1])
+
+        self.dense = Dense(self.dnn_dim, self.activation)
+        self.dense_x = DNN([self.dnn_dim, self.dnn_dim], output_activation='softmax')
+        self.dense_h = DNN([self.dnn_dim, self.dnn_dim], output_activation='softmax')
+
+        super(BridgeLayer, self).build(input_shape)  # Be sure to call this somewhere!
+
+    def call(self, inputs, **kwargs):
+        x, h = inputs
+        if self.bridge_type == "pointwise_addition":
+            return x + h
+        elif self.bridge_type == "hadamard_product":
+            return x * h
+        elif self.bridge_type == "concatenation":
+            return self.dense(tf.concat(inputs, axis=-1))
+        elif self.bridge_type == "attention_pooling":
+            a_x = self.dense_x(x)
+            a_h = self.dense_h(h)
+            return a_x * x + a_h * h
+
+    def compute_output_shape(self, input_shape):
+        return (None, self.dnn_dim)
+
+    def get_config(self):
+        base_config = super(BridgeLayer, self).get_config().copy()
+        config = {
+            'bridge_type': self.bridge_type,
+            'l2_reg': self.l2_reg,
+            'activation': self.activation,
+            'seed': self.seed
+        }
+        config.update(base_config)
         return config
