@@ -44,7 +44,7 @@ News
 -----
 11/05/2022 : Add `EDCN` . `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.9.3>`_
 
-10/15/2022 : Support python `3.9`,`3.10`. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.9.2>`_
+10/15/2022 : Support python `3.9`,`3.10` . `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.9.2>`_
 
 06/11/2022 : Improve compatibility with tensorflow `2.x`. `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.9.1>`_
 
