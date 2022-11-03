@@ -1493,17 +1493,19 @@ class FEFMLayer(Layer):
         return config
 
 
-class BridgeLayer(Layer):  # ridge
-    """AttentionPoolingLayer layer used in EDCN
+class BridgeLayer(Layer):
+    """BridgeLayer layer used in EDCN
 
       Input shape
-        - A list of 3D tensor with shape: ``(batch_size,1,embedding_size)``. Its length is ``number of subnetworks``.
+        - A list of two 2D tensor with shape: ``(batch_size, units)``.
 
       Output shape
-        - 2D tensor with shape: ``(batch_size, embedding_size)``.
+        - 2D tensor with shape: ``(batch_size, units)``.
 
     Arguments
-       - **activation**: Activation function to use.
+        - **bridge_type**: The type of bridge interaction, one of 'pointwise_addition', 'hadamard_product', 'concatenation', 'attention_pooling'
+
+        - **activation**: Activation function to use.
        
         - **l2_reg**: float between 0 and 1. L2 regularizer strength applied to the kernel weights matrix.
 
@@ -1514,7 +1516,7 @@ class BridgeLayer(Layer):  # ridge
 
     """
 
-    def __init__(self, bridge_type='attention_pooling', activation='relu', l2_reg=0, seed=1024, **kwargs):
+    def __init__(self, bridge_type='hadamard_product', activation='relu', l2_reg=0, seed=1024, **kwargs):
         self.bridge_type = bridge_type
         self.activation = activation
         self.l2_reg = l2_reg
@@ -1525,14 +1527,14 @@ class BridgeLayer(Layer):  # ridge
     def build(self, input_shape):
         if not isinstance(input_shape, list) or len(input_shape) < 2:
             raise ValueError(
-                'A `AttentionPoolingLayer` layer should be called '
+                'A `BridgeLayer` layer should be called '
                 'on a list of at least 2 inputs')
 
         self.dnn_dim = int(input_shape[0][-1])
 
         self.dense = Dense(self.dnn_dim, self.activation)
-        self.dense_x = DNN([self.dnn_dim, self.dnn_dim], output_activation='softmax')
-        self.dense_h = DNN([self.dnn_dim, self.dnn_dim], output_activation='softmax')
+        self.dense_x = DNN([self.dnn_dim, self.dnn_dim], self.activation, output_activation='softmax')
+        self.dense_h = DNN([self.dnn_dim, self.dnn_dim], self.activation, output_activation='softmax')
 
         super(BridgeLayer, self).build(input_shape)  # Be sure to call this somewhere!
 
