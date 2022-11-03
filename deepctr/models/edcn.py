@@ -36,7 +36,7 @@ def EDCN(linear_feature_columns,
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
     :param cross_num: positive integet,cross layer number
     :param cross_parameterization: str, ``"vector"`` or ``"matrix"``, how to parameterize the cross network.
-    :param bridge_type: The type of bridge interaction, one of 'pointwise_addition', 'hadamard_product', 'concatenation', 'attention_pooling'
+    :param bridge_type: The type of bridge interaction, one of ``"pointwise_addition"``, ``"hadamard_product"``, ``"concatenation"`` , ``"attention_pooling"``
     :param tau: Positive float, the temperature coefficient to control distribution of field-wise gating unit
     :param l2_reg_linear: float. L2 regularizer strength applied to linear part
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
