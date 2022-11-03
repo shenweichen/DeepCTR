@@ -30,5 +30,6 @@ DeepCTR Models API
    ESMM<deepctr.models.multitask.esmm>
    MMOE<deepctr.models.multitask.mmoe>
    PLE<deepctr.models.multitask.ple>
+   EDCN<deepctr.models.edcn>
 
    

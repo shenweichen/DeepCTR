@@ -413,6 +413,17 @@ information routing across tasks in a general setup.
 
 [Tang H, Liu J, Zhao M, et al. Progressive layered extraction (ple): A novel multi-task learning (mtl) model for personalized recommendations[C]//Fourteenth ACM Conference on Recommender Systems. 2020.](https://dl.acm.org/doi/10.1145/3383313.3412236)
 
+### EDCN(Enhancing Explicit and Implicit Feature Interactions DCN)
+
+EDCN introduces two advanced modules, namelybridge moduleandregulation module, which work collaboratively tocapture the layer-wise interactive signals and learn discriminativefeature distributions for each hidden layer of the parallel networks.
+
+[**EDCN Model API**](./deepctr.models.edcn.html)
+
+![EDCN](../pics/EDCN.png)
+
+[Chen B, Wang Y, Liu Z, et al. Enhancing explicit and implicit feature interactions via information sharing for parallel deep ctr models[C]//Proceedings of the 30th ACM International Conference on Information & Knowledge Management. 2021: 3757-3766.](https://dlp-kdd.github.io/assets/pdf/DLP-KDD_2021_paper_12.pdf)
+
+
 ## Layers
 
 The models of deepctr are modular, so you can use different modules to build your own models.

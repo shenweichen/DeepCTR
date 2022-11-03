@@ -267,7 +267,7 @@ class PredictionLayer(Layer):
         return dict(list(base_config.items()) + list(config.items()))
 
 
-class RegulationLayer(Layer):
+class RegulationModule(Layer):
     """Regulation module used in EDCN.
 
       Input shape
@@ -280,17 +280,15 @@ class RegulationLayer(Layer):
         - **tau** : Positive float, the temperature coefficient to control
         distribution of field-wise gating unit.
 
-        - **seed** : A Python integer to use as random seed.
-
       References
         - [Enhancing Explicit and Implicit Feature Interactions via Information Sharing for Parallel Deep CTR Models.](https://dlp-kdd.github.io/assets/pdf/DLP-KDD_2021_paper_12.pdf)
     """
 
     def __init__(self, tau=1.0, **kwargs):
         if tau == 0:
-            raise ValueError("RegulationLayer tau can not be zero.")
+            raise ValueError("RegulationModule tau can not be zero.")
         self.tau = 1.0 / tau
-        super(RegulationLayer, self).__init__(**kwargs)
+        super(RegulationModule, self).__init__(**kwargs)
 
     def build(self, input_shape):
         self.field_size = int(input_shape[1])
@@ -301,7 +299,7 @@ class RegulationLayer(Layer):
             name=self.name + '_field_weight')
 
         # Be sure to call this somewhere!
-        super(RegulationLayer, self).build(input_shape)
+        super(RegulationModule, self).build(input_shape)
 
     def call(self, inputs, **kwargs):
 
@@ -318,6 +316,6 @@ class RegulationLayer(Layer):
 
     def get_config(self):
         config = {'tau': self.tau}
-        base_config = super(RegulationLayer, self).get_config()
+        base_config = super(RegulationModule, self).get_config()
         base_config.update(config)
         return base_config

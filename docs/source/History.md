@@ -1,4 +1,5 @@
 # History
+- 11/05/2022 : [v0.9.3](https://github.com/shenweichen/DeepCTR/releases/tag/v0.9.3) released.Add [EDCN]().
 - 10/15/2022 : [v0.9.2](https://github.com/shenweichen/DeepCTR/releases/tag/v0.9.2) released.Support python `3.9`,`3.10`.
 - 06/11/2022 : [v0.9.1](https://github.com/shenweichen/DeepCTR/releases/tag/v0.9.1) released.Improve compatibility with tensorflow `2.x`.
 - 09/03/2021 : [v0.9.0](https://github.com/shenweichen/DeepCTR/releases/tag/v0.9.0) released.Add multitask learning models:[SharedBottom](./Features.html#sharedbottom),[ESMM](./Features.html#esmm-entire-space-multi-task-model),[MMOE](./Features.html#mmoe-multi-gate-mixture-of-experts) and [PLE](./Features.html#ple-progressive-layered-extraction). [running example](./Examples.html#multitask-learning-mmoe)

@@ -10,8 +10,8 @@ from tensorflow.python.keras.layers import Dense, Reshape, Concatenate
 from tensorflow.python.keras.models import Model
 
 from ..feature_column import build_input_features, get_linear_logit, input_from_feature_columns
-from ..layers.core import PredictionLayer, DNN, RegulationLayer
-from ..layers.interaction import CrossNet, BridgeLayer
+from ..layers.core import PredictionLayer, DNN, RegulationModule
+from ..layers.interaction import CrossNet, BridgeModule
 from ..layers.utils import add_func, concat_func
 
 
@@ -19,7 +19,7 @@ def EDCN(linear_feature_columns,
          dnn_feature_columns,
          cross_num=2,
          cross_parameterization='vector',
-         bridge_type='hadamard_product',
+         bridge_type='concatenation',
          tau=1.0,
          l2_reg_linear=1e-5,
          l2_reg_embedding=1e-5,
@@ -31,6 +31,7 @@ def EDCN(linear_feature_columns,
          dnn_activation='relu',
          task='binary'):
     """Instantiates the Enhanced Deep&Cross Network architecture.
+
     :param linear_feature_columns: An iterable containing all the features used by linear part of the model.
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
     :param cross_num: positive integet,cross layer number
@@ -63,25 +64,24 @@ def EDCN(linear_feature_columns,
         features, dnn_feature_columns, l2_reg_embedding, seed, support_dense=False)
 
     emb_input = concat_func(sparse_embedding_list, axis=1)
-    deep_in = RegulationLayer(tau)(emb_input)
-    cross_in = RegulationLayer(tau)(emb_input)
+    deep_in = RegulationModule(tau)(emb_input)
+    cross_in = RegulationModule(tau)(emb_input)
 
     field_size = len(sparse_embedding_list)
     embedding_size = int(sparse_embedding_list[0].shape[-1])
     cross_dim = field_size * embedding_size
 
     for i in range(cross_num):
-
         cross_out = CrossNet(1, parameterization=cross_parameterization,
                              l2_reg=l2_reg_cross)(cross_in)
         deep_out = DNN([cross_dim], dnn_activation, l2_reg_dnn,
                        dnn_dropout, dnn_use_bn, seed=seed)(deep_in)
         print(cross_out, deep_out)
-        bridge_out = BridgeLayer(bridge_type)([cross_out, deep_out])
+        bridge_out = BridgeModule(bridge_type)([cross_out, deep_out])
         if i + 1 < cross_num:
             bridge_out_list = Reshape([field_size, embedding_size])(bridge_out)
-            deep_in = RegulationLayer(tau)(bridge_out_list)
-            cross_in = RegulationLayer(tau)(bridge_out_list)
+            deep_in = RegulationModule(tau)(bridge_out_list)
+            cross_in = RegulationModule(tau)(bridge_out_list)
 
     stack_out = Concatenate()([cross_out, deep_out, bridge_out])
     final_logit = Dense(1, use_bias=False)(stack_out)
