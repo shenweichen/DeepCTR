@@ -271,10 +271,7 @@ class _Add(Layer):
         super(_Add, self).build(input_shape)
 
     def call(self, inputs, **kwargs):
-        # if not isinstance(inputs, list):
-        #     return inputs
-        # if len(inputs) == 1:
-        #     return inputs[0]
+
         if len(inputs) == 0:
             return tf.constant([[0.0]])
 

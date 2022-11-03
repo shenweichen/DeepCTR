@@ -9,8 +9,7 @@ from .interaction import (CIN, FM, AFMLayer, BiInteractionPooling, CrossNet, Cro
 from .normalization import LayerNormalization
 from .sequence import (AttentionSequencePoolingLayer, BiasEncoding, BiLSTM,
                        KMaxPooling, SequencePoolingLayer, WeightedSequenceLayer,
-                       Transformer, DynamicGRU,PositionEncoding)
-
+                       Transformer, DynamicGRU, PositionEncoding)
 from .utils import NoMask, Hash, Linear, _Add, combined_dnn_input, softmax, reduce_sum
 
 custom_objects = {'tf': tf,
@@ -28,7 +27,6 @@ custom_objects = {'tf': tf,
                   'SequencePoolingLayer': SequencePoolingLayer,
                   'AttentionSequencePoolingLayer': AttentionSequencePoolingLayer,
                   'CIN': CIN,
-                  'RegulationLayer': RegulationModule,
                   'InteractingLayer': InteractingLayer,
                   'LayerNormalization': LayerNormalization,
                   'BiLSTM': BiLSTM,
@@ -50,5 +48,6 @@ custom_objects = {'tf': tf,
                   'FEFMLayer': FEFMLayer,
                   'reduce_sum': reduce_sum,
                   'PositionEncoding': PositionEncoding,
-                  'BridgeLayer': BridgeModule
+                  'RegulationModule': RegulationModule,
+                  'BridgeModule': BridgeModule
                   }
