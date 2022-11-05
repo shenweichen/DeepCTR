@@ -1,0 +1,94 @@
+name: CI2
+
+on: 
+  push:
+    path:
+      - 'deepctr/*'
+      - 'tests/*'
+  pull_request:
+    path:
+      - 'deepctr/*'
+      - 'tests/*'
+      
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    strategy:
+      matrix:
+        python-version: [3.6,3.7,3.8,3.9,3.10.7]
+        tf-version: [1.4.0,1.12.0,1.15.0]
+        
+        exclude:
+          - python-version: 3.7
+            tf-version: 1.4.0
+          - python-version: 3.7
+            tf-version: 1.15.0
+          - python-version: 3.8
+            tf-version: 1.4.0
+          - python-version: 3.8
+            tf-version: 1.14.0
+          - python-version: 3.8
+            tf-version: 1.15.0
+          - python-version: 3.6
+            tf-version: 2.7.0
+          - python-version: 3.6
+            tf-version: 2.8.0
+          - python-version: 3.6
+            tf-version: 2.9.0
+          - python-version: 3.6
+            tf-version: 2.10.0
+          - python-version: 3.9
+            tf-version: 1.4.0
+          - python-version: 3.9
+            tf-version: 1.15.0
+          - python-version: 3.9
+            tf-version: 2.2.0
+          - python-version: 3.9
+            tf-version: 2.5.0
+          - python-version: 3.9
+            tf-version: 2.6.0
+          - python-version: 3.9
+            tf-version: 2.7.0
+          - python-version: 3.10.7
+            tf-version: 1.4.0
+          - python-version: 3.10.7
+            tf-version: 1.15.0
+          - python-version: 3.10.7
+            tf-version: 2.2.0
+          - python-version: 3.10.7
+            tf-version: 2.5.0
+          - python-version: 3.10.7
+            tf-version: 2.6.0
+          - python-version: 3.10.7
+            tf-version: 2.7.0
+    steps:
+    
+    - uses: actions/checkout@v3
+    
+    - name: Setup python environment
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        pip3 install -q tensorflow==${{ matrix.tf-version }}
+        pip install -q protobuf==3.19.0
+        pip install -q requests
+        pip install -e .
+    - name: Test with pytest
+      timeout-minutes: 180
+      run: |
+        pip install -q pytest
+        pip install -q pytest-cov
+        pip install -q python-coveralls
+        pytest --cov=deepctr --cov-report=xml
+    - name: Upload coverage to Codecov  
+      uses: codecov/codecov-action@v3.1.0
+      with:
+        token: ${{secrets.CODECOV_TOKEN}}
+        file: ./coverage.xml
+        flags: pytest
+        name: py${{ matrix.python-version }}-tf${{ matrix.tf-version }}
