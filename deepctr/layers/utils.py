@@ -6,7 +6,7 @@ Author:
 
 """
 import tensorflow as tf
-from tensorflow.python.keras.layers import Flatten, Concatenate, Layer, Add
+from tensorflow.python.keras.layers import Flatten, Layer, Add, Lambda
 from tensorflow.python.ops.lookup_ops import TextFileInitializer
 
 try:
@@ -191,7 +191,7 @@ def concat_func(inputs, axis=-1, mask=False):
     if len(inputs) == 1:
         return inputs[0]
     else:
-        return Concatenate(axis=axis)(inputs)
+        return Lambda(lambda x: tf.concat(x, axis=axis))(inputs)
 
 
 def reduce_mean(input_tensor,
@@ -271,7 +271,6 @@ class _Add(Layer):
         super(_Add, self).build(input_shape)
 
     def call(self, inputs, **kwargs):
-
         if len(inputs) == 0:
             return tf.constant([[0.0]])
 

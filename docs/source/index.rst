@@ -42,7 +42,7 @@ You can read the latest code and related projects
 
 News
 -----
-11/05/2022 : Add `EDCN` . `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.9.3>`_
+11/06/2022 : Add `EDCN` . `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.9.3>`_
 
 10/15/2022 : Support python `3.9` , `3.10` . `Changelog <https://github.com/shenweichen/DeepCTR/releases/tag/v0.9.2>`_
 

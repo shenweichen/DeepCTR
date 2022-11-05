@@ -387,7 +387,7 @@ class BiLSTM(Layer):
         elif self.merge_mode == "bw":
             output = output_bw
         elif self.merge_mode == 'concat':
-            output = K.concatenate([output_fw, output_bw])
+            output = tf.concat([output_fw, output_bw], axis=-1)
         elif self.merge_mode == 'sum':
             output = output_fw + output_bw
         elif self.merge_mode == 'ave':
