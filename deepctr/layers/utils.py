@@ -191,7 +191,7 @@ def concat_func(inputs, axis=-1, mask=False):
     if len(inputs) == 1:
         return inputs[0]
     else:
-        return Lambda(lambda x: tf.concat(x, axis=axis))(inputs)
+        return Lambda(lambda x, axis: tf.concat(x, axis=axis), arguments={"axis": axis})(inputs)
 
 
 def reduce_mean(input_tensor,

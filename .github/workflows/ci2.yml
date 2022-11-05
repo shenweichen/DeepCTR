@@ -1,4 +1,4 @@
-name: CI2
+name: CI_TF1
 
 on:
   push:
