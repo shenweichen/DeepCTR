@@ -226,8 +226,9 @@ class CustomConcat(Layer):
                 masks.append(tf.expand_dims(mask_i, axis=-1))
             else:
                 masks.append(mask_i)
-        concatenated = tf.concat(masks, axis=axis)  # K.concatenate(masks, axis=axis)
-        return tf.reduce_all(concatenated, axis=-1, keepdims=False)  # K.all(concatenated, axis=-1, keepdims=False)
+        concatenated = K.concatenate(masks, axis=axis)  # tf.concat(masks, axis=axis)
+        return K.all(concatenated, axis=-1, keepdims=False)
+        # tf.reduce_all(concatenated, axis=-1, keepdims=False) keep_dims
 
     def get_config(self, ):
         config = {'axis': self.axis, 'supports_masking': self.supports_masking}
