@@ -10,7 +10,7 @@ from .normalization import LayerNormalization
 from .sequence import (AttentionSequencePoolingLayer, BiasEncoding, BiLSTM,
                        KMaxPooling, SequencePoolingLayer, WeightedSequenceLayer,
                        Transformer, DynamicGRU, PositionEncoding)
-from .utils import NoMask, Hash, Linear, _Add, combined_dnn_input, softmax, reduce_sum
+from .utils import NoMask, Hash, Linear, _Add, combined_dnn_input, softmax, reduce_sum,CustomConcat
 
 custom_objects = {'tf': tf,
                   'InnerProductLayer': InnerProductLayer,
@@ -49,5 +49,6 @@ custom_objects = {'tf': tf,
                   'reduce_sum': reduce_sum,
                   'PositionEncoding': PositionEncoding,
                   'RegulationModule': RegulationModule,
-                  'BridgeModule': BridgeModule
+                  'BridgeModule': BridgeModule,
+                  'CustomConcat':CustomConcat
                   }

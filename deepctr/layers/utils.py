@@ -185,13 +185,68 @@ class Linear(Layer):
         return dict(list(base_config.items()) + list(config.items()))
 
 
+from tensorflow.python.keras import backend as K
+
+
+class CustomConcat(Layer):
+    def __init__(self, axis, supports_masking=True, **kwargs):
+        super(CustomConcat, self).__init__(**kwargs)
+        self.axis = axis
+        self.supports_masking = supports_masking
+
+    def call(self, inputs):
+        return tf.concat(inputs, axis=self.axis)
+
+    def compute_mask(self, inputs, mask=None):
+        if not self.supports_masking:
+            return None
+        axis = self.axis
+        mask = [inputs_i._keras_mask if hasattr(inputs_i, "_keras_mask") else None for inputs_i in inputs]
+        if mask is None:
+            return None
+        if not isinstance(mask, list):
+            raise ValueError('`mask` should be a list.')
+        if not isinstance(inputs, list):
+            raise ValueError('`inputs` should be a list.')
+        if len(mask) != len(inputs):
+            raise ValueError('The lists `inputs` and `mask` '
+                             'should have the same length.')
+        if all([m is None for m in mask]):
+            return None
+        # Make a list of masks while making sure
+        # the dimensionality of each mask
+        # is the same as the corresponding input.
+        masks = []
+        for input_i, mask_i in zip(inputs, mask):
+            if mask_i is None:
+                # Input is unmasked. Append all 1s to masks,
+                masks.append(tf.ones_like(input_i, dtype='bool'))
+            elif K.ndim(mask_i) < K.ndim(input_i):
+                # Mask is smaller than the input, expand it
+                masks.append(tf.expand_dims(mask_i, axis=-1))
+            else:
+                masks.append(mask_i)
+        concatenated = tf.concat(masks, axis=axis)  # K.concatenate(masks, axis=axis)
+        return tf.reduce_all(concatenated, axis=-1, keepdims=False)  # K.all(concatenated, axis=-1, keepdims=False)
+
+    def get_config(self, ):
+        config = {'axis': self.axis, 'supports_masking': self.supports_masking}
+        base_config = super(CustomConcat, self).get_config()
+        return dict(list(base_config.items()) + list(config.items()))
+
+
 def concat_func(inputs, axis=-1, mask=False):
-    if not mask:
-        inputs = list(map(NoMask(), inputs))
     if len(inputs) == 1:
-        return inputs[0]
-    else:
-        return Lambda(lambda x, axis: tf.concat(x, axis=axis), arguments={"axis": axis})(inputs)
+        inputs = inputs[0]
+        if not mask:
+            inputs = NoMask()(inputs)
+        return inputs
+    # if not mask:
+    #     inputs = list(map(NoMask(), inputs))
+    # if len(inputs) == 1:
+    #     return inputs[0]
+    # else:
+    return CustomConcat(axis, supports_masking=mask)(inputs)
 
 
 def reduce_mean(input_tensor,
