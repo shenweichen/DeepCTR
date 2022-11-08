@@ -530,7 +530,7 @@ class Transformer(Layer):
 
         if self.use_positional_encoding:
             queries = self.query_pe(queries)
-            keys = self.key_pe(queries)
+            keys = self.key_pe(keys)
 
         Q = tf.tensordot(queries, self.W_Query,
                          axes=(-1, 0))  # N T_q D*h

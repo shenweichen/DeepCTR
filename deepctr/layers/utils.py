@@ -6,7 +6,8 @@ Author:
 
 """
 import tensorflow as tf
-from tensorflow.python.keras.layers import Flatten, Layer, Add, Lambda
+from tensorflow.python.keras import backend as K
+from tensorflow.python.keras.layers import Flatten, Layer, Add
 from tensorflow.python.ops.lookup_ops import TextFileInitializer
 
 try:
@@ -185,12 +186,9 @@ class Linear(Layer):
         return dict(list(base_config.items()) + list(config.items()))
 
 
-from tensorflow.python.keras import backend as K
-
-
-class CustomConcat(Layer):
+class Concat(Layer):
     def __init__(self, axis, supports_masking=True, **kwargs):
-        super(CustomConcat, self).__init__(**kwargs)
+        super(Concat, self).__init__(**kwargs)
         self.axis = axis
         self.supports_masking = supports_masking
 
@@ -226,28 +224,22 @@ class CustomConcat(Layer):
                 masks.append(tf.expand_dims(mask_i, axis=-1))
             else:
                 masks.append(mask_i)
-        concatenated = K.concatenate(masks, axis=axis)  # tf.concat(masks, axis=axis)
+        concatenated = K.concatenate(masks, axis=axis)
         return K.all(concatenated, axis=-1, keepdims=False)
-        # tf.reduce_all(concatenated, axis=-1, keepdims=False) keep_dims
 
     def get_config(self, ):
         config = {'axis': self.axis, 'supports_masking': self.supports_masking}
-        base_config = super(CustomConcat, self).get_config()
+        base_config = super(Concat, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
 
 
 def concat_func(inputs, axis=-1, mask=False):
     if len(inputs) == 1:
-        inputs = inputs[0]
+        input = inputs[0]
         if not mask:
-            inputs = NoMask()(inputs)
-        return inputs
-    # if not mask:
-    #     inputs = list(map(NoMask(), inputs))
-    # if len(inputs) == 1:
-    #     return inputs[0]
-    # else:
-    return CustomConcat(axis, supports_masking=mask)(inputs)
+            input = NoMask()(input)
+        return input
+    return Concat(axis, supports_masking=mask)(inputs)
 
 
 def reduce_mean(input_tensor,
