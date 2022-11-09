@@ -198,8 +198,8 @@ class Concat(Layer):
     def compute_mask(self, inputs, mask=None):
         if not self.supports_masking:
             return None
-        axis = self.axis
-        mask = [inputs_i._keras_mask if hasattr(inputs_i, "_keras_mask") else None for inputs_i in inputs]
+        if mask is None:
+            mask = [inputs_i._keras_mask if hasattr(inputs_i, "_keras_mask") else None for inputs_i in inputs]
         if mask is None:
             return None
         if not isinstance(mask, list):
@@ -224,7 +224,7 @@ class Concat(Layer):
                 masks.append(tf.expand_dims(mask_i, axis=-1))
             else:
                 masks.append(mask_i)
-        concatenated = K.concatenate(masks, axis=axis)
+        concatenated = K.concatenate(masks, axis=self.axis)
         return K.all(concatenated, axis=-1, keepdims=False)
 
     def get_config(self, ):
