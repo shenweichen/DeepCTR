@@ -2,7 +2,6 @@ from __future__ import absolute_import, division, print_function
 
 import inspect
 import os
-import shutil
 import sys
 
 import numpy as np
@@ -378,10 +377,6 @@ def check_model(model, model_name, x, y, check_model_io=True):
         model = load_model(model_name + '.h5', custom_objects)
         os.remove(model_name + '.h5')
         print(model_name + " test save load model pass!")
-        if tf.__version__ >= "2.0.0":
-            tf.saved_model.save(model, model_name)
-            shutil.rmtree(model_name)
-            print(model_name + "test saved model pass!")
 
     print(model_name + " test pass!")
 

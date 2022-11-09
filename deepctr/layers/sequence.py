@@ -11,10 +11,9 @@ import tensorflow as tf
 from tensorflow.python.keras import backend as K
 
 try:
-    from tensorflow.python.ops.init_ops import TruncatedNormal, glorot_uniform_initializer as glorot_uniform, \
-        identity_initializer as identity
+    from tensorflow.python.ops.init_ops import TruncatedNormal, Constant, glorot_uniform_initializer as glorot_uniform
 except ImportError:
-    from tensorflow.python.ops.init_ops_v2 import TruncatedNormal, glorot_uniform, identity
+    from tensorflow.python.ops.init_ops_v2 import TruncatedNormal, Constant, glorot_uniform
 
 from tensorflow.python.keras.layers import LSTM, Lambda, Layer, Dropout
 
@@ -665,7 +664,7 @@ class PositionEncoding(Layer):
         if self.zero_pad:
             position_enc[0, :] = np.zeros(num_units)
         self.lookup_table = self.add_weight("lookup_table", (T, num_units),
-                                            initializer=identity(position_enc),
+                                            initializer=Constant(position_enc),
                                             trainable=self.pos_embedding_trainable)
 
         # Be sure to call this somewhere!
