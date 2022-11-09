@@ -2,7 +2,7 @@ import pytest
 import tensorflow as tf
 
 from deepctr.models import xDeepFM
-from ..utils import check_model, get_test_data, SAMPLE_SIZE, get_test_data_estimator, check_estimator, TEST_Estimator
+from ..utils import check_model, get_test_data, SAMPLE_SIZE, get_test_data_estimator, check_estimator
 
 
 @pytest.mark.parametrize(
@@ -46,9 +46,6 @@ def test_xDeepFM(dnn_hidden_units, cin_layer_size, cin_split_half, cin_activatio
 )
 def test_xDeepFMEstimator(dnn_hidden_units, cin_layer_size, cin_split_half, cin_activation, sparse_feature_num,
                           dense_feature_dim):
-    import tensorflow as tf
-    if not TEST_Estimator or tf.__version__ == "1.4.0":
-        return
     from deepctr.estimator import xDeepFMEstimator
 
     sample_size = SAMPLE_SIZE
