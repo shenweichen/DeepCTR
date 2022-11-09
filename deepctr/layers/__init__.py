@@ -1,17 +1,16 @@
 import tensorflow as tf
 
 from .activation import Dice
-from .core import DNN, LocalActivationUnit, PredictionLayer, RegulationLayer
+from .core import DNN, LocalActivationUnit, PredictionLayer, RegulationModule
 from .interaction import (CIN, FM, AFMLayer, BiInteractionPooling, CrossNet, CrossNetMix,
                           InnerProductLayer, InteractingLayer,
                           OutterProductLayer, FGCNNLayer, SENETLayer, BilinearInteraction,
-                          FieldWiseBiInteraction, FwFMLayer, FEFMLayer, BridgeLayer)
+                          FieldWiseBiInteraction, FwFMLayer, FEFMLayer, BridgeModule)
 from .normalization import LayerNormalization
 from .sequence import (AttentionSequencePoolingLayer, BiasEncoding, BiLSTM,
                        KMaxPooling, SequencePoolingLayer, WeightedSequenceLayer,
-                       Transformer, DynamicGRU,PositionEncoding)
-
-from .utils import NoMask, Hash, Linear, _Add, combined_dnn_input, softmax, reduce_sum
+                       Transformer, DynamicGRU, PositionEncoding)
+from .utils import NoMask, Hash, Linear, _Add, combined_dnn_input, softmax, reduce_sum, Concat
 
 custom_objects = {'tf': tf,
                   'InnerProductLayer': InnerProductLayer,
@@ -28,7 +27,6 @@ custom_objects = {'tf': tf,
                   'SequencePoolingLayer': SequencePoolingLayer,
                   'AttentionSequencePoolingLayer': AttentionSequencePoolingLayer,
                   'CIN': CIN,
-                  'RegulationLayer': RegulationLayer,
                   'InteractingLayer': InteractingLayer,
                   'LayerNormalization': LayerNormalization,
                   'BiLSTM': BiLSTM,
@@ -39,6 +37,7 @@ custom_objects = {'tf': tf,
                   'FGCNNLayer': FGCNNLayer,
                   'Hash': Hash,
                   'Linear': Linear,
+                  'Concat': Concat,
                   'DynamicGRU': DynamicGRU,
                   'SENETLayer': SENETLayer,
                   'BilinearInteraction': BilinearInteraction,
@@ -50,5 +49,6 @@ custom_objects = {'tf': tf,
                   'FEFMLayer': FEFMLayer,
                   'reduce_sum': reduce_sum,
                   'PositionEncoding': PositionEncoding,
-                  'BridgeLayer': BridgeLayer
+                  'RegulationModule': RegulationModule,
+                  'BridgeModule': BridgeModule
                   }

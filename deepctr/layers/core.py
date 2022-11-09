@@ -267,41 +267,39 @@ class PredictionLayer(Layer):
         return dict(list(base_config.items()) + list(config.items()))
 
 
-class RegulationLayer(Layer):
+class RegulationModule(Layer):
     """Regulation module used in EDCN.
 
       Input shape
-        - A list of 3D tensor with shape: ``(batch_size,1,embedding_size)``.
+        - 3D tensor with shape: ``(batch_size,field_size,embedding_size)``.
 
       Output shape
-        - 2D tensor with shape: ``(batch_size, embedding_size * field_num)``.
+        - 2D tensor with shape: ``(batch_size,field_size * embedding_size)``.
 
       Arguments
         - **tau** : Positive float, the temperature coefficient to control
         distribution of field-wise gating unit.
 
-        - **seed** : A Python integer to use as random seed.
-
       References
         - [Enhancing Explicit and Implicit Feature Interactions via Information Sharing for Parallel Deep CTR Models.](https://dlp-kdd.github.io/assets/pdf/DLP-KDD_2021_paper_12.pdf)
     """
 
-    def __init__(self, tau=0.1, **kwargs):
+    def __init__(self, tau=1.0, **kwargs):
         if tau == 0:
-            raise ValueError("RegulationLayer tau can not be zero.")
+            raise ValueError("RegulationModule tau can not be zero.")
         self.tau = 1.0 / tau
-        super(RegulationLayer, self).__init__(**kwargs)
+        super(RegulationModule, self).__init__(**kwargs)
 
     def build(self, input_shape):
-        self.field_num = int(input_shape[1])
+        self.field_size = int(input_shape[1])
         self.embedding_size = int(input_shape[2])
         self.g = self.add_weight(
-            shape=(1, self.field_num, 1),
+            shape=(1, self.field_size, 1),
             initializer=Ones(),
             name=self.name + '_field_weight')
 
         # Be sure to call this somewhere!
-        super(RegulationLayer, self).build(input_shape)
+        super(RegulationModule, self).build(input_shape)
 
     def call(self, inputs, **kwargs):
 
@@ -311,13 +309,13 @@ class RegulationLayer(Layer):
 
         feild_gating_score = tf.nn.softmax(self.g * self.tau, 1)
         E = inputs * feild_gating_score
-        return tf.reshape(E, [-1, self.field_num * self.embedding_size])
+        return tf.reshape(E, [-1, self.field_size * self.embedding_size])
 
     def compute_output_shape(self, input_shape):
-        return (None, self.field_num * self.embedding_size)
+        return (None, self.field_size * self.embedding_size)
 
     def get_config(self):
         config = {'tau': self.tau}
-        base_config = super(RegulationLayer, self).get_config()
+        base_config = super(RegulationModule, self).get_config()
         base_config.update(config)
         return base_config

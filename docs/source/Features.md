@@ -304,6 +304,17 @@ feature. FEFM has significantly lower model complexity than FFM and roughly the 
 
 [Pande H. Field-Embedded Factorization Machines for Click-through rate prediction[J]. arXiv preprint arXiv:2009.09931, 2020.](https://arxiv.org/pdf/2009.09931)
 
+### EDCN(Enhancing Explicit and Implicit Feature Interactions DCN)
+
+EDCN introduces two advanced modules, namelybridge moduleandregulation module, which work collaboratively tocapture the layer-wise interactive signals and learn discriminativefeature distributions for each hidden layer of the parallel networks.
+
+[**EDCN Model API**](./deepctr.models.edcn.html)
+
+![EDCN](../pics/EDCN.png)
+
+[Chen B, Wang Y, Liu Z, et al. Enhancing explicit and implicit feature interactions via information sharing for parallel deep ctr models[C]//Proceedings of the 30th ACM International Conference on Information & Knowledge Management. 2021: 3757-3766.](https://dlp-kdd.github.io/assets/pdf/DLP-KDD_2021_paper_12.pdf)
+
+
 ## Sequence Models
 
 ### DIN (Deep Interest Network)
@@ -412,6 +423,8 @@ information routing across tasks in a general setup.
 ![PLE](../pics/multitaskmodels/PLE.png)
 
 [Tang H, Liu J, Zhao M, et al. Progressive layered extraction (ple): A novel multi-task learning (mtl) model for personalized recommendations[C]//Fourteenth ACM Conference on Recommender Systems. 2020.](https://dl.acm.org/doi/10.1145/3383313.3412236)
+
+
 
 ## Layers
 

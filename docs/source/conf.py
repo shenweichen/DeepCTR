@@ -26,7 +26,7 @@ author = 'Weichen Shen'
 # The short X.Y version
 version = ''
 # The full version, including alpha/beta/rc tags
-release = '0.9.2'
+release = '0.9.3'
 
 
 # -- General configuration ---------------------------------------------------

@@ -11,10 +11,9 @@ import tensorflow as tf
 from tensorflow.python.keras import backend as K
 
 try:
-    from tensorflow.python.ops.init_ops import TruncatedNormal, glorot_uniform_initializer as glorot_uniform, \
-        identity_initializer as identity
+    from tensorflow.python.ops.init_ops import TruncatedNormal, Constant, glorot_uniform_initializer as glorot_uniform
 except ImportError:
-    from tensorflow.python.ops.init_ops_v2 import TruncatedNormal, glorot_uniform, identity
+    from tensorflow.python.ops.init_ops_v2 import TruncatedNormal, Constant, glorot_uniform
 
 from tensorflow.python.keras.layers import LSTM, Lambda, Layer, Dropout
 
@@ -387,7 +386,7 @@ class BiLSTM(Layer):
         elif self.merge_mode == "bw":
             output = output_bw
         elif self.merge_mode == 'concat':
-            output = K.concatenate([output_fw, output_bw])
+            output = tf.concat([output_fw, output_bw], axis=-1)
         elif self.merge_mode == 'sum':
             output = output_fw + output_bw
         elif self.merge_mode == 'ave':
@@ -530,7 +529,7 @@ class Transformer(Layer):
 
         if self.use_positional_encoding:
             queries = self.query_pe(queries)
-            keys = self.key_pe(queries)
+            keys = self.key_pe(keys)
 
         Q = tf.tensordot(queries, self.W_Query,
                          axes=(-1, 0))  # N T_q D*h
@@ -665,7 +664,7 @@ class PositionEncoding(Layer):
         if self.zero_pad:
             position_enc[0, :] = np.zeros(num_units)
         self.lookup_table = self.add_weight("lookup_table", (T, num_units),
-                                            initializer=identity(position_enc),
+                                            initializer=Constant(position_enc),
                                             trainable=self.pos_embedding_trainable)
 
         # Be sure to call this somewhere!
@@ -867,52 +866,3 @@ class KMaxPooling(Layer):
         config = {'k': self.k, 'axis': self.axis}
         base_config = super(KMaxPooling, self).get_config()
         return dict(list(base_config.items()) + list(config.items()))
-
-# def positional_encoding(inputs,
-#                         pos_embedding_trainable=True,
-#                         zero_pad=False,
-#                         scale=True,
-#                         ):
-#     '''Sinusoidal Positional_Encoding.
-#
-#     Args:
-#
-#       - inputs: A 2d Tensor with shape of (N, T).
-#       - num_units: Output dimensionality
-#       - zero_pad: Boolean. If True, all the values of the first row (id = 0) should be constant zero
-#       - scale: Boolean. If True, the output will be multiplied by sqrt num_units(check details from paper)
-#       - scope: Optional scope for `variable_scope`.
-#       - reuse: Boolean, whether to reuse the weights of a previous layer by the same name.
-#
-#     Returns:
-#
-#       - A 'Tensor' with one more rank than inputs's, with the dimensionality should be 'num_units'
-#     '''
-#
-#     _, T, num_units = inputs.get_shape().as_list()
-#     # with tf.variable_scope(scope, reuse=reuse):
-#     position_ind = tf.expand_dims(tf.range(T), 0)
-#     # First part of the PE function: sin and cos argument
-#     position_enc = np.array([
-#         [pos / np.power(10000, 2. * i / num_units)
-#          for i in range(num_units)]
-#         for pos in range(T)])
-#
-#     # Second part, apply the cosine to even columns and sin to odds.
-#     position_enc[:, 0::2] = np.sin(position_enc[:, 0::2])  # dim 2i
-#     position_enc[:, 1::2] = np.cos(position_enc[:, 1::2])  # dim 2i+1
-#
-#     # Convert to a tensor
-#
-#     if pos_embedding_trainable:
-#         lookup_table = K.variable(position_enc, dtype=tf.float32)
-#
-#     if zero_pad:
-#         lookup_table = tf.concat((tf.zeros(shape=[1, num_units]),
-#                                   lookup_table[1:, :]), 0)
-#
-#     outputs = tf.nn.embedding_lookup(lookup_table, position_ind)
-#
-#     if scale:
-#         outputs = outputs * num_units ** 0.5
-#     return outputs + inputs
