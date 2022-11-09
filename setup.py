@@ -3,15 +3,11 @@ import setuptools
 with open("README.md", "r",encoding='utf-8') as fh:
     long_description = fh.read()
 
-import sys
-if sys.version_info < (3, 9):
-    REQUIRED_PACKAGES = [
-    'h5py==2.10.0', 'requests'
-    ]
-else:
-    REQUIRED_PACKAGES = [
-    'h5py==3.7.0', 'requests'
-    ]
+REQUIRED_PACKAGES = [
+    'requests',
+    'h5py==3.7.0; python_version>="3.9"',
+    'h5py==2.10.0; python_version<"3.9"'
+]
 
 setuptools.setup(
     name="deepctr",
