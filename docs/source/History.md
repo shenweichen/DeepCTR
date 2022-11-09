@@ -1,4 +1,5 @@
 # History
+- 11/09/2022 : [v0.9.3](https://github.com/shenweichen/DeepCTR/releases/tag/v0.9.3) released.Add [EDCN](./Features.html#edcn-enhancing-explicit-and-implicit-feature-interactions-dcn).
 - 10/15/2022 : [v0.9.2](https://github.com/shenweichen/DeepCTR/releases/tag/v0.9.2) released.Support python `3.9`,`3.10`.
 - 06/11/2022 : [v0.9.1](https://github.com/shenweichen/DeepCTR/releases/tag/v0.9.1) released.Improve compatibility with tensorflow `2.x`.
 - 09/03/2021 : [v0.9.0](https://github.com/shenweichen/DeepCTR/releases/tag/v0.9.0) released.Add multitask learning models:[SharedBottom](./Features.html#sharedbottom),[ESMM](./Features.html#esmm-entire-space-multi-task-model),[MMOE](./Features.html#mmoe-multi-gate-mixture-of-experts) and [PLE](./Features.html#ple-progressive-layered-extraction). [running example](./Examples.html#multitask-learning-mmoe)
@@ -10,8 +11,8 @@
 - 10/11/2020 : [v0.8.2](https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.2) released.Refactor `DNN` Layer.
 - 09/12/2020 : [v0.8.1](https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.1) released.Improve the reproducibility & fix some bugs.
 - 06/27/2020 : [v0.8.0](https://github.com/shenweichen/DeepCTR/releases/tag/v0.8.0) released.
-  - Support `Tensorflow Estimator` for large scale data and distributed training. [example: Estimator with TFRecord](https://deepctr-doc.readthedocs.io/en/latest/Examples.html#estimator-with-tfrecord-classification-criteo) 
-  - Support different initializers for different embedding weights and loading pretrained embeddings. [example](https://deepctr-doc.readthedocs.io/en/latest/FAQ.html#how-to-use-pretrained-weights-to-initialize-embedding-weights-and-frozen-embedding-weights)
+  - Support `Tensorflow Estimator` for large scale data and distributed training. [example: Estimator with TFRecord](./Examples.html#estimator-with-tfrecord-classification-criteo) 
+  - Support different initializers for different embedding weights and loading pretrained embeddings. [example](./FAQ.html#how-to-use-pretrained-weights-to-initialize-embedding-weights-and-frozen-embedding-weights)
   - Add new model `FwFM`.
 - 05/17/2020 : [v0.7.5](https://github.com/shenweichen/DeepCTR/releases/tag/v0.7.5) released.Fix numerical instability in `LayerNormalization`.
 - 03/15/2020 : [v0.7.4](https://github.com/shenweichen/DeepCTR/releases/tag/v0.7.4) released.Add [FLEN](./Features.html#flen-field-leveraged-embedding-network) and `FieldWiseBiInteraction`.

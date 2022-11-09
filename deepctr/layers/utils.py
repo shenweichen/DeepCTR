@@ -6,7 +6,8 @@ Author:
 
 """
 import tensorflow as tf
-from tensorflow.python.keras.layers import Flatten, Concatenate, Layer, Add
+from tensorflow.python.keras import backend as K
+from tensorflow.python.keras.layers import Flatten, Layer, Add
 from tensorflow.python.ops.lookup_ops import TextFileInitializer
 
 try:
@@ -185,13 +186,60 @@ class Linear(Layer):
         return dict(list(base_config.items()) + list(config.items()))
 
 
+class Concat(Layer):
+    def __init__(self, axis, supports_masking=True, **kwargs):
+        super(Concat, self).__init__(**kwargs)
+        self.axis = axis
+        self.supports_masking = supports_masking
+
+    def call(self, inputs):
+        return tf.concat(inputs, axis=self.axis)
+
+    def compute_mask(self, inputs, mask=None):
+        if not self.supports_masking:
+            return None
+        if mask is None:
+            mask = [inputs_i._keras_mask if hasattr(inputs_i, "_keras_mask") else None for inputs_i in inputs]
+        if mask is None:
+            return None
+        if not isinstance(mask, list):
+            raise ValueError('`mask` should be a list.')
+        if not isinstance(inputs, list):
+            raise ValueError('`inputs` should be a list.')
+        if len(mask) != len(inputs):
+            raise ValueError('The lists `inputs` and `mask` '
+                             'should have the same length.')
+        if all([m is None for m in mask]):
+            return None
+        # Make a list of masks while making sure
+        # the dimensionality of each mask
+        # is the same as the corresponding input.
+        masks = []
+        for input_i, mask_i in zip(inputs, mask):
+            if mask_i is None:
+                # Input is unmasked. Append all 1s to masks,
+                masks.append(tf.ones_like(input_i, dtype='bool'))
+            elif K.ndim(mask_i) < K.ndim(input_i):
+                # Mask is smaller than the input, expand it
+                masks.append(tf.expand_dims(mask_i, axis=-1))
+            else:
+                masks.append(mask_i)
+        concatenated = K.concatenate(masks, axis=self.axis)
+        return K.all(concatenated, axis=-1, keepdims=False)
+
+    def get_config(self, ):
+        config = {'axis': self.axis, 'supports_masking': self.supports_masking}
+        base_config = super(Concat, self).get_config()
+        return dict(list(base_config.items()) + list(config.items()))
+
+
 def concat_func(inputs, axis=-1, mask=False):
-    if not mask:
-        inputs = list(map(NoMask(), inputs))
     if len(inputs) == 1:
-        return inputs[0]
-    else:
-        return Concatenate(axis=axis)(inputs)
+        input = inputs[0]
+        if not mask:
+            input = NoMask()(input)
+        return input
+    return Concat(axis, supports_masking=mask)(inputs)
 
 
 def reduce_mean(input_tensor,
@@ -271,10 +319,6 @@ class _Add(Layer):
         super(_Add, self).build(input_shape)
 
     def call(self, inputs, **kwargs):
-        # if not isinstance(inputs, list):
-        #     return inputs
-        # if len(inputs) == 1:
-        #     return inputs[0]
         if len(inputs) == 0:
             return tf.constant([[0.0]])
 
