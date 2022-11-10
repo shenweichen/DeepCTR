@@ -128,7 +128,7 @@ from deepctr.models import DeepFM
 from deepctr.feature_column import SparseFeat,get_feature_names
 
 pretrained_item_weights = np.random.randn(60,4)
-pretrained_weights_initializer = tf.initializers.identity(pretrained_item_weights)
+pretrained_weights_initializer = tf.initializers.constant(pretrained_item_weights)
 
 feature_columns = [SparseFeat('user_id',120,),SparseFeat('item_id',60,embedding_dim=4,embeddings_initializer=pretrained_weights_initializer,trainable=False)]
 fixlen_feature_names = get_feature_names(feature_columns)

@@ -6,15 +6,15 @@ Author:
 Reference:
     [1] Zhou G, Zhu X, Song C, et al. Deep interest network for click-through rate prediction[C]//Proceedings of the 24th ACM SIGKDD International Conference on Knowledge Discovery & Data Mining. ACM, 2018: 1059-1068. (https://arxiv.org/pdf/1706.06978.pdf)
 """
+from tensorflow.python.keras.layers import Dense, Flatten
 from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.layers import Dense, Concatenate, Flatten
 
 from ...feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, build_input_features
 from ...inputs import create_embedding_matrix, embedding_lookup, get_dense_input, varlen_embedding_lookup, \
     get_varlen_pooling_list
 from ...layers.core import DNN, PredictionLayer
 from ...layers.sequence import AttentionSequencePoolingLayer
-from ...layers.utils import concat_func, NoMask, combined_dnn_input
+from ...layers.utils import concat_func, combined_dnn_input
 
 
 def DIN(dnn_feature_columns, history_feature_list, dnn_use_bn=False,
@@ -84,7 +84,7 @@ def DIN(dnn_feature_columns, history_feature_list, dnn_use_bn=False,
                                          weight_normalization=att_weight_normalization, supports_masking=True)([
         query_emb, keys_emb])
 
-    deep_input_emb = Concatenate()([NoMask()(deep_input_emb), hist])
+    deep_input_emb = concat_func([deep_input_emb, hist])
     deep_input_emb = Flatten()(deep_input_emb)
     dnn_input = combined_dnn_input([deep_input_emb], dense_value_list)
     output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed)(dnn_input)
