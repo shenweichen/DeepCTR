@@ -14,7 +14,7 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 360
     strategy:
       matrix:
         python-version: [ 3.6,3.7 ]
@@ -81,7 +81,7 @@ jobs:
           pip install -q requests
           pip install -e .
       - name: Test with pytest
-        timeout-minutes: 180
+        timeout-minutes: 360
         run: |
           pip install -q pytest
           pip install -q pytest-cov
