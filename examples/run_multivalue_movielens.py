@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 from tensorflow.python.keras.preprocessing.sequence import pad_sequences
 
-from deepctr.feature_column import SparseFeat, VarLenSparseFeat,get_feature_names
+from deepctr.feature_column import SparseFeat, VarLenSparseFeat, get_feature_names
 from deepctr.models import DeepFM
 
 
@@ -22,21 +22,21 @@ if __name__ == "__main__":
                        "gender", "age", "occupation", "zip", ]
     target = ['rating']
 
-    # 1.Label Encoding for sparse features,and process sequence features
+    # 1.Label Encoding for sparse features and process sequence features
     for feat in sparse_features:
         lbe = LabelEncoder()
         data[feat] = lbe.fit_transform(data[feat])
-    # preprocess the sequence feature
 
+    # 2.Preprocess the sequence feature
     key2index = {}
     genres_list = list(map(split, data['genres'].values))
     genres_length = np.array(list(map(len, genres_list)))
     max_len = max(genres_length)
+
     # Notice : padding=`post`
     genres_list = pad_sequences(genres_list, maxlen=max_len, padding='post', )
 
-    # 2.count #unique features for each sparse field and generate feature config for sequence feature
-
+    # 3.Count unique features for each sparse field and generate feature config for sequence feature
     fixlen_feature_columns = [SparseFeat(feat, data[feat].max() + 1, embedding_dim=4)
                               for feat in sparse_features]
 
@@ -55,12 +55,12 @@ if __name__ == "__main__":
 
     feature_names = get_feature_names(linear_feature_columns + dnn_feature_columns)
 
-    # 3.generate input data for model
+    # 4.Generate input data for model
     model_input = {name: data[name] for name in sparse_features}  #
     model_input["genres"] = genres_list
     model_input["genres_weight"] = np.random.randn(data.shape[0], max_len, 1)
 
-    # 4.Define Model,compile and train
+    # 5.Define Model, compile and train
     model = DeepFM(linear_feature_columns, dnn_feature_columns, task='regression')
 
     model.compile("adam", "mse", metrics=['mse'], )

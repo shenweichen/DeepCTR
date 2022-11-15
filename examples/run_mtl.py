@@ -16,10 +16,12 @@ if __name__ == "__main__":
                     'own_or_self', 'vet_question', 'vet_benefits', 'weeks_worked', 'year', 'income_50k']
     data = pd.read_csv('./census-income.sample', header=None, names=column_names)
 
+    # preprocess
     data['label_income'] = data['income_50k'].map({' - 50000.': 0, ' 50000+.': 1})
     data['label_marital'] = data['marital_stat'].apply(lambda x: 1 if x == ' Never married' else 0)
     data.drop(labels=['income_50k', 'marital_stat'], axis=1, inplace=True)
 
+    # columns
     columns = data.columns.values.tolist()
     sparse_features = ['class_worker', 'det_ind_code', 'det_occ_code', 'education', 'hs_college', 'major_ind_code',
                        'major_occ_code', 'race', 'hisp_origin', 'sex', 'union_member', 'unemp_reason',
@@ -30,6 +32,7 @@ if __name__ == "__main__":
     dense_features = [col for col in columns if
                       col not in sparse_features and col not in ['label_income', 'label_marital']]
 
+    # preprocess
     data[sparse_features] = data[sparse_features].fillna('-1', )
     data[dense_features] = data[dense_features].fillna(0, )
     mms = MinMaxScaler(feature_range=(0, 1))
@@ -47,13 +50,12 @@ if __name__ == "__main__":
 
     feature_names = get_feature_names(linear_feature_columns + dnn_feature_columns)
 
-    # 3.generate input data for model
-
+    # 3.Generate input data for model
     train, test = train_test_split(data, test_size=0.2, random_state=2020)
     train_model_input = {name: train[name] for name in feature_names}
     test_model_input = {name: test[name] for name in feature_names}
 
-    # 4.Define Model,train,predict and evaluate
+    # 4.Define Model, train, predict and evaluate
     model = MMOE(dnn_feature_columns, tower_dnn_hidden_units=[], task_types=['binary', 'binary'],
                  task_names=['label_income', 'label_marital'])
     model.compile("adam", loss=["binary_crossentropy", "binary_crossentropy"],
@@ -62,6 +64,5 @@ if __name__ == "__main__":
     history = model.fit(train_model_input, [train['label_income'].values, train['label_marital'].values],
                         batch_size=256, epochs=10, verbose=2, validation_split=0.2)
     pred_ans = model.predict(test_model_input, batch_size=256)
-
     print("test income AUC", round(roc_auc_score(test['label_income'], pred_ans[0]), 4))
     print("test marital AUC", round(roc_auc_score(test['label_marital'], pred_ans[1]), 4))

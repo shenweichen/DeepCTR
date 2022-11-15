@@ -17,15 +17,14 @@ if __name__ == "__main__":
     data[dense_features] = data[dense_features].fillna(0, )
     target = ['label']
 
-    # 1.Label Encoding for sparse features,and do simple Transformation for dense features
+    # 1.Label Encoding for sparse features, and do simple Transformation for dense features
     for feat in sparse_features:
         lbe = LabelEncoder()
         data[feat] = lbe.fit_transform(data[feat])
     mms = MinMaxScaler(feature_range=(0, 1))
     data[dense_features] = mms.fit_transform(data[dense_features])
 
-    # 2.count #unique features for each sparse field,and record dense feature field name
-
+    # 2.Count unique features for each sparse field, and record dense feature field name
     dnn_feature_columns = []
     linear_feature_columns = []
 
@@ -37,22 +36,19 @@ if __name__ == "__main__":
         dnn_feature_columns.append(tf.feature_column.numeric_column(feat))
         linear_feature_columns.append(tf.feature_column.numeric_column(feat))
 
-    # 3.generate input data for model
-
+    # 3.Generate input data for model
     train, test = train_test_split(data, test_size=0.2, random_state=2021)
 
-    # Not setting default value for continuous feature. filled with mean.
-
+    # Not setting default value for continuous feature, filled with mean instead
     train_model_input = input_fn_pandas(train, sparse_features + dense_features, 'label', shuffle=True)
     test_model_input = input_fn_pandas(test, sparse_features + dense_features, None, shuffle=False)
 
-    # 4.Define Model,train,predict and evaluate
+    # 4.Define Model, train, predict and evaluate
     model = DeepFMEstimator(linear_feature_columns, dnn_feature_columns, task='binary',
                             config=tf.estimator.RunConfig(tf_random_seed=2021))
 
     model.train(train_model_input)
     pred_ans_iter = model.predict(test_model_input)
     pred_ans = list(map(lambda x: x['pred'], pred_ans_iter))
-    #
     print("test LogLoss", round(log_loss(test[target].values, pred_ans), 4))
     print("test AUC", round(roc_auc_score(test[target].values, pred_ans), 4))

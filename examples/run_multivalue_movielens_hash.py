@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from tensorflow.python.keras.preprocessing.sequence import pad_sequences
 
-from deepctr.feature_column import SparseFeat, VarLenSparseFeat,get_feature_names
+from deepctr.feature_column import SparseFeat, VarLenSparseFeat, get_feature_names
 from deepctr.models import DeepFM
 
 if __name__ == "__main__":
@@ -13,16 +13,15 @@ if __name__ == "__main__":
     data[sparse_features] = data[sparse_features].astype(str)
     target = ['rating']
 
-    # 1.Use hashing encoding on the fly for sparse features,and process sequence features
-
+    # 1.Use hashing encoding on the fly for sparse features and process sequence features
     genres_list = list(map(lambda x: x.split('|'), data['genres'].values))
     genres_length = np.array(list(map(len, genres_list)))
     max_len = max(genres_length)
 
     # Notice : padding=`post`
     genres_list = pad_sequences(genres_list, maxlen=max_len, padding='post', dtype=object, value=0).astype(str)
-    # 2.set hashing space for each sparse field and generate feature config for sequence feature
 
+    # 2.Set hashing space for each sparse field and generate feature config for sequence feature
     fixlen_feature_columns = [SparseFeat(feat, data[feat].nunique() * 5, embedding_dim=4, use_hash=True, dtype='string')
                               for feat in sparse_features]
     varlen_feature_columns = [
@@ -33,11 +32,11 @@ if __name__ == "__main__":
     dnn_feature_columns = fixlen_feature_columns + varlen_feature_columns
     feature_names = get_feature_names(linear_feature_columns + dnn_feature_columns)
 
-    # 3.generate input data for model
+    # 3.Generate input data for model
     model_input = {name: data[name] for name in feature_names}
     model_input['genres'] = genres_list
 
-    # 4.Define Model,compile and train
+    # 4.Define Model, compile and train
     model = DeepFM(linear_feature_columns, dnn_feature_columns, task='regression')
 
     model.compile("adam", "mse", metrics=['mse'], )

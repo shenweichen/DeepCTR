@@ -3,7 +3,7 @@ from sklearn.metrics import log_loss, roc_auc_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
-from deepctr.feature_column import SparseFeat,get_feature_names
+from deepctr.feature_column import SparseFeat, get_feature_names
 from deepctr.models import FLEN
 
 if __name__ == "__main__":
@@ -20,13 +20,12 @@ if __name__ == "__main__":
     data[sparse_features] = data[sparse_features].fillna('-1', )
     target = ['click']
 
-    # 1.Label Encoding for sparse features,and do simple Transformation for dense features
+    # 1.Label Encoding for sparse features,and do simple transformation for dense features
     for feat in sparse_features:
         lbe = LabelEncoder()
         data[feat] = lbe.fit_transform(data[feat])
 
-    # 2.count #unique features for each sparse field,and record dense feature field name
-
+    # 2.Count unique features for each sparse field,and record dense feature field name
     field_info = dict(C14='user', C15='user', C16='user', C17='user',
                       C18='user', C19='user', C20='user', C21='user', C1='user',
                       banner_pos='context', site_id='context',
@@ -46,13 +45,12 @@ if __name__ == "__main__":
 
     feature_names = get_feature_names(linear_feature_columns + dnn_feature_columns)
 
-    # 3.generate input data for model
-
+    # 3.Generate input data for model
     train, test = train_test_split(data, test_size=0.2, random_state=2020)
     train_model_input = {name: train[name] for name in feature_names}
     test_model_input = {name: test[name] for name in feature_names}
 
-    # 4.Define Model,train,predict and evaluate
+    # 4.Define Model, train, predict and evaluate
     model = FLEN(linear_feature_columns, dnn_feature_columns, task='binary')
     model.compile("adam", "binary_crossentropy",
                   metrics=['binary_crossentropy'], )

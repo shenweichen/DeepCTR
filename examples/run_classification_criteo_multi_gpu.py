@@ -4,7 +4,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 from tensorflow.python.keras.utils import multi_gpu_model
 
-from deepctr.feature_column import SparseFeat, DenseFeat,get_feature_names
+from deepctr.feature_column import SparseFeat, DenseFeat, get_feature_names
 from deepctr.models import DeepFM
 
 if __name__ == "__main__":
@@ -17,32 +17,29 @@ if __name__ == "__main__":
     data[dense_features] = data[dense_features].fillna(0, )
     target = ['label']
 
-    # 1.Label Encoding for sparse features,and do simple Transformation for dense features
+    # 1.Label Encoding for sparse features, and do simple transformation for dense features
     for feat in sparse_features:
         lbe = LabelEncoder()
         data[feat] = lbe.fit_transform(data[feat])
     mms = MinMaxScaler(feature_range=(0, 1))
     data[dense_features] = mms.fit_transform(data[dense_features])
 
-    # 2.count #unique features for each sparse field,and record dense feature field name
-
+    # 2.Count unique features for each sparse field, and record dense feature field name
     fixlen_feature_columns = [SparseFeat(feat, vocabulary_size=data[feat].max() + 1, embedding_dim=4)
-                              for feat in sparse_features] + [DenseFeat(feat, 1, )
-                                                              for feat in dense_features]
+                              for feat in sparse_features] + [DenseFeat(feat, 1, ) for feat in dense_features]
 
     dnn_feature_columns = fixlen_feature_columns
     linear_feature_columns = fixlen_feature_columns
 
     feature_names = get_feature_names(linear_feature_columns + dnn_feature_columns)
 
-    # 3.generate input data for model
-
+    # 3.Generate input data for model
     train, test = train_test_split(data, test_size=0.2, random_state=2020)
 
     train_model_input = {name: train[name] for name in feature_names}
     test_model_input = {name: test[name] for name in feature_names}
 
-    # 4.Define Model,train,predict and evaluate
+    # 4.Define Model, train, predict and evaluate
     model = DeepFM(linear_feature_columns, dnn_feature_columns, task='binary')
     model = multi_gpu_model(model, gpus=2)
 
