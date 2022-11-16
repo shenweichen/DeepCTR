@@ -17,6 +17,7 @@ if __name__ == "__main__":
         dnn_feature_columns.append(tf.feature_column.embedding_column(
             tf.feature_column.categorical_column_with_identity(feat, 1000), 4))
         linear_feature_columns.append(tf.feature_column.categorical_column_with_identity(feat, 1000))
+
     for feat in dense_features:
         dnn_feature_columns.append(tf.feature_column.numeric_column(feat))
         linear_feature_columns.append(tf.feature_column.numeric_column(feat))
@@ -37,5 +38,6 @@ if __name__ == "__main__":
                             config=tf.estimator.RunConfig(tf_random_seed=2021))
 
     model.train(train_model_input)
+
     eval_result = model.evaluate(test_model_input)
     print(eval_result)

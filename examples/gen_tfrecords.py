@@ -17,5 +17,6 @@ def write_tfrecord(filename, df, sparse_feature_names, dense_feature_names, labe
         writer.write(ex.SerializeToString())
     writer.close()
 
-# write_tfrecord('./criteo_sample.tr.tfrecords',train,sparse_features,dense_features,'label')
-# write_tfrecord('./criteo_sample.te.tfrecords',test,sparse_features,dense_features,'label')
+
+# write_tfrecord('./criteo_sample.tr.tfrecords', train, sparse_features, dense_features, 'label')
+# write_tfrecord('./criteo_sample.te.tfrecords', test, sparse_features, dense_features, 'label')

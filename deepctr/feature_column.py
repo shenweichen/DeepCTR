@@ -201,6 +201,7 @@ def input_from_feature_columns(features, feature_columns, l2_reg, seed, prefix='
     embedding_matrix_dict = create_embedding_matrix(feature_columns, l2_reg, seed, prefix=prefix,
                                                     seq_mask_zero=seq_mask_zero)
     group_sparse_embedding_dict = embedding_lookup(embedding_matrix_dict, features, sparse_feature_columns)
+
     dense_value_list = get_dense_input(features, feature_columns)
     if not support_dense and len(dense_value_list) > 0:
         raise ValueError("DenseFeat is not supported in dnn_feature_columns")

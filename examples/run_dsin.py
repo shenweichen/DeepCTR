@@ -1,24 +1,29 @@
 import numpy as np
 import tensorflow as tf
 
-from deepctr.feature_column import SparseFeat, VarLenSparseFeat, DenseFeat,get_feature_names
+from deepctr.feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, get_feature_names
 from deepctr.models import DSIN
 
 
 def get_xy_fd(hash_flag=False):
-    feature_columns = [SparseFeat('user', 3, embedding_dim=10, use_hash=hash_flag),
-                       SparseFeat('gender', 2, embedding_dim=4, use_hash=hash_flag),
-                       SparseFeat('item', 3 + 1, embedding_dim=4, use_hash=hash_flag),
-                       SparseFeat('cate_id', 2 + 1, embedding_dim=4, use_hash=hash_flag),
-                       DenseFeat('pay_score', 1)]
+    feature_columns = [
+        SparseFeat('user', 3, embedding_dim=10, use_hash=hash_flag)
+        , SparseFeat('gender', 2, embedding_dim=4, use_hash=hash_flag)
+        , SparseFeat('item', 3 + 1, embedding_dim=4, use_hash=hash_flag)
+        , SparseFeat('cate_id', 2 + 1, embedding_dim=4, use_hash=hash_flag)
+        , DenseFeat('pay_score', 1)]
+
     feature_columns += [
         VarLenSparseFeat(SparseFeat('sess_0_item', 3 + 1, embedding_dim=4, use_hash=hash_flag, embedding_name='item'),
-                         maxlen=4), VarLenSparseFeat(
+                         maxlen=4)
+        , VarLenSparseFeat(
             SparseFeat('sess_0_cate_id', 2 + 1, embedding_dim=4, use_hash=hash_flag, embedding_name='cate_id'),
             maxlen=4)]
+
     feature_columns += [
         VarLenSparseFeat(SparseFeat('sess_1_item', 3 + 1, embedding_dim=4, use_hash=hash_flag, embedding_name='item'),
-                         maxlen=4), VarLenSparseFeat(
+                         maxlen=4)
+        , VarLenSparseFeat(
             SparseFeat('sess_1_cate_id', 2 + 1, embedding_dim=4, use_hash=hash_flag, embedding_name='cate_id'),
             maxlen=4)]
 
@@ -54,8 +59,8 @@ if __name__ == "__main__":
     x, y, feature_columns, behavior_feature_list = get_xy_fd(True)
 
     model = DSIN(feature_columns, behavior_feature_list, sess_max_count=2,
-                 dnn_hidden_units=[4, 4, 4], dnn_dropout=0.5, )
+                 dnn_hidden_units=[4, 4, 4], dnn_dropout=0.5)
 
-    model.compile('adam', 'binary_crossentropy',
-                  metrics=['binary_crossentropy'])
+    model.compile('adam', 'binary_crossentropy', metrics=['binary_crossentropy'])
+
     history = model.fit(x, y, verbose=1, epochs=10, validation_split=0.5)

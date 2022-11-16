@@ -11,40 +11,43 @@ if __name__ == "__main__":
 
     sparse_features = ['C' + str(i) for i in range(1, 27)]
     dense_features = ['I' + str(i) for i in range(1, 14)]
-
-    data[sparse_features] = data[sparse_features].fillna('-1', )
-    data[dense_features] = data[dense_features].fillna(0, )
     target = ['label']
 
-    # 1.Label Encoding for sparse features, and do simple transformation for dense features
+    # 1 Preprocess
+    # 1.1 Fill NA/NaN values
+    data[sparse_features] = data[sparse_features].fillna('-1')
+    data[dense_features] = data[dense_features].fillna(0)
+
+    # 1.2 Label Encoding for sparse features
     for feat in sparse_features:
         lbe = LabelEncoder()
         data[feat] = lbe.fit_transform(data[feat])
+
+    # 1.3 Transform dense features by Min-Max scaling
     mms = MinMaxScaler(feature_range=(0, 1))
     data[dense_features] = mms.fit_transform(data[dense_features])
 
-    # 2.Count unique features for each sparse field, and record dense feature field name
+    # 2 Specify the parameters for Embedding
     fixlen_feature_columns = [SparseFeat(feat, vocabulary_size=data[feat].max() + 1, embedding_dim=4)
-                              for i, feat in enumerate(sparse_features)] + [DenseFeat(feat, 1, )
-                                                                            for feat in dense_features]
+                              for feat in sparse_features] + [DenseFeat(feat, 1) for feat in dense_features]
 
     dnn_feature_columns = fixlen_feature_columns
     linear_feature_columns = fixlen_feature_columns
 
+    # 3 Generate input data for model
     feature_names = get_feature_names(linear_feature_columns + dnn_feature_columns)
 
-    # 3.Generate input data for model
     train, test = train_test_split(data, test_size=0.2, random_state=2020)
     train_model_input = {name: train[name] for name in feature_names}
     test_model_input = {name: test[name] for name in feature_names}
 
-    # 4.Define Model, train, predict and evaluate
+    # 4 Define Model, train, predict and evaluate
     model = DeepFM(linear_feature_columns, dnn_feature_columns, task='binary')
-    model.compile("adam", "binary_crossentropy",
-                  metrics=['binary_crossentropy'], )
+    model.compile("adam", "binary_crossentropy", metrics=['binary_crossentropy'])
 
     history = model.fit(train_model_input, train[target].values,
-                        batch_size=256, epochs=10, verbose=2, validation_split=0.2, )
+                        batch_size=256, epochs=10, verbose=2, validation_split=0.2)
+
     pred_ans = model.predict(test_model_input, batch_size=256)
     print("test LogLoss", round(log_loss(test[target].values, pred_ans), 4))
     print("test AUC", round(roc_auc_score(test[target].values, pred_ans), 4))

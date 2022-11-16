@@ -34,7 +34,7 @@ def DeepFM(linear_feature_columns, dnn_feature_columns, fm_group=(DEFAULT_GROUP_
     :param seed: integer ,to use as random seed.
     :param dnn_dropout: float in [0,1), the probability we will drop out a given DNN coordinate.
     :param dnn_activation: Activation function to use in DNN
-    :param dnn_use_bn: bool. Whether use BatchNormalization before activation or not in DNN
+    :param dnn_use_bn: bool. Whether to use BatchNormalization before activation or not in DNN
     :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
     :return: A Keras model instance.
     """

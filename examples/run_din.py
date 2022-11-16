@@ -5,14 +5,18 @@ from deepctr.feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, get_
 
 
 def get_xy_fd():
-    feature_columns = [SparseFeat('user', 3, embedding_dim=10), SparseFeat(
-        'gender', 2, embedding_dim=4), SparseFeat('item_id', 3 + 1, embedding_dim=8),
-                       SparseFeat('cate_id', 2 + 1, embedding_dim=4), DenseFeat('pay_score', 1)]
+    feature_columns = [
+        SparseFeat('user', 3, embedding_dim=10)
+        , SparseFeat('gender', 2, embedding_dim=4)
+        , SparseFeat('item_id', 3 + 1, embedding_dim=8)
+        , SparseFeat('cate_id', 2 + 1, embedding_dim=4)
+        , DenseFeat('pay_score', 1)]
+
     feature_columns += [
         VarLenSparseFeat(SparseFeat('hist_item_id', vocabulary_size=3 + 1, embedding_dim=8, embedding_name='item_id'),
-                         maxlen=4, length_name="seq_length"),
-        VarLenSparseFeat(SparseFeat('hist_cate_id', 2 + 1, embedding_dim=4, embedding_name='cate_id'), maxlen=4,
-                         length_name="seq_length")]
+                         maxlen=4, length_name="seq_length")
+        , VarLenSparseFeat(SparseFeat('hist_cate_id', 2 + 1, embedding_dim=4, embedding_name='cate_id'), maxlen=4,
+                           length_name="seq_length")]
     # Notice: History behavior sequence feature name must start with "hist_".
     behavior_feature_list = ["item_id", "cate_id"]
     uid = np.array([0, 1, 2])
@@ -35,8 +39,9 @@ def get_xy_fd():
 
 if __name__ == "__main__":
     x, y, feature_columns, behavior_feature_list = get_xy_fd()
+
     model = DIN(feature_columns, behavior_feature_list)
-    # model = BST(feature_columns, behavior_feature_list,att_head_num=4)
-    model.compile('adam', 'binary_crossentropy',
-                  metrics=['binary_crossentropy'])
+
+    model.compile('adam', 'binary_crossentropy', metrics=['binary_crossentropy'])
+
     history = model.fit(x, y, verbose=1, epochs=10, validation_split=0.5)

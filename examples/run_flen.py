@@ -14,8 +14,7 @@ if __name__ == "__main__":
     sparse_features = ['hour', 'C1', 'banner_pos', 'site_id', 'site_domain',
                        'site_category', 'app_id', 'app_domain', 'app_category', 'device_id',
                        'device_model', 'device_type', 'device_conn_type',  # 'device_ip',
-                       'C14',
-                       'C15', 'C16', 'C17', 'C18', 'C19', 'C20', 'C21', ]
+                       'C14', 'C15', 'C16', 'C17', 'C18', 'C19', 'C20', 'C21', ]
 
     data[sparse_features] = data[sparse_features].fillna('-1', )
     target = ['click']
@@ -52,11 +51,11 @@ if __name__ == "__main__":
 
     # 4.Define Model, train, predict and evaluate
     model = FLEN(linear_feature_columns, dnn_feature_columns, task='binary')
-    model.compile("adam", "binary_crossentropy",
-                  metrics=['binary_crossentropy'], )
+    model.compile("adam", "binary_crossentropy", metrics=['binary_crossentropy'], )
 
     history = model.fit(train_model_input, train[target].values,
                         batch_size=256, epochs=10, verbose=2, validation_split=0.2, )
+
     pred_ans = model.predict(test_model_input, batch_size=256)
     print("test LogLoss", round(log_loss(test[target].values, pred_ans), 4))
     print("test AUC", round(roc_auc_score(test[target].values, pred_ans), 4))

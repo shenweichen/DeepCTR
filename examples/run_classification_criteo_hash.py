@@ -12,21 +12,23 @@ if __name__ == "__main__":
     sparse_features = ['C' + str(i) for i in range(1, 27)]
     dense_features = ['I' + str(i) for i in range(1, 14)]
 
-    data[sparse_features] = data[sparse_features].fillna('-1', )
-    data[dense_features] = data[dense_features].fillna(0, )
+    data[sparse_features] = data[sparse_features].fillna('-1')
+    data[dense_features] = data[dense_features].fillna(0)
     target = ['label']
 
     # 1.Do simple transformation for dense features
     mms = MinMaxScaler(feature_range=(0, 1))
     data[dense_features] = mms.fit_transform(data[dense_features])
 
-    # 2.Set hashing space for each sparse field, and record dense feature field name
-    fixlen_feature_columns = [SparseFeat(feat, vocabulary_size=1000, embedding_dim=4, use_hash=True, dtype='string')  # since the input is string
-                              for feat in sparse_features] + [DenseFeat(feat, 1, ) for feat in dense_features]
+    # 2.Set hashing space for each sparse field and record dense feature field name
+    fixlen_feature_columns = [SparseFeat(feat, vocabulary_size=1000, embedding_dim=4, use_hash=True, dtype='string')
+                              # since the input is string
+                              for feat in sparse_features] + [DenseFeat(feat, 1) for feat in dense_features]
 
     linear_feature_columns = fixlen_feature_columns
     dnn_feature_columns = fixlen_feature_columns
-    feature_names = get_feature_names(linear_feature_columns + dnn_feature_columns, )
+
+    feature_names = get_feature_names(linear_feature_columns + dnn_feature_columns)
 
     # 3.Generate input data for model
     train, test = train_test_split(data, test_size=0.2, random_state=2020)
@@ -36,11 +38,11 @@ if __name__ == "__main__":
 
     # 4.Define Model, train, predict and evaluate
     model = DeepFM(linear_feature_columns, dnn_feature_columns, task='binary')
-    model.compile("adam", "binary_crossentropy",
-                  metrics=['binary_crossentropy'], )
+    model.compile("adam", "binary_crossentropy", metrics=['binary_crossentropy'])
 
     history = model.fit(train_model_input, train[target].values,
-                        batch_size=256, epochs=10, verbose=2, validation_split=0.2, )
+                        batch_size=256, epochs=10, verbose=2, validation_split=0.2)
+
     pred_ans = model.predict(test_model_input, batch_size=256)
     print("test LogLoss", round(log_loss(test[target].values, pred_ans), 4))
     print("test AUC", round(roc_auc_score(test[target].values, pred_ans), 4))

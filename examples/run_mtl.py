@@ -29,21 +29,23 @@ if __name__ == "__main__":
                        'det_hh_summ', 'mig_chg_msa', 'mig_chg_reg', 'mig_move_reg', 'mig_same', 'mig_prev_sunbelt',
                        'fam_under_18', 'country_father', 'country_mother', 'country_self', 'citizenship',
                        'vet_question']
+
     dense_features = [col for col in columns if
                       col not in sparse_features and col not in ['label_income', 'label_marital']]
 
     # preprocess
-    data[sparse_features] = data[sparse_features].fillna('-1', )
-    data[dense_features] = data[dense_features].fillna(0, )
-    mms = MinMaxScaler(feature_range=(0, 1))
-    data[dense_features] = mms.fit_transform(data[dense_features])
+    data[sparse_features] = data[sparse_features].fillna('-1')
+    data[dense_features] = data[dense_features].fillna(0)
 
     for feat in sparse_features:
         lbe = LabelEncoder()
         data[feat] = lbe.fit_transform(data[feat])
 
+    mms = MinMaxScaler(feature_range=(0, 1))
+    data[dense_features] = mms.fit_transform(data[dense_features])
+
     fixlen_feature_columns = [SparseFeat(feat, data[feat].max() + 1, embedding_dim=4) for feat in sparse_features] \
-                             + [DenseFeat(feat, 1, ) for feat in dense_features]
+                             + [DenseFeat(feat, 1) for feat in dense_features]
 
     dnn_feature_columns = fixlen_feature_columns
     linear_feature_columns = fixlen_feature_columns
@@ -58,11 +60,11 @@ if __name__ == "__main__":
     # 4.Define Model, train, predict and evaluate
     model = MMOE(dnn_feature_columns, tower_dnn_hidden_units=[], task_types=['binary', 'binary'],
                  task_names=['label_income', 'label_marital'])
-    model.compile("adam", loss=["binary_crossentropy", "binary_crossentropy"],
-                  metrics=['binary_crossentropy'], )
+    model.compile("adam", loss=["binary_crossentropy", "binary_crossentropy"], metrics=['binary_crossentropy'])
 
     history = model.fit(train_model_input, [train['label_income'].values, train['label_marital'].values],
                         batch_size=256, epochs=10, verbose=2, validation_split=0.2)
+
     pred_ans = model.predict(test_model_input, batch_size=256)
     print("test income AUC", round(roc_auc_score(test['label_income'], pred_ans[0]), 4))
     print("test marital AUC", round(roc_auc_score(test['label_marital'], pred_ans[1]), 4))
