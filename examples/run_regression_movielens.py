@@ -13,28 +13,33 @@ if __name__ == "__main__":
                        "gender", "age", "occupation", "zip"]
     target = ['rating']
 
-    # 1.Label Encoding for sparse features, and do simple Transformation for dense features
+    # 1 Preprocess
+    # 1.1 Label Encoding for sparse features
     for feat in sparse_features:
         lbe = LabelEncoder()
         data[feat] = lbe.fit_transform(data[feat])
 
-    # 2.Count unique features for each sparse field
+    # 2 Specify the parameters for Embedding
     fixlen_feature_columns = [SparseFeat(feat, data[feat].max() + 1, embedding_dim=4)
                               for feat in sparse_features]
+
     linear_feature_columns = fixlen_feature_columns
     dnn_feature_columns = fixlen_feature_columns
+
+    # 3 Generate input data for model
     feature_names = get_feature_names(linear_feature_columns + dnn_feature_columns)
 
-    # 3.Generate input data for model
     train, test = train_test_split(data, test_size=0.2, random_state=2020)
+
     train_model_input = {name: train[name].values for name in feature_names}
     test_model_input = {name: test[name].values for name in feature_names}
 
-    # 4.Define Model, train, predict and evaluate
+    # 4 Define model, train, predict and evaluate
     model = DeepFM(linear_feature_columns, dnn_feature_columns, task='regression')
-    model.compile("adam", "mse", metrics=['mse'], )
+    model.compile("adam", "mse", metrics=['mse'])
 
     history = model.fit(train_model_input, train[target].values,
-                        batch_size=256, epochs=10, verbose=2, validation_split=0.2, )
+                        batch_size=256, epochs=10, verbose=2, validation_split=0.2)
+
     pred_ans = model.predict(test_model_input, batch_size=256)
     print("test MSE", round(mean_squared_error(test[target].values, pred_ans), 4))
