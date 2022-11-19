@@ -47,7 +47,7 @@ if __name__ == "__main__":
     model = DeepFM(linear_feature_columns, dnn_feature_columns, task='binary')
     model = multi_gpu_model(model, gpus=2)
 
-    model.compile("adam", "binary_crossentropy", metrics=['binary_crossentropy'])
+    model.compile(optimizer="adam", loss="binary_crossentropy", metrics=['binary_crossentropy'])
 
     history = model.fit(train_model_input, train[target].values,
                         batch_size=256, epochs=10, verbose=2, validation_split=0.2)

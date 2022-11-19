@@ -50,7 +50,7 @@ if __name__ == "__main__":
 
     # 4 Define model, compile and train
     model = DeepFM(linear_feature_columns, dnn_feature_columns, task='regression')
-    model.compile("adam", "mse", metrics=['mse'])
+    model.compile(optimizer="adam", loss="mse", metrics=['mse'])
 
     if not hasattr(tf, 'version') or tf.version.VERSION < '2.0.0':
         with tf.Session() as sess:

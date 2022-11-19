@@ -42,6 +42,6 @@ if __name__ == "__main__":
 
     model = DIN(feature_columns, behavior_feature_list)
 
-    model.compile('adam', 'binary_crossentropy', metrics=['binary_crossentropy'])
+    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['binary_crossentropy'])
 
     history = model.fit(x, y, verbose=1, epochs=10, validation_split=0.5)

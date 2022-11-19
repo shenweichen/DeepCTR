@@ -61,6 +61,6 @@ if __name__ == "__main__":
     model = DSIN(feature_columns, behavior_feature_list, sess_max_count=2,
                  dnn_hidden_units=[4, 4, 4], dnn_dropout=0.5)
 
-    model.compile('adam', 'binary_crossentropy', metrics=['binary_crossentropy'])
+    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['binary_crossentropy'])
 
     history = model.fit(x, y, verbose=1, epochs=10, validation_split=0.5)

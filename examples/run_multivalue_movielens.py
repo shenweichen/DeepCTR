@@ -11,9 +11,11 @@ def split(x):
     key_ans = x.split('|')
     for key in key_ans:
         if key not in key2index:
-            # Notice : input value 0 is a special "padding",so we do not use 0 to encode valid feature for sequence input
+            # Notice: input value 0 is a special "padding"
             key2index[key] = len(key2index) + 1
-    return list(map(lambda x: key2index[x], key_ans))
+
+    result = list(map(lambda _: key2index[_], key_ans))
+    return result
 
 
 if __name__ == "__main__":
@@ -28,13 +30,13 @@ if __name__ == "__main__":
         lbe = LabelEncoder()
         data[feat] = lbe.fit_transform(data[feat])
 
-    # 1.2 Preprocess the sequence feature
+    # 1.2 Pad sequence feature
     key2index = {}
     genres_list = list(map(split, data['genres'].values))
     genres_length = np.array(list(map(len, genres_list)))
     max_len = max(genres_length)
 
-    # Notice : padding=`post`
+    # Notice: padding=`post`
     genres_list = pad_sequences(genres_list, maxlen=max_len, padding='post')
 
     # 2 Specify the parameters for Embedding
@@ -65,7 +67,7 @@ if __name__ == "__main__":
 
     # 4 Define Model, compile and train
     model = DeepFM(linear_feature_columns, dnn_feature_columns, task='regression')
-    model.compile("adam", "mse", metrics=['mse'], )
+    model.compile(optimizer="adam", loss="mse", metrics=['mse'])
 
     history = model.fit(model_input, data[target].values,
                         batch_size=256, epochs=10, verbose=2, validation_split=0.2, )

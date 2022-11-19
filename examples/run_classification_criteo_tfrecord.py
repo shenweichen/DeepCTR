@@ -5,6 +5,7 @@ from sklearn.preprocessing import LabelEncoder, MinMaxScaler
 
 from deepctr.models import DeepFM
 from deepctr.feature_column import SparseFeat, DenseFeat, get_feature_names
+from examples.gen_tfrecords import write_tfrecord, get_feature_description, get_tfrecord_parse_func, get_tfdataset
 
 if __name__ == "__main__":
     data = pd.read_csv('./criteo_sample.txt')
@@ -28,27 +29,40 @@ if __name__ == "__main__":
     data[dense_features] = mms.fit_transform(data[dense_features])
 
     # 2 Specify the parameters for Embedding
-    fixlen_feature_columns = [SparseFeat(feat, vocabulary_size=data[feat].max() + 1, embedding_dim=4)
+    sparse_feat_max_len = {feat: data[feat].max() + 1 for feat in sparse_features}
+
+    fixlen_feature_columns = [SparseFeat(feat, vocabulary_size=sparse_feat_max_len[feat], embedding_dim=4)
                               for feat in sparse_features] + [DenseFeat(feat, 1) for feat in dense_features]
 
     dnn_feature_columns = fixlen_feature_columns
     linear_feature_columns = fixlen_feature_columns
 
-    # 3 Generate input data for model
+    # 3 Write tfrecords
     feature_names = get_feature_names(linear_feature_columns + dnn_feature_columns)
 
-    train, test = train_test_split(data, test_size=0.2, random_state=2020)
+    train, valid = train_test_split(data, train_size=0.8, random_state=2020)
+    valid, test = train_test_split(valid, test_size=0.5, random_state=2020)
 
-    train_model_input = {name: train[name] for name in feature_names}
-    test_model_input = {name: test[name] for name in feature_names}
+    write_tfrecord("./criteo_sample.tr.tfrecords", train, sparse_features, dense_features, label_name=target[0])
+    write_tfrecord("./criteo_sample.va.tfrecords", valid, sparse_features, dense_features, label_name=target[0])
+    write_tfrecord("./criteo_sample.te.tfrecords", test, sparse_features, dense_features, label_name=target[0])
 
-    # 4 Define model, train, predict and evaluate
+    # 4 Read tfrecords
+    feature_description = get_feature_description(sparse_features, dense_features, label_name=target[0])
+
+    tfrecord_parse_func = get_tfrecord_parse_func(feature_description, label_name=target[0])
+
+    train_tfdataset = get_tfdataset("./criteo_sample.tr.tfrecords", tfrecord_parse_func, batch_size=256)
+    valid_tfdataset = get_tfdataset("./criteo_sample.va.tfrecords", tfrecord_parse_func, batch_size=256)
+    test_tfdataset = get_tfdataset("./criteo_sample.te.tfrecords", tfrecord_parse_func, batch_size=256)
+
+    # 5 Define model, train, predict and evaluate
     model = DeepFM(linear_feature_columns, dnn_feature_columns, task='binary')
     model.compile(optimizer="adam", loss="binary_crossentropy", metrics=['binary_crossentropy'])
 
-    history = model.fit(train_model_input, train[target].values,
-                        batch_size=256, epochs=10, verbose=2, validation_split=0.2)
+    history = model.fit(train_tfdataset,
+                        batch_size=256, epochs=10, verbose=2, validation_data=valid_tfdataset)
 
-    pred_ans = model.predict(test_model_input, batch_size=256)
+    pred_ans = model.predict(test_tfdataset, batch_size=256)
     print("test LogLoss", round(log_loss(test[target].values, pred_ans), 4))
     print("test AUC", round(roc_auc_score(test[target].values, pred_ans), 4))

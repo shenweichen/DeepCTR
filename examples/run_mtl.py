@@ -16,7 +16,6 @@ if __name__ == "__main__":
                     'own_or_self', 'vet_question', 'vet_benefits', 'weeks_worked', 'year', 'income_50k']
     data = pd.read_csv('./census-income.sample', header=None, names=column_names)
 
-    # preprocess
     data['label_income'] = data['income_50k'].map({' - 50000.': 0, ' 50000+.': 1})
     data['label_marital'] = data['marital_stat'].apply(lambda x: 1 if x == ' Never married' else 0)
     data.drop(labels=['income_50k', 'marital_stat'], axis=1, inplace=True)
@@ -30,37 +29,42 @@ if __name__ == "__main__":
                        'fam_under_18', 'country_father', 'country_mother', 'country_self', 'citizenship',
                        'vet_question']
 
-    dense_features = [col for col in columns if
-                      col not in sparse_features and col not in ['label_income', 'label_marital']]
+    dense_features = [col for col in columns if col not in sparse_features + ['label_income', 'label_marital']]
 
-    # preprocess
+    # 1 Preprocess
+    # 1.1 Fill NA/NaN values
     data[sparse_features] = data[sparse_features].fillna('-1')
     data[dense_features] = data[dense_features].fillna(0)
 
+    # 1.2 Label Encoding for sparse features
     for feat in sparse_features:
         lbe = LabelEncoder()
         data[feat] = lbe.fit_transform(data[feat])
 
+    # 1.3 Transform dense features by Min-Max scaling
     mms = MinMaxScaler(feature_range=(0, 1))
     data[dense_features] = mms.fit_transform(data[dense_features])
 
+    # 2 Specify the parameters for Embedding
     fixlen_feature_columns = [SparseFeat(feat, data[feat].max() + 1, embedding_dim=4) for feat in sparse_features] \
                              + [DenseFeat(feat, 1) for feat in dense_features]
 
     dnn_feature_columns = fixlen_feature_columns
     linear_feature_columns = fixlen_feature_columns
 
+    # 3 Generate input data for model
     feature_names = get_feature_names(linear_feature_columns + dnn_feature_columns)
 
-    # 3.Generate input data for model
     train, test = train_test_split(data, test_size=0.2, random_state=2020)
+
     train_model_input = {name: train[name] for name in feature_names}
     test_model_input = {name: test[name] for name in feature_names}
 
-    # 4.Define Model, train, predict and evaluate
+    # 4 Define model, train, predict and evaluate
     model = MMOE(dnn_feature_columns, tower_dnn_hidden_units=[], task_types=['binary', 'binary'],
                  task_names=['label_income', 'label_marital'])
-    model.compile("adam", loss=["binary_crossentropy", "binary_crossentropy"], metrics=['binary_crossentropy'])
+    model.compile(optimizer="adam", loss=["binary_crossentropy", "binary_crossentropy"],
+                  metrics=['binary_crossentropy'])
 
     history = model.fit(train_model_input, [train['label_income'].values, train['label_marital'].values],
                         batch_size=256, epochs=10, verbose=2, validation_split=0.2)
