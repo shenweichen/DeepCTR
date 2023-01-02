@@ -26,16 +26,16 @@ def DeepFM(linear_feature_columns, dnn_feature_columns, fm_group=(DEFAULT_GROUP_
 
     :param linear_feature_columns: An iterable containing all the features used by the linear part of the model.
     :param dnn_feature_columns: An iterable containing all the features used by the deep part of the model.
-    :param fm_group: list, group_name of features that will be used to do feature interactions.
-    :param dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of DNN
-    :param l2_reg_linear: float. L2 regularizer strength applied to linear part
-    :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
-    :param l2_reg_dnn: float. L2 regularizer strength applied to DNN
-    :param seed: integer ,to use as random seed.
-    :param dnn_dropout: float in [0,1), the probability we will drop out a given DNN coordinate.
-    :param dnn_activation: Activation function to use in DNN
-    :param dnn_use_bn: bool. Whether to use BatchNormalization before activation or not in DNN
-    :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
+    :param fm_group: list. Group_name of features that will be used to do feature interactions.
+    :param dnn_hidden_units: list. List of positive integer or empty list, the layer number and units in each layer of DNN.
+    :param l2_reg_linear: float. L2 regularizer strength applied to linear part.
+    :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector.
+    :param l2_reg_dnn: float. L2 regularizer strength applied to DNN.
+    :param seed: integer. Random seed.
+    :param dnn_dropout: float in [0,1). The probability we will drop out a given DNN coordinate.
+    :param dnn_activation: Activation function to use in DNN.
+    :param dnn_use_bn: bool. Whether to use BatchNormalization before activation or not in DNN.
+    :param task: str. ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss.
     :return: A Keras model instance.
     """
 

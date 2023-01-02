@@ -3,7 +3,8 @@ from collections import namedtuple, OrderedDict
 from copy import copy
 from itertools import chain
 
-from tensorflow.python.keras.initializers import RandomNormal, Zeros
+from keras.initializers.initializers_v2 import RandomNormal, Zeros
+# from tensorflow.python.keras.initializers import RandomNormal, Zeros
 from tensorflow.python.keras.layers import Input, Lambda
 
 from .inputs import create_embedding_matrix, embedding_lookup, get_dense_input, varlen_embedding_lookup, \
@@ -15,12 +16,12 @@ DEFAULT_GROUP_NAME = "default_group"
 
 
 class SparseFeat(namedtuple('SparseFeat',
-                            ['name', 'vocabulary_size', 'embedding_dim', 'use_hash', 'vocabulary_path', 'dtype', 'embeddings_initializer',
-                             'embedding_name',
-                             'group_name', 'trainable'])):
+                            ['name', 'vocabulary_size', 'embedding_dim', 'use_hash', 'vocabulary_path', 'dtype',
+                             'embeddings_initializer', 'embedding_name', 'group_name', 'trainable'])):
     __slots__ = ()
 
-    def __new__(cls, name, vocabulary_size, embedding_dim=4, use_hash=False, vocabulary_path=None, dtype="int32", embeddings_initializer=None,
+    def __new__(cls, name, vocabulary_size, embedding_dim=4, use_hash=False, vocabulary_path=None, dtype="int32",
+                embeddings_initializer=None,
                 embedding_name=None,
                 group_name=DEFAULT_GROUP_NAME, trainable=True):
 
@@ -32,7 +33,8 @@ class SparseFeat(namedtuple('SparseFeat',
         if embedding_name is None:
             embedding_name = name
 
-        return super(SparseFeat, cls).__new__(cls, name, vocabulary_size, embedding_dim, use_hash, vocabulary_path, dtype,
+        return super(SparseFeat, cls).__new__(cls, name, vocabulary_size, embedding_dim, use_hash, vocabulary_path,
+                                              dtype,
                                               embeddings_initializer,
                                               embedding_name, group_name, trainable)
 
@@ -184,7 +186,7 @@ def get_linear_logit(features, feature_columns, units=1, use_bias=False, seed=10
         elif len(dense_input_list) > 0:
             dense_input = concat_func(dense_input_list)
             linear_logit = Linear(l2_reg, mode=1, use_bias=use_bias, seed=seed)(dense_input)
-        else:   #empty feature_columns
+        else:  # empty feature_columns
             return Lambda(lambda x: tf.constant([[0.0]]))(list(features.values())[0])
         linear_logit_list.append(linear_logit)
 
