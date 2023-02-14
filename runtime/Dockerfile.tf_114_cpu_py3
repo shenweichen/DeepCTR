@@ -1,0 +1,4 @@
+FROM tensorflow/tensorflow:1.14.0-py3
+WORKDIR /workspace/deepctr
+COPY DeepCTR /workspace/deepctr
+RUN python3 setup.py
