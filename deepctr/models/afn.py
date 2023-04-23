@@ -59,4 +59,4 @@ def AFN(linear_feature_columns, dnn_feature_columns, cross_num=2, cross_paramete
         hidden_layers.append(fc)
 
     # Output
-    output = Concatenate(axis=1)([linear_logit, cross_input, afm_out, hidden_layers[-
+    output = Concatenate(axis=1)([linear_logit, cross_input, afm_out, hidden_layers[-1]])
