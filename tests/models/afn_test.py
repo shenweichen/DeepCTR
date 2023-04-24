@@ -1,8 +1,7 @@
 import pytest
 
-from deepctr.models import AFM
-from ..utils import check_model, check_estimator, get_test_data, get_test_data_estimator, SAMPLE_SIZE, \
-    TEST_Estimator
+from deepctr.models import AFN
+from tests.utils import get_test_data, SAMPLE_SIZE, check_model, get_device
 
 @pytest.mark.parametrize(
     'afn_dnn_hidden_units, sparse_feature_num, dense_feature_num',

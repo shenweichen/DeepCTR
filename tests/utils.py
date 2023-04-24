@@ -416,3 +416,24 @@ def get_test_data_estimator(sample_size=1000, embedding_size=4, sparse_feature_n
 def check_estimator(model, input_fn):
     model.train(input_fn)
     model.evaluate(input_fn)
+
+    
+def get_device(device_num=None):
+    """
+    Get the PyTorch device to use for computation.
+
+    :param device_num: int, optional (default=None)
+        The index of the device to use. If None, the device with the most available memory will be selected.
+
+    :return: torch.device
+        The PyTorch device to use for computation.
+    """
+    if device_num is not None:
+        device = torch.device("cuda:{}".format(device_num) if torch.cuda.is_available() else "cpu")
+    else:
+        # Get the device with the most available memory
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        if device.type == 'cuda':
+            mem_list = [torch.cuda.max_memory_allocated(i) for i in range(torch.cuda.device_count())]
+            device = torch.device("cuda:{}".format(mem_list.index(max(mem_list))))
+    return device
