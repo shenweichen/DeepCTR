@@ -17,7 +17,7 @@ jobs:
     timeout-minutes: 360
     strategy:
       matrix:
-        python-version: [ 3.6,3.7 ]
+        python-version: [ 3.6, 3.7 ]
         tf-version: [ 1.15.0 ]
 
         exclude:
@@ -67,7 +67,7 @@ jobs:
             tf-version: 2.7.0
     steps:
 
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup python environment
         uses: actions/setup-python@v4
@@ -76,19 +76,15 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip3 install -q tensorflow==${{ matrix.tf-version }}
-          pip install -q protobuf==3.19.0
-          pip install -q requests
+          pip install -q protobuf==3.19.0 requests tensorflow==${{ matrix.tf-version }}
           pip install -e .
       - name: Test with pytest
         timeout-minutes: 360
         run: |
-          pip install -q pytest
-          pip install -q pytest-cov
-          pip install -q python-coveralls
+          pip install -q pytest pytest-cov python-coveralls
           pytest --cov=deepctr --cov-report=xml
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3.1.0
+        uses: codecov/codecov-action@v3.1.4
         with:
           token: ${{secrets.CODECOV_TOKEN}}
           file: ./coverage.xml
