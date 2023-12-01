@@ -17,7 +17,7 @@ jobs:
     timeout-minutes: 360
     strategy:
       matrix:
-        python-version: [ 3.6, 3.7 ]
+        python-version: [ 3.7 ]
         tf-version: [ 1.15.0 ]
 
         exclude:
