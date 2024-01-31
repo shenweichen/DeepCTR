@@ -15,7 +15,7 @@ try:
 except ImportError:
     from tensorflow.python.ops.init_ops_v2 import TruncatedNormal, Constant, glorot_uniform
 
-from tensorflow.python.keras.layers import LSTM, Lambda, Layer, Dropout
+from keras.layers import LSTM, Lambda, Layer, Dropout
 
 from .core import LocalActivationUnit
 from .normalization import LayerNormalization
