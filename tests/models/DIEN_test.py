@@ -78,7 +78,7 @@ def test_DIEN(gru_type):
 def test_DIEN_neg():
     model_name = "DIEN_neg"
     if version.parse(tf.__version__) >= version.parse("1.14.0"):
-        return
+        pytest.skip("DIEN negative sampling test is only maintained for TensorFlow < 1.14.0")
 
     x, y, feature_dim_dict, behavior_feature_list = get_xy_fd(use_neg=True)
 

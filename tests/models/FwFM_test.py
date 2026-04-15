@@ -27,7 +27,7 @@ def test_FwFM(hidden_size, sparse_feature_num):
 )
 def test_FwFMEstimator(hidden_size, sparse_feature_num):
     if not TEST_Estimator:
-        return
+        pytest.skip("Estimator tests are unsupported for this TensorFlow version")
     from deepctr.estimator import FwFMEstimator
 
     sample_size = SAMPLE_SIZE

@@ -25,7 +25,7 @@ def test_NFM(hidden_size, sparse_feature_num):
 )
 def test_FNNEstimator(hidden_size, sparse_feature_num):
     if not TEST_Estimator:
-        return
+        pytest.skip("Estimator tests are unsupported for this TensorFlow version")
     from deepctr.estimator import NFMEstimator
 
     sample_size = SAMPLE_SIZE

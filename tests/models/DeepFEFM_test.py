@@ -40,7 +40,7 @@ def test_DeepFEFM(hidden_size, sparse_feature_num, use_fefm, use_linear, use_fef
 def test_DeepFEFMEstimator(hidden_size, sparse_feature_num):
     import tensorflow as tf
     if not TEST_Estimator or tf.__version__ == "1.4.0":
-        return
+        pytest.skip("DeepFEFM estimator tests are unsupported for this TensorFlow version")
     from deepctr.estimator import DeepFEFMEstimator
 
     sample_size = SAMPLE_SIZE

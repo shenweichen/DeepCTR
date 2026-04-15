@@ -12,7 +12,7 @@ from ..utils import check_model, get_test_data, SAMPLE_SIZE
 )
 def test_ONN(sparse_feature_num):
     if version.parse(tf.__version__) >= version.parse('1.15.0'):
-        return
+        pytest.skip("ONN test is only maintained for TensorFlow < 1.15.0")
     model_name = "ONN"
 
     sample_size = SAMPLE_SIZE

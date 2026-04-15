@@ -40,7 +40,7 @@ def test_DCN_2():
 )
 def test_DCNEstimator(cross_num, hidden_size, sparse_feature_num):
     if not TEST_Estimator:
-        return
+        pytest.skip("Estimator tests are unsupported for this TensorFlow version")
     from deepctr.estimator import DCNEstimator
 
     sample_size = SAMPLE_SIZE

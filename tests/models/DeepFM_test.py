@@ -29,7 +29,7 @@ def test_DeepFM(hidden_size, sparse_feature_num):
 )
 def test_DeepFMEstimator(hidden_size, sparse_feature_num):
     if not TEST_Estimator:
-        return
+        pytest.skip("Estimator tests are unsupported for this TensorFlow version")
     from deepctr.estimator import DeepFMEstimator
     sample_size = SAMPLE_SIZE
     linear_feature_columns, dnn_feature_columns, input_fn = get_test_data_estimator(sample_size,

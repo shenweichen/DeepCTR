@@ -7,7 +7,7 @@ from tests.layers.interaction_test import BATCH_SIZE, EMBEDDING_SIZE
 from tests.utils import layer_test
 
 try:
-    from tensorflow.python.keras.utils.generic_utils import CustomObjectScope
+    from tensorflow.keras.utils import CustomObjectScope
 except ImportError:
     from tensorflow.python.keras.utils import CustomObjectScope
 
@@ -24,7 +24,7 @@ except ImportError:
 )
 def test_Hash(num_buckets, mask_zero, vocabulary_path, input_data, expected_output):
     if not hasattr(tf, 'version') or tf.version.VERSION < '2.0.0':
-        return
+        pytest.skip("Hash layer test requires TensorFlow >= 2.0.0")
 
     with CustomObjectScope({'Hash': Hash}):
         layer_test(Hash,

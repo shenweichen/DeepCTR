@@ -12,7 +12,7 @@ from ..utils import check_model, get_test_data, SAMPLE_SIZE, get_test_data_estim
 )
 def test_FNN(sparse_feature_num, dense_feature_num):
     if tf.__version__ >= "2.0.0":
-        return
+        pytest.skip("FNN model test path is only maintained for TensorFlow 1.x")
     model_name = "FNN"
 
     sample_size = SAMPLE_SIZE
@@ -44,7 +44,7 @@ def test_FNN(sparse_feature_num, dense_feature_num):
 )
 def test_FNNEstimator(sparse_feature_num, dense_feature_num):
     if not TEST_Estimator:
-        return
+        pytest.skip("Estimator tests are unsupported for this TensorFlow version")
     from deepctr.estimator import FNNEstimator
 
     sample_size = SAMPLE_SIZE

@@ -28,7 +28,7 @@ def test_AFM(use_attention, sparse_feature_num, dense_feature_num):
 )
 def test_AFMEstimator(use_attention, sparse_feature_num, dense_feature_num):
     if not TEST_Estimator:
-        return
+        pytest.skip("Estimator tests are unsupported for this TensorFlow version")
     from deepctr.estimator import AFMEstimator
 
     sample_size = SAMPLE_SIZE

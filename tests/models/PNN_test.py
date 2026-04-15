@@ -25,7 +25,7 @@ def test_PNN(use_inner, use_outter, sparse_feature_num):
 )
 def test_PNNEstimator(use_inner, use_outter, sparse_feature_num):
     if not TEST_Estimator:
-        return
+        pytest.skip("Estimator tests are unsupported for this TensorFlow version")
     from deepctr.estimator import PNNEstimator
 
     sample_size = SAMPLE_SIZE

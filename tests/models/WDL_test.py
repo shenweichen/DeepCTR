@@ -13,7 +13,7 @@ from ..utils import check_model, check_estimator, SAMPLE_SIZE, get_test_data, ge
 )
 def test_WDL(sparse_feature_num, dense_feature_num):
     if version.parse(tf.__version__) >= version.parse('2.0.0'):
-        return
+        pytest.skip("WDL model test path is only maintained for TensorFlow 1.x")
     model_name = "WDL"
     sample_size = SAMPLE_SIZE
     x, y, feature_columns = get_test_data(sample_size, sparse_feature_num=sparse_feature_num,
@@ -31,7 +31,7 @@ def test_WDL(sparse_feature_num, dense_feature_num):
 )
 def test_WDLEstimator(sparse_feature_num, dense_feature_num):
     if not TEST_Estimator:
-        return
+        pytest.skip("Estimator tests are unsupported for this TensorFlow version")
     from deepctr.estimator import WDLEstimator
 
     sample_size = SAMPLE_SIZE

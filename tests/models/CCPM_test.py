@@ -31,7 +31,7 @@ def test_CCPM(sparse_feature_num, dense_feature_num):
 )
 def test_CCPM_without_seq(sparse_feature_num, dense_feature_num):
     if tf.__version__ >= "2.0.0":
-        return
+        pytest.skip("CCPM tests are only maintained for TensorFlow 1.x")
     model_name = "CCPM"
 
     sample_size = SAMPLE_SIZE
@@ -50,7 +50,7 @@ def test_CCPM_without_seq(sparse_feature_num, dense_feature_num):
 )
 def test_CCPMEstimator_without_seq(sparse_feature_num, dense_feature_num):
     if not TEST_Estimator:
-        return
+        pytest.skip("Estimator tests are unsupported for this TensorFlow version")
     from deepctr.estimator import CCPMEstimator
 
     sample_size = SAMPLE_SIZE

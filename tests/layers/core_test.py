@@ -1,9 +1,9 @@
 import pytest
 import tensorflow as tf
-from tensorflow.python.keras.layers import PReLU
+from tensorflow.keras.layers import PReLU
 
 try:
-    from tensorflow.python.keras.utils.generic_utils import CustomObjectScope
+    from tensorflow.keras.utils import CustomObjectScope
 except ImportError:
     from tensorflow.python.keras.utils import CustomObjectScope
 from deepctr import layers
@@ -21,7 +21,7 @@ from tests.utils import layer_test
 )
 def test_LocalActivationUnit(hidden_units, activation):
     if tf.__version__ >= '1.13.0' and activation != 'sigmoid':
-        return
+        pytest.skip("Only sigmoid activation is covered for TensorFlow >= 1.13.0 in this test")
 
     with CustomObjectScope({'LocalActivationUnit': layers.LocalActivationUnit}):
         layer_test(layers.LocalActivationUnit,

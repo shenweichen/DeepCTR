@@ -25,7 +25,7 @@ def test_FiBiNET(bilinear_type):
 )
 def test_FiBiNETEstimator(bilinear_type):
     if not TEST_Estimator:
-        return
+        pytest.skip("Estimator tests are unsupported for this TensorFlow version")
     from deepctr.estimator import FiBiNETEstimator
 
     sample_size = SAMPLE_SIZE

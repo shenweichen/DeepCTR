@@ -45,7 +45,7 @@ def test_xDeepFMEstimator(dnn_hidden_units, cin_layer_size, cin_split_half, cin_
                           dense_feature_dim):
     import tensorflow as tf
     if not TEST_Estimator or tf.__version__ == "1.4.0":
-        return
+        pytest.skip("xDeepFM estimator tests are unsupported for this TensorFlow version")
     from deepctr.estimator import xDeepFMEstimator
 
     sample_size = SAMPLE_SIZE
