@@ -23,11 +23,15 @@ setuptools.setup(
     download_url='https://github.com/shenweichen/deepctr/tags',
     packages=setuptools.find_packages(
         exclude=["tests", "tests.models", "tests.layers"]),
-    python_requires=">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*",  # '>=3.4',  # 3.4.6
+    # Keep metadata aligned with CI-tested environments.
+    python_requires=">=3.6,<3.11",
     install_requires=REQUIRED_PACKAGES,
     extras_require={
-        "cpu": ["tensorflow>=1.4.0,!=1.7.*,!=1.8.*"],
-        "gpu": ["tensorflow-gpu>=1.4.0,!=1.7.*,!=1.8.*"],
+        "cpu": ["tensorflow>=1.15.0,<2.11.0"],
+        "gpu": [
+            "tensorflow-gpu==1.15.0; python_version<'3.8'",
+            "tensorflow>=2.0.0,<2.11.0; python_version>='3.8'"
+        ],
     },
     entry_points={
     },
@@ -37,8 +41,6 @@ setuptools.setup(
         'Intended Audience :: Developers',
         'Intended Audience :: Education',
         'Intended Audience :: Science/Research',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',

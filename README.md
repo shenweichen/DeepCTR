@@ -1,7 +1,7 @@
 # DeepCTR
 
 [![Python Versions](https://img.shields.io/pypi/pyversions/deepctr.svg)](https://pypi.org/project/deepctr)
-[![TensorFlow Versions](https://img.shields.io/badge/TensorFlow-1.4+/2.0+-blue.svg)](https://pypi.org/project/deepctr)
+[![TensorFlow Versions](https://img.shields.io/badge/TensorFlow-1.15+/2.x-blue.svg)](https://pypi.org/project/deepctr)
 [![Downloads](https://pepy.tech/badge/deepctr)](https://pepy.tech/project/deepctr)
 [![PyPI Version](https://img.shields.io/pypi/v/deepctr.svg)](https://pypi.org/project/deepctr)
 [![GitHub Issues](https://img.shields.io/github/issues/shenweichen/deepctr.svg
@@ -25,6 +25,19 @@ core components layers which can be used to easily build custom models.You can u
 - Provide `tf.keras.Model` like interfaces for **quick experiment**. [example](https://deepctr-doc.readthedocs.io/en/latest/Quick-Start.html#getting-started-4-steps-to-deepctr)
 - Provide  `tensorflow estimator` interface for **large scale data** and **distributed training**. [example](https://deepctr-doc.readthedocs.io/en/latest/Quick-Start.html#getting-started-4-steps-to-deepctr-estimator-with-tfrecord)
 - It is compatible with both `tf 1.x`  and `tf 2.x`.
+
+## Compatibility
+
+DeepCTR is currently CI-tested on the following combinations:
+
+- Python `3.6` + TensorFlow `1.15.0` (legacy compatibility path)
+- Python `3.6` + TensorFlow `2.6.0`
+- Python `3.7` + TensorFlow `2.7.0`
+- Python `3.8` + TensorFlow `2.8.0`
+- Python `3.9` + TensorFlow `2.10.0`
+- Python `3.10` + TensorFlow `2.10.0`
+
+For new projects, prefer TensorFlow 2.x APIs. TensorFlow 1.x support is maintained for compatibility.
 
 Some related projects:
 
