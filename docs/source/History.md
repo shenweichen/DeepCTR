@@ -1,4 +1,5 @@
 # History
+- 04/16/2026 : [v0.9.4](https://github.com/shenweichen/DeepCTR/releases/tag/v0.9.4) released.Support higher tensorflow version.
 - 11/10/2022 : [v0.9.3](https://github.com/shenweichen/DeepCTR/releases/tag/v0.9.3) released.Add [EDCN](./Features.html#edcn-enhancing-explicit-and-implicit-feature-interactions-dcn).
 - 10/15/2022 : [v0.9.2](https://github.com/shenweichen/DeepCTR/releases/tag/v0.9.2) released.Support python `3.9`,`3.10`.
 - 06/11/2022 : [v0.9.1](https://github.com/shenweichen/DeepCTR/releases/tag/v0.9.1) released.Improve compatibility with tensorflow `2.x`.

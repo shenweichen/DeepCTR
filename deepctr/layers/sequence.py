@@ -8,14 +8,14 @@ Author:
 
 import numpy as np
 import tensorflow as tf
-from tensorflow.python.keras import backend as K
+from tensorflow.keras import backend as K
 
 try:
     from tensorflow.python.ops.init_ops import TruncatedNormal, Constant, glorot_uniform_initializer as glorot_uniform
 except ImportError:
     from tensorflow.python.ops.init_ops_v2 import TruncatedNormal, Constant, glorot_uniform
 
-from tensorflow.python.keras.layers import LSTM, Lambda, Layer, Dropout
+from tensorflow.keras.layers import LSTM, Lambda, Layer, Dropout
 
 from .core import LocalActivationUnit
 from .normalization import LayerNormalization
@@ -26,6 +26,16 @@ else:
     from ..contrib.rnn import dynamic_rnn
 from ..contrib.utils import QAAttGRUCell, VecAttGRUCell
 from .utils import reduce_sum, reduce_max, div, softmax, reduce_mean
+
+
+def _dim_value(dim):
+    return dim.value if hasattr(dim, "value") else dim
+
+
+def _shape_to_list(shape):
+    if hasattr(shape, "as_list"):
+        return shape.as_list()
+    return [_dim_value(dim) for dim in shape]
 
 
 class SequencePoolingLayer(Layer):
@@ -652,7 +662,7 @@ class PositionEncoding(Layer):
 
     def build(self, input_shape):
         # Create a trainable weight variable for this layer.
-        _, T, num_units = input_shape.as_list()  # inputs.get_shape().as_list()
+        _, T, num_units = _shape_to_list(input_shape)  # inputs.get_shape().as_list()
         # First part of the PE function: sin and cos argument
         position_enc = np.array([
             [pos / np.power(10000, 2. * (i // 2) / num_units) for i in range(num_units)]
@@ -703,15 +713,11 @@ class BiasEncoding(Layer):
         # Create a trainable weight variable for this layer.
 
         if self.sess_max_count == 1:
-            embed_size = input_shape[2].value
-            seq_len_max = input_shape[1].value
+            embed_size = _dim_value(input_shape[2])
+            seq_len_max = _dim_value(input_shape[1])
         else:
-            try:
-                embed_size = input_shape[0][2].value
-                seq_len_max = input_shape[0][1].value
-            except AttributeError:
-                embed_size = input_shape[0][2]
-                seq_len_max = input_shape[0][1]
+            embed_size = _dim_value(input_shape[0][2])
+            seq_len_max = _dim_value(input_shape[0][1])
 
         self.sess_bias_embedding = self.add_weight('sess_bias_embedding', shape=(self.sess_max_count, 1, 1),
                                                    initializer=TruncatedNormal(
@@ -763,7 +769,7 @@ class DynamicGRU(Layer):
         # Create a trainable weight variable for this layer.
         input_seq_shape = input_shape[0]
         if self.num_units is None:
-            self.num_units = input_seq_shape.as_list()[-1]
+            self.num_units = _shape_to_list(input_seq_shape)[-1]
         if self.gru_type == "AGRU":
             self.gru_cell = QAAttGRUCell(self.num_units)
         elif self.gru_type == "AUGRU":

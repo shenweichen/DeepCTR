@@ -8,8 +8,8 @@ Reference:
     [1] Ma X, Zhao L, Huang G, et al. Entire space multi-task model: An effective approach for estimating post-click conversion rate[C]//The 41st International ACM SIGIR Conference on Research & Development in Information Retrieval. 2018.(https://arxiv.org/abs/1804.07931)
 """
 
-from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.layers import Dense, Multiply
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Dense, Multiply
 
 from ...feature_column import build_input_features, input_from_feature_columns
 from ...layers.core import PredictionLayer, DNN

@@ -8,8 +8,8 @@ Reference:
     [1] Ruder S. An overview of multi-task learning in deep neural networks[J]. arXiv preprint arXiv:1706.05098, 2017.(https://arxiv.org/pdf/1706.05098.pdf)
 """
 
-from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.layers import Dense
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Dense
 
 from ...feature_column import build_input_features, input_from_feature_columns
 from ...layers.core import PredictionLayer, DNN

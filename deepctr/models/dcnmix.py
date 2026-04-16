@@ -10,8 +10,8 @@ Reference:
 
     [2] Wang R, Shivanna R, Cheng D Z, et al. DCN V2: Improved Deep & Cross Network and Practical Lessons for Web-scale Learning to Rank Systems[J]. 2020. (https://arxiv.org/abs/2008.13535)
 """
-from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.layers import Dense, Concatenate
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Dense, Concatenate
 
 from ..feature_column import build_input_features, get_linear_logit, input_from_feature_columns
 from ..layers.core import PredictionLayer, DNN

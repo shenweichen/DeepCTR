@@ -11,8 +11,8 @@ Authors:
 import itertools
 
 import tensorflow as tf
-from tensorflow.python.keras import backend as K
-from tensorflow.python.keras.backend import batch_dot
+from tensorflow.keras import backend as K
+from tensorflow.keras.backend import batch_dot
 
 try:
     from tensorflow.python.ops.init_ops import Zeros, Ones, Constant, TruncatedNormal, \
@@ -21,13 +21,19 @@ try:
 except ImportError:
     from tensorflow.python.ops.init_ops_v2 import Zeros, Ones, Constant, TruncatedNormal, glorot_normal, glorot_uniform
 
-from tensorflow.python.keras.layers import Layer, MaxPooling2D, Conv2D, Dropout, Lambda, Dense, Flatten
-from tensorflow.python.keras.regularizers import l2
+from tensorflow.keras.layers import Layer, MaxPooling2D, Conv2D, Dropout, Lambda, Dense, Flatten
+from tensorflow.keras.regularizers import l2
 from tensorflow.python.layers import utils
 
 from .activation import activation_layer
 from .utils import concat_func, reduce_sum, softmax, reduce_mean
 from .core import DNN
+
+
+def _shape_to_list(shape):
+    if hasattr(shape, "as_list"):
+        return shape.as_list()
+    return [dim.value if hasattr(dim, "value") else dim for dim in shape]
 
 
 class AFMLayer(Layer):
@@ -72,7 +78,7 @@ class AFMLayer(Layer):
                              'on a list of at least 2 inputs')
 
         shape_set = set()
-        reduced_input_shape = [shape.as_list() for shape in input_shape]
+        reduced_input_shape = [_shape_to_list(shape) for shape in input_shape]
         for i in range(len(input_shape)):
             shape_set.add(tuple(reduced_input_shape[i]))
 
@@ -628,7 +634,7 @@ class InnerProductLayer(Layer):
             raise ValueError('A `InnerProductLayer` layer should be called '
                              'on a list of at least 2 inputs')
 
-        reduced_inputs_shapes = [shape.as_list() for shape in input_shape]
+        reduced_inputs_shapes = [_shape_to_list(shape) for shape in input_shape]
         shape_set = set()
 
         for i in range(len(input_shape)):
@@ -816,7 +822,7 @@ class OutterProductLayer(Layer):
             raise ValueError('A `OutterProductLayer` layer should be called '
                              'on a list of at least 2 inputs')
 
-        reduced_inputs_shapes = [shape.as_list() for shape in input_shape]
+        reduced_inputs_shapes = [_shape_to_list(shape) for shape in input_shape]
         shape_set = set()
 
         for i in range(len(input_shape)):
@@ -961,7 +967,7 @@ class FGCNNLayer(Layer):
         self.conv_layers = []
         self.pooling_layers = []
         self.dense_layers = []
-        pooling_shape = input_shape.as_list() + [1, ]
+        pooling_shape = _shape_to_list(input_shape) + [1, ]
         embedding_size = int(input_shape[-1])
         for i in range(1, len(self.filters) + 1):
             filters = self.filters[i - 1]

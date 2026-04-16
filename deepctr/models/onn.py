@@ -11,16 +11,16 @@ Reference:
 
 import itertools
 
-from tensorflow.python.keras import backend as K
-from tensorflow.python.keras.layers import (Dense, Embedding, Lambda,
+from tensorflow.keras import backend as K
+from tensorflow.keras.layers import (Dense, Embedding, Lambda,
                                             multiply, Flatten)
 try:
-    from tensorflow.python.keras.layers import BatchNormalization
+    from tensorflow.keras.layers import BatchNormalization
 except ImportError:
     import tensorflow as tf
     BatchNormalization = tf.keras.layers.BatchNormalization
-from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.regularizers import l2
+from tensorflow.keras.models import Model
+from tensorflow.keras.regularizers import l2
 
 from ..feature_column import SparseFeat, VarLenSparseFeat, build_input_features, get_linear_logit
 from ..inputs import get_dense_input

@@ -10,8 +10,8 @@ Reference:
 
 """
 import tensorflow as tf
-from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.layers import Dense, Flatten, Conv2D, Lambda
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Dense, Flatten, Conv2D, Lambda
 
 from ..feature_column import build_input_features, get_linear_logit, input_from_feature_columns
 from ..layers.core import DNN, PredictionLayer

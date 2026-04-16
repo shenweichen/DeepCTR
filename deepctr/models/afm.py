@@ -9,7 +9,7 @@ Reference:
     (https://arxiv.org/abs/1708.04617)
 
 """
-from tensorflow.python.keras.models import Model
+from tensorflow.keras.models import Model
 from ..feature_column import build_input_features, get_linear_logit, DEFAULT_GROUP_NAME, input_from_feature_columns
 from ..layers.core import PredictionLayer
 from ..layers.interaction import AFMLayer, FM

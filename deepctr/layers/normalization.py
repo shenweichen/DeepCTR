@@ -6,8 +6,8 @@ Author:
 
 """
 
-from tensorflow.python.keras import backend as K
-from tensorflow.python.keras.layers import Layer
+from tensorflow.keras import backend as K
+from tensorflow.keras.layers import Layer
 
 try:
     from tensorflow.python.ops.init_ops import Zeros, Ones

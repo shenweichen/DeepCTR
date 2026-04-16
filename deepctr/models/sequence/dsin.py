@@ -10,10 +10,10 @@ Reference:
 
 from collections import OrderedDict
 
-from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.layers import (Concatenate, Dense, Embedding,
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import (Concatenate, Dense, Embedding,
                                             Flatten, Input)
-from tensorflow.python.keras.regularizers import l2
+from tensorflow.keras.regularizers import l2
 
 from ...feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, build_input_features
 from ...inputs import (get_embedding_vec_list, get_inputs_list, embedding_lookup, get_dense_input)
