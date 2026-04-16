@@ -69,7 +69,7 @@ jobs:
       - name: Test with pytest
         timeout-minutes: 180
         run: |
-          pytest --cov=deepctr --cov-report=xml
+          pytest --cov=deepctr --cov-report=xml --cov-report=term-missing:skip-covered
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v6
