@@ -10,7 +10,8 @@
 
 
 [![Documentation Status](https://readthedocs.org/projects/deepctr-doc/badge/?version=latest)](https://deepctr-doc.readthedocs.io/)
-![CI status](https://github.com/shenweichen/deepctr/workflows/CI/badge.svg)
+[![CI_TF1](https://github.com/shenweichen/DeepCTR/actions/workflows/ci.yml/badge.svg)](https://github.com/shenweichen/DeepCTR/actions/workflows/ci.yml)
+[![CI_TF2](https://github.com/shenweichen/DeepCTR/actions/workflows/ci2.yml/badge.svg)](https://github.com/shenweichen/DeepCTR/actions/workflows/ci2.yml)
 [![codecov](https://codecov.io/gh/shenweichen/DeepCTR/branch/master/graph/badge.svg)](https://codecov.io/gh/shenweichen/DeepCTR)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/d4099734dc0e4bab91d332ead8c0bdd0)](https://www.codacy.com/gh/shenweichen/DeepCTR?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=shenweichen/DeepCTR&amp;utm_campaign=Badge_Grade)
 [![Disscussion](https://img.shields.io/badge/chat-wechat-brightgreen?style=flat)](./README.md#DisscussionGroup)
