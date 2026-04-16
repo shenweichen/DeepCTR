@@ -27,6 +27,19 @@ core components layers which can be used to easily build custom models.You can u
 - Provide  `tensorflow estimator` interface for **large scale data** and **distributed training**. [example](https://deepctr-doc.readthedocs.io/en/latest/Quick-Start.html#getting-started-4-steps-to-deepctr-estimator-with-tfrecord)
 - It is compatible with both `tf 1.15`  and `tf 2.x`.
 
+## Installation and compatibility
+
+DeepCTR does not pin or install TensorFlow for you. Install a TensorFlow build that matches your Python, NumPy, CPU/GPU, and operating system first, then install DeepCTR:
+
+```bash
+pip install tensorflow
+pip install deepctr
+```
+
+For Python `>=3.9`, DeepCTR allows modern `h5py` releases with `h5py>=3.7.0`. If TensorFlow reports a NumPy conflict, follow the TensorFlow requirement for your selected TensorFlow release, for example using `numpy<2` when required by TensorFlow.
+
+Use public `tensorflow.keras` APIs in your own code and examples. Avoid mixing `tensorflow.python.keras` with `tensorflow.keras`, because `tensorflow.python.*` is private TensorFlow API and can break model serialization or optimizer/metric loading across TensorFlow versions.
+
 Some related projects:
 
 - DeepMatch: https://github.com/shenweichen/DeepMatch

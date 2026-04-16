@@ -206,7 +206,7 @@ following codes.
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
-from tensorflow.python.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 from deepctr.models import DeepFM
 from deepctr.feature_column import SparseFeat, VarLenSparseFeat, get_feature_names
@@ -278,7 +278,7 @@ if __name__ == "__main__":
 ```python
 import numpy as np
 import pandas as pd
-from tensorflow.python.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 from deepctr.feature_column import SparseFeat, VarLenSparseFeat, get_feature_names
 from deepctr.models import DeepFM
@@ -334,7 +334,7 @@ from deepctr.models import DeepFM
 from deepctr.feature_column import SparseFeat, VarLenSparseFeat, get_feature_names
 import numpy as np
 import pandas as pd
-from tensorflow.python.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 try:
     import tensorflow.compat.v1 as tf
@@ -401,7 +401,6 @@ and run the following codes.
 ```python
 import tensorflow as tf
 
-from tensorflow.python.ops.parsing_ops import FixedLenFeature
 from deepctr.estimator import DeepFMEstimator
 from deepctr.estimator.inputs import input_fn_tfrecord
 
@@ -425,10 +424,10 @@ if __name__ == "__main__":
 
     # 2.generate input data for model
 
-    feature_description = {k: FixedLenFeature(dtype=tf.int64, shape=1) for k in sparse_features}
+    feature_description = {k: tf.io.FixedLenFeature(dtype=tf.int64, shape=1) for k in sparse_features}
     feature_description.update(
-        {k: FixedLenFeature(dtype=tf.float32, shape=1) for k in dense_features})
-    feature_description['label'] = FixedLenFeature(dtype=tf.float32, shape=1)
+        {k: tf.io.FixedLenFeature(dtype=tf.float32, shape=1) for k in dense_features})
+    feature_description['label'] = tf.io.FixedLenFeature(dtype=tf.float32, shape=1)
 
     train_model_input = input_fn_tfrecord('./criteo_sample.tr.tfrecords', feature_description, 'label', batch_size=256,
                                           num_epochs=1, shuffle_factor=10)
