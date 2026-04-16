@@ -57,6 +57,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install -q --upgrade pip setuptools wheel
+          python -m pip install -q "numpy<2"
           python -m pip install -q tensorflow==${{ matrix.tf-version }}
           if [ "${{ matrix.use-legacy-keras }}" = "1" ]; then
             python -m pip install -q tf-keras==${{ matrix.tf-version }}

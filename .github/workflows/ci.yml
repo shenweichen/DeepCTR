@@ -39,6 +39,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install -q --upgrade pip setuptools wheel
+          python -m pip install -q "numpy<2"
           python -m pip install -q tensorflow==${{ matrix.tf-version }}
           python -m pip install -q protobuf==3.19.0
           python -m pip install -q pytest pytest-cov
