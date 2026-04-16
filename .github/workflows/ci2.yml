@@ -27,16 +27,24 @@ jobs:
         include:
           - python-version: "3.10"
             tf-version: "2.10.0"
+            use-legacy-keras: "0"
           - python-version: "3.10"
             tf-version: "2.15.0"
+            use-legacy-keras: "0"
           - python-version: "3.11"
             tf-version: "2.15.0"
+            use-legacy-keras: "0"
           - python-version: "3.10"
             tf-version: "2.20.0"
+            use-legacy-keras: "1"
           - python-version: "3.11"
             tf-version: "2.20.0"
+            use-legacy-keras: "1"
           - python-version: "3.12"
             tf-version: "2.20.0"
+            use-legacy-keras: "1"
+    env:
+      TF_USE_LEGACY_KERAS: ${{ matrix.use-legacy-keras }}
 
     steps:
       - uses: actions/checkout@v5
@@ -50,6 +58,9 @@ jobs:
         run: |
           python -m pip install -q --upgrade pip setuptools wheel
           python -m pip install -q tensorflow==${{ matrix.tf-version }}
+          if [ "${{ matrix.use-legacy-keras }}" = "1" ]; then
+            python -m pip install -q tf-keras==${{ matrix.tf-version }}
+          fi
           python -m pip install -q pytest pytest-cov
           python -m pip install -e .
           python -m pip check

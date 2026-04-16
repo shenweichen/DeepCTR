@@ -7,8 +7,8 @@ Reference:
     [1] Qu Y, Cai H, Ren K, et al. Product-based neural networks for user response prediction[C]//Data Mining (ICDM), 2016 IEEE 16th International Conference on. IEEE, 2016: 1149-1154.(https://arxiv.org/pdf/1611.00144.pdf)
 """
 
-from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.layers import Dense, Reshape, Flatten
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Dense, Reshape, Flatten
 
 from ..feature_column import build_input_features, input_from_feature_columns
 from ..layers.core import PredictionLayer, DNN

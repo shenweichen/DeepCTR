@@ -10,8 +10,8 @@ Reference:
 
 from itertools import chain
 
-from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.layers import Dense
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Dense
 
 from ..feature_column import build_input_features, get_linear_logit, input_from_feature_columns
 from ..layers.core import PredictionLayer, DNN

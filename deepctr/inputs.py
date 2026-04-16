@@ -9,8 +9,8 @@ Author:
 from collections import defaultdict
 from itertools import chain
 
-from tensorflow.python.keras.layers import Embedding, Lambda
-from tensorflow.python.keras.regularizers import l2
+from tensorflow.keras.layers import Embedding, Lambda
+from tensorflow.keras.regularizers import l2
 
 from .layers.sequence import SequencePoolingLayer, WeightedSequenceLayer
 from .layers.utils import Hash

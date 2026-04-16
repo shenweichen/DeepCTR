@@ -7,20 +7,20 @@ Author:
 """
 
 import tensorflow as tf
-from tensorflow.python.keras import backend as K
+from tensorflow.keras import backend as K
 
 try:
     from tensorflow.python.ops.init_ops_v2 import Zeros, Ones, glorot_normal
 except ImportError:
     from tensorflow.python.ops.init_ops import Zeros, Ones, glorot_normal_initializer as glorot_normal
 
-from tensorflow.python.keras.layers import Layer, Dropout
+from tensorflow.keras.layers import Layer, Dropout
 
 try:
-    from tensorflow.python.keras.layers import BatchNormalization
+    from tensorflow.keras.layers import BatchNormalization
 except ImportError:
     BatchNormalization = tf.keras.layers.BatchNormalization
-from tensorflow.python.keras.regularizers import l2
+from tensorflow.keras.regularizers import l2
 
 from .activation import activation_layer
 

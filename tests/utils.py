@@ -8,9 +8,9 @@ import numpy as np
 import tensorflow as tf
 from numpy.testing import assert_allclose
 from packaging import version
-from tensorflow.python.keras import backend as K
-from tensorflow.python.keras.layers import Input, Masking
-from tensorflow.python.keras.models import Model, load_model, save_model
+from tensorflow.keras import backend as K
+from tensorflow.keras.layers import Input, Masking
+from tensorflow.keras.models import Model, load_model, save_model
 
 from deepctr.feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, DEFAULT_GROUP_NAME
 from deepctr.layers import custom_objects

@@ -7,8 +7,8 @@ Reference:
     //IJCAI. 2020: 3139-3145.(https://www.ijcai.org/Proceedings/2020/0434.pdf)
 """
 import tensorflow as tf
-from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.layers import Dense, Lambda, Flatten
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Dense, Lambda, Flatten
 
 from ..feature_column import build_input_features, get_linear_logit, input_from_feature_columns, SparseFeat, \
     VarLenSparseFeat

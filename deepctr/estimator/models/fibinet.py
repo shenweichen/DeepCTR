@@ -8,7 +8,7 @@ Reference:
 """
 
 import tensorflow as tf
-from tensorflow.python.keras.layers import Dense, Flatten
+from tensorflow.keras.layers import Dense, Flatten
 
 from ..feature_column import get_linear_logit, input_from_feature_columns
 from ..utils import deepctr_model_fn, DNN_SCOPE_NAME, variable_scope

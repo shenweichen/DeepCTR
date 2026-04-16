@@ -7,8 +7,8 @@ Reference:
     Qiwei Chen, Huan Zhao, Wei Li, Pipei Huang, and Wenwu Ou. 2019. Behavior sequence transformer for e-commerce recommendation in Alibaba. In Proceedings of the 1st International Workshop on Deep Learning Practice for High-Dimensional Sparse Data (DLP-KDD '19). Association for Computing Machinery, New York, NY, USA, Article 12, 1–4. DOI:https://doi.org/10.1145/3326937.3341261
 """
 
-from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.layers import (Dense, Flatten)
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import (Dense, Flatten)
 
 from ...feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, build_input_features
 from ...inputs import get_varlen_pooling_list, create_embedding_matrix, embedding_lookup, varlen_embedding_lookup, \

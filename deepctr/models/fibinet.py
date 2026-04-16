@@ -7,8 +7,8 @@ Reference:
     [1] Huang T, Zhang Z, Zhang J. FiBiNET: Combining Feature Importance and Bilinear feature Interaction for Click-Through Rate Prediction[J]. arXiv preprint arXiv:1905.09433, 2019.
 """
 
-from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.layers import Dense, Flatten
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Dense, Flatten
 
 from ..feature_column import build_input_features, get_linear_logit, input_from_feature_columns
 from ..layers.core import PredictionLayer, DNN

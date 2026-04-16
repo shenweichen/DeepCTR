@@ -6,8 +6,8 @@ Author:
 Reference:
     [1] Chen, B., Wang, Y., Liu, et al. Enhancing Explicit and Implicit Feature Interactions via Information Sharing for Parallel Deep CTR Models. CIKM, 2021, October (https://dlp-kdd.github.io/assets/pdf/DLP-KDD_2021_paper_12.pdf)
 """
-from tensorflow.python.keras.layers import Dense, Reshape, Concatenate
-from tensorflow.python.keras.models import Model
+from tensorflow.keras.layers import Dense, Reshape, Concatenate
+from tensorflow.keras.models import Model
 
 from ..feature_column import build_input_features, get_linear_logit, input_from_feature_columns
 from ..layers.core import PredictionLayer, DNN, RegulationModule
