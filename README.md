@@ -1,7 +1,7 @@
 # DeepCTR
 
 [![Python Versions](https://img.shields.io/pypi/pyversions/deepctr.svg)](https://pypi.org/project/deepctr)
-[![TensorFlow Versions](https://img.shields.io/badge/TensorFlow-1.4+/2.0+-blue.svg)](https://pypi.org/project/deepctr)
+[![TensorFlow Versions](https://img.shields.io/badge/TensorFlow-1.15/2.0+-blue.svg)](https://pypi.org/project/deepctr)
 [![Downloads](https://pepy.tech/badge/deepctr)](https://pepy.tech/project/deepctr)
 [![PyPI Version](https://img.shields.io/pypi/v/deepctr.svg)](https://pypi.org/project/deepctr)
 [![GitHub Issues](https://img.shields.io/github/issues/shenweichen/deepctr.svg
@@ -92,9 +92,9 @@ If you find this code useful in your research, please cite it using the followin
 - [Github Discussions](https://github.com/shenweichen/DeepCTR/discussions)
 - Wechat Discussions
 
-|公众号：浅梦学习笔记|微信：deepctrbot|学习小组 [加入](https://t.zsxq.com/026UJEuzv) [主题集合](https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MjM5MzY4NzE3MA==&action=getalbum&album_id=1361647041096843265&scene=126#wechat_redirect)|
-|:--:|:--:|:--:|
-| [![公众号](./docs/pics/code.png)](https://github.com/shenweichen/AlgoNotes)| [![微信](./docs/pics/deepctrbot.png)](https://github.com/shenweichen/AlgoNotes)|[![学习小组](./docs/pics/planet_github.png)](https://t.zsxq.com/026UJEuzv)|
+|公众号：浅梦学习笔记|微信：deepctrbot|
+|:--:|:--:|
+| [![公众号](./docs/pics/code.png)](https://github.com/shenweichen/AlgoNotes)| [![微信](./docs/pics/deepctrbot.png)](https://github.com/shenweichen/AlgoNotes)|
 
 ## Main contributors([welcome to join us!](./CONTRIBUTING.md))
 
