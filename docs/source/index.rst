@@ -57,7 +57,7 @@ DisscussionGroup
 
   `Discussions <https://github.com/shenweichen/DeepCTR/discussions>`_ 
 
-.. image:: ../pics/code2.jpg
+.. image:: ../pics/code.png
 
 .. toctree::
    :maxdepth: 2
