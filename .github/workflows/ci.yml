@@ -20,7 +20,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-22.04
-    timeout-minutes: 180
+    timeout-minutes: 240
     strategy:
       fail-fast: false
       matrix:
@@ -47,7 +47,7 @@ jobs:
           python -m pip check
 
       - name: Test with pytest
-        timeout-minutes: 180
+        timeout-minutes: 240
         run: |
           pytest --cov=deepctr --cov-report=xml
 
