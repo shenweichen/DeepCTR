@@ -9,12 +9,6 @@ on:
       - 'setup.cfg'
       - '.github/workflows/**'
   pull_request:
-    paths:
-      - 'deepctr/**'
-      - 'tests/**'
-      - 'setup.py'
-      - 'setup.cfg'
-      - '.github/workflows/**'
   workflow_dispatch:
 
 jobs:
