@@ -16,6 +16,27 @@ from .layers.sequence import SequencePoolingLayer, WeightedSequenceLayer
 from .layers.utils import Hash
 
 
+def _create_embedding_layer(feat, l2_reg, prefix, name_suffix, mask_zero=False):
+    emb = Embedding(feat.vocabulary_size, feat.embedding_dim,
+                    embeddings_initializer=feat.embeddings_initializer,
+                    embeddings_regularizer=l2(l2_reg),
+                    name=prefix + '_' + name_suffix + '_' + feat.embedding_name,
+                    mask_zero=mask_zero)
+    emb.trainable = feat.trainable
+    return emb
+
+
+def _check_embedding_compatible(embedding_name, existing_feat, feat):
+    for attr in ('vocabulary_size', 'embedding_dim', 'trainable'):
+        if getattr(existing_feat, attr) != getattr(feat, attr):
+            raise ValueError(
+                "Feature columns with the same embedding_name must share the same "
+                "{}. embedding_name='{}' has {} and {}.".format(
+                    attr, embedding_name, getattr(existing_feat, attr), getattr(feat, attr)
+                )
+            )
+
+
 def get_inputs_list(inputs):
     return list(chain(*list(map(lambda x: x.values(), filter(lambda x: x is not None, inputs)))))
 
@@ -23,25 +44,30 @@ def get_inputs_list(inputs):
 def create_embedding_dict(sparse_feature_columns, varlen_sparse_feature_columns, seed, l2_reg,
                           prefix='sparse_', seq_mask_zero=True):
     sparse_embedding = {}
+    embedding_feature_dict = {}
+    varlen_embedding_names = set(
+        feat.embedding_name for feat in varlen_sparse_feature_columns
+    ) if varlen_sparse_feature_columns else set()
+
     for feat in sparse_feature_columns:
-        emb = Embedding(feat.vocabulary_size, feat.embedding_dim,
-                        embeddings_initializer=feat.embeddings_initializer,
-                        embeddings_regularizer=l2(l2_reg),
-                        name=prefix + '_emb_' + feat.embedding_name)
-        emb.trainable = feat.trainable
-        sparse_embedding[feat.embedding_name] = emb
+        embedding_name = feat.embedding_name
+        if embedding_name in sparse_embedding:
+            _check_embedding_compatible(embedding_name, embedding_feature_dict[embedding_name], feat)
+            continue
+        mask_zero = seq_mask_zero and feat.embedding_name in varlen_embedding_names
+        emb = _create_embedding_layer(feat, l2_reg, prefix, 'emb', mask_zero)
+        sparse_embedding[embedding_name] = emb
+        embedding_feature_dict[embedding_name] = feat
 
     if varlen_sparse_feature_columns and len(varlen_sparse_feature_columns) > 0:
         for feat in varlen_sparse_feature_columns:
-            # if feat.name not in sparse_embedding:
-            emb = Embedding(feat.vocabulary_size, feat.embedding_dim,
-                            embeddings_initializer=feat.embeddings_initializer,
-                            embeddings_regularizer=l2(
-                                l2_reg),
-                            name=prefix + '_seq_emb_' + feat.name,
-                            mask_zero=seq_mask_zero)
-            emb.trainable = feat.trainable
+            embedding_name = feat.embedding_name
+            if embedding_name in sparse_embedding:
+                _check_embedding_compatible(embedding_name, embedding_feature_dict[embedding_name], feat)
+                continue
+            emb = _create_embedding_layer(feat, l2_reg, prefix, 'seq_emb', seq_mask_zero)
             sparse_embedding[feat.embedding_name] = emb
+            embedding_feature_dict[feat.embedding_name] = feat
     return sparse_embedding
 
 

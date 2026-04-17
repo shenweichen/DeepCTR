@@ -1,6 +1,8 @@
 from deepctr.models import DeepFM
 from deepctr.feature_column import SparseFeat, DenseFeat, VarLenSparseFeat, get_feature_names
+from deepctr.inputs import create_embedding_matrix
 import numpy as np
+import pytest
 
 
 def test_long_dense_vector():
@@ -28,3 +30,28 @@ def test_feature_column_sparsefeat_vocabulary_path():
     vlsf = VarLenSparseFeat(sf, 6)
     if vlsf.vocabulary_path != vocab_path:
         raise ValueError("vlsf.vocabulary_path is invalid")
+
+
+def test_create_embedding_matrix_reuses_same_embedding_name():
+    feature_columns = [
+        SparseFeat('item_id', 4, embedding_dim=8),
+        SparseFeat('item_id_copy', 4, embedding_dim=8, embedding_name='item_id'),
+        VarLenSparseFeat(SparseFeat('hist_item_id', 4, embedding_dim=8, embedding_name='item_id'), maxlen=3),
+        VarLenSparseFeat(SparseFeat('neg_hist_item_id', 4, embedding_dim=8, embedding_name='item_id'), maxlen=3),
+    ]
+
+    embedding_dict = create_embedding_matrix(feature_columns, l2_reg=0, seed=1024)
+
+    assert list(embedding_dict.keys()) == ['item_id']
+    assert embedding_dict['item_id'].name == 'sparse_emb_item_id'
+    assert embedding_dict['item_id'].mask_zero is True
+
+
+def test_create_embedding_matrix_rejects_inconsistent_shared_embedding():
+    feature_columns = [
+        SparseFeat('item_id', 4, embedding_dim=8),
+        VarLenSparseFeat(SparseFeat('hist_item_id', 5, embedding_dim=8, embedding_name='item_id'), maxlen=3),
+    ]
+
+    with pytest.raises(ValueError, match="same embedding_name"):
+        create_embedding_matrix(feature_columns, l2_reg=0, seed=1024)

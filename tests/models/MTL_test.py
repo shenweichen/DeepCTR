@@ -1,6 +1,7 @@
 import pytest
 import tensorflow as tf
 
+from deepctr.feature_column import SparseFeat
 from deepctr.models.multitask import SharedBottom, ESMM, MMOE, PLE
 from ..utils_mtl import get_mtl_test_data, check_mtl_model
 
@@ -25,6 +26,16 @@ def test_ESMM():
     model = ESMM(dnn_feature_columns, tower_dnn_hidden_units=(8,), task_types=['binary', 'binary'],
                  task_names=['label_marital', 'label_income'])
     check_mtl_model(model, model_name, x, y_list, task_types=['binary', 'binary'])
+
+
+def test_ESMM_string_sparse_requires_hash():
+    with pytest.raises(ValueError, match="use_hash=True"):
+        ESMM([SparseFeat('user_id', 10, dtype='string')], tower_dnn_hidden_units=(8,))
+
+
+def test_ESMM_string_sparse_with_hash():
+    model = ESMM([SparseFeat('user_id', 10, use_hash=True, dtype='string')], tower_dnn_hidden_units=(8,))
+    assert len(model.outputs) == 2
 
 
 def test_MMOE():
