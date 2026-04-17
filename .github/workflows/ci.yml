@@ -9,16 +9,34 @@ on:
       - 'setup.cfg'
       - '.github/workflows/**'
   pull_request:
-    paths:
-      - 'deepctr/**'
-      - 'tests/**'
-      - 'setup.py'
-      - 'setup.cfg'
-      - '.github/workflows/**'
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
 jobs:
+  changes:
+    runs-on: ubuntu-22.04
+    outputs:
+      code_related: ${{ steps.filter.outputs.code_related }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Detect code-related changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            code_related:
+              - 'deepctr/**'
+              - 'tests/**'
+              - 'setup.py'
+              - 'setup.cfg'
+              - '.github/workflows/**'
+
   build:
+    needs: changes
     runs-on: ubuntu-22.04
     timeout-minutes: 240
     strategy:
@@ -29,14 +47,21 @@ jobs:
             tf-version: "1.15.5"
 
     steps:
+      - name: Docs-only PR fast-path
+        if: ${{ github.event_name == 'pull_request' && needs.changes.outputs.code_related != 'true' }}
+        run: echo "Docs-only PR detected; skipping heavy CI steps."
+
       - uses: actions/checkout@v5
+        if: ${{ github.event_name != 'pull_request' || needs.changes.outputs.code_related == 'true' }}
 
       - name: Setup python environment
+        if: ${{ github.event_name != 'pull_request' || needs.changes.outputs.code_related == 'true' }}
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
+        if: ${{ github.event_name != 'pull_request' || needs.changes.outputs.code_related == 'true' }}
         run: |
           python -m pip install -q --upgrade pip setuptools wheel
           python -m pip install -q "numpy<2"
@@ -47,11 +72,13 @@ jobs:
           python -m pip check
 
       - name: Test with pytest
+        if: ${{ github.event_name != 'pull_request' || needs.changes.outputs.code_related == 'true' }}
         timeout-minutes: 240
         run: |
           pytest --cov=deepctr --cov-report=xml --cov-report=term-missing:skip-covered
 
       - name: Upload coverage to Codecov
+        if: ${{ github.event_name != 'pull_request' || needs.changes.outputs.code_related == 'true' }}
         uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}

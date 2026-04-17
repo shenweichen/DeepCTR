@@ -19,6 +19,7 @@ Submodules
    deepctr.models.fgcnn
    deepctr.models.fibinet
    deepctr.models.fnn
+   deepctr.models.fwfm
    deepctr.models.mlr
    deepctr.models.onn
    deepctr.models.nfm

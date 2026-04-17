@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from tensorflow.python.keras.preprocessing.sequence import pad_sequences
+from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 from deepctr.feature_column import SparseFeat, VarLenSparseFeat,get_feature_names
 from deepctr.models import DeepFM

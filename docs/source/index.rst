@@ -30,7 +30,9 @@ DeepCTR is a **Easy-to-use** , **Modular** and **Extendible** package of deep-le
 
 - Provide ``tf.keras.Model`` like interface for **quick experiment**. `example <https://deepctr-doc.readthedocs.io/en/latest/Quick-Start.html#getting-started-4-steps-to-deepctr>`_
 - Provide  ``tensorflow estimator`` interface for **large scale data** and **distributed training**. `example <https://deepctr-doc.readthedocs.io/en/latest/Quick-Start.html#getting-started-4-steps-to-deepctr-estimator-with-tfrecord>`_
-- It is compatible with both ``tf 1.x``  and ``tf 2.x``.
+- It is compatible with both ``tf 1.15``  and ``tf 2.x``.
+
+Install a TensorFlow build that matches your Python, NumPy, CPU/GPU, and operating system first, then install DeepCTR. Use public ``tensorflow.keras`` APIs in your own code and avoid mixing them with private ``tensorflow.python.keras`` imports.
 
 Let's `Get Started! <./Quick-Start.html>`_ (`Chinese Introduction <https://zhuanlan.zhihu.com/p/53231955>`_)
 
@@ -55,7 +57,7 @@ DisscussionGroup
 
   `Discussions <https://github.com/shenweichen/DeepCTR/discussions>`_ 
 
-.. image:: ../pics/code.jpg
+.. image:: ../pics/code.png
 
 .. toctree::
    :maxdepth: 2

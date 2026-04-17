@@ -1,8 +1,10 @@
 import numpy as np
+import sys
 import tensorflow as tf
 
-from deepctr.feature_column import SparseFeat, VarLenSparseFeat, DenseFeat,get_feature_names
-from deepctr.models import DIEN
+
+def version_tuple(version):
+    return tuple(int(part) for part in version.split(".")[:3] if part.isdigit())
 
 
 def get_xy_fd(use_neg=False, hash_flag=False):
@@ -49,8 +51,22 @@ def get_xy_fd(use_neg=False, hash_flag=False):
 
 
 if __name__ == "__main__":
+    if version_tuple(tf.__version__) >= (1, 14, 0):
+        print(
+            "run_dien.py skipped: this DIEN example enables AUGRU with negative "
+            "sampling, which depends on legacy TensorFlow private RNN APIs. "
+            "Please run it with TensorFlow < 1.14, or modify the example to "
+            "disable negative sampling/use a supported DIEN configuration. "
+            "Detected TensorFlow %s." % tf.__version__
+        )
+        sys.exit(0)
+
     if tf.__version__ >= '2.0.0':
         tf.compat.v1.disable_eager_execution()
+
+    from deepctr.feature_column import SparseFeat, VarLenSparseFeat, DenseFeat,get_feature_names
+    from deepctr.models import DIEN
+
     USE_NEG = True
     x, y, feature_columns, behavior_feature_list = get_xy_fd(use_neg=USE_NEG)
 
