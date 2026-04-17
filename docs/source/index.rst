@@ -86,3 +86,5 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+.. ci-fast-path-smoke-test
