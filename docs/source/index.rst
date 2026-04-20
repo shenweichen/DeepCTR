@@ -66,6 +66,7 @@ DisscussionGroup
    Quick-Start<Quick-Start.md>
    Features<Features.md>
    Examples<Examples.md>
+   Sequence Feature Cookbook<Sequence-Cookbook.md>
    FAQ<FAQ.md>
    History<History.md>
 
