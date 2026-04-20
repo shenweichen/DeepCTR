@@ -70,6 +70,12 @@ DisscussionGroup
    History<History.md>
 
 .. toctree::
+   :maxdepth: 2
+   :caption: Cookbook:
+
+   Sequence Feature Cookbook<Sequence-Cookbook.md>
+
+.. toctree::
    :maxdepth: 3
    :caption: API:
 

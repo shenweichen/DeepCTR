@@ -84,7 +84,7 @@ data[dense_features] = mms.fit_transform(data[dense_features])
 For sparse features, we transform them into dense vectors by embedding techniques.
 For dense numerical features, we concatenate them to the input tensors of fully connected layer. 
 
-And for varlen(multi-valued) sparse features,you can use [VarlenSparseFeat](./Features.html#varlensparsefeat).  Visit [examples](./Examples.html#multi-value-input-movielens) of using `VarlenSparseFeat`
+And for varlen(multi-valued) sparse features,you can use [VarlenSparseFeat](./Features.html#varlensparsefeat). Visit [examples](./Examples.html#multi-value-input-movielens) of using `VarlenSparseFeat` and the <a href="Sequence-Cookbook.html">Sequence Feature Cookbook</a> for sequence model input conventions.
 
 - Label Encoding
 ```python
