@@ -66,9 +66,14 @@ DisscussionGroup
    Quick-Start<Quick-Start.md>
    Features<Features.md>
    Examples<Examples.md>
-   Sequence Feature Cookbook<Sequence-Cookbook.md>
    FAQ<FAQ.md>
    History<History.md>
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Cookbook:
+
+   Sequence Feature Cookbook<Sequence-Cookbook.md>
 
 .. toctree::
    :maxdepth: 3
