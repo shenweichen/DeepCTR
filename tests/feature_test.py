@@ -1,6 +1,8 @@
 from deepctr.models import DeepFM
 from deepctr.feature_column import SparseFeat, DenseFeat, VarLenSparseFeat, get_feature_names
+from deepctr.inputs import create_embedding_matrix
 import numpy as np
+import pytest
 
 
 def test_long_dense_vector():
@@ -28,3 +30,50 @@ def test_feature_column_sparsefeat_vocabulary_path():
     vlsf = VarLenSparseFeat(sf, 6)
     if vlsf.vocabulary_path != vocab_path:
         raise ValueError("vlsf.vocabulary_path is invalid")
+
+
+def test_shared_embedding_name_creates_one_sequence_embedding():
+    feature_columns = [
+        SparseFeat('item', 4, embedding_dim=8),
+        VarLenSparseFeat(SparseFeat('hist_item', 4, embedding_dim=8, embedding_name='item'), maxlen=4),
+        VarLenSparseFeat(SparseFeat('sess_item', 4, embedding_dim=8, embedding_name='item'), maxlen=4),
+    ]
+
+    embedding_dict = create_embedding_matrix(feature_columns, l2_reg=0, seed=1024)
+
+    assert list(embedding_dict.keys()) == ['item']
+    assert embedding_dict['item'].name.startswith('sparse_seq_emb_item')
+    assert embedding_dict['item'].mask_zero is True
+
+
+def test_shared_embedding_name_respects_seq_mask_zero():
+    feature_columns = [
+        SparseFeat('item', 4, embedding_dim=8),
+        VarLenSparseFeat(SparseFeat('hist_item', 4, embedding_dim=8, embedding_name='item'), maxlen=4),
+    ]
+
+    embedding_dict = create_embedding_matrix(feature_columns, l2_reg=0, seed=1024, seq_mask_zero=False)
+
+    assert embedding_dict['item'].mask_zero is False
+
+
+def test_sparse_features_can_share_embedding_name():
+    feature_columns = [
+        SparseFeat('item', 4, embedding_dim=8),
+        SparseFeat('query_item', 4, embedding_dim=8, embedding_name='item'),
+    ]
+
+    embedding_dict = create_embedding_matrix(feature_columns, l2_reg=0, seed=1024)
+
+    assert list(embedding_dict.keys()) == ['item']
+    assert embedding_dict['item'].name.startswith('sparse_emb_item')
+
+
+def test_shared_embedding_name_requires_same_shape():
+    feature_columns = [
+        SparseFeat('item', 4, embedding_dim=8),
+        VarLenSparseFeat(SparseFeat('hist_item', 5, embedding_dim=8, embedding_name='item'), maxlen=4),
+    ]
+
+    with pytest.raises(ValueError):
+        create_embedding_matrix(feature_columns, l2_reg=0, seed=1024)

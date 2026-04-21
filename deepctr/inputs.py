@@ -20,28 +20,46 @@ def get_inputs_list(inputs):
     return list(chain(*list(map(lambda x: x.values(), filter(lambda x: x is not None, inputs)))))
 
 
+def _validate_shared_embedding_feature(base_feature, feature):
+    if base_feature.vocabulary_size != feature.vocabulary_size:
+        raise ValueError("Features sharing embedding_name must have the same vocabulary_size: %s" %
+                         feature.embedding_name)
+    if base_feature.embedding_dim != feature.embedding_dim:
+        raise ValueError("Features sharing embedding_name must have the same embedding_dim: %s" %
+                         feature.embedding_name)
+
+
 def create_embedding_dict(sparse_feature_columns, varlen_sparse_feature_columns, seed, l2_reg,
                           prefix='sparse_', seq_mask_zero=True):
-    sparse_embedding = {}
+    embedding_feature_dict = {}
+    is_sequence_embedding = {}
+
     for feat in sparse_feature_columns:
-        emb = Embedding(feat.vocabulary_size, feat.embedding_dim,
-                        embeddings_initializer=feat.embeddings_initializer,
-                        embeddings_regularizer=l2(l2_reg),
-                        name=prefix + '_emb_' + feat.embedding_name)
-        emb.trainable = feat.trainable
-        sparse_embedding[feat.embedding_name] = emb
+        if feat.embedding_name in embedding_feature_dict:
+            _validate_shared_embedding_feature(embedding_feature_dict[feat.embedding_name], feat)
+        embedding_feature_dict[feat.embedding_name] = feat
+        is_sequence_embedding[feat.embedding_name] = False
 
     if varlen_sparse_feature_columns and len(varlen_sparse_feature_columns) > 0:
         for feat in varlen_sparse_feature_columns:
-            # if feat.name not in sparse_embedding:
-            emb = Embedding(feat.vocabulary_size, feat.embedding_dim,
-                            embeddings_initializer=feat.embeddings_initializer,
-                            embeddings_regularizer=l2(
-                                l2_reg),
-                            name=prefix + '_seq_emb_' + feat.name,
-                            mask_zero=seq_mask_zero)
-            emb.trainable = feat.trainable
-            sparse_embedding[feat.embedding_name] = emb
+            if feat.embedding_name in embedding_feature_dict:
+                _validate_shared_embedding_feature(embedding_feature_dict[feat.embedding_name], feat)
+            else:
+                is_sequence_embedding[feat.embedding_name] = False
+            embedding_feature_dict[feat.embedding_name] = feat
+            is_sequence_embedding[feat.embedding_name] = True
+
+    sparse_embedding = {}
+    for embedding_name, feat in embedding_feature_dict.items():
+        sequence_embedding = is_sequence_embedding[embedding_name]
+        embedding_prefix = '_seq_emb_' if sequence_embedding else '_emb_'
+        emb = Embedding(feat.vocabulary_size, feat.embedding_dim,
+                        embeddings_initializer=feat.embeddings_initializer,
+                        embeddings_regularizer=l2(l2_reg),
+                        name=prefix + embedding_prefix + embedding_name,
+                        mask_zero=seq_mask_zero if sequence_embedding else False)
+        emb.trainable = feat.trainable
+        sparse_embedding[embedding_name] = emb
     return sparse_embedding
 
 
