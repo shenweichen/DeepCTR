@@ -13,7 +13,7 @@ model.load_weights('DeepFM_w.h5')
 To save/load models,just a little different.
 
 ```python
-from tensorflow.python.keras.models import  save_model,load_model
+from tensorflow.keras.models import save_model, load_model
 model = DeepFM()
 save_model(model, 'DeepFM.h5')# save_model, same as before
 
@@ -27,8 +27,8 @@ Here is a example of how to set learning rate and earlystopping:
 
 ```python
 import deepctr
-from tensorflow.python.keras.optimizers import Adam,Adagrad
-from tensorflow.python.keras.callbacks import EarlyStopping
+from tensorflow.keras.optimizers import Adam, Adagrad
+from tensorflow.keras.callbacks import EarlyStopping
 
 model = deepctr.models.DeepFM(linear_feature_columns,dnn_feature_columns)
 model.compile(Adagrad(0.1024),'binary_crossentropy',metrics=['binary_crossentropy'])
@@ -61,8 +61,8 @@ import itertools
 import deepctr
 from deepctr.models import AFM
 from deepctr.feature_column import get_feature_names
-from tensorflow.python.keras.models import Model
-from tensorflow.python.keras.layers import Lambda
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Lambda
 
 model = AFM(linear_feature_columns,dnn_feature_columns)
 model.fit(model_input,target)
@@ -145,10 +145,27 @@ model.fit(model_input,label)
 ```
 
 ## 7. How to run the demo with GPU ?
-just install deepctr with 
+Install the TensorFlow build recommended for your CUDA, cuDNN, and platform combination, then install `deepctr`.
+
+## 8. How to avoid TensorFlow, Keras, h5py, or NumPy compatibility errors?
+
+Install TensorFlow separately before installing DeepCTR. Pick the TensorFlow release according to your Python version, CPU/GPU environment, and platform.
+
 ```bash
-$ pip install deepctr[gpu]
+$ pip install tensorflow
+$ pip install deepctr
 ```
 
-## 8. How to run the demo with multiple GPUs
+For Python `>=3.9`, DeepCTR uses `h5py>=3.7.0`, so newer `h5py` releases such as `3.9+` and `3.12+` are allowed. If TensorFlow reports a NumPy conflict, follow the TensorFlow requirement for the TensorFlow release you installed, for example using `numpy<2` when required by TensorFlow.
+
+Use public `tensorflow.keras` imports in your own code:
+
+```python
+from tensorflow.keras.models import load_model
+from tensorflow.keras.optimizers import Adam
+```
+
+Avoid mixing `tensorflow.python.keras` with `tensorflow.keras`. `tensorflow.python.*` is private TensorFlow API and can break serialization, optimizer loading, or metric loading across TensorFlow versions.
+
+## 9. How to run the demo with multiple GPUs
 you can use multiple gpus with tensorflow version higher than ``1.4``,see [run_classification_criteo_multi_gpu.py](https://github.com/shenweichen/DeepCTR/blob/master/examples/run_classification_criteo_multi_gpu.py)

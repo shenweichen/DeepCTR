@@ -11,7 +11,7 @@ Submodules
    deepctr.estimator.models.ccpm
    deepctr.estimator.models.dcn
    deepctr.estimator.models.deepfm
-   deepctr.estimator.models.deepfwfm
+   deepctr.estimator.models.fwfm
    deepctr.estimator.models.fibinet
    deepctr.estimator.models.fnn
    deepctr.estimator.models.nfm

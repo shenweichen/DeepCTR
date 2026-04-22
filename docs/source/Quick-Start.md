@@ -1,18 +1,27 @@
 # Quick-Start
 [![](https://pai-public-data.oss-cn-beijing.aliyuncs.com/EN-pai-dsw.svg)](https://dsw-dev.data.aliyun.com/#/?fileUrl=https://pai-public-data.oss-cn-beijing.aliyuncs.com/deep-ctr/Getting-started-4-steps-to-DeepCTR.ipynb&fileName=Getting-started-4-steps-to-DeepCTR.ipynb)
 ## Installation Guide
-Now `deepctr` is available for python `2.7 `and `3.5, 3.6, 3.7`.  
-`deepctr` depends on tensorflow, you can specify to install the cpu version or gpu version through `pip`.
+Now `deepctr` supports Python `>=3.7` and is tested with TensorFlow `1.15` and TensorFlow `2.x`.
 
-### CPU version
+DeepCTR does not pin or install TensorFlow for you. Install a TensorFlow build that matches your Python, NumPy, CPU/GPU, and operating system first, then install DeepCTR:
 
 ```bash
-$ pip install deepctr[cpu]
+$ pip install tensorflow
+$ pip install deepctr
 ```
-### GPU version
+
+For GPU environments, install the TensorFlow package recommended for your CUDA, cuDNN, and platform combination, then install `deepctr`.
+
+For Python `>=3.9`, DeepCTR allows modern `h5py` releases with `h5py>=3.7.0`. If TensorFlow reports a NumPy conflict, follow the TensorFlow requirement for your selected TensorFlow release, for example using `numpy<2` when required by TensorFlow.
+
+Use public `tensorflow.keras` APIs in your own code. Avoid mixing `tensorflow.python.keras` with `tensorflow.keras`, because `tensorflow.python.*` is private TensorFlow API and can break model serialization or optimizer/metric loading across TensorFlow versions.
+
+### Install from source
 
 ```bash
-$ pip install deepctr[gpu]
+$ git clone https://github.com/shenweichen/DeepCTR.git
+$ cd DeepCTR
+$ pip install .
 ```
 ## Getting started: 4 steps to DeepCTR
 
@@ -75,7 +84,7 @@ data[dense_features] = mms.fit_transform(data[dense_features])
 For sparse features, we transform them into dense vectors by embedding techniques.
 For dense numerical features, we concatenate them to the input tensors of fully connected layer. 
 
-And for varlen(multi-valued) sparse features,you can use [VarlenSparseFeat](./Features.html#varlensparsefeat).  Visit [examples](./Examples.html#multi-value-input-movielens) of using `VarlenSparseFeat`
+And for varlen(multi-valued) sparse features,you can use [VarlenSparseFeat](./Features.html#varlensparsefeat). Visit [examples](./Examples.html#multi-value-input-movielens) of using `VarlenSparseFeat` and the <a href="Sequence-Cookbook.html">Sequence Feature Cookbook</a> for sequence model input conventions.
 
 - Label Encoding
 ```python
@@ -128,7 +137,6 @@ You also can run a distributed training job with the keras model on Kubernetes u
 ```python
 import tensorflow as tf
 
-from tensorflow.python.ops.parsing_ops import  FixedLenFeature
 from deepctr.estimator.inputs import input_fn_tfrecord
 from deepctr.estimator.models import DeepFMEstimator
 
@@ -155,10 +163,10 @@ for feat in dense_features:
 ### Step 3: Generate the training samples with TFRecord format
 
 ```python
-feature_description = {k: FixedLenFeature(dtype=tf.int64, shape=1) for k in sparse_features}
+feature_description = {k: tf.io.FixedLenFeature(dtype=tf.int64, shape=1) for k in sparse_features}
 feature_description.update(
-    {k: FixedLenFeature(dtype=tf.float32, shape=1) for k in dense_features})
-feature_description['label'] = FixedLenFeature(dtype=tf.float32, shape=1)
+    {k: tf.io.FixedLenFeature(dtype=tf.float32, shape=1) for k in dense_features})
+feature_description['label'] = tf.io.FixedLenFeature(dtype=tf.float32, shape=1)
 
 train_model_input = input_fn_tfrecord('./criteo_sample.tr.tfrecords', feature_description, 'label', batch_size=256,
                                       num_epochs=1, shuffle_factor=10)
