@@ -42,9 +42,12 @@ def test_create_embedding_matrix_reuses_same_embedding_name():
 
     embedding_dict = create_embedding_matrix(feature_columns, l2_reg=0, seed=1024)
 
-    assert list(embedding_dict.keys()) == ['item_id']
-    assert embedding_dict['item_id'].name == 'sparse_emb_item_id'
-    assert embedding_dict['item_id'].mask_zero is True
+    if list(embedding_dict.keys()) != ['item_id']:
+        raise AssertionError("Expected a single shared embedding keyed by 'item_id'")
+    if embedding_dict['item_id'].name != 'sparse_emb_item_id':
+        raise AssertionError("Expected the shared embedding layer to use the embedding_name-based layer name")
+    if embedding_dict['item_id'].mask_zero is not True:
+        raise AssertionError("Expected shared sequence embeddings to preserve mask_zero")
 
 
 def test_create_embedding_matrix_rejects_inconsistent_shared_embedding():

@@ -35,7 +35,8 @@ def test_ESMM_string_sparse_requires_hash():
 
 def test_ESMM_string_sparse_with_hash():
     model = ESMM([SparseFeat('user_id', 10, use_hash=True, dtype='string')], tower_dnn_hidden_units=(8,))
-    assert len(model.outputs) == 2
+    if len(model.outputs) != 2:
+        raise AssertionError("Expected ESMM to build two task outputs")
 
 
 def test_MMOE():
