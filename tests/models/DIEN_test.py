@@ -9,10 +9,10 @@ from ..utils import check_model
 
 
 def get_xy_fd(use_neg=False, hash_flag=False):
-    feature_columns = [SparseFeat('user', 3, hash_flag),
-                       SparseFeat('gender', 2, hash_flag),
-                       SparseFeat('item', 3 + 1, hash_flag),
-                       SparseFeat('item_gender', 2 + 1, hash_flag),
+    feature_columns = [SparseFeat('user', 3, use_hash=hash_flag),
+                       SparseFeat('gender', 2, use_hash=hash_flag),
+                       SparseFeat('item', 3 + 1, embedding_dim=8, use_hash=hash_flag),
+                       SparseFeat('item_gender', 2 + 1, embedding_dim=4, use_hash=hash_flag),
                        DenseFeat('score', 1)]
 
     feature_columns += [

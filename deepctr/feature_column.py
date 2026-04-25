@@ -14,6 +14,23 @@ from .layers.utils import concat_func
 DEFAULT_GROUP_NAME = "default_group"
 
 
+def _is_string_dtype(dtype):
+    try:
+        return tf.as_dtype(dtype) == tf.string
+    except TypeError:
+        return dtype == "string"
+
+
+def _check_sparse_feature_dtype(fc):
+    if _is_string_dtype(fc.dtype) and not fc.use_hash:
+        raise ValueError(
+            "SparseFeat(name='{}', dtype='string') requires use_hash=True "
+            "so string ids can be converted before embedding lookup. "
+            "Alternatively, encode the feature values to integer ids before "
+            "passing them to DeepCTR.".format(fc.name)
+        )
+
+
 class SparseFeat(namedtuple('SparseFeat',
                             ['name', 'vocabulary_size', 'embedding_dim', 'use_hash', 'vocabulary_path', 'dtype', 'embeddings_initializer',
                              'embedding_name',
@@ -129,12 +146,14 @@ def build_input_features(feature_columns, prefix=''):
     input_features = OrderedDict()
     for fc in feature_columns:
         if isinstance(fc, SparseFeat):
+            _check_sparse_feature_dtype(fc)
             input_features[fc.name] = Input(
                 shape=(1,), name=prefix + fc.name, dtype=fc.dtype)
         elif isinstance(fc, DenseFeat):
             input_features[fc.name] = Input(
                 shape=(fc.dimension,), name=prefix + fc.name, dtype=fc.dtype)
         elif isinstance(fc, VarLenSparseFeat):
+            _check_sparse_feature_dtype(fc)
             input_features[fc.name] = Input(shape=(fc.maxlen,), name=prefix + fc.name,
                                             dtype=fc.dtype)
             if fc.weight_name is not None:
