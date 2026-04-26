@@ -48,7 +48,8 @@ def test_DNN_output_activation():
         x = tf.keras.layers.Input(shape=(EMBEDDING_SIZE,))
         y = layers.DNN((10,), output_activation='sigmoid')(x)
         model = tf.keras.models.Model(x, y)
-        assert model.output_shape == (None, 10)
+        if model.output_shape != (None, 10):
+            raise AssertionError("Unexpected DNN output shape")
 
 
 @pytest.mark.parametrize(

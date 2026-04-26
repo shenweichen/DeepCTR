@@ -30,7 +30,8 @@ def test_FNN_does_not_add_wide_linear_logit():
 
     model = FNN(feature_columns, feature_columns, dnn_hidden_units=(4,), dnn_dropout=0)
 
-    assert all(layer.__class__.__name__ != 'Linear' for layer in model.layers)
+    if not all(layer.__class__.__name__ != 'Linear' for layer in model.layers):
+        raise AssertionError("FNN should not include a wide Linear layer")
 
 
 # @pytest.mark.parametrize(
