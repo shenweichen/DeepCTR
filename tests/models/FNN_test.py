@@ -1,6 +1,7 @@
 import pytest
 import tensorflow as tf
 
+from deepctr.feature_column import DenseFeat, SparseFeat
 from deepctr.models import FNN
 from ..utils import check_model, get_test_data, SAMPLE_SIZE, get_test_data_estimator, check_estimator, TEST_Estimator
 
@@ -21,6 +22,16 @@ def test_FNN(sparse_feature_num, dense_feature_num):
 
     model = FNN(feature_columns, feature_columns, dnn_hidden_units=[8, 8], dnn_dropout=0.5)
     check_model(model, model_name, x, y)
+
+
+def test_FNN_does_not_add_wide_linear_logit():
+    feature_columns = [SparseFeat('sparse_feature', 4, embedding_dim=4),
+                       DenseFeat('dense_feature', 1)]
+
+    model = FNN(feature_columns, feature_columns, dnn_hidden_units=(4,), dnn_dropout=0)
+
+    if not all(layer.__class__.__name__ != 'Linear' for layer in model.layers):
+        raise AssertionError("FNN should not include a wide Linear layer")
 
 
 # @pytest.mark.parametrize(

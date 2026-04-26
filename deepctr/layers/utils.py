@@ -142,14 +142,14 @@ class Linear(Layer):
                                         trainable=True)
         if self.mode == 1:
             self.kernel = self.add_weight(
-                'linear_kernel',
+                name='linear_kernel',
                 shape=[int(input_shape[-1]), 1],
                 initializer=glorot_normal(self.seed),
                 regularizer=l2(self.l2_reg),
                 trainable=True)
         elif self.mode == 2:
             self.kernel = self.add_weight(
-                'linear_kernel',
+                name='linear_kernel',
                 shape=[int(input_shape[1][-1]), 1],
                 initializer=glorot_normal(self.seed),
                 regularizer=l2(self.l2_reg),

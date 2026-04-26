@@ -179,10 +179,10 @@ class DNN(Layer):
         self.dropout_layers = [Dropout(self.dropout_rate, seed=self.seed + i) for i in
                                range(len(self.hidden_units))]
 
-        self.activation_layers = [activation_layer(self.activation) for _ in range(len(self.hidden_units))]
-
-        if self.output_activation:
-            self.activation_layers[-1] = activation_layer(self.output_activation)
+        self.activation_layers = [
+            activation_layer(
+                self.output_activation if i == len(self.hidden_units) - 1 and self.output_activation else self.activation)
+            for i in range(len(self.hidden_units))]
 
         super(DNN, self).build(input_shape)  # Be sure to call this somewhere!
 
