@@ -50,15 +50,15 @@ def DeepFM(linear_feature_columns, dnn_feature_columns, fm_group=(DEFAULT_GROUP_
     group_embedding_dict, dense_value_list = input_from_feature_columns(features, dnn_feature_columns, l2_reg_embedding,
                                                                         seed, support_group=True)
 
-    fm_logit = add_func([FM()(concat_func(v, axis=1))
-                         for k, v in group_embedding_dict.items() if k in fm_group])
+    fm_logit_list = [FM()(concat_func(v, axis=1))
+                     for k, v in group_embedding_dict.items() if k in fm_group]
 
     dnn_input = combined_dnn_input(list(chain.from_iterable(
         group_embedding_dict.values())), dense_value_list)
     dnn_output = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed)(dnn_input)
     dnn_logit = Dense(1, use_bias=False)(dnn_output)
 
-    final_logit = add_func([linear_logit, fm_logit, dnn_logit])
+    final_logit = add_func([linear_logit, dnn_logit] + fm_logit_list)
 
     output = PredictionLayer(task)(final_logit)
     model = Model(inputs=inputs_list, outputs=output)

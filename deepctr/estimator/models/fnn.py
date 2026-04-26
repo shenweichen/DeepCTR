@@ -8,7 +8,7 @@ Reference:
 """
 import tensorflow as tf
 
-from ..feature_column import get_linear_logit, input_from_feature_columns
+from ..feature_column import input_from_feature_columns
 from ..utils import deepctr_model_fn, DNN_SCOPE_NAME, variable_scope
 from ...layers.core import DNN
 from ...layers.utils import combined_dnn_input
@@ -20,11 +20,11 @@ def FNNEstimator(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(
                  dnn_optimizer='Adagrad', training_chief_hooks=None):
     """Instantiates the Factorization-supported Neural Network architecture.
 
-    :param linear_feature_columns: An iterable containing all the features used by linear part of the model.
+    :param linear_feature_columns: An iterable containing features kept for API compatibility.
     :param dnn_feature_columns: An iterable containing all the features used by deep part of the model.
     :param dnn_hidden_units: list,list of positive integer or empty list, the layer number and units in each layer of deep net
     :param l2_reg_embedding: float. L2 regularizer strength applied to embedding vector
-    :param l2_reg_linear: float. L2 regularizer strength applied to linear weight
+    :param l2_reg_linear: float. Kept for API compatibility.
     :param l2_reg_dnn: float . L2 regularizer strength applied to DNN
     :param seed: integer ,to use as random seed.
     :param dnn_dropout: float in [0,1), the probability we will drop out a given DNN coordinate.
@@ -47,8 +47,6 @@ def FNNEstimator(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(
     def _model_fn(features, labels, mode, config):
         train_flag = (mode == tf.estimator.ModeKeys.TRAIN)
 
-        linear_logits = get_linear_logit(features, linear_feature_columns, l2_reg_linear=l2_reg_linear)
-
         with variable_scope(DNN_SCOPE_NAME):
             sparse_embedding_list, dense_value_list = input_from_feature_columns(features, dnn_feature_columns,
                                                                                  l2_reg_embedding=l2_reg_embedding)
@@ -57,9 +55,7 @@ def FNNEstimator(linear_feature_columns, dnn_feature_columns, dnn_hidden_units=(
             dnn_logit = tf.keras.layers.Dense(
                 1, use_bias=False, kernel_initializer=tf.keras.initializers.glorot_normal(seed))(deep_out)
 
-        logits = linear_logits + dnn_logit
-
-        return deepctr_model_fn(features, mode, logits, labels, task, linear_optimizer, dnn_optimizer,
+        return deepctr_model_fn(features, mode, dnn_logit, labels, task, linear_optimizer, dnn_optimizer,
                                 training_chief_hooks=training_chief_hooks)
 
     return tf.estimator.Estimator(_model_fn, model_dir=model_dir, config=config)

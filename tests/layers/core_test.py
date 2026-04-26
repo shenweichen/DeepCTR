@@ -43,6 +43,14 @@ def test_DNN(hidden_units, use_bn):
                        BATCH_SIZE, EMBEDDING_SIZE))
 
 
+def test_DNN_output_activation():
+    with CustomObjectScope({'DNN': layers.DNN}):
+        x = tf.keras.layers.Input(shape=(EMBEDDING_SIZE,))
+        y = layers.DNN((10,), output_activation='sigmoid')(x)
+        model = tf.keras.models.Model(x, y)
+        assert model.output_shape == (None, 10)
+
+
 @pytest.mark.parametrize(
     'task,use_bias',
     [(task, use_bias)
