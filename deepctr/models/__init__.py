@@ -21,6 +21,7 @@ from .sequence import DIN, DIEN, DSIN, BST
 from .wdl import WDL
 from .xdeepfm import xDeepFM
 from .edcn import EDCN
+from .afn import AFN
 
 __all__ = ["AFM", "CCPM", "DCN", "IFM", "DIFM", "DCNMix", "MLR", "DeepFM", "MLR", "NFM", "DIN", "DIEN", "FNN", "PNN",
            "WDL", "xDeepFM", "AutoInt", "ONN", "FGCNN", "DSIN", "FiBiNET", 'FLEN', "FwFM", "BST", "DeepFEFM",
