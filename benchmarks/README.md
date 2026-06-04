@@ -75,6 +75,13 @@ Uses the bundled `examples/census-income.sample`; pass the full UCI
 Census-Income KDD `.data` file via `--data-path`. Two derived binary tasks:
 `label_income` (>50k) and `label_marital` (never-married).
 
+> When `--data-path` points at `census-income.data` and its sibling
+> `census-income.test` exists, the loader uses the dataset's **official
+> train/test partition** (199,523 / 99,762 rows) instead of a random split —
+> the canonical evaluation. Encoders are fit on the union so test-only
+> categories don't crash the run. The bundled sample has no `.test` sibling and
+> falls back to a random split.
+
 > ESMM assumes sequentially-dependent CTR→CTCVR tasks; on Census it still runs,
 > but its numbers are not directly comparable to the other multitask models.
 
@@ -100,6 +107,7 @@ Amazon-Electronics is the canonical heavy benchmark and is left as an extension.
 | `--batch-size` | 256 | |
 | `--embedding-dim` | 8 | uniform sparse embedding size |
 | `--val-split` / `--test-size` | 0.2 / 0.2 | |
+| `--temporal-split` / `--time-col` | off / – | single-task: chronological hold-out (most recent `--test-size` as test) instead of a random split — for time-ordered logs, to avoid leakage. Sorts by `--time-col` when given, else trusts file order. (The bundled/Criteo_x1 data is anonymised & shuffled with no timestamp, so it stays on the random split.) |
 | `--seed` | 2020 | seeds python/numpy/TF |
 | `--quick` | off | 1 epoch, 2 models/track, small data |
 | `--source` / `--download` / `--data-path` | bundled | Criteo source |

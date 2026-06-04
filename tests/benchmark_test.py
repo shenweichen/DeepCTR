@@ -43,6 +43,58 @@ def test_sequence_track(tmp_path):
     assert (tmp_path / "sequence_synthetic_seq.csv").exists()
 
 
+def test_temporal_split_holds_out_most_recent_rows(tmp_path):
+    """--temporal-split must hold out the most recent rows (by --time-col),
+    never random ones, so no future information leaks into training."""
+    import numpy as np
+    import pandas as pd
+
+    from benchmarks.datasets.criteo import COLUMNS, load_criteo
+
+    n = 100
+    df = pd.DataFrame({c: [0] * n for c in COLUMNS})
+    df["ts"] = list(range(n))           # ascending time
+    df["label"] = [0] * 80 + [1] * 20   # the 20 most-recent rows are the positives
+    # Shuffle file order so a correct split must rely on `ts`, not row position.
+    df = df.iloc[np.random.RandomState(0).permutation(n)].reset_index(drop=True)
+    path = tmp_path / "criteo_ts.csv"
+    df.to_csv(path, index=False)
+
+    data = load_criteo(data_path=str(path), temporal_split=True, time_col="ts", test_size=0.2)
+
+    assert len(data.train_y) == 80 and len(data.test_y) == 20
+    # Most-recent 20% (ts 80..99 -> all positives) must be exactly the test set.
+    assert set(data.test_y.flatten().tolist()) == {1}
+    assert set(data.train_y.flatten().tolist()) == {0}
+
+
+def _census_row(income, marital):
+    from benchmarks.datasets.census import COLUMN_NAMES
+
+    vals = ["0"] * len(COLUMN_NAMES)
+    vals[COLUMN_NAMES.index("marital_stat")] = marital
+    vals[COLUMN_NAMES.index("income_50k")] = income
+    return ",".join(vals)
+
+
+def test_census_uses_official_test_partition(tmp_path):
+    """When a sibling .test file exists, load_census must use that official
+    partition rather than reshuffling a random split out of .data."""
+    from benchmarks.datasets.census import load_census
+
+    train_rows = [_census_row(" 50000+.", " Never married")] * 10 + \
+                 [_census_row(" - 50000.", " Married")] * 10          # 20 train rows
+    test_rows = [_census_row(" - 50000.", " Married")] * 7            # 7 test rows
+    (tmp_path / "mini.data").write_text("\n".join(train_rows) + "\n")
+    (tmp_path / "mini.test").write_text("\n".join(test_rows) + "\n")
+
+    data = load_census(data_path=str(tmp_path / "mini.data"))
+
+    # Official split -> exactly the .test rows (a random 0.2 split would give 5).
+    assert len(data.train_y[0]) == 20
+    assert len(data.test_y[0]) == 7
+
+
 if __name__ == "__main__":
     import sys
     import pytest

@@ -72,6 +72,7 @@ def run_single(args):
         hash_buckets=args.hash_buckets,
         test_size=args.test_size, seed=args.seed, max_rows=args.max_rows,
         download_url=args.download_url,
+        temporal_split=args.temporal_split, time_col=args.time_col,
     )
     names = select(list(SINGLE_TASK_MODELS), args.models, args.exclude)
     if args.quick:
@@ -213,6 +214,11 @@ def build_parser():
     p.add_argument("--batch-size", type=int, default=256)
     p.add_argument("--val-split", type=float, default=0.2)
     p.add_argument("--test-size", type=float, default=0.2)
+    p.add_argument("--temporal-split", action="store_true",
+                   help="single-task: chronological hold-out (most recent test_size as test) "
+                        "instead of a random split; use for time-ordered logs to avoid leakage")
+    p.add_argument("--time-col", default=None,
+                   help="single-task --temporal-split: column to sort by before the positional split")
     p.add_argument("--embedding-dim", type=int, default=8)
     p.add_argument("--seed", type=int, default=2020)
     p.add_argument("--fit-verbose", type=int, default=0, help="passed to model.fit(verbose=...)")

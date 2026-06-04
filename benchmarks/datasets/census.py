@@ -45,9 +45,35 @@ TASK_TYPES = ("binary", "binary")
 
 
 def load_census(data_path=None, embedding_dim=4, test_size=0.2, seed=2020):
-    """Load and preprocess Census-Income into a :class:`MultiTaskData`."""
-    path = data_path or os.path.join(EXAMPLES_DIR, "census-income.sample")
-    data = pd.read_csv(path, header=None, names=COLUMN_NAMES)
+    """Load and preprocess Census-Income into a :class:`MultiTaskData`.
+
+    The UCI Census-Income (KDD) distribution ships an *official* train/test
+    partition: ``census-income.data`` (train) and ``census-income.test`` (test).
+    When ``data_path`` points at the ``.data`` file and its sibling ``.test``
+    exists, that official split is used instead of a random one -- this is the
+    canonical evaluation for the dataset and avoids reshuffling the two together.
+    Encoders are still fit on the union so categories that appear only in the
+    test partition don't crash the run. The bundled sample has no ``.test``
+    sibling and falls back to a random split.
+    """
+    train_path = data_path or os.path.join(EXAMPLES_DIR, "census-income.sample")
+
+    official_test = None
+    if data_path and data_path.endswith(".data"):
+        sibling = data_path[: -len(".data")] + ".test"
+        if os.path.exists(sibling):
+            official_test = sibling
+
+    if official_test:
+        train_df = pd.read_csv(train_path, header=None, names=COLUMN_NAMES)
+        test_df = pd.read_csv(official_test, header=None, names=COLUMN_NAMES)
+        n_train = len(train_df)
+        data = pd.concat([train_df, test_df], ignore_index=True)
+        print("[census] using official train/test split (%d train + %d test rows)"
+              % (n_train, len(test_df)))
+    else:
+        data = pd.read_csv(train_path, header=None, names=COLUMN_NAMES)
+        n_train = None
 
     data["label_income"] = data["income_50k"].map({" - 50000.": 0, " 50000+.": 1})
     data["label_marital"] = data["marital_stat"].apply(lambda x: 1 if x == " Never married" else 0)
@@ -68,7 +94,10 @@ def load_census(data_path=None, embedding_dim=4, test_size=0.2, seed=2020):
     )
     feature_names = get_feature_names(feature_columns)
 
-    train, test = train_test_split(data, test_size=test_size, random_state=seed)
+    if n_train is not None:
+        train, test = data.iloc[:n_train], data.iloc[n_train:]
+    else:
+        train, test = train_test_split(data, test_size=test_size, random_state=seed)
     train_input = {n: train[n].values for n in feature_names}
     test_input = {n: test[n].values for n in feature_names}
 

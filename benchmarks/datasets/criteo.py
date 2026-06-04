@@ -83,8 +83,16 @@ def _download_dac_sample(url, dest_dir):
 
 def load_criteo(source="bundled", data_path=None, embedding_dim=8, use_hash=False,
                 hash_buckets=1000, test_size=0.2, seed=2020, max_rows=None,
-                download_url=DEFAULT_DAC_URL):
-    """Load and preprocess Criteo into a :class:`SingleTaskData` (task='binary')."""
+                download_url=DEFAULT_DAC_URL, temporal_split=False, time_col=None):
+    """Load and preprocess Criteo into a :class:`SingleTaskData` (task='binary').
+
+    By default the train/test split is random (the Kaggle DAC / Criteo_x1 data
+    is anonymised and shuffled, with no timestamp, so this is leakage-free and
+    standard). For logs that *do* carry time, pass ``temporal_split=True`` to
+    hold out the most recent ``test_size`` fraction instead: rows are sorted by
+    ``time_col`` when given, otherwise the file's existing order is trusted, and
+    the tail becomes the test set -- so no future row can leak into training.
+    """
     if data_path is not None:
         df = _read_criteo_file(data_path)
         name = "criteo_custom"
@@ -131,7 +139,19 @@ def load_criteo(source="bundled", data_path=None, embedding_dim=8, use_hash=Fals
     feature_columns = sparse_cols + dense_cols
     feature_names = get_feature_names(feature_columns)
 
-    train, test = train_test_split(df, test_size=test_size, random_state=seed)
+    if temporal_split:
+        # Chronological hold-out: the most recent rows become the test set so no
+        # future information leaks into training. Sort by time_col when present;
+        # otherwise assume the file is already in chronological order.
+        if time_col and time_col in df.columns:
+            df = df.sort_values(time_col, kind="mergesort")  # stable
+        elif time_col:
+            print("[criteo] --time-col %r not found; assuming the file is already "
+                  "in chronological order." % time_col)
+        cut = max(1, int(round(len(df) * (1 - test_size))))
+        train, test = df.iloc[:cut], df.iloc[cut:]
+    else:
+        train, test = train_test_split(df, test_size=test_size, random_state=seed)
     train_input = {n: train[n].values for n in feature_names}
     test_input = {n: test[n].values for n in feature_names}
 
