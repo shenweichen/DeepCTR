@@ -37,6 +37,35 @@ Criteo DAC URL 已失效——匿名 HF 镜像会限流,下载 `reczoo/Criteo_x1
 | `benchmarks/data/census-income.data`（+ `.test`） | 199,523（+99,762） | 多任务,官方切分 |
 | `examples/criteo_sample.txt` | 200 | 仅冒烟——AUC 是噪声 |
 
+上面的 `criteo_x1_*` 是 **FuxiCTR Criteo_x1 完整集**(~4584 万行)的切片。需要更大规模时,下载完整集
+并按需截取(不要把完整集直接喂给 loader——它会把整个文件读进 pandas):
+
+```bash
+# 1) 下载完整集（2.9GB zip，需 HF token；匿名会被限流）
+curl -L -C - -H "Authorization: Bearer $HF_TOKEN" \
+  -o benchmarks/data/Criteo_x1.zip \
+  "https://huggingface.co/datasets/reczoo/Criteo_x1/resolve/main/Criteo_x1.zip"
+# zip 内含官方 8:1:1 切分: train.csv(8.2GB) / valid.csv(2.0GB) / test.csv(1.1GB)
+# 列格式与切片一致: label,I1..I13,C1..C26（带表头）
+
+# 2) 流式抽取前 N 行（避免解压/读入整个 8.2GB），生成自定义规模切片
+python -c "
+import zipfile, io
+N = 2_000_000
+z = zipfile.ZipFile('benchmarks/data/Criteo_x1.zip')
+with z.open('train.csv') as raw, io.TextIOWrapper(raw) as fin, \
+     open('benchmarks/data/criteo_x1_2m.csv','w') as fo:
+    fo.write(fin.readline())            # 表头
+    for i, line in enumerate(fin):
+        if i >= N: break
+        fo.write(line)
+"
+```
+
+CPU 上 200 万行单 epoch:DeepFM ~60s,慢模型(ONN/DeepFEFM/FiBiNET)数分钟到十几分钟;全量 21
+模型约 1 小时。要用完整集的官方 train/valid/test 切分(而非我们的随机切分),需给 loader 加多文件
+读取(参照 Census 官方切分的实现)。
+
 ## 命令
 
 ```bash
