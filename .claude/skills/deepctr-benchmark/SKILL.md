@@ -1,103 +1,91 @@
 ---
 name: deepctr-benchmark
 description: >-
-  Run the DeepCTR model benchmark suite (benchmarks/) to validate and compare
-  CTR models end-to-end on real or bundled data, producing a sorted leaderboard.
-  Use when asked to benchmark, compare, validate, or measure DeepCTR models
-  (single-task CTR, multitask, or sequence), or to re-run / extend the
-  benchmark after a code change.
+  运行 DeepCTR 模型 benchmark 套件（benchmarks/），在真实或自带数据上端到端验证、
+  对比 CTR 模型并产出排序后的 leaderboard。当被要求 benchmark、对比、验证或评测
+  DeepCTR 模型（单任务 CTR / 多任务 / 序列），或在改动代码后重跑、扩展 benchmark 时使用。
+  Use to benchmark, compare, or validate DeepCTR CTR models.
 ---
 
-# DeepCTR benchmark suite
+# DeepCTR benchmark 套件
 
-A self-contained harness (`benchmarks/`) that trains DeepCTR models and writes a
-ranked leaderboard. Three tracks: `single` (21 single-task CTR models, Criteo),
-`multitask` (SharedBottom/ESMM/MMOE/PLE, Census-Income), `sequence`
-(DIN/BST/DSIN, DIEN skipped on TF≥2.0). Full docs: `benchmarks/README.md`.
-Curated past results: `benchmarks/RESULTS.md`.
+一个自包含的 harness（`benchmarks/`），训练 DeepCTR 模型并写出排序的 leaderboard。
+三个 track：`single`（21 个单任务 CTR 模型，Criteo）、`multitask`
+（SharedBottom/ESMM/MMOE/PLE，Census-Income）、`sequence`（DIN/BST/DSIN，DIEN 在
+TF≥2.0 上跳过）。完整文档见 `benchmarks/README.md`，历史结果见 `benchmarks/RESULTS.md`。
 
-## Always do these two things first
+## 每次必做的两件事
 
-1. **Force CPU** with `CUDA_VISIBLE_DEVICES=""`. The GPU on this host has a
-   CUDA/PTX mismatch — every model fails with `CUDA_ERROR_UNSUPPORTED_PTX_VERSION`
-   on GPU. The harness isolates each model, so on GPU you get an all-`failed`
-   leaderboard rather than a crash; the fix is always CPU.
-2. **Use legacy Keras**: `TF_USE_LEGACY_KERAS=1` (DeepCTR targets the Keras 2
-   API; on TF≥2.16 that means `tf-keras`). The package sets this itself, but set
-   it explicitly when invoking pytest.
+1. **强制 CPU**：加 `CUDA_VISIBLE_DEVICES=""`。本机 GPU 存在 CUDA/PTX 不兼容，在 GPU 上
+   每个模型都会以 `CUDA_ERROR_UNSUPPORTED_PTX_VERSION` 失败。harness 会逐模型隔离错误，
+   所以在 GPU 上你会得到一张全部 `failed` 的 leaderboard 而非崩溃——解决办法永远是走 CPU。
+2. **用 legacy Keras**：`TF_USE_LEGACY_KERAS=1`（DeepCTR 面向 Keras 2 API；在 TF≥2.16 上
+   即 `tf-keras`）。套件自身会设置它,但用 pytest 调用时要显式设上。
 
-Run long sweeps in the background and poll the log — a full 21-model single-task
-sweep on real data is several minutes to ~30 min on CPU.
+长时间 sweep 放后台跑并轮询日志——真实数据上 21 个单任务模型的完整 sweep 在 CPU 上需要
+几分钟到约 30 分钟。
 
-## Data on this host
+## 本机数据
 
-Real data lives in `benchmarks/data/` (git-ignored). If absent, regenerate or
-re-download (see README; the built-in Criteo DAC URL is dead — anonymous HF
-mirrors rate-limit, so a `HF_TOKEN` is needed for `reczoo/Criteo_x1`).
+真实数据在 `benchmarks/data/`（git-ignored）。若缺失,需重新生成或下载（见 README;内置的
+Criteo DAC URL 已失效——匿名 HF 镜像会限流,下载 `reczoo/Criteo_x1` 需要 `HF_TOKEN`）。
 
-| File | Rows | Use |
+| 文件 | 样本数 | 用途 |
 | ---- | ---- | --- |
-| `benchmarks/data/criteo_x1_500k.csv` | 500,000 | single-task, meaningful AUC |
-| `benchmarks/data/criteo_x1_200k.csv` | 200,000 | single-task, faster |
-| `benchmarks/data/census-income.data` (+ `.test`) | 199,523 (+99,762) | multitask, official split |
-| `examples/criteo_sample.txt` | 200 | smoke only — AUC is noise |
+| `benchmarks/data/criteo_x1_500k.csv` | 500,000 | 单任务,AUC 有意义 |
+| `benchmarks/data/criteo_x1_200k.csv` | 200,000 | 单任务,更快 |
+| `benchmarks/data/census-income.data`（+ `.test`） | 199,523（+99,762） | 多任务,官方切分 |
+| `examples/criteo_sample.txt` | 200 | 仅冒烟——AUC 是噪声 |
 
-## Commands
+## 命令
 
 ```bash
-# Fast smoke test (1 epoch, 2 models/track, bundled data) — verify the harness
+# 快速冒烟（1 epoch、每 track 2 个模型、自带数据）—— 验证 harness 正常
 CUDA_VISIBLE_DEVICES="" python -m benchmarks.benchmark --track all --quick
 
-# Single-task, real Criteo 500k — the headline comparison
+# 单任务,真实 Criteo 500k —— 主力对比
 CUDA_VISIBLE_DEVICES="" python -m benchmarks.benchmark --track single \
   --data-path benchmarks/data/criteo_x1_500k.csv \
   --epochs 1 --batch-size 1024 --val-split 0 --seed 2020
 
-# Multitask, real Census with its official train/test partition
+# 多任务,真实 Census,使用其官方 train/test 切分
 CUDA_VISIBLE_DEVICES="" python -m benchmarks.benchmark --track multitask \
   --data-path benchmarks/data/census-income.data --epochs 3 --batch-size 1024
 
-# Subset / exclude slow models; e.g. drop the interaction-heavy ones to save time
-#   --models DeepFM,DCN,xDeepFM     run only these
-#   --exclude FiBiNET,ONN,DeepFEFM,FwFM,FGCNN   ONN alone is 77M params / ~245s
+# 子集 / 排除慢模型;例如丢掉交互密集的几个以省时间
+#   --models DeepFM,DCN,xDeepFM     只跑这些
+#   --exclude FiBiNET,ONN,DeepFEFM,FwFM,FGCNN   仅 ONN 就有 77M 参数 / 约 245s
 ```
 
-Leaderboards print to stdout and write `benchmarks/results/<track>_<dataset>.csv`
-and `.md`. To preserve a run, copy the numbers into `benchmarks/RESULTS.md`
-(the `results/` dir is git-ignored).
+leaderboard 打印到 stdout,并写出 `benchmarks/results/<track>_<dataset>.csv` 和 `.md`。
+要长期保存一次运行结果,把数字抄进 `benchmarks/RESULTS.md`（`results/` 目录是 git-ignored）。
 
-## Train / test split — get this right
+## 训练 / 测试集划分 —— 这点要做对
 
-- **Default = random split**, `--test-size 0.2`, fixed `--seed`. Correct for
-  Criteo_x1 / DAC, which is anonymised and shuffled with no timestamp (so a
-  random split is leakage-free and standard).
-- **`--temporal-split` (+ optional `--time-col COL`)**: chronological hold-out —
-  the most recent `test_size` fraction becomes the test set, so no future row
-  leaks into training. Sorts by `--time-col` when present, else trusts file
-  order. Use only for time-ordered logs; the bundled Criteo has no timestamp.
-- **Census official split**: when `--data-path` is `census-income.data` and a
-  sibling `census-income.test` exists, the loader uses that official partition
-  automatically (encoders fit on the union). Don't reshuffle it.
-- **`--val-split`** carves validation from *train* but is **not wired to any
-  early-stopping/checkpoint** — it does not influence training or model
-  selection. For short fixed-epoch runs set `--val-split 0` so training uses the
-  full train split; only keep it if you add an EarlyStopping callback.
+- **默认 = 随机切分**,`--test-size 0.2`,固定 `--seed`。对 Criteo_x1 / DAC 是正确的:该数据
+  已匿名化并打散、无时间戳,所以随机切分无穿越且为标准做法。
+- **`--temporal-split`（可选 `--time-col COL`）**:按时间留出——最近 `test_size` 比例作为测试集,
+  杜绝未来行泄漏进训练。有 `--time-col` 时按它排序,否则信任文件既有顺序。仅用于带时间顺序的
+  日志;自带的 Criteo 没有时间戳。
+- **Census 官方切分**:当 `--data-path` 为 `census-income.data` 且同目录存在 `census-income.test`
+  时,loader 自动使用官方划分（编码器在并集上 fit）。不要再把它打散重切。
+- **`--val-split`** 从训练集中切出验证集,但**没有接任何早停 / checkpoint**——它不影响训练过程
+  也不参与模型选择。固定 epoch 的短跑应设 `--val-split 0`,让训练用满整个训练集;只有在加了
+  EarlyStopping callback 时才保留它。
 
-## Interpreting results
+## 结果解读
 
-- Reported AUC/LogLoss are on the held-out **test** set (never seen in `fit`).
-- Need enough data for a real ranking: on 200-row bundled data AUC ≈ 0.5 noise;
-  on 200k–500k the deep interaction models (DeepFEFM/FiBiNET/DeepFM/xDeepFM)
-  separate from simpler ones. More epochs raise absolute AUC but rarely flip the
-  top group.
-- Always report the split and epoch count alongside the leaderboard — a ranking
-  is only comparable within the same data/split/epochs.
+- 报告的 AUC/LogLoss 来自 hold-out 的**测试集**（`fit` 从未见过）。
+- 要有足够数据才有真实排名:200 行自带数据上 AUC≈0.5 是噪声;到 200k–500k 时,深层交互模型
+  （DeepFEFM/FiBiNET/DeepFM/xDeepFM）才与简单模型拉开。更多 epoch 会抬高绝对 AUC,但很少改变
+  头部梯队。
+- 汇报 leaderboard 时务必同时注明切分方式与 epoch 数——排名只在相同 数据/切分/epoch 下可比。
 
-## Tests
+## 测试
 
 ```bash
 CUDA_VISIBLE_DEVICES="" TF_USE_LEGACY_KERAS=1 python -m pytest tests/benchmark_test.py -q
 ```
 
-Covers each track on tiny data plus the split guarantees (temporal hold-out
-keeps the most-recent rows as test; Census uses the official `.test`).
+覆盖每个 track 在小数据上的运行,以及切分保证（时序留出把最近的行作为测试集;Census 使用
+官方 `.test`）。
