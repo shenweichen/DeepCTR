@@ -120,6 +120,27 @@ batch 1024. Tasks: `label_income` (>50k), `label_marital` (never-married).
   sequentially-dependent CTR→CTCVR tasks, which Census does not satisfy. Its
   numbers are not directly comparable.
 
+## Sequence — real MovieLens-25M `ml25m_seq_2m.csv` (current headline)
+
+**2,284,710** behavior samples built from the first 2.3M ratings of MovieLens-25M
+(per user, sorted by timestamp: target = current movie, history = up to 12 prior
+movies, label = rating ≥ 4, cate = first genre). 29,273 items · random split
+(seed=2020, test_size=0.2). 1 epoch, batch 1024, embedding-dim 8, **CPU**.
+
+| Rank | Model | AUC | LogLoss | Params | Train(s) |
+| ---- | ----- | --- | ------- | ------ | -------- |
+| 1 | DIN | **0.8021** | 0.5408 | 419,194 | 16.3 |
+| 2 | DSIN | 0.7951 | 0.5471 | 436,635 | 77.2 |
+| 3 | BST | 0.7943 | 0.5487 | 419,162 | 45.0 |
+| - | DIEN | skipped | — | — | — | GRU/AUGRU need legacy TF1 RNN APIs; unsupported on TF≥2.0 |
+
+- On real sequences all three models land at **0.79–0.80 AUC** — a genuine signal,
+  unlike the ~0.5 synthetic track (which only checks build/train/predict + cost).
+- **DIN is the value pick**: top AUC *and* fastest (16s). DSIN edges out BST but
+  costs ~4.7× the train time — its session structure earns nothing at 1 epoch.
+- MovieLens-25M has no user demographics, so `gender` (a minor sparse feature) is
+  synthesized deterministically from `user_id`; the sequence signal is fully real.
+
 ## Sequence — synthetic
 
 DIN / BST / DSIN build, train and predict; **DIEN is skipped on TF≥2.0** (its
@@ -138,4 +159,9 @@ CUDA_VISIBLE_DEVICES="" python -m benchmarks.benchmark --track single \
 
 CUDA_VISIBLE_DEVICES="" python -m benchmarks.benchmark --track multitask \
   --data-path benchmarks/data/census-income.data --epochs 3 --batch-size 1024
+
+# Sequence on real MovieLens-25M (build ml25m_seq_2m.csv first — see the skill)
+CUDA_VISIBLE_DEVICES="" python -m benchmarks.benchmark --track sequence \
+  --seq-source movielens --data-path benchmarks/data/ml25m_seq_2m.csv \
+  --epochs 1 --batch-size 1024 --embedding-dim 8
 ```

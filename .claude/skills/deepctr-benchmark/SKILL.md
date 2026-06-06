@@ -66,6 +66,36 @@ CPU 上 200 万行单 epoch:DeepFM ~60s,慢模型(ONN/DeepFEFM/FiBiNET)数分钟
 模型约 1 小时。要用完整集的官方 train/valid/test 切分(而非我们的随机切分),需给 loader 加多文件
 读取(参照 Census 官方切分的实现)。
 
+### Sequence 真实数据（MovieLens-25M,≥200 万样本）
+
+自带的 `examples/movielens_sample.txt` 只有 200 行(冒烟用);ml-1m 仅 ~100 万评分 → ~99 万样本,
+**不够 200 万**。要 ≥200 万真实序列样本用 **MovieLens-25M**(2500 万评分),切片后合并成 loader
+期望的列(`user_id,movie_id,rating,timestamp,genres,gender`):
+
+```bash
+# 1) 下载并解压（无需 token；约 250MB）
+curl -s -o benchmarks/data/ml-25m.zip \
+  https://files.grouplens.org/datasets/movielens/ml-25m.zip
+python -c "import zipfile; zipfile.ZipFile('benchmarks/data/ml-25m.zip').extractall('benchmarks/data')"
+
+# 2) 取前 ~230 万评分(ml-25m 按 userId 排序)→ ~228 万 (历史→目标) 样本
+python -c "
+import pandas as pd
+r = pd.read_csv('benchmarks/data/ml-25m/ratings.csv', nrows=2_300_000)
+m = pd.read_csv('benchmarks/data/ml-25m/movies.csv')[['movieId','genres']]
+df = r.merge(m, on='movieId', how='left').rename(columns={'userId':'user_id','movieId':'movie_id'})
+df['genres'] = df['genres'].fillna('(no genres listed)')
+df['gender'] = df['user_id'].map(lambda u: 'M' if u % 2 == 0 else 'F')  # ml-25m 无用户画像,确定性合成
+df[['user_id','movie_id','rating','timestamp','genres','gender']].to_csv('benchmarks/data/ml25m_seq_2m.csv', index=False)
+print('samples ~', len(df) - df.user_id.nunique())
+"
+```
+
+样本数 ≈ 评分行数 − 用户数(每个用户首条评分无历史被丢弃)。`gender` 是次要稀疏特征,合成不影响
+序列信号(用户行为历史 → 目标 item/类目)的真实性。CPU 上 228 万样本单 epoch:DIN ~16s、BST ~45s、
+DSIN ~77s(DIEN 在 TF≥2.0 自动 skip)。**注意 GPU 若驱动 PTX 版本与 TF 内核不匹配会全部 failed,
+务必带 `CUDA_VISIBLE_DEVICES=""` 强制 CPU。**
+
 ## 命令
 
 ```bash
@@ -80,6 +110,11 @@ CUDA_VISIBLE_DEVICES="" python -m benchmarks.benchmark --track single \
 # 多任务,真实 Census,使用其官方 train/test 切分
 CUDA_VISIBLE_DEVICES="" python -m benchmarks.benchmark --track multitask \
   --data-path benchmarks/data/census-income.data --epochs 3 --batch-size 1024
+
+# 序列,真实 MovieLens-25M(先按上文构建 ml25m_seq_2m.csv)
+CUDA_VISIBLE_DEVICES="" python -m benchmarks.benchmark --track sequence \
+  --seq-source movielens --data-path benchmarks/data/ml25m_seq_2m.csv \
+  --epochs 1 --batch-size 1024 --embedding-dim 8
 
 # 子集 / 排除慢模型;例如丢掉交互密集的几个以省时间
 #   --models DeepFM,DCN,xDeepFM     只跑这些
