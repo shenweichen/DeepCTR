@@ -10,6 +10,50 @@ curated, version-controlled snapshot.
 > `TF_USE_LEGACY_KERAS=1`). Absolute AUCs are not tuned maxima — the value is in
 > the **relative ranking and cost** under a fixed, leakage-free split.
 
+## Single-task CTR — real Criteo `criteo_x1_2m.csv` (current headline)
+
+2,000,000 samples sliced from the full Criteo_x1 `train.csv` · **random split,
+seed=2020 → 1,600,000 train / 400,000 test** (`--val-split 0`). 1 epoch, batch
+1024, embedding-dim 8.
+
+| Rank | Model | AUC | LogLoss | Params | Train(s) |
+| ---- | ----- | --- | ------- | ------ | -------- |
+| 1 | DeepFEFM | 0.7914 | 0.4541 | 7.5M | 332 |
+| 2 | FiBiNET | 0.7913 | 0.4542 | 8.7M | 188 |
+| 3 | PNN | 0.7901 | 0.4552 | 6.7M | 72 |
+| 4 | ONN | 0.7900 | 0.4556 | 163.8M | 1304 |
+| 5 | DeepFM | 0.7893 | 0.4558 | 7.4M | 60 |
+| 6 | xDeepFM | 0.7892 | 0.4560 | 7.7M | 163 |
+| 7 | FwFM | 0.7887 | 0.4563 | 7.4M | 307 |
+| 8 | FNN | 0.7886 | 0.4565 | 6.6M | 55 |
+| 9 | DCN | 0.7885 | 0.4564 | 7.4M | 71 |
+| 10 | WDL | 0.7885 | 0.4565 | 7.4M | 61 |
+| 11 | FLEN | 0.7884 | 0.4565 | 7.4M | 68 |
+| 12 | AutoInt | 0.7882 | 0.4570 | 7.4M | 129 |
+| 13 | DCNMix | 0.7879 | 0.4569 | 7.5M | 186 |
+| 14 | NFM | 0.7872 | 0.4575 | 7.3M | 56 |
+| 15 | FGCNN | 0.7807 | 0.4629 | 15.8M | 500 |
+| 16 | DIFM | 0.7795 | 0.4639 | 7.4M | 116 |
+| 17 | IFM | 0.7784 | 0.4647 | 7.4M | 58 |
+| 18 | MLR | 0.7753 | 0.4681 | 6.5M | 44 |
+| 19 | CCPM | 0.7579 | 0.4807 | 7.3M | 90 |
+| 20 | EDCN | 0.7543 | 0.4819 | 7.6M | 82 |
+| 21 | AFM | 0.7495 | 0.4861 | 7.3M | 93 |
+
+**Cross-scale (same random split, 1 epoch unless noted)**
+
+| Model | 200k (3ep) | 500k (1ep) | 2M (1ep) |
+| ----- | ---------- | ---------- | -------- |
+| DeepFM | 0.745 | 0.7794 | **0.7893** |
+| DeepFEFM | (excluded) | 0.7817 | **0.7914** |
+| FiBiNET | (excluded) | 0.7797 | **0.7913** |
+
+- **Data volume is the biggest lever**: DeepFM gains ~0.01 AUC from 500k→2M,
+  more than swapping architectures buys — the top 14 models sit within 0.787–0.791.
+- DeepFEFM / FiBiNET stay #1/#2; **PNN climbs to #3** at scale.
+- **ONN catches up on AUC at 2M (0.7900) but is absurdly costly**: 163.8M params
+  and ~22 min (22× DeepFM's 60s). Not worth it.
+
 ## Single-task CTR — real Criteo `criteo_x1_500k.csv`
 
 500,000 samples · **random split, seed=2020 → 400,000 train / 100,000 test**
