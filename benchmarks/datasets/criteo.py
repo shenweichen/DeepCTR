@@ -31,9 +31,12 @@ DENSE_FEATURES = ["I%d" % i for i in range(1, 14)]
 SPARSE_FEATURES = ["C%d" % i for i in range(1, 27)]
 COLUMNS = ["label"] + DENSE_FEATURES + SPARSE_FEATURES
 
-# Historical Criteo Labs mirror of the 100k-row DAC sample. May be offline; the
-# loader degrades gracefully to the bundled sample when it is.
-DEFAULT_DAC_URL = "https://s3-eu-west-1.amazonaws.com/criteo-labs/dac_sample.tar.gz"
+# Criteo's historical public DAC-sample mirror (criteo-labs S3) is offline, and
+# there is no stable drop-in auto-download anymore (the data now lives as large
+# multi-file datasets on Hugging Face / Criteo AI Lab). So there is no default
+# auto-download: use --data-path for real data, or pass your own tar.gz mirror
+# via --download-url. The loader degrades gracefully to the bundled sample.
+DEFAULT_DAC_URL = None
 
 
 def _read_bundled():
@@ -50,13 +53,17 @@ def _read_criteo_file(path):
     return pd.read_csv(path, sep=sep, header=None, names=COLUMNS)
 
 
-def _print_manual_instructions(url):
+def _print_manual_instructions():
     print(
-        "[criteo] To benchmark on real data, download the Criteo DAC sample "
-        "manually and pass it via --data-path:\n"
-        "           curl -L -o dac_sample.tar.gz '%s'\n"
-        "           tar -xzf dac_sample.tar.gz   # -> dac_sample.txt\n"
-        "         (or point --data-path at any full Criteo train.txt)." % url
+        "[criteo] No public auto-download is available (Criteo's DAC-sample mirror "
+        "is offline).\n"
+        "         For a real benchmark, fetch a Criteo dataset and pass it via "
+        "--data-path, e.g.:\n"
+        "           - Criteo_x1 split:  https://huggingface.co/datasets/reczoo/Criteo_x1\n"
+        "           - Full click logs:  https://huggingface.co/datasets/criteo/CriteoClickLogs\n"
+        "           - Criteo AI Lab:    https://ailab.criteo.com/ressources/\n"
+        "         then:  python -m benchmarks.benchmark --track single --data-path <file.csv>\n"
+        "         (or pass a working tar.gz mirror via --download-url)."
     )
 
 
@@ -98,11 +105,16 @@ def load_criteo(source="bundled", data_path=None, embedding_dim=8, use_hash=Fals
         name = "criteo_custom"
     elif source == "download":
         path = None
-        try:
-            path = _download_dac_sample(download_url, DATA_DIR)
-        except Exception as exc:  # network down, URL moved, bad archive, ...
-            print("[criteo] download failed (%s); using bundled sample instead." % exc)
-            _print_manual_instructions(download_url)
+        if download_url:
+            try:
+                path = _download_dac_sample(download_url, DATA_DIR)
+            except Exception as exc:  # network down, URL moved, bad archive, ...
+                print("[criteo] download failed (%s); using bundled sample instead." % exc)
+                _print_manual_instructions()
+        else:
+            print("[criteo] --source download requested but no download URL is "
+                  "configured (the historical DAC-sample mirror is offline).")
+            _print_manual_instructions()
         if path:
             df = _read_criteo_file(path)
             name = "criteo_dac100k"
