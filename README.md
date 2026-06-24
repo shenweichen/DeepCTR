@@ -81,6 +81,9 @@ Introduction](https://zhuanlan.zhihu.com/p/53231955)) and [welcome to join us!](
 |   MMOE                    | [KDD 2018][Modeling Task Relationships in Multi-task Learning with Multi-gate Mixture-of-Experts](https://dl.acm.org/doi/abs/10.1145/3219819.3220007)                   |
 |   PLE                    | [RecSys 2020][Progressive Layered Extraction (PLE): A Novel Multi-Task Learning (MTL) Model for Personalized Recommendations](https://dl.acm.org/doi/10.1145/3383313.3412236)                   |
 |   EDCN                   | [KDD 2021][Enhancing Explicit and Implicit Feature Interactions via Information Sharing for Parallel Deep CTR Models](https://dlp-kdd.github.io/assets/pdf/DLP-KDD_2021_paper_12.pdf)                   |
+|   OneTrans                   | [industrial 2024][OneTrans: Unified Feature Interaction and Sequence Modeling with One Transformer in Industrial Recommender Systems]()   |
+|   FinalMLP                   | [AAAI 2023][FinalMLP: An Enhanced Two-Stream MLP Model for CTR Prediction](https://arxiv.org/abs/2304.00902)   |
+|   MaskNet                   | [DLP-KDD 2021][MaskNet: Introducing Feature-Wise Multiplication to CTR Ranking Models by Instance-Guided Mask](https://arxiv.org/abs/2102.07619)   |
 
 ## Citation
 

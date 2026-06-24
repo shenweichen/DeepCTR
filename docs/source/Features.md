@@ -315,6 +315,18 @@ EDCN introduces two advanced modules, namelybridge moduleandregulation module, w
 [Chen B, Wang Y, Liu Z, et al. Enhancing explicit and implicit feature interactions via information sharing for parallel deep ctr models[C]//Proceedings of the 30th ACM International Conference on Information & Knowledge Management. 2021: 3757-3766.](https://dlp-kdd.github.io/assets/pdf/DLP-KDD_2021_paper_12.pdf)
 
 
+### FinalMLP
+
+Two parallel MLP streams with per-stream feature gating, fused by a multi-head bilinear interaction aggregation head; a simple MLP-only model that rivals complex interaction nets.
+
+[FinalMLP: An Enhanced Two-Stream MLP Model for CTR Prediction](https://arxiv.org/abs/2304.00902)
+
+### MaskNet
+
+Applies instance-guided multiplicative masks on feature embeddings / hidden layers (serial or parallel MaskBlocks) to inject feature-wise multiplicative interactions into an MLP.
+
+[MaskNet: Introducing Feature-Wise Multiplication to CTR Ranking Models by Instance-Guided Mask](https://arxiv.org/abs/2102.07619)
+
 ## Sequence Models
 
 ### DIN (Deep Interest Network)
@@ -374,6 +386,12 @@ BST use the powerful Transformer model to capture the sequential signals underly
 ![BST](../pics/BST.png)
 
 [Qiwei Chen, Huan Zhao, Wei Li, Pipei Huang, and Wenwu Ou. 2019. Behavior sequence transformer for e-commerce recommendation in Alibaba. In Proceedings of the 1st International Workshop on Deep Learning Practice for High-Dimensional Sparse Data (DLP-KDD '19). Association for Computing Machinery, New York, NY, USA, Article 12, 1–4. DOI:)](https://arxiv.org/pdf/1905.06874.pdf)
+
+### OneTrans
+
+Feeds feature-field tokens and behavior-sequence tokens into one Transformer with a structured mask so feature interaction and sequence modeling happen jointly.
+
+[OneTrans: Unified Feature Interaction and Sequence Modeling with One Transformer in Industrial Recommender Systems]()
 
 ## MultiTask Models
 

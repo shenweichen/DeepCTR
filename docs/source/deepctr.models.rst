@@ -34,6 +34,9 @@ Submodules
    deepctr.models.multitask.esmm
    deepctr.models.multitask.mmoe
    deepctr.models.multitask.ple
+   deepctr.models.sequence.onetrans
+   deepctr.models.finalmlp
+   deepctr.models.masknet
 
 
 Module contents

@@ -165,3 +165,10 @@ CUDA_VISIBLE_DEVICES="" python -m benchmarks.benchmark --track sequence \
   --seq-source movielens --data-path benchmarks/data/ml25m_seq_2m.csv \
   --epochs 1 --batch-size 1024 --embedding-dim 8
 ```
+
+## Onboarded via pipeline <!-- onboard:results -->
+
+Auto-recorded verify outcomes for models added through `benchmarks.onboard`.
+- **OneTrans**: see `benchmarks/onboard/reports/OneTrans.md`
+- **FinalMLP**: see `benchmarks/onboard/reports/FinalMLP.md`
+- **MaskNet**: see `benchmarks/onboard/reports/MaskNet.md`
