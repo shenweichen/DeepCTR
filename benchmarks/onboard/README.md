@@ -37,6 +37,8 @@ python -m benchmarks.onboard docs   FinalMLP                        # update all
 python -m benchmarks.onboard audit                                  # confirm 100% wired
 ```
 
+For the design rationale and why each stage exists, see [`DESIGN.md`](./DESIGN.md).
+
 ## Notes
 
 - `candidates.json` is the version-controlled knowledge base of candidate models.
