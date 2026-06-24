@@ -77,6 +77,97 @@
       "paper_metric": {"dataset": "Criteo_x1", "AUC": 0.8137},
       "difficulty": "hard",
       "status": "candidate"
+    },
+    {
+      "name": "FinalNet",
+      "paper_title": "FINAL: Factorized Interaction Layer for CTR Prediction",
+      "paper_url": "https://dl.acm.org/doi/10.1145/3539618.3591988",
+      "year": 2023,
+      "venue": "SIGIR",
+      "category": "single",
+      "one_liner": "Two-stream model built on a Factorized Interaction Layer (FINAL block) that generalizes linear + quadratic feature interactions; a strong MLP-style backbone.",
+      "ref_impl_url": "https://github.com/reczoo/FuxiCTR",
+      "paper_metric": {"dataset": "Criteo_x1", "AUC": 0.8137},
+      "difficulty": "medium",
+      "status": "candidate"
+    },
+    {
+      "name": "WuKong",
+      "paper_title": "Wukong: Towards a Scaling Law for Large-Scale Recommendation",
+      "paper_url": "https://arxiv.org/abs/2403.02545",
+      "year": 2024,
+      "venue": "ICML",
+      "category": "single",
+      "one_liner": "Stacks factorization-machine blocks (LCB/FMB) with MLPs into a dense architecture whose quality scales predictably with model size (a recommendation scaling law).",
+      "ref_impl_url": "https://github.com/reczoo/FuxiCTR",
+      "paper_metric": null,
+      "difficulty": "medium",
+      "status": "candidate"
+    },
+    {
+      "name": "FCN",
+      "paper_title": "FCN: Fusing Exponential and Linear Cross Network for CTR Prediction",
+      "paper_url": "https://arxiv.org/abs/2407.13349",
+      "year": 2024,
+      "venue": "arXiv",
+      "category": "single",
+      "one_liner": "Combines a Linear Cross Network with an Exponential Cross Network so the model captures both bounded- and unbounded-order feature interactions (successor to GDCN).",
+      "ref_impl_url": "",
+      "paper_metric": null,
+      "difficulty": "medium",
+      "status": "candidate"
+    },
+    {
+      "name": "QNN",
+      "paper_title": "Revisiting Feature Interactions from the Perspective of Quadratic Neural Networks for CTR Prediction",
+      "paper_url": "https://arxiv.org/abs/2505.17999",
+      "year": 2025,
+      "venue": "KDD",
+      "category": "single",
+      "one_liner": "Uses quadratic neurons (Hadamard-product interactions) as the core building block to model explicit second-order feature interactions efficiently.",
+      "ref_impl_url": "https://github.com/reczoo/FuxiCTR",
+      "paper_metric": null,
+      "difficulty": "hard",
+      "status": "candidate"
+    },
+    {
+      "name": "APG",
+      "paper_title": "APG: Adaptive Parameter Generation Network for Click-Through Rate Prediction",
+      "paper_url": "https://arxiv.org/abs/2203.16218",
+      "year": 2022,
+      "venue": "NeurIPS",
+      "category": "single",
+      "one_liner": "Generates DNN weights on the fly from instance-specific conditions (adaptive/dynamic weights) instead of using a single shared MLP; a wrapper applicable to many backbones.",
+      "ref_impl_url": "https://github.com/reczoo/FuxiCTR",
+      "paper_metric": null,
+      "difficulty": "hard",
+      "status": "candidate"
+    },
+    {
+      "name": "TransAct",
+      "paper_title": "TransAct: Transformer-based Realtime User Action Model for Recommendation at Pinterest",
+      "paper_url": "https://arxiv.org/abs/2306.00248",
+      "year": 2023,
+      "venue": "KDD",
+      "category": "sequence",
+      "one_liner": "Transformer over recent real-time user actions fused with batch (long-term) features; an industrial behavior-sequence model in the DIN/BST family.",
+      "ref_impl_url": "https://github.com/reczoo/FuxiCTR",
+      "paper_metric": null,
+      "difficulty": "medium",
+      "status": "candidate"
+    },
+    {
+      "name": "TWIN",
+      "paper_title": "TWIN: Two-stage Interest Network for Lifelong User Behavior Modeling in CTR Prediction at Kuaishou",
+      "paper_url": "https://arxiv.org/abs/2302.02352",
+      "year": 2023,
+      "venue": "KDD",
+      "category": "sequence",
+      "one_liner": "Two-stage target-attention (GSU+ESU) over lifelong behavior sequences with consistent relevance metrics across stages; for very long user histories.",
+      "ref_impl_url": "https://github.com/reczoo/FuxiCTR",
+      "paper_metric": null,
+      "difficulty": "hard",
+      "status": "candidate"
     }
   ]
 }
