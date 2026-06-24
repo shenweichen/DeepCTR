@@ -5,8 +5,8 @@ industry/academic CTR models, each with a fixed schema (paper, venue, category,
 key idea, reference impl, reported metric, integration difficulty, status).
 
   discover --list                list candidates (optionally filtered)
-  discover --refresh             print a research prompt to refresh the KB via
-                                 web search / the deep-research skill
+  discover --refresh             print a research prompt to refresh the KB
+                                 using your own web-search capability
 
 Discovery cannot fully auto-select models (that needs judgement), so the CLI
 automates the structured/ranked part and marks which candidates are already
@@ -26,8 +26,9 @@ DIFFICULTY_RANK = {"easy": 0, "medium": 1, "hard": 2}
 RESEARCH_PROMPT = """\
 Refresh benchmarks/onboard/candidates.json with recent CTR / recommendation models.
 
-Search these sources for models published in the last ~3 years that fit DeepCTR's
-feature-column interface (SparseFeat / DenseFeat / VarLenSparseFeat):
+Using your web-search / browsing capability, search these sources for models
+published in the last ~3 years that fit DeepCTR's feature-column interface
+(SparseFeat / DenseFeat / VarLenSparseFeat):
   - arXiv (cs.IR / cs.LG), Papers-with-Code CTR leaderboards
   - KDD / RecSys / CIKM / SIGIR / WWW / AAAI proceedings
   - FuxiCTR / BARS benchmark model zoo (github.com/reczoo/FuxiCTR)

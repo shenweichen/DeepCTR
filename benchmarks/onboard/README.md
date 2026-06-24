@@ -19,7 +19,7 @@ export TF_USE_LEGACY_KERAS=1        # requires `pip install tf-keras==<your TF x
 | Command | What it does |
 | --- | --- |
 | `discover --list` | List/rank candidate models from `candidates.json`; marks which are already implemented. |
-| `discover --refresh` | Print a research prompt to refresh the candidate KB via web search / the deep-research skill. |
+| `discover --refresh` | Print a research prompt to refresh the candidate KB using your own web-search capability. |
 | `scaffold <Name> --category single\|sequence\|multitask` | Generate model + test skeletons and **auto-wire all 6 registration points** (`deepctr/models/__init__.py` import + `__all__`, sub-package `__init__`, `deepctr/layers/__init__.py` `custom_objects`, `benchmarks/registry.py`). Use `--with-layer` to also create a custom layer, `--wire-only` for an already-written model. |
 | `audit [--name X ...]` | Check every discovered model is fully wired (importable, in `__all__`, custom layers registered, has a test, has a registry builder). Catches half-integrated models. |
 | `verify <Name>` | Correctness (unit test + audit) **and** effectiveness (benchmark AUC vs an in-track baseline, compared to the paper number). Writes `reports/<Name>.md`. |
