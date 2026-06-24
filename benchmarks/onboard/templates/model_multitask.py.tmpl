@@ -1,0 +1,53 @@
+# -*- coding:utf-8 -*-
+"""
+{{NAME}}
+
+Reference:
+    {{PAPER}}
+"""
+
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Dense
+
+from ...feature_column import build_input_features, input_from_feature_columns
+from ...layers.core import PredictionLayer, DNN
+from ...layers.utils import combined_dnn_input
+
+
+def {{NAME}}(dnn_feature_columns, tower_dnn_hidden_units=(64,), l2_reg_embedding=0.00001, l2_reg_dnn=0,
+        seed=1024, dnn_dropout=0, dnn_activation='relu', dnn_use_bn=False,
+        task_types=('binary', 'binary'), task_names=('ctr', 'ctcvr')):
+    """Instantiates the {{NAME}} multi-task architecture.
+
+    :param dnn_feature_columns: iterable of all feature columns used by the model.
+    :param tower_dnn_hidden_units: layer sizes of each per-task tower DNN.
+    :param task_types: list of ``"binary"``/``"regression"``, one per task.
+    :param task_names: list of str, the prediction name of each task.
+    :return: A Keras model instance with one output per task.
+    """
+    num_tasks = len(task_names)
+    if num_tasks != len(task_types):
+        raise ValueError("task_names and task_types must have the same length")
+
+    features = build_input_features(dnn_feature_columns)
+    inputs_list = list(features.values())
+
+    sparse_embedding_list, dense_value_list = input_from_feature_columns(
+        features, dnn_feature_columns, l2_reg_embedding, seed)
+    dnn_input = combined_dnn_input(sparse_embedding_list, dense_value_list)
+
+    # ===================== TODO: {{NAME}} core multi-task body =====================
+    # Implement the shared/expert/gating structure here, producing one tower input
+    # per task. The skeleton below shares a single body across tasks.
+    shared = DNN((128,), dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed)(dnn_input)
+    # =========================== END TODO ==========================================
+
+    task_outs = []
+    for task_type, task_name in zip(task_types, task_names):
+        tower = DNN(tower_dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout,
+                    dnn_use_bn, seed=seed, name='tower_' + task_name)(shared)
+        logit = Dense(1, use_bias=False)(tower)
+        task_outs.append(PredictionLayer(task_type, name=task_name)(logit))
+
+    model = Model(inputs=inputs_list, outputs=task_outs)
+    return model

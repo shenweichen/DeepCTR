@@ -10,7 +10,7 @@ from packaging import version
 from deepctr.feature_column import DenseFeat, SparseFeat
 from deepctr.models import (AFM, BST, CCPM, DCN, DIEN, DIFM, DIN, DSIN, EDCN, FGCNN, FLEN, FNN,
                             FwFM, IFM, MLR, MMOE, NFM, ONN, PLE, PNN, WDL, AutoInt, DCNMix,
-                            DeepFEFM, DeepFM, ESMM, FiBiNET, SharedBottom, xDeepFM)
+                            DeepFEFM, DeepFM, ESMM, FiBiNET, SharedBottom, xDeepFM, OneTrans, FinalMLP, MaskNet)
 
 _TF2 = version.parse(tf.__version__) >= version.parse("2.0.0")
 _TF28 = version.parse(tf.__version__) >= version.parse("2.8.0")
@@ -65,7 +65,9 @@ SINGLE_TASK_MODELS = {
     "DIFM": lambda lin, dnn, task: DIFM(lin, dnn, task=task),
     "DeepFEFM": lambda lin, dnn, task: DeepFEFM(lin, dnn, task=task),
     "MLR": lambda lin, dnn, task: MLR(lin, lin, task=task),  # region == base
-    "EDCN": lambda lin, dnn, task: EDCN(_sparse_only(lin), _sparse_only(dnn), task=task),  # sparse-only
+    "EDCN": lambda lin, dnn, task: EDCN(_sparse_only(lin), _sparse_only(dnn), task=task),  # sparse-only,
+    'FinalMLP': lambda lin, dnn, task: FinalMLP(lin, dnn, task=task),
+    'MaskNet': lambda lin, dnn, task: MaskNet(lin, dnn, task=task),
 }
 
 # --------------------------------------------------------------------------- #
@@ -138,11 +140,21 @@ def _build_dsin(data, task):
 
 
 # view: which SequenceData to feed ('din' for DIN/BST/DIEN, 'dsin' for DSIN)
+def _build_onetrans(data, task):
+    # Transformer-style sequence model: pick head count that divides the
+    # behavior embedding dim (see _build_bst / _build_dsin for the pattern).
+    emb = _behavior_embedding_dim(data)
+    head = _largest_divisor_leq(emb, 4)
+    return OneTrans(data.feature_columns, data.behavior_feature_list,
+                     att_head_num=head, task=task)
+
+
 SEQUENCE_MODELS = {
     "DIN": {"view": "din", "build": _build_din},
     "BST": {"view": "din", "build": _build_bst},
     "DIEN": {"view": "din", "build": _build_dien},
     "DSIN": {"view": "dsin", "build": _build_dsin},
+    'OneTrans': {"view": "din", "build": _build_onetrans},
 }
 
 

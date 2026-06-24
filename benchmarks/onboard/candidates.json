@@ -1,0 +1,82 @@
+{
+  "_schema": {
+    "name": "model name (CapWords, used as the deepctr.models symbol)",
+    "paper_title": "full paper title",
+    "paper_url": "link to the paper",
+    "year": "publication year",
+    "venue": "venue (KDD/RecSys/AAAI/...)",
+    "category": "single | sequence | multitask",
+    "one_liner": "one-sentence description of the key idea",
+    "ref_impl_url": "reference implementation (e.g. FuxiCTR/BARS) if any",
+    "paper_metric": "reported metric, e.g. {\"dataset\": \"Criteo_x1\", \"AUC\": 0.8137}",
+    "difficulty": "easy | medium | hard (DeepCTR integration effort)",
+    "status": "candidate | implemented | skipped"
+  },
+  "candidates": [
+    {
+      "name": "OneTrans",
+      "paper_title": "OneTrans: Unified Feature Interaction and Sequence Modeling with One Transformer in Industrial Recommender Systems",
+      "paper_url": "",
+      "year": 2024,
+      "venue": "industrial",
+      "category": "sequence",
+      "one_liner": "Feeds feature-field tokens and behavior-sequence tokens into one Transformer with a structured mask so feature interaction and sequence modeling happen jointly.",
+      "ref_impl_url": "",
+      "paper_metric": null,
+      "difficulty": "hard",
+      "status": "implemented"
+    },
+    {
+      "name": "FinalMLP",
+      "paper_title": "FinalMLP: An Enhanced Two-Stream MLP Model for CTR Prediction",
+      "paper_url": "https://arxiv.org/abs/2304.00902",
+      "year": 2023,
+      "venue": "AAAI",
+      "category": "single",
+      "one_liner": "Two parallel MLP streams with per-stream feature gating, fused by a multi-head bilinear interaction aggregation head; a simple MLP-only model that rivals complex interaction nets.",
+      "ref_impl_url": "https://github.com/reczoo/FuxiCTR",
+      "paper_metric": {"dataset": "Criteo_x1", "AUC": 0.8137},
+      "difficulty": "easy",
+      "status": "candidate"
+    },
+    {
+      "name": "MaskNet",
+      "paper_title": "MaskNet: Introducing Feature-Wise Multiplication to CTR Ranking Models by Instance-Guided Mask",
+      "paper_url": "https://arxiv.org/abs/2102.07619",
+      "year": 2021,
+      "venue": "DLP-KDD",
+      "category": "single",
+      "one_liner": "Applies instance-guided multiplicative masks on feature embeddings / hidden layers (serial or parallel MaskBlocks) to inject feature-wise multiplicative interactions into an MLP.",
+      "ref_impl_url": "https://github.com/reczoo/FuxiCTR",
+      "paper_metric": {"dataset": "Criteo_x1", "AUC": 0.8124},
+      "difficulty": "easy",
+      "status": "candidate"
+    },
+    {
+      "name": "GDCN",
+      "paper_title": "Towards Deeper, Lighter and Interpretable Cross Network for CTR Prediction",
+      "paper_url": "https://arxiv.org/abs/2311.04635",
+      "year": 2023,
+      "venue": "CIKM",
+      "category": "single",
+      "one_liner": "Gated Deep & Cross Network: adds an information gate to each cross layer of DCN-V2 to filter noisy high-order interactions.",
+      "ref_impl_url": "https://github.com/reczoo/FuxiCTR",
+      "paper_metric": {"dataset": "Criteo_x1", "AUC": 0.8138},
+      "difficulty": "medium",
+      "status": "candidate"
+    },
+    {
+      "name": "EulerNet",
+      "paper_title": "EulerNet: Adaptive Feature Interaction Learning via Euler's Formula for CTR Prediction",
+      "paper_url": "https://arxiv.org/abs/2304.10711",
+      "year": 2023,
+      "venue": "SIGIR",
+      "category": "single",
+      "one_liner": "Learns arbitrary-order feature interactions in a complex vector space via Euler's formula, modeling exponents of interactions as learnable parameters.",
+      "ref_impl_url": "https://github.com/reczoo/FuxiCTR",
+      "paper_metric": {"dataset": "Criteo_x1", "AUC": 0.8137},
+      "difficulty": "hard",
+      "status": "candidate"
+    }
+  ]
+}
