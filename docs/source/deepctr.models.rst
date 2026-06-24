@@ -37,6 +37,7 @@ Submodules
    deepctr.models.sequence.onetrans
    deepctr.models.finalmlp
    deepctr.models.masknet
+   deepctr.models.wukong
 
 
 Module contents

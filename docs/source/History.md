@@ -1,4 +1,5 @@
 # History
+- 06/24/2026 : Add [WuKong](./Features.html#wukong) model via the onboarding pipeline.
 - 06/24/2026 : Add [MaskNet](./Features.html#masknet) model via the onboarding pipeline.
 - 06/24/2026 : Add [FinalMLP](./Features.html#finalmlp) model via the onboarding pipeline.
 - 06/24/2026 : Add [OneTrans](./Features.html#onetrans) model via the onboarding pipeline.

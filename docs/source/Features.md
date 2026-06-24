@@ -327,6 +327,12 @@ Applies instance-guided multiplicative masks on feature embeddings / hidden laye
 
 [MaskNet: Introducing Feature-Wise Multiplication to CTR Ranking Models by Instance-Guided Mask](https://arxiv.org/abs/2102.07619)
 
+### WuKong
+
+Stacks factorization-machine blocks (LCB/FMB) with MLPs into a dense architecture whose quality scales predictably with model size (a recommendation scaling law).
+
+[Wukong: Towards a Scaling Law for Large-Scale Recommendation](https://arxiv.org/abs/2403.02545)
+
 ## Sequence Models
 
 ### DIN (Deep Interest Network)

@@ -102,7 +102,7 @@
       "ref_impl_url": "https://github.com/reczoo/FuxiCTR",
       "paper_metric": null,
       "difficulty": "medium",
-      "status": "candidate"
+      "status": "implemented"
     },
     {
       "name": "FCN",

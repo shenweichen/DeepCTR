@@ -10,7 +10,7 @@ from packaging import version
 from deepctr.feature_column import DenseFeat, SparseFeat
 from deepctr.models import (AFM, BST, CCPM, DCN, DIEN, DIFM, DIN, DSIN, EDCN, FGCNN, FLEN, FNN,
                             FwFM, IFM, MLR, MMOE, NFM, ONN, PLE, PNN, WDL, AutoInt, DCNMix,
-                            DeepFEFM, DeepFM, ESMM, FiBiNET, SharedBottom, xDeepFM, OneTrans, FinalMLP, MaskNet)
+                            DeepFEFM, DeepFM, ESMM, FiBiNET, SharedBottom, xDeepFM, OneTrans, FinalMLP, MaskNet, WuKong)
 
 _TF2 = version.parse(tf.__version__) >= version.parse("2.0.0")
 _TF28 = version.parse(tf.__version__) >= version.parse("2.8.0")
@@ -68,6 +68,7 @@ SINGLE_TASK_MODELS = {
     "EDCN": lambda lin, dnn, task: EDCN(_sparse_only(lin), _sparse_only(dnn), task=task),  # sparse-only,
     'FinalMLP': lambda lin, dnn, task: FinalMLP(lin, dnn, task=task),
     'MaskNet': lambda lin, dnn, task: MaskNet(lin, dnn, task=task),
+    'WuKong': lambda lin, dnn, task: WuKong(lin, dnn, task=task),
 }
 
 # --------------------------------------------------------------------------- #

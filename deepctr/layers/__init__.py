@@ -12,6 +12,7 @@ from .onetrans import OneTransLayer, TokenSlice, SinusoidalPositionEncoding
 from .sequence import (AttentionSequencePoolingLayer, BiasEncoding, BiLSTM,
                        KMaxPooling, SequencePoolingLayer, WeightedSequenceLayer,
                        Transformer, DynamicGRU, PositionEncoding)
+from .wukong import WuKongLayer
 from .utils import NoMask, Hash, Linear, _Add, combined_dnn_input, softmax, reduce_sum, Concat
 
 custom_objects = {'tf': tf,
@@ -57,4 +58,5 @@ custom_objects = {'tf': tf,
                   'SinusoidalPositionEncoding': SinusoidalPositionEncoding,
                   'TokenSlice': TokenSlice,
                   'InteractionAggregation': InteractionAggregation,
+                  'WuKongLayer': WuKongLayer,
                   }

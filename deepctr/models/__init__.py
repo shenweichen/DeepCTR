@@ -24,6 +24,7 @@ from .edcn import EDCN
 
 from .finalmlp import FinalMLP
 from .masknet import MaskNet
+from .wukong import WuKong
 __all__ = ["AFM", "CCPM", "DCN", "IFM", "DIFM", "DCNMix", "MLR", "DeepFM", "MLR", "NFM", "DIN", "DIEN", "FNN", "PNN",
            "WDL", "xDeepFM", "AutoInt", "ONN", "FGCNN", "DSIN", "FiBiNET", 'FLEN', "FwFM", "BST", "DeepFEFM",
-           "SharedBottom", "ESMM", "MMOE", "PLE", 'EDCN', "OneTrans", "FinalMLP", "MaskNet"]
+           "SharedBottom", "ESMM", "MMOE", "PLE", 'EDCN', "OneTrans", "FinalMLP", "MaskNet", "WuKong"]

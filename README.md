@@ -84,6 +84,7 @@ Introduction](https://zhuanlan.zhihu.com/p/53231955)) and [welcome to join us!](
 |   OneTrans                   | [industrial 2024][OneTrans: Unified Feature Interaction and Sequence Modeling with One Transformer in Industrial Recommender Systems]()   |
 |   FinalMLP                   | [AAAI 2023][FinalMLP: An Enhanced Two-Stream MLP Model for CTR Prediction](https://arxiv.org/abs/2304.00902)   |
 |   MaskNet                   | [DLP-KDD 2021][MaskNet: Introducing Feature-Wise Multiplication to CTR Ranking Models by Instance-Guided Mask](https://arxiv.org/abs/2102.07619)   |
+|   WuKong                   | [ICML 2024][Wukong: Towards a Scaling Law for Large-Scale Recommendation](https://arxiv.org/abs/2403.02545)   |
 
 ## Citation
 

@@ -172,3 +172,4 @@ Auto-recorded verify outcomes for models added through `benchmarks.onboard`.
 - **OneTrans**: see `benchmarks/onboard/reports/OneTrans.md`
 - **FinalMLP**: see `benchmarks/onboard/reports/FinalMLP.md`
 - **MaskNet**: see `benchmarks/onboard/reports/MaskNet.md`
+- **WuKong**: see `benchmarks/onboard/reports/WuKong.md`
