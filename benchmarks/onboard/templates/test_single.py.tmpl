@@ -1,6 +1,7 @@
 import pytest
 
 from deepctr.models import {{NAME}}
+from tests.correctness import set_test_seed
 from ..utils import check_model, get_test_data, SAMPLE_SIZE
 
 
@@ -11,6 +12,7 @@ from ..utils import check_model, get_test_data, SAMPLE_SIZE
 )
 def test_{{NAME}}(hidden_size, sparse_feature_num):
     model_name = "{{NAME}}"
+    set_test_seed(2020)
     sample_size = SAMPLE_SIZE
     x, y, feature_columns = get_test_data(sample_size, sparse_feature_num=sparse_feature_num,
                                           dense_feature_num=sparse_feature_num)

@@ -29,6 +29,18 @@ CUDA_VISIBLE_DEVICES="" TF_USE_LEGACY_KERAS=1 python -m pytest tests/ -q
 CUDA_VISIBLE_DEVICES="" TF_USE_LEGACY_KERAS=1 python -m pytest tests/models/DeepFM_test.py -q   # single model
 ```
 
+## Correctness contract for model work
+
+- A training smoke test is not proof of mathematical correctness. Follow the
+  C0-C6 ladder in `tests/README.md`.
+- Every model uses `check_model` / `check_mtl_model` for finite inference and
+  prediction-equivalent weight/full-model serialization.
+- Every custom mathematical layer adds an independent NumPy equation test plus
+  finite gradients via `tests/correctness.py`; add numerical gradients on tiny
+  tensors and domain invariants for masking, causality, symmetry, or padding.
+- Benchmark AUC validates effectiveness only. Claim paper reproduction only
+  after an official-code differential or matching paper-scale protocol.
+
 ## Adding a new model — use the onboarding pipeline
 
 The `benchmarks.onboard` CLI standardizes adding a new CTR model across four

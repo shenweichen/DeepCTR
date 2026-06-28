@@ -51,13 +51,21 @@ def _run_correctness(name):
         result["unit_test_note"] = "no test file found"
         return result
 
+    test_paths = [test_path]
+    layer_contract = os.path.join(REPO_ROOT, "tests", "layers",
+                                  name + "_correctness_test.py")
+    if os.path.exists(layer_contract):
+        test_paths.append(layer_contract)
+
     env = dict(os.environ, CUDA_VISIBLE_DEVICES="", TF_USE_LEGACY_KERAS="1")
-    print("  running unit test: %s" % os.path.relpath(test_path, REPO_ROOT))
-    proc = subprocess.run([sys.executable, "-m", "pytest", test_path, "-q"],
+    print("  running correctness tests: %s" %
+          ", ".join(os.path.relpath(path, REPO_ROOT) for path in test_paths))
+    proc = subprocess.run([sys.executable, "-m", "pytest"] + test_paths + ["-q"],
                           cwd=REPO_ROOT, env=env,
                           stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     out = proc.stdout.decode("utf-8", "replace")
     result["unit_test"] = proc.returncode == 0
+    result["test_paths"] = test_paths
     # keep the pytest summary line(s)
     tail = [l for l in out.splitlines() if "passed" in l or "failed" in l or "error" in l.lower()]
     result["unit_test_note"] = tail[-1].strip() if tail else "see output"

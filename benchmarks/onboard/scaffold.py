@@ -19,6 +19,7 @@ from ._util import (
 )
 
 TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), "templates")
+TESTS_LAYERS_DIR = os.path.join(REPO_ROOT, "tests", "layers")
 
 
 def _render(template_name, mapping):
@@ -95,6 +96,16 @@ def _create_layer_file(name):
                           anchor="custom_objects = {", after=False)
     _log(changed, "deepctr/layers/__init__.py: import %sLayer" % name)
     return [name + "Layer"]
+
+
+def _create_layer_test(name):
+    path = os.path.join(TESTS_LAYERS_DIR, name + "_correctness_test.py")
+    if os.path.exists(path):
+        _log(False, "tests/layers/%s_correctness_test.py exists" % name)
+        return
+    mapping = {"NAME": name, "NAME_LOWER": name.lower()}
+    write_text(path, _render("test_layer_correctness.py.tmpl", mapping))
+    _log(True, "tests/layers/%s_correctness_test.py created" % name)
 
 
 def _create_model_file(name, category, mapping):
@@ -187,6 +198,7 @@ def run(args):
         _create_model_file(name, category, mapping)
         if args.with_layer:
             layer_symbols = _create_layer_file(name)
+            _create_layer_test(name)
 
     _wire_package_exports(name, category)
     if layer_symbols:

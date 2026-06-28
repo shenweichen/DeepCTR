@@ -1,6 +1,7 @@
 import pytest
 
 from deepctr.models import EDCN
+from tests.correctness import set_test_seed
 from ..utils import check_model, get_test_data, SAMPLE_SIZE
 
 
@@ -15,6 +16,7 @@ from ..utils import check_model, get_test_data, SAMPLE_SIZE
 )
 def test_EDCN(bridge_type, cross_num, cross_parameterization, sparse_feature_num):
     model_name = "EDCN"
+    set_test_seed(0)
 
     sample_size = SAMPLE_SIZE
     x, y, feature_columns = get_test_data(sample_size, sparse_feature_num=sparse_feature_num,

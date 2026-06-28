@@ -20,9 +20,9 @@ export TF_USE_LEGACY_KERAS=1        # requires `pip install tf-keras==<your TF x
 | --- | --- |
 | `discover --list` | List/rank candidate models from `candidates.json`; marks which are already implemented. |
 | `discover --refresh` | Print a research prompt to refresh the candidate KB using your own web-search capability. |
-| `scaffold <Name> --category single\|sequence\|multitask` | Generate model + test skeletons and **auto-wire all 6 registration points** (`deepctr/models/__init__.py` import + `__all__`, sub-package `__init__`, `deepctr/layers/__init__.py` `custom_objects`, `benchmarks/registry.py`). Use `--with-layer` to also create a custom layer, `--wire-only` for an already-written model. |
+| `scaffold <Name> --category single\|sequence\|multitask` | Generate model + test skeletons and **auto-wire all 6 registration points** (`deepctr/models/__init__.py` import + `__all__`, sub-package `__init__`, `deepctr/layers/__init__.py` `custom_objects`, `benchmarks/registry.py`). Use `--with-layer` to also create a custom layer plus an independent reference/gradient correctness-test skeleton; use `--wire-only` for an already-written model. |
 | `audit [--name X ...]` | Check every discovered model is fully wired (importable, in `__all__`, custom layers registered, has a test, has a registry builder). Catches half-integrated models. |
-| `verify <Name>` | Correctness (unit test + audit) **and** effectiveness (benchmark AUC vs an in-track baseline, compared to the paper number). Writes `reports/<Name>.md`. |
+| `verify <Name>` | Correctness (model test, matching layer correctness contract when present, and audit) **and** effectiveness (benchmark AUC vs an in-track baseline, compared to the paper number). Writes `reports/<Name>.md`. |
 | `docs <Name>` | Idempotently update `README.md`, `docs/source/Features.md`, the autodoc `.rst` + toctree, `History.md`, and `RESULTS.md`. |
 | `onboard <Name> --category ...` | `scaffold` → (pause to implement the core) → `verify` → `docs`. |
 
@@ -32,6 +32,8 @@ export TF_USE_LEGACY_KERAS=1        # requires `pip install tf-keras==<your TF x
 python -m benchmarks.onboard discover --list
 python -m benchmarks.onboard scaffold FinalMLP --category single   # generates + wires
 #   implement the model core in deepctr/models/finalmlp.py (replace the TODO block)
+#   if a custom layer was generated, replace the identity NumPy reference in
+#   tests/layers/FinalMLP_correctness_test.py with the paper equation
 python -m benchmarks.onboard verify FinalMLP                        # correctness + effectiveness
 python -m benchmarks.onboard docs   FinalMLP                        # update all docs
 python -m benchmarks.onboard audit                                  # confirm 100% wired
@@ -46,3 +48,7 @@ For the design rationale and why each stage exists, see [`DESIGN.md`](./DESIGN.m
   to the gitignored `benchmarks/results/`.
 - Scaffolded test files use a generic signature; adjust the generated
   `tests/models/<Name>_test.py` if your model's constructor differs (e.g. FinalMLP).
+- `check_model` supplies the generic build/train/serialization contract. It
+  cannot prove a paper equation. Custom mathematical layers must additionally
+  use the C3-C5 helpers in `tests/correctness.py`; see `tests/README.md` for the
+  correctness ladder and concrete examples.
