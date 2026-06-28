@@ -10,10 +10,12 @@ from numpy.testing import assert_allclose
 from packaging import version
 from tensorflow.keras import backend as K
 from tensorflow.keras.layers import Input, Masking
-from tensorflow.keras.models import Model, load_model, save_model
+from tensorflow.keras.models import Model
 
 from deepctr.feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, DEFAULT_GROUP_NAME
 from deepctr.layers import custom_objects
+from tests.correctness import (assert_nested_allclose, assert_serialization_predictions,
+                               predict_numpy)
 
 SAMPLE_SIZE = 8
 VOCABULARY_SIZE = 4
@@ -355,7 +357,14 @@ def has_arg(fn, name, accept_all=False):
 
 def check_model(model, model_name, x, y, check_model_io=True):
     """
-    compile model,train and evaluate it,then save/load weight and model file.
+    Compile/train a model, then enforce the generic model correctness contract:
+
+    * inference is finite;
+    * predictions survive a weight round-trip; and
+    * predictions survive a full-model serialization round-trip.
+
+    Architecture-specific paper equations and invariants belong in focused
+    layer tests using ``tests.correctness``.
     :param model:
     :param model_name:
     :param x:
@@ -368,14 +377,14 @@ def check_model(model, model_name, x, y, check_model_io=True):
     model.fit(x, y, batch_size=100, epochs=1, validation_split=0.5)
 
     print(model_name + " test train valid pass!")
+    expected_predictions = predict_numpy(model, x)
     model.save_weights(model_name + '_weights.h5')
     model.load_weights(model_name + '_weights.h5')
     os.remove(model_name + '_weights.h5')
+    assert_nested_allclose(predict_numpy(model, x), expected_predictions)
     print(model_name + " test save load weight pass!")
     if check_model_io:
-        save_model(model, model_name + '.h5')
-        model = load_model(model_name + '.h5', custom_objects)
-        os.remove(model_name + '.h5')
+        model = assert_serialization_predictions(model, x, custom_objects)
         print(model_name + " test save load model pass!")
 
     print(model_name + " test pass!")

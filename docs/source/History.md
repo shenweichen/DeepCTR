@@ -1,4 +1,8 @@
 # History
+- 06/24/2026 : Add [WuKong](./Features.html#wukong) model via the onboarding pipeline.
+- 06/24/2026 : Add [MaskNet](./Features.html#masknet) model via the onboarding pipeline.
+- 06/24/2026 : Add [FinalMLP](./Features.html#finalmlp) model via the onboarding pipeline.
+- 06/24/2026 : Add [OneTrans](./Features.html#onetrans) model via the onboarding pipeline.
 - 04/16/2026 : [v0.9.4](https://github.com/shenweichen/DeepCTR/releases/tag/v0.9.4) released.Support higher tensorflow version.
 - 11/10/2022 : [v0.9.3](https://github.com/shenweichen/DeepCTR/releases/tag/v0.9.3) released.Add [EDCN](./Features.html#edcn-enhancing-explicit-and-implicit-feature-interactions-dcn).
 - 10/15/2022 : [v0.9.2](https://github.com/shenweichen/DeepCTR/releases/tag/v0.9.2) released.Support python `3.9`,`3.10`.

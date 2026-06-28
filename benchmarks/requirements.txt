@@ -1,0 +1,10 @@
+# Extra dependencies for the DeepCTR benchmark suite.
+# These are NOT required by the core deepctr library (which stays lean) and are
+# only needed to run the benchmark pipeline under benchmarks/.
+#
+#   pip install -r benchmarks/requirements.txt
+#
+# TensorFlow is intentionally not listed here: install the build that matches
+# your platform first (see the project README), then deepctr, then these.
+scikit-learn>=0.23
+pandas>=1.0

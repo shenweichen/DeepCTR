@@ -6,10 +6,13 @@ from .interaction import (CIN, FM, AFMLayer, BiInteractionPooling, CrossNet, Cro
                           InnerProductLayer, InteractingLayer,
                           OutterProductLayer, FGCNNLayer, SENETLayer, BilinearInteraction,
                           FieldWiseBiInteraction, FwFMLayer, FEFMLayer, BridgeModule)
+from .finalmlp import InteractionAggregation
 from .normalization import LayerNormalization
+from .onetrans import OneTransLayer, TokenSlice, SinusoidalPositionEncoding
 from .sequence import (AttentionSequencePoolingLayer, BiasEncoding, BiLSTM,
                        KMaxPooling, SequencePoolingLayer, WeightedSequenceLayer,
                        Transformer, DynamicGRU, PositionEncoding)
+from .wukong import WuKongLayer
 from .utils import NoMask, Hash, Linear, _Add, combined_dnn_input, softmax, reduce_sum, Concat
 
 custom_objects = {'tf': tf,
@@ -50,5 +53,10 @@ custom_objects = {'tf': tf,
                   'reduce_sum': reduce_sum,
                   'PositionEncoding': PositionEncoding,
                   'RegulationModule': RegulationModule,
-                  'BridgeModule': BridgeModule
+                  'BridgeModule': BridgeModule,
+                  'OneTransLayer': OneTransLayer,
+                  'SinusoidalPositionEncoding': SinusoidalPositionEncoding,
+                  'TokenSlice': TokenSlice,
+                  'InteractionAggregation': InteractionAggregation,
+                  'WuKongLayer': WuKongLayer,
                   }

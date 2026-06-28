@@ -1,0 +1,26 @@
+"""Semantic correctness contract for ``{{NAME}}Layer``.
+
+Keep the reference independent: translate the paper equation to NumPy rather
+than calling the implementation under test.  Add domain invariants with
+``assert_invariant`` when the layer has masking, causality, symmetry, or another
+property that should hold for every set of weights.
+"""
+import numpy as np
+
+from deepctr.layers.{{NAME_LOWER}} import {{NAME}}Layer
+from tests.correctness import assert_finite_gradients, assert_forward_matches
+
+
+def _reference(inputs, weights):
+    # TODO: replace this identity with an independent NumPy implementation of
+    # the paper equation when {{NAME}}Layer.call() is implemented.
+    return inputs
+
+
+def test_{{NAME}}Layer_reference_and_gradients():
+    inputs = np.asarray([[0.2, -0.1, 0.5],
+                         [0.4, 0.3, -0.2]], dtype="float32")
+    layer = {{NAME}}Layer()
+
+    assert_forward_matches(layer, inputs, _reference)
+    assert_finite_gradients(layer, inputs)

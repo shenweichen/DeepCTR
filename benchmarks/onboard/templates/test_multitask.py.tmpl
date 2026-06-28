@@ -1,0 +1,17 @@
+from deepctr.models import {{NAME}}
+from tests.correctness import set_test_seed
+from ..utils_mtl import get_mtl_test_data, check_mtl_model
+
+
+def test_{{NAME}}():
+    model_name = "{{NAME}}"
+    set_test_seed(2020)
+    x, y_list, dnn_feature_columns = get_mtl_test_data()
+
+    model = {{NAME}}(dnn_feature_columns, tower_dnn_hidden_units=(8,),
+                 task_types=['binary', 'binary'], task_names=['label_income', 'label_marital'])
+    check_mtl_model(model, model_name, x, y_list, task_types=['binary', 'binary'])
+
+
+if __name__ == "__main__":
+    pass
