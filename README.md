@@ -48,7 +48,7 @@ Some related projects:
 Let's [**Get Started!**](https://deepctr-doc.readthedocs.io/en/latest/Quick-Start.html)([Chinese
 Introduction](https://zhuanlan.zhihu.com/p/53231955)) and [welcome to join us!](./CONTRIBUTING.md)
 
-## Cross-framework-aligned DeepFM defaults
+## Consistent DeepFM defaults
 
 DeepFM uses semantic-name-based portable initialization by default, so the
 normal Keras API starts from the same parameters as DeepCTR-Torch:
@@ -66,10 +66,7 @@ model.fit(x, y, batch_size=1024, epochs=1)
 
 Portable initialization is currently implemented for DeepFM. Model architecture
 and feature-column ordering must match when comparing independent TensorFlow and
-PyTorch runs. Set ``initialization_profile="native"`` to restore DeepCTR's
-historical initialization. The stricter ``compile_cross_framework`` and
-``fit_cross_framework`` helpers remain available for experiments requiring a
-shared NumPy-defined mini-batch order.
+PyTorch runs.
 
 For portable inference, transfer the trained semantic parameters without
 depending on backend variable names:
