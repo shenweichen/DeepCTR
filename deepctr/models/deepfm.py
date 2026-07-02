@@ -14,7 +14,6 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Dense
 
 from ..feature_column import build_input_features, get_linear_logit, DEFAULT_GROUP_NAME, input_from_feature_columns
-from ..initializers import initialize_deepfm_parameters
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import FM
 from ..layers.utils import concat_func, add_func, combined_dnn_input
@@ -63,5 +62,4 @@ def DeepFM(linear_feature_columns, dnn_feature_columns, fm_group=(DEFAULT_GROUP_
 
     output = PredictionLayer(task)(final_logit)
     model = Model(inputs=inputs_list, outputs=output)
-    initialize_deepfm_parameters(model, seed=seed)
     return model

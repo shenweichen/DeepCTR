@@ -48,38 +48,6 @@ Some related projects:
 Let's [**Get Started!**](https://deepctr-doc.readthedocs.io/en/latest/Quick-Start.html)([Chinese
 Introduction](https://zhuanlan.zhihu.com/p/53231955)) and [welcome to join us!](./CONTRIBUTING.md)
 
-## Consistent DeepFM defaults
-
-DeepFM uses semantic-name-based portable initialization by default, so the
-normal Keras API starts from the same parameters as DeepCTR-Torch:
-
-```python
-from deepctr.models import DeepFM
-model = DeepFM(
-    linear_feature_columns,
-    dnn_feature_columns,
-    seed=2026,
-)
-model.compile("adam", "binary_crossentropy", metrics=["AUC"])
-model.fit(x, y, batch_size=1024, epochs=1)
-```
-
-Portable initialization is currently implemented for DeepFM. Model architecture
-and feature-column ordering must match when comparing independent TensorFlow and
-PyTorch runs.
-
-For portable inference, transfer the trained semantic parameters without
-depending on backend variable names:
-
-```python
-from deepctr.initializers import export_deepfm_parameters
-
-portable_parameters = export_deepfm_parameters(model)
-```
-
-Pass the resulting dictionary to
-`deepctr_torch.initializers.load_deepfm_parameters(torch_model, portable_parameters)`.
-
 ## Models List
 
 |                 Model                  | Paper                                                                                                                                                           |
