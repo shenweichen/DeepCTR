@@ -14,6 +14,7 @@ from tensorflow.keras.models import Model
 from tensorflow.keras.layers import Dense
 
 from ..feature_column import build_input_features, get_linear_logit, DEFAULT_GROUP_NAME, input_from_feature_columns
+from ..initializers import initialize_deepfm_parameters
 from ..layers.core import PredictionLayer, DNN
 from ..layers.interaction import FM
 from ..layers.utils import concat_func, add_func, combined_dnn_input
@@ -21,7 +22,7 @@ from ..layers.utils import concat_func, add_func, combined_dnn_input
 
 def DeepFM(linear_feature_columns, dnn_feature_columns, fm_group=(DEFAULT_GROUP_NAME,), dnn_hidden_units=(256, 128, 64),
            l2_reg_linear=0.00001, l2_reg_embedding=0.00001, l2_reg_dnn=0, seed=1024, dnn_dropout=0,
-           dnn_activation='relu', dnn_use_bn=False, task='binary'):
+           dnn_activation='relu', dnn_use_bn=False, task='binary', initialization_profile='cross_framework'):
     """Instantiates the DeepFM Network architecture.
 
     :param linear_feature_columns: An iterable containing all the features used by the linear part of the model.
@@ -36,6 +37,9 @@ def DeepFM(linear_feature_columns, dnn_feature_columns, fm_group=(DEFAULT_GROUP_
     :param dnn_activation: Activation function to use in DNN
     :param dnn_use_bn: bool. Whether use BatchNormalization before activation or not in DNN
     :param task: str, ``"binary"`` for  binary logloss or  ``"regression"`` for regression loss
+    :param initialization_profile: ``"cross_framework"`` (default) uses
+        semantic-name-based portable initialization. ``"native"`` restores the
+        historical framework-specific initialization.
     :return: A Keras model instance.
     """
 
@@ -62,4 +66,9 @@ def DeepFM(linear_feature_columns, dnn_feature_columns, fm_group=(DEFAULT_GROUP_
 
     output = PredictionLayer(task)(final_logit)
     model = Model(inputs=inputs_list, outputs=output)
+    if initialization_profile not in ('native', 'cross_framework'):
+        raise ValueError('initialization_profile must be native or cross_framework')
+    model.initialization_profile = initialization_profile
+    if initialization_profile == 'cross_framework':
+        initialize_deepfm_parameters(model, seed=seed)
     return model
