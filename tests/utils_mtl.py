@@ -4,10 +4,11 @@ import os
 
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras.models import load_model, save_model
 
 from deepctr.feature_column import SparseFeat, DenseFeat, DEFAULT_GROUP_NAME
 from deepctr.layers import custom_objects
+from tests.correctness import (assert_nested_allclose, assert_serialization_predictions,
+                               predict_numpy)
 
 
 def get_mtl_test_data(sample_size=10, embedding_size=4, sparse_feature_num=1,
@@ -80,14 +81,14 @@ def check_mtl_model(model, model_name, x, y_list, task_types, check_model_io=Tru
     model.fit(x, y_list, batch_size=100, epochs=1, validation_split=0.5)
 
     print(model_name + " test train valid pass!")
+    expected_predictions = predict_numpy(model, x)
     model.save_weights(model_name + '_weights.h5')
     model.load_weights(model_name + '_weights.h5')
     os.remove(model_name + '_weights.h5')
+    assert_nested_allclose(predict_numpy(model, x), expected_predictions)
     print(model_name + " test save load weight pass!")
     if check_model_io:
-        save_model(model, model_name + '.h5')
-        model = load_model(model_name + '.h5', custom_objects)
-        os.remove(model_name + '.h5')
+        model = assert_serialization_predictions(model, x, custom_objects)
         print(model_name + " test save load model pass!")
 
     print(model_name + " test pass!")

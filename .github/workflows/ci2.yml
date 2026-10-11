@@ -5,6 +5,7 @@ on:
     paths:
       - 'deepctr/**'
       - 'tests/**'
+      - 'benchmarks/**'
       - 'setup.py'
       - 'setup.cfg'
       - '.github/workflows/**'
@@ -31,6 +32,7 @@ jobs:
             code_related:
               - 'deepctr/**'
               - 'tests/**'
+              - 'benchmarks/**'
               - 'setup.py'
               - 'setup.cfg'
               - '.github/workflows/**'
@@ -88,6 +90,7 @@ jobs:
             python -m pip install -q tf-keras==${{ matrix.tf-version }}
           fi
           python -m pip install -q pytest pytest-cov
+          python -m pip install -q -r benchmarks/requirements.txt
           python -m pip install -e .
           python -m pip check
 

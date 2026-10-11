@@ -1,0 +1,58 @@
+import numpy as np
+
+from deepctr.feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, get_feature_names
+from deepctr.models import {{NAME}}
+from tests.correctness import set_test_seed
+from ..utils import check_model
+
+# NOTE: this model concatenates feature tokens with sequence tokens, so every
+# sparse / history feature must share the SAME embedding_dim.
+EMB = 8
+
+
+def get_xy_fd():
+    feature_columns = [
+        SparseFeat('user', 3, embedding_dim=EMB),
+        SparseFeat('gender', 2, embedding_dim=EMB),
+        SparseFeat('item_id', 3 + 1, embedding_dim=EMB),
+        SparseFeat('cate_id', 2 + 1, embedding_dim=EMB),
+        DenseFeat('pay_score', 1),
+    ]
+    feature_columns += [
+        VarLenSparseFeat(SparseFeat('hist_item_id', vocabulary_size=3 + 1, embedding_dim=EMB,
+                                    embedding_name='item_id'), maxlen=4, length_name="seq_length"),
+        VarLenSparseFeat(SparseFeat('hist_cate_id', vocabulary_size=2 + 1, embedding_dim=EMB,
+                                    embedding_name='cate_id'), maxlen=4, length_name="seq_length"),
+    ]
+    # History behavior sequence feature name must start with "hist_".
+    behavior_feature_list = ["item_id", "cate_id"]
+
+    uid = np.array([0, 1, 2])
+    ugender = np.array([0, 1, 0])
+    iid = np.array([1, 2, 3])       # 0 is the mask value
+    cate_id = np.array([1, 2, 2])   # 0 is the mask value
+    pay_score = np.array([0.1, 0.2, 0.3])
+
+    hist_iid = np.array([[1, 2, 3, 0], [3, 2, 1, 0], [1, 2, 0, 0]])
+    hist_cate_id = np.array([[1, 2, 2, 0], [2, 2, 1, 0], [1, 2, 0, 0]])
+    seq_length = np.array([3, 3, 2])  # actual length of each behavior sequence
+
+    feature_dict = {'user': uid, 'gender': ugender, 'item_id': iid, 'cate_id': cate_id,
+                    'hist_item_id': hist_iid, 'hist_cate_id': hist_cate_id,
+                    'pay_score': pay_score, 'seq_length': seq_length}
+    x = {name: feature_dict[name] for name in get_feature_names(feature_columns)}
+    y = np.array([1, 0, 1])
+    return x, y, feature_columns, behavior_feature_list
+
+
+def test_{{NAME}}():
+    model_name = "{{NAME}}"
+    set_test_seed(2020)
+    x, y, feature_columns, behavior_feature_list = get_xy_fd()
+    model = {{NAME}}(feature_columns, behavior_feature_list,
+                 dnn_hidden_units=[4, 4], att_head_num=2)
+    check_model(model, model_name, x, y)
+
+
+if __name__ == "__main__":
+    pass

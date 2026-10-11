@@ -17,11 +17,14 @@ from .multitask import SharedBottom, ESMM, MMOE, PLE
 from .nfm import NFM
 from .onn import ONN
 from .pnn import PNN
-from .sequence import DIN, DIEN, DSIN, BST
+from .sequence import DIN, DIEN, DSIN, BST, OneTrans
 from .wdl import WDL
 from .xdeepfm import xDeepFM
 from .edcn import EDCN
 
+from .finalmlp import FinalMLP
+from .masknet import MaskNet
+from .wukong import WuKong
 __all__ = ["AFM", "CCPM", "DCN", "IFM", "DIFM", "DCNMix", "MLR", "DeepFM", "MLR", "NFM", "DIN", "DIEN", "FNN", "PNN",
            "WDL", "xDeepFM", "AutoInt", "ONN", "FGCNN", "DSIN", "FiBiNET", 'FLEN', "FwFM", "BST", "DeepFEFM",
-           "SharedBottom", "ESMM", "MMOE", "PLE", 'EDCN']
+           "SharedBottom", "ESMM", "MMOE", "PLE", 'EDCN', "OneTrans", "FinalMLP", "MaskNet", "WuKong"]

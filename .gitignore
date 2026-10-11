@@ -1,6 +1,10 @@
 *.h5
 *.ipynb
 .pytest_cache/
+
+# DeepCTR benchmark suite: downloaded datasets and generated leaderboards
+benchmarks/data/
+benchmarks/results/
 .vscode/
 tests/unused/*
 # Byte-compiled / optimized / DLL files

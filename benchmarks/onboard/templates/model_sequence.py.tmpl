@@ -1,0 +1,55 @@
+# -*- coding:utf-8 -*-
+"""
+{{NAME}}
+
+Reference:
+    {{PAPER}}
+"""
+
+from tensorflow.keras.models import Model
+from tensorflow.keras.layers import Dense
+
+from ...feature_column import SparseFeat, VarLenSparseFeat, DenseFeat, build_input_features
+from ...inputs import create_embedding_matrix, embedding_lookup, get_dense_input, varlen_embedding_lookup
+from ...layers.core import DNN, PredictionLayer
+from ...layers.sequence import AttentionSequencePoolingLayer
+from ...layers.utils import concat_func, combined_dnn_input
+
+
+def {{NAME}}(dnn_feature_columns, history_feature_list, dnn_hidden_units=(256, 128, 64),
+        dnn_activation='relu', dnn_dropout=0.0, dnn_use_bn=False,
+        l2_reg_embedding=1e-6, l2_reg_dnn=0, seed=1024, task='binary'):
+    """Instantiates the {{NAME}} sequence model.
+
+    :param dnn_feature_columns: iterable of all feature columns (SparseFeat / VarLenSparseFeat / DenseFeat).
+    :param history_feature_list: list of str, names of target sparse features whose
+        behavior-sequence counterparts (prefixed with ``"hist_"``) are VarLenSparseFeat columns.
+    :param task: ``"binary"`` or ``"regression"``.
+    :return: A Keras model instance.
+    """
+    features = build_input_features(dnn_feature_columns)
+    inputs_list = list(features.values())
+
+    sparse_feature_columns = [fc for fc in dnn_feature_columns if isinstance(fc, SparseFeat)]
+    dense_feature_columns = [fc for fc in dnn_feature_columns if isinstance(fc, DenseFeat)]
+    varlen_feature_columns = [fc for fc in dnn_feature_columns if isinstance(fc, VarLenSparseFeat)]
+
+    embedding_dict = create_embedding_matrix(dnn_feature_columns, l2_reg_embedding, seed, prefix="",
+                                             seq_mask_zero=True)
+
+    dense_value_list = get_dense_input(features, dense_feature_columns)
+
+    # ===================== TODO: {{NAME}} core sequence modeling =====================
+    # Use embedding_lookup / varlen_embedding_lookup to gather target & history
+    # embeddings, model the behavior sequence (attention / transformer / GRU), and
+    # build `dnn_input` from the pooled representation + other feature embeddings.
+    sparse_emb_list = embedding_lookup(embedding_dict, features, sparse_feature_columns, to_list=True)
+    dnn_input = combined_dnn_input(sparse_emb_list, dense_value_list)
+    # =========================== END TODO ============================================
+
+    dnn_out = DNN(dnn_hidden_units, dnn_activation, l2_reg_dnn, dnn_dropout, dnn_use_bn, seed=seed)(dnn_input)
+    final_logit = Dense(1, use_bias=False)(dnn_out)
+    output = PredictionLayer(task)(final_logit)
+
+    model = Model(inputs=inputs_list, outputs=output)
+    return model
