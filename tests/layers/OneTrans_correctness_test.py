@@ -4,6 +4,7 @@ from __future__ import absolute_import, division, print_function
 import numpy as np
 import tensorflow as tf
 from numpy.testing import assert_allclose
+from tensorflow.keras import backend as K
 
 from deepctr.layers.onetrans import OneTransLayer
 from tests.correctness import assert_invariant, assign_named_weights
@@ -32,7 +33,7 @@ def test_attention_mask_matches_structured_contract():
                           use_ffn=False, use_layer_norm=False)
     lengths = tf.constant([[2], [1]], dtype=tf.int32)
     actual = layer._build_mask(lengths, 5)
-    assert_allclose(actual.numpy(), _expected_mask(), rtol=0, atol=0)
+    assert_allclose(K.get_value(actual), _expected_mask(), rtol=0, atol=0)
 
 
 def test_causal_output_is_invariant_to_future_token_changes():

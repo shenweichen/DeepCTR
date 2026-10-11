@@ -50,7 +50,7 @@ def _to_tensor(value):
 def _to_numpy(value):
     if isinstance(value, np.ndarray):
         return value
-    if hasattr(value, "numpy"):
+    if tf.executing_eagerly() and hasattr(value, "numpy"):
         return value.numpy()
     return K.get_value(value)
 
@@ -148,37 +148,43 @@ def assert_forward_matches(subject, inputs, reference_fn, weights=None,
 
 def assert_finite_gradients(subject, inputs, loss_fn=None, require_all=True):
     """Assert that differentiable inputs and trainable weights have gradients."""
-    if not hasattr(tf, "GradientTape") or not tf.executing_eagerly():
-        raise RuntimeError("gradient contracts require TensorFlow eager execution")
-
     watched = []
 
     def make_input(value):
         array = np.asarray(value)
         if np.issubdtype(array.dtype, np.floating):
-            variable = tf.Variable(array)
+            variable = (tf.Variable(array) if tf.executing_eagerly()
+                        else tf.convert_to_tensor(array))
             watched.append(variable)
             return variable
         return tf.convert_to_tensor(array)
 
     tensor_inputs = tf.nest.map_structure(make_input, inputs)
-    with tf.GradientTape() as tape:
+
+    def compute_loss():
         outputs = _invoke(subject, tensor_inputs, training=False)
         if loss_fn is None:
             terms = [tf.reduce_sum(tf.cast(value, tf.float32))
                      for value in tf.nest.flatten(outputs)]
-            loss = tf.add_n(terms)
+            return tf.add_n(terms)
         else:
-            loss = loss_fn(outputs)
+            return loss_fn(outputs)
 
-    targets = watched + list(subject.trainable_weights)
-    gradients = tape.gradient(loss, targets)
+    if tf.executing_eagerly():
+        with tf.GradientTape() as tape:
+            loss = compute_loss()
+        targets = watched + list(subject.trainable_weights)
+        gradients = tape.gradient(loss, targets)
+    else:
+        loss = compute_loss()
+        targets = watched + list(subject.trainable_weights)
+        gradients = tf.compat.v1.gradients(loss, targets)
     for target, gradient in zip(targets, gradients):
         if gradient is None:
             if require_all:
                 raise AssertionError("missing gradient for %s" % getattr(target, "name", "input"))
             continue
-        gradient_value = _to_numpy(gradient)
+        gradient_value = _to_numpy(tf.convert_to_tensor(gradient))
         if not np.all(np.isfinite(gradient_value)):
             raise AssertionError("non-finite gradient for %s" % getattr(target, "name", "input"))
     return gradients
@@ -191,8 +197,6 @@ def assert_numerical_gradient(subject, inputs, rtol=2e-2, atol=2e-3, delta=1e-3)
     covered cheaply by :func:`assert_finite_gradients`.  Keep tensors small,
     because a full Jacobian is materialized.
     """
-    if not hasattr(tf.test, "compute_gradient") or not tf.executing_eagerly():
-        raise RuntimeError("numerical gradients require TensorFlow eager execution")
     if isinstance(inputs, dict):
         raise TypeError("numerical gradient helper supports a tensor or list/tuple, not dict")
 
@@ -209,7 +213,19 @@ def assert_numerical_gradient(subject, inputs, rtol=2e-2, atol=2e-3, delta=1e-3)
             raise TypeError("numerical gradient helper requires one output tensor")
         return tf.nest.flatten(output)[0]
 
-    theoretical, numerical = tf.test.compute_gradient(function, tensors, delta=delta)
+    if tf.executing_eagerly():
+        theoretical, numerical = tf.test.compute_gradient(function, tensors, delta=delta)
+    else:
+        # TF1's graph API takes tensors and explicit shapes, unlike TF2's
+        # eager API which takes a callable. Use the same input fixture for both.
+        output = function(*tensors)
+        input_arrays = [np.asarray(value) for value in input_values]
+        # The compatibility backend also exposes this session API under TF2.
+        with tf.compat.v1.keras.backend.get_session().as_default():
+            pairs = tf.compat.v1.test.compute_gradient(
+                tensors, [value.shape for value in input_arrays],
+                output, output.shape.as_list(), x_init_value=input_arrays, delta=delta)
+        theoretical, numerical = zip(*pairs)
     for index, (analytic, finite_difference) in enumerate(zip(theoretical, numerical)):
         assert_allclose(analytic, finite_difference, rtol=rtol, atol=atol,
                         err_msg="input %d analytic gradient differs from finite difference" % index)

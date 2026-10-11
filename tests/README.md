@@ -64,6 +64,11 @@ causal invariance.
 
 ## Running the contracts
 
+Install `benchmarks/requirements.txt` as well as the core and pytest dependencies
+before running the full suite; the benchmark smoke tests import pandas and
+scikit-learn. The equation, mask, and gradient contracts run in both TensorFlow
+1.x graph mode and TensorFlow 2.x eager mode.
+
 ```bash
 CUDA_VISIBLE_DEVICES="" TF_USE_LEGACY_KERAS=1 \
   python -m pytest tests/layers/*_correctness_test.py -q

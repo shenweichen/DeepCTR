@@ -5,6 +5,7 @@ on:
     paths:
       - 'deepctr/**'
       - 'tests/**'
+      - 'benchmarks/**'
       - 'setup.py'
       - 'setup.cfg'
       - '.github/workflows/**'
@@ -31,6 +32,7 @@ jobs:
             code_related:
               - 'deepctr/**'
               - 'tests/**'
+              - 'benchmarks/**'
               - 'setup.py'
               - 'setup.cfg'
               - '.github/workflows/**'
@@ -68,6 +70,7 @@ jobs:
           python -m pip install -q tensorflow==${{ matrix.tf-version }}
           python -m pip install -q protobuf==3.19.0
           python -m pip install -q pytest pytest-cov
+          python -m pip install -q -r benchmarks/requirements.txt
           python -m pip install -e .
           python -m pip check
 
